@@ -6,7 +6,8 @@
     "grunt-typescript": "~0.3.8",
     "grunt-contrib-jasmine": "~0.8.0",
     "grunt-contrib-clean": "~0.6.0",
-    "grunt-template-jasmine-requirejs": "~0.2.0"
+    "grunt-template-jasmine-requirejs": "~0.2.0",
+    "grunt-contrib-watch": "~0.6.1"
   },
   "scripts": {
     "build": "grunt --gruntfile Gruntfile.js"

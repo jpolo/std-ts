@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+	  <meta charset="utf-8">
+    <title>Test Launcher</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.14/require.min.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      requirejs.config({
+    	  baseUrl: "target/js-test/main/typescript"
+    	});
+
+      require(["../../../../target/js-test/test/typescript/main"], function () {
+        console.debug("scripts loaded");
+      });
+    </script>
+
+  </body>
+</html>

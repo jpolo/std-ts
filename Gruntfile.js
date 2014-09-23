@@ -9,9 +9,9 @@ module.exports = function(grunt) {
       "source": "src",
 
       // location where TypeScript source files are located
-      "source_ts": "src/main/ts",
+      "source_ts": "src/main/typescript",
       // location where TypeScript/Jasmine test files are located
-      "source_test_ts": "src/test/ts",
+      "source_test_ts": "src/test/typescript",
 
       // location where all build files shall be placed
       "target": "target",
@@ -28,6 +28,23 @@ module.exports = function(grunt) {
     clean: {
       target: {
         src: "<%= dir.target %>"
+      }
+    },
+
+    watch: {
+      main: {
+        files: ['<%= dir.source_ts %>/**/*.ts'],
+        tasks: ['typescript:compile'],
+        options: {
+          spawn: false,
+        },
+      },
+      test: {
+        files: ['<%= dir.source_test_ts %>/**/*.ts'],
+        tasks: ['typescript:compile_test'],
+        options: {
+          spawn: false,
+        },
       }
     },
 
@@ -69,8 +86,6 @@ module.exports = function(grunt) {
           template: require('grunt-template-jasmine-requirejs'),
           templateOptions: {
             requireConfig: {
-              // as described in https://github.com/maenu/grunt-template-jasmine-istanbul:
-              // use instrumented classes rather than the originals
               baseUrl: '.grunt/grunt-contrib-jasmine/<%= target_test_js %>',
               // HACK: Fix nasty 'wrong uri' problem on windows. The location of the reporter.js
               //  contains backslashes that can't be resolved by requirejs
@@ -91,7 +106,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-typescript');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.registerTask('compile', ['typescript:compile']);
   grunt.registerTask('test', ['typescript:compile_test', 'jasmine']);
-  grunt.registerTask('default', ['compile', 'test']);
+  grunt.registerTask('default', ['compile']);
 };
