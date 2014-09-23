@@ -5,12 +5,17 @@ module.exports = function(grunt) {
     project: grunt.file.readJSON('package.json'),
     // define some directories to be used during build
     dir: {
+      // location of all source files
+      "source": "src",
+
       // location where TypeScript source files are located
       "source_ts": "src/main/ts",
       // location where TypeScript/Jasmine test files are located
       "source_test_ts": "src/test/ts",
+
       // location where all build files shall be placed
       "target": "target",
+
       // location to place (compiled) javascript files
       "target_js": "target/js",
       // location to place (compiles) javascript test files
@@ -31,8 +36,8 @@ module.exports = function(grunt) {
     typescript: {
       // Compiles the code into a single file. Also generates a typescript declaration file
       compile: {
-        src: ['<%= dir.source_ts %>/**/*.ts'],
-        dest: '<%= dir.target_js %>/<%= project.name %>.js',
+      src: ['<%= dir.source_ts %>/**/*.ts'],
+        dest: '<%= dir.target_js %>',
         options: {
           basePath: '<%= dir.source_ts %>',
           target: 'es5',
@@ -43,10 +48,10 @@ module.exports = function(grunt) {
       },
       // Compiles the tests.
       compile_test: {
-        src: ['<%= dir.source_test_ts %>/**/*.ts'],
+        src: ['<%= dir.source_test_ts %>/**/*.ts','<%= dir.source_ts %>/**/*.ts'],
         dest: '<%= dir.target_test_js %>',
         options: {
-          basePath: '<%= dir.source_test_ts %>',
+          basePath: '<%= dir.source %>',
           target: 'es5',
           module: 'amd'
         }
@@ -56,12 +61,29 @@ module.exports = function(grunt) {
     //  See https://github.com/gruntjs/grunt-contrib-jasmine
     jasmine: {
       run: {
-        // the code to be tested
-        src: ['<%= dir.target_js %>/**/*.js'],
+        src: ['<%= dir.target_test_js %>/main/**/*.js'],
         options: {
           // the tests
-          specs: '<%= dir.target_test_js %>/**/*.test.js',
+          specs: '<%= dir.target_test_js %>/test/**/*.test.js',
+          keepRunner: true, // useful for debugging
+          template: require('grunt-template-jasmine-requirejs'),
+          templateOptions: {
+            requireConfig: {
+              // as described in https://github.com/maenu/grunt-template-jasmine-istanbul:
+              // use instrumented classes rather than the originals
+              baseUrl: '.grunt/grunt-contrib-jasmine/<%= target_test_js %>',
+              // HACK: Fix nasty 'wrong uri' problem on windows. The location of the reporter.js
+              //  contains backslashes that can't be resolved by requirejs
+              map: {
+                //'*': {
+        			    //'.gruntgrunt-contrib-jasminegrunt-template-jasmine-istanbul\reporter.js':
+                  //'.grunt/grunt-contrib-jasmine/grunt-template-jasmine-istanbul/reporter.js'
+                //}
+              }
+            }
+          }
         }
+
       }
     }
   });

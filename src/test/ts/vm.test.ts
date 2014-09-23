@@ -2,8 +2,16 @@
 
 import vm = require('../../main/ts/vm')
 
-describe("", () => {
+describe("ts/vm", () => {
 
-  
+  describe("", () => {
+
+    it("should do something", () => {
+
+      expect(true).toBe(true)
+
+    })
+
+  })
 
 })
