@@ -86,18 +86,26 @@ module vm {
     return s
   }
 
-  export function compile(jscode: string): (context: IContext) => any {
-    var fn = new Function("__context__", "with(__context__) { " + jscode + "}")
+  export function compile(jscode: string): (context?: IContext) => any {
+    var fnWithContext: Function
+    var fnNoContext: Function  
+    
     return function (context) {
-      return fn.call(context, context)
+      var returnValue
+      if (context) {
+        fnWithContext = fnWithContext || new Function("__context__", "with(__context__) { " + jscode + "}")
+        returnValue = fnWithContext.call(context, context)
+      } else {
+        fnNoContext = fnNoContext || new Function(jscode)
+        returnValue = fnNoContext()
+      }
+      
+      return returnValue
     }
   }
 
   export function run(jscode: string, context?: IContext): any {
-    return (
-      context? (new Function("__context__", "with(__context__) {\n" + jscode + "\n}")).call(context, context) :
-      (new Function(jscode))()
-    )
+    return compile(jscode)(context)
   }
 
   export function callstack(offset: number = 0, error?: Error): ICallStack {

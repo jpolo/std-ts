@@ -2,13 +2,13 @@ import vm = require("ts/vm")
 import ICallStack = vm.ICallStack
 import ICallSite = vm.ICallSite
 
-
 module unit {
   var TEST_TIMEOUT = 2000;//ms
   var FLOAT_EPSILON = 1e-5;
   var objectToString = Object.prototype.toString;
   var __freeze = Object.freeze || function (o) { return o; };
   var __stringTag = vm.stringTag
+  var __now = Date.now || function () { return (new Date()).getTime(); }
 
   export enum AssertionType { Success, Failure, Error, Warning }
 
@@ -148,7 +148,7 @@ module unit {
         var to2 = typeof o2
 
         return (
-          (to1 === "number" || to2 === "number") ? (to1 === to2) && (o1 == o2 || this._floatNearEquals(o1, o2, epsilon)) :
+          (to1 === "number" || to2 === "number") ? this.testEqualsStrict(to1, to2) && (o1 == o2 || this._floatNearEquals(o1, o2, epsilon)) :
           ("nearEquals" in o1) ? o1.nearEquals(o2) :
           false
         )

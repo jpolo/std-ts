@@ -36,14 +36,18 @@ module.exports = function(grunt) {
         files: ['<%= dir.source_ts %>/**/*.ts'],
         tasks: ['typescript:compile'],
         options: {
-          spawn: false,
+          atBegin: true,
+          interrupt: true
+          //spawn: false,
         },
       },
       test: {
         files: ['<%= dir.source_test_ts %>/**/*.ts'],
         tasks: ['typescript:compile_test'],
         options: {
-          spawn: false,
+          atBegin: true,
+          interrupt: true
+          //spawn: false,
         },
       }
     },
