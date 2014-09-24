@@ -1,0 +1,5 @@
+build.path.exportedFolder=
+build.path.sourceFolder=src
+compiler.outputDirOption=target/js-test
+compiler.outputFileOption=
+eclipse.preferences.version=1

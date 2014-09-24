@@ -1,0 +1,6 @@
+module geometry {
+
+
+}
+
+export = geometry

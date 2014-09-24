@@ -1,0 +1,5 @@
+module date {
+
+}
+
+export = date
