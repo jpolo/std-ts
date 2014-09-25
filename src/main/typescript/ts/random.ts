@@ -80,40 +80,34 @@ module random {
     export class Pseudo extends Engine {
       name = "pseudo"
       
-      private static _nextId = 0
-      private static _nextSeed() {
-        return Pseudo._nextId++ + Date.now()
-      }
-      
-      private _state: number = 1
+      private _state: number = 0
       
       constructor(seed?: string) {
         super()
-        if (seed) {
+        if (seed != undefined) {
           this.seed(seed)
         }
       }
       
       seed(str: string) {
-        /*var state = this._state;
-        for (var i = 0, l = s.length; i < l; ++i) {
-          var seed = s % PSEUDO_M_MINUS_ONE
-          if (seed <= 0) {
-            seed += PSEUDO_M_MINUS_ONE
-          }
+        var state = 0        
+        var hash = 0
+        for (var i = 0, l = str.length; i < l; ++i) {
+          hash  = (((hash << 5) - hash) + str.charCodeAt(i)) | 0
         }
         
-        var seed = s % PSEUDO_M_MINUS_ONE
-        if (seed <= 0) {
-          seed += PSEUDO_M_MINUS_ONE
+        state = hash % PSEUDO_M_MINUS_ONE
+        if (state <= 0) {
+          state += PSEUDO_M_MINUS_ONE
         }
-        this._seed = seed*/
+        
+        this._state = state
       }
       
       generate() {
-        var seed = this._state
-        var hi = floor(seed / PSEUDO_Q)
-        var lo = seed % PSEUDO_Q
+        var state = this._state
+        var hi = floor(state / PSEUDO_Q)
+        var lo = state % PSEUDO_Q
         var test = PSEUDO_A * lo - PSEUDO_R * hi
         this._state = test > 0 ? test : test + PSEUDO_M
     

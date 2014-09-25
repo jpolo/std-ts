@@ -164,6 +164,10 @@ module uri {
     //  return std.hash(this.toString());
     //}
       
+    inspect(): string {
+      return 'URI(' + this.toString() + ')';
+    }
+      
     isAbsolute(): boolean {
       return (
         !strIsEmpty(this.scheme) &&
@@ -192,15 +196,8 @@ module uri {
       ];
     }
 
-    inspect(): string {
-      return 'URI(' + this.toString() + ')';
-    }
-
     toString(): string {
-      if (!this._href) {
-        this._href = stringify(this);
-      }
-      return this._href;
+      return stringify(this);
     }
 
     /*unapply<T>(fn: (

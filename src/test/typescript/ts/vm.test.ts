@@ -36,14 +36,14 @@ var vmSuite = suite("ts/vm", (self) => {
     assert.ok(stack.length > 0)
   })
 
-  test("run(jscode: string, context?)", (assert) => {
+  test("eval(jscode: string, context?)", (assert) => {
     // simple
-    var returnValue = vm.run("return 'abc';")
+    var returnValue = vm.eval("return 'abc';")
     assert.strictEqual(returnValue, "abc")
 
     //with context
     var context: {[key: string]: any} = {a: 1, b: 2, c: null}
-    returnValue = vm.run("c = a + b; this.d = c;return c;", context)
+    returnValue = vm.eval("c = a + b; this.d = c;return c;", context)
     assert.strictEqual(returnValue, 3)
     assert.strictEqual(context['c'], 3)
     assert.strictEqual(context['d'], 3)

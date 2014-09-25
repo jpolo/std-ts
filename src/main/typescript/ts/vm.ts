@@ -79,14 +79,19 @@ module vm {
     return s
   }
 
-  export function compile(jscode: string): (context?: IContext) => any {
+  export function compile(jscode: string, fileName?: string): (context?: IContext) => any {
     var fnWithContext: Function
-    var fnNoContext: Function  
+    var fnNoContext: Function
+        
+    if (fileName) {
+      //Firebug and Webkit annotation
+      jscode += "\n//@ sourceURL=" + fileName
+    }
     
     return function (context) {
       var returnValue
       if (context) {
-        fnWithContext = fnWithContext || new Function("__context__", "with(__context__) { " + jscode + "}")
+        fnWithContext = fnWithContext || new Function("__context__", "with(__context__) {" + jscode + "}")
         returnValue = fnWithContext.call(context, context)
       } else {
         fnNoContext = fnNoContext || new Function(jscode)
@@ -97,8 +102,8 @@ module vm {
     }
   }
 
-  export function run(jscode: string, context?: IContext): any {
-    return compile(jscode)(context)
+  export function eval(jscode: string, context?: IContext, fileName?: string): any {
+    return compile(jscode, fileName)(context)
   }
 
   export function callstack(offset: number = 0, error?: Error): ICallStack {
@@ -120,8 +125,8 @@ module vm {
 
   function parseCallSite(s: string): ICallSite {
     var parts = s.split("@", 2)
-    var functionName = parts[0]
-    var location = parts[1]
+    var functionName = parts[0] || ""
+    var location = parts[1] || ""
 
     var typeName = ""
     var methodName = ""
@@ -257,24 +262,6 @@ module vm {
       return e
     }
   }
-
-  /*instrumentFunction(context, functionName: string, callback) {
-      context = context || window
-      var original = context[functionName]
-      context[functionName] = function instrumented() {
-        callback.call(this, printStackTrace().slice(4))
-        return context[functionName]._instrumented.apply(this, arguments)
-      }
-      context[functionName]._instrumented = original
-    }
-
-    deinstrumentFunction(context, functionName: string) {
-      if (context[functionName].constructor === Function &&
-        context[functionName]._instrumented &&
-        context[functionName]._instrumented.constructor === Function) {
-        context[functionName] = context[functionName]._instrumented
-      }
-    }*/
 
   function stringifyArguments(args: any[]) {
     var argc = args.length

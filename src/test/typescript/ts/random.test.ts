@@ -12,7 +12,7 @@ class Assert extends unit.engine.Assert {
       var actual = f();
       if (actual !== expected) {
         isSuccess = false;
-        message += this.__dump__(expected) + ' must be ' + this.__dump__(actual) + '\n';
+        message += this.__dump__(actual) + ' must be ' + this.__dump__(expected) + '\n';
       }
     })
     this.__assert__(isSuccess, message, this.__position__());
@@ -24,7 +24,7 @@ var randomSuite = suite("ts/random", (self) => {
   var engineTest = random.engine.pseudo;
   
   self.setUp = () => {
-    engineTest.seed("0");
+    engineTest.seed("");
   }
   
   self.tearDown = () => {
@@ -47,17 +47,17 @@ var randomSuite = suite("ts/random", (self) => {
   })
   
   test("engine.Pseudo", (assert) => {
-    var engine = new random.engine.Pseudo("0");
-    
+    var engine = new random.engine.Pseudo("");
+
     assert.generates(
       engine.generate.bind(engine), 
       [
-        0.9235766003151045,
-        0.8955134919266526,
-        0.2633521912703438,
-        0.253521034851023,
-        0.694521560797501,
-        0.19720533176246954
+        1,
+        0.9235974954684081,
+        0.9041418537984751,
+        0.7623494746874472,
+        0.31325315816067667,
+        0.01927975276576525
       ]
     );
   })
