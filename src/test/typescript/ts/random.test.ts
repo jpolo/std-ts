@@ -24,7 +24,7 @@ var randomSuite = suite("ts/random", (self) => {
   var engineTest = random.engine.pseudo;
   
   self.setUp = () => {
-    engineTest.seed(0);
+    engineTest.seed("0");
   }
   
   self.tearDown = () => {
@@ -47,7 +47,7 @@ var randomSuite = suite("ts/random", (self) => {
   })
   
   test("engine.Pseudo", (assert) => {
-    var engine = new random.engine.Pseudo(0);
+    var engine = new random.engine.Pseudo("0");
     
     assert.generates(
       engine.generate.bind(engine), 

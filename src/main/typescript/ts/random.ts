@@ -17,26 +17,7 @@ module random {
     generate(): number
     next(): { done: boolean; value?: number }
   }
-  
-  export interface IGenerator<T> {
-    (): T
-    next(): { done: boolean; value?: T }
-  }
-  
-  export var generator = (function () {
-    function generator<T>(f: () => T): IGenerator<T> {
-      var o = <any>f
-      o.next = next
-      return o
-    }
-    
-    function next() {
-      return { done: false, value: this() }
-    }
-    
-    return generator
-  }());
-  
+
   export function next(ng: IEngine = engine.current) {
     return ng.generate()
   }
@@ -68,6 +49,8 @@ module random {
     export class Engine implements IEngine {
 
       name = "<anonymous>"
+      
+      seed(s: string) { }
       
       generate(): number {
         throw Error()
@@ -102,29 +85,39 @@ module random {
         return Pseudo._nextId++ + Date.now()
       }
       
-      private _seed: number = 1
+      private _state: number = 1
       
-      constructor(seed: number = Pseudo._nextSeed()) {
+      constructor(seed?: string) {
         super()
-        this.seed(seed)
+        if (seed) {
+          this.seed(seed)
+        }
       }
       
-      seed(s: number) {
+      seed(str: string) {
+        /*var state = this._state;
+        for (var i = 0, l = s.length; i < l; ++i) {
+          var seed = s % PSEUDO_M_MINUS_ONE
+          if (seed <= 0) {
+            seed += PSEUDO_M_MINUS_ONE
+          }
+        }
+        
         var seed = s % PSEUDO_M_MINUS_ONE
         if (seed <= 0) {
           seed += PSEUDO_M_MINUS_ONE
         }
-        this._seed = seed
+        this._seed = seed*/
       }
       
       generate() {
-        var seed = this._seed
+        var seed = this._state
         var hi = floor(seed / PSEUDO_Q)
         var lo = seed % PSEUDO_Q
         var test = PSEUDO_A * lo - PSEUDO_R * hi
-        this._seed = test > 0 ? test : test + PSEUDO_M
+        this._state = test > 0 ? test : test + PSEUDO_M
     
-        return (this._seed - 1) * PSEUDO_ONE_OVER_M_MINUS_ONE
+        return (this._state - 1) * PSEUDO_ONE_OVER_M_MINUS_ONE
       }
     }
 
@@ -212,7 +205,24 @@ module random {
     export var current = native
   }
   
+  /*export interface IGenerator<T> {
+    (): T
+    next(): { done: boolean; value?: T }
+  }
   
+  export var generator = (function () {
+    function generator<T>(f: () => T): IGenerator<T> {
+      var o = <any>f
+      o.next = next
+      return o
+    }
+    
+    function next() {
+      return { done: false, value: this() }
+    }
+    
+    return generator
+  }());*/
     
   /*export function exponential(lambda: number, g: IRandomEngine = engineDefault) {
     return generator(() => { return log(1 - g.generate()) / (-lambda); });

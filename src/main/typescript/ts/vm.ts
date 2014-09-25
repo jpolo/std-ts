@@ -42,45 +42,38 @@ module vm {
   export function dump(o: any): string {
     var maxElements = 7
     var s = ''
-    switch (typeof o) {
-      case 'boolean':
-      case 'undefined':
-      case 'number':
+    switch (stringTag(o)) {
+      case 'Boolean':
+      case 'Undefined':
+      case 'Null':
+      case 'Number':
+      case 'RegExp':
         s = String(o)
         break
-      case 'string':
+      case 'String':
         s = '"' + String(o).replace(/"/g, '\\"' ) + '"'
         break
-      case 'function':
+      case 'Function':
         s = String(o)
         s = s.slice(0, s.indexOf('{')) + '...}'
         break
+      case 'Array':
+        var array = (<any[]>o)
+        var truncate = array.length > maxElements
+        if (truncate) {
+          array = array.slice(0, maxElements)
+        }
+        s = '[' + array.map(dump).join(', ') + (truncate ? ', ...' : '') + ']'
+        break
+      case 'Date':
+        var date = (<Date>o)
+        s = 'Date(' + date.toISOString() + ')'
+        break
       default:
-        if (o === null) {
-          s = String(o);
+        if (typeof o.inspect === 'function') {
+          s = o.inspect()
         } else {
-          switch (stringTag(o)) {
-            case 'Array':
-              var array = (<any[]>o)
-              var truncate = array.length > maxElements
-              if (truncate) {
-                array = array.slice(0, maxElements)
-              }
-              s = '[' + array.map(dump).join(', ') + (truncate ? ', ...' : '') + ']'
-              break
-            case 'Date':
-              var date = (<Date>o)
-              s = 'Date(' + date.toISOString() + ')'
-              break
-            case 'RegExp':
-              s = String(o)
-              break
-            case 'String':
-              s = '"' + String(o).replace(/"/g, '\\"' ) + '"'
-              break
-            default:
-              s = String(o)
-          }
+          s = String(o)
         }
     }
     return s

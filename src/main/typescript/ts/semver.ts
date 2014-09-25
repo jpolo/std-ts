@@ -1,0 +1,4 @@
+module semver {
+
+}
+export = semver
