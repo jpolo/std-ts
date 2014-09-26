@@ -10,7 +10,7 @@ class Assert extends unit.engine.Assert {
     var message = "";
     expected.forEach((expected, index) => {
       var actual = f();
-      if (actual !== expected) {
+      if (!this.__engine__.testEquals(expected, actual)) {
         isSuccess = false;
         message += this.__dump__(actual) + ' must be ' + this.__dump__(expected) + '\n';
       }
@@ -52,12 +52,12 @@ var randomSuite = suite("ts/random", (self) => {
     assert.generates(
       engine.generate.bind(engine), 
       [
-        1,
-        0.9235974954684081,
-        0.9041418537984751,
-        0.7623494746874472,
-        0.31325315816067667,
-        0.01927975276576525
+        0.9235766003151045,
+        0.8955134919266526,
+        0.2633521912703438,
+        0.253521034851023,
+        0.694521560797501,
+        0.19720533176246954
       ]
     );
   })

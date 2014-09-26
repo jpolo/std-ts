@@ -2,11 +2,29 @@ import unit = require("../../../main/typescript/ts/unit")
 import suite = unit.suite
 import test = unit.test
 import geometry = require("../../../main/typescript/ts/geometry")
+import vector = geometry.vector
 
+var geometrySuite = suite("ts/geometry.vector", (self) => {
 
-var geometrySuite = suite("ts/date", (self) => {
-
-  
+  test('add()', (assert) => {
+    var vec1 = vector.create2(1, 2)
+    var vec2 = vector.create2(2, 2)
+    assert.equal(vector.add(vec1, vec2), [3, 4])
+  })
+    
+  test('subtract()', (assert) => {
+    var vec1 = vector.create2(1, 2)
+    var vec2 = vector.create2(2, 2)
+    assert.equal(vector.subtract(vec1, vec2), [-3, -4])
+  })
+    
+  test('lengthSquared(v)', (assert) => {
+    assert.equal(vector.lengthSquared(vector.create2(1, 2)), 5)
+  })
+    
+  test('length(v)', (assert) => {
+    assert.equal(vector.length(vector.create2(1, 2)), Math.sqrt(5))
+  })
   
 })
   

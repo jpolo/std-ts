@@ -4,9 +4,7 @@ import ICallSite = vm.ICallSite
 
 module unit {
   var TEST_TIMEOUT = 2000;//ms
-  var FLOAT_EPSILON = 1e-5;
-  var objectToString = Object.prototype.toString;
-  var __freeze = Object.freeze || function (o) { return o; };
+  var __freeze = Object.freeze || function (o) { return o; }
   var __stringTag = vm.stringTag
   var __now = Date.now || function () { return (new Date()).getTime(); }
 
@@ -49,6 +47,22 @@ module unit {
 
   export class Assertion implements IAssertion {
 
+    static success(testCase: ITest, message: string, position?: ICallSite) {
+      return new Assertion(AssertionType.Success, testCase, message, position)
+    }
+
+    static failure(testCase: ITest, message: string, position?: ICallSite) {
+      return new Assertion(AssertionType.Failure, testCase,  message, position)
+    }
+
+    static error(testCase: ITest, message: string, position?: ICallSite, stack = null) {
+      return new Assertion(AssertionType.Error, testCase, message, position, stack)
+    }
+
+    static warning(testCase: ITest, message: string, position?: ICallSite) {
+      return new Assertion(AssertionType.Warning, testCase, message, position)
+    }
+    
     constructor(
       public type: AssertionType,
       public test: ITest,
@@ -87,24 +101,9 @@ module unit {
     }
   }
 
-  export function success(testCase: ITest, message: string, position?: ICallSite) {
-    return new Assertion(AssertionType.Success, testCase, message, position)
-  }
-
-  export function failure(testCase: ITest, message: string, position?: ICallSite) {
-    return new Assertion(AssertionType.Failure, testCase,  message, position)
-  }
-
-  export function error(testCase: ITest, message: string, position?: ICallSite, stack = null) {
-    return new Assertion(AssertionType.Error, testCase, message, position, stack)
-  }
-
-  export function warning(testCase: ITest, message: string, position?: ICallSite) {
-    return new Assertion(AssertionType.Warning, testCase, message, position)
-  }
-
   export module engine {
-
+    export var FLOAT_EPSILON = 1e-5;
+    
     export class Engine implements IEngine {
 
       callstack(offset = 0): ICallStack {
@@ -120,7 +119,7 @@ module unit {
       }
 
       currentTime() {
-        return Date.now ? Date.now() : (new Date()).getTime()
+        return __now()
       }
 
       testEqualsStrict(a: any, b: any): boolean {
@@ -274,7 +273,7 @@ module unit {
 
           var onTimeout = () => {
             timerId = null
-            assertions.push(error(this, "No test completion after " + timeoutMs + "ms", null, null))
+            assertions.push(Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
             complete()
           }
 
@@ -287,7 +286,7 @@ module unit {
               }
 
               if (assertions.length === 0) {
-                assertions.push(warning(this, "No assertion found", null))
+                assertions.push(Assertion.warning(this, "No assertion found", null))
               }
 
               this._afterRun()
@@ -304,7 +303,7 @@ module unit {
               block(assert)
             }
           } catch (e) {
-            assertions.push(error(this, e.message, e.stack[0], e.stack))
+            assertions.push(Assertion.error(this, e.message, e.stack[0], e.stack))
           } finally {
             if (!isAsync) {
               complete()
@@ -467,7 +466,46 @@ module unit {
         return this.__assert__(isSuccess, message, position)
       }
     }
+    
+
+    /**
+     * Default suite 
+     */
+    export var suiteDefault = new TestSuite("")
   }
+   
+  var suiteCurrent = engine.suiteDefault
+      
+  export function suite(
+    name: string,
+    f: (self?: engine.TestSuite) => void
+  ): ITest[]  {
+    var suitePrevious = suiteCurrent
+    var suiteNew = new engine.TestSuite(name)
+    suiteCurrent = suiteNew
+    try {
+      f(suiteNew)
+    } finally {
+      suiteCurrent = suitePrevious
+    }
+    return suiteNew.tests
+  }
+
+  export function testc<IAssert>(
+    AssertClass: { new(ng: IEngine, tc: engine.Test<IAssert>, r: ITestReport): IAssert }
+  ) {
+    return (name: string, f: (assert: IAssert, done?: () => void) => void) => {
+      return suiteCurrent.test(name, f, AssertClass)
+    }
+  }
+
+  export function test(
+    name: string,
+    f: (assert: engine.Assert, done?: () => void) => void
+  ) {
+    suiteCurrent.test(name, f, engine.Assert)
+  }
+    
 
   export class Runner {
     constructor(
@@ -484,7 +522,7 @@ module unit {
 
     run(testCases: ITest[], onComplete?: (report: ITestReport[]) => void, noDefault = false): void {
       if (!noDefault) {
-        testCases = testCases.concat(suiteDefault.tests)
+        testCases = testCases.concat(engine.suiteDefault.tests)
       }
       this._engine.run(testCases, onComplete)
     }
@@ -621,40 +659,6 @@ module unit {
       this._print(v || "")
     }
   }
-
-  var suiteDefault = new engine.TestSuite("")
-  var suiteCurrent = suiteDefault
-
-  export function suite(
-    name: string,
-    f: (self?: engine.TestSuite) => void
-  ): ITest[]  {
-    var suitePrevious = suiteCurrent
-    var suiteNew = new engine.TestSuite(name)
-    suiteCurrent = suiteNew
-    try {
-      f(suiteNew)
-    } finally {
-      suiteCurrent = suitePrevious
-    }
-    return suiteNew.tests
-  }
-
-  export function testc<IAssert>(
-    AssertClass: { new(ng: IEngine, tc: engine.Test<IAssert>, r: ITestReport): IAssert }
-  ) {
-    return (name: string, f: (assert: IAssert, done?: () => void) => void) => {
-      return suiteCurrent.test(name, f, AssertClass)
-    }
-  }
-
-  export function test(
-    name: string,
-    f: (assert: engine.Assert, done?: () => void) => void
-  ) {
-    suiteCurrent.test(name, f, engine.Assert)
-  }
-
 
 }
 export = unit

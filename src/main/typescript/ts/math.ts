@@ -1,5 +1,6 @@
 module math {
 
+  var isNaN = (n: number) => { return n !== n }
   var math_eq = (l: number, r: number) => { return isNaN(l) === isNaN(r) && l == r }
   var math_abs = Math.abs
   var math_ceil = Math.ceil
