@@ -2,6 +2,7 @@ import vm = require("ts/vm")
 import IContext = vm.IContext
 
 module macro {
+  export var USE_STRICT = '\n"use strict";'
   var ARGS = ['$0', '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9']
 
   export function compile(f: () => string, ctx?: IContext): () => any
@@ -16,15 +17,16 @@ module macro {
     var args = ARGS.slice(0, argc)
     var contextExpr = $name("ctx")
     var jscode: string = 
-      '\n"use strict";' + 
+      USE_STRICT + 
+      
       //head
       (ctx ? Object.keys(ctx).map(function (key) {
         return $var(key, $attr(contextExpr, '"' + key + '"'))
       }).join("") : "") +
+      
       //body
       $return($function(args, f.apply(null, args))) 
       
-console.warn(jscode)
     return (new Function(contextExpr, jscode))(ctx)
   }
 
@@ -43,15 +45,72 @@ console.warn(jscode)
     return '\ncase ' + caseExpr + ':' + $indent(execExpr + (nobreak ? '' : '\nbreak;'))
   }
   
-  export function $fori(each: (i: string, l: string) => string, lenExpr: string): string {
-    var l = $name('l')
-    var i = $name('i')
+  export function $do(body: string, whileExpr: string): string {
+    return '\ndo {' + $indent(body) + '\nwhile (' + whileExpr + ');'
+  }
+  
+  export function $for(init: string, cond: string, incr: string, body: string): string {
     return (
-      '\nfor (var ' + $op(i, '=', '0') + ', ' +  $op(l, '=', lenExpr) + '; ' + $op(i, '<', l) + '; ++' + i + ') {' +
-        $indent(each(i, l)) +
+      '\nfor (' + init + '; ' + cond + '; ' + incr + ') {' +
+        $indent(body) +
       '\n}'
     )
   }
+  
+  export function $foreach(o: string, each: (key: string) => string): string {
+    var keys = $name('keys')
+    var keyc = $name('keyc')
+    var key = $name('key')
+    return (
+      $var(keys, 'Object.keys(' + o + ')') +
+      $var(keyc, keys + '.length') +
+      $var(key) +
+      $fori("0", keyc, "1", (i) => {
+        return (
+          $assign(key, $attr(o, i)) +
+          each(key)
+        )
+      })
+    )
+  }
+  
+  export function $fori(min: string, max: string, step: string, each: (i: string) => string): string {
+    var i = $name('i')
+    return $for(
+      'var ' + $op(i, '=', min),
+      $op(i, '<', max),
+      $op(i, '+= ', step),
+      each(i)
+    )
+  }
+  
+  export function $fora(arrayExpr: string, each: (i: string) => string): string {
+    var i = $name('i')
+    var l = $name('l')
+    var iterations = 'iterations'
+    var leftover = 'leftover'
+    var bufferc = 8
+    var values = [0, 1, 2, 3, 4, 5, 6, 7]
+    return (
+      $var(l, arrayExpr + '.length') +
+      $var(iterations, 'Math.floor(' + $op(arrayExpr, '/', String(bufferc)) + ')') +
+      $var(leftover, $op(l, '%', String(bufferc))) +
+      
+      $var(i, '0') +
+      $if($op(leftover, '>', '0'), 
+        $switch(leftover, values.map((i) => {
+          return $case(String(i), each(String(i)))
+        }))
+      ) +
+      $do(
+        values.map(() => {
+          return each(i) + '\n++' + i + ';' 
+        }).join(''),
+        '--' + iterations + ' > 0'
+      )
+    )
+  }
+    
   
   export function $if(condExpr: string, thenExpr: string): string {
     return '\nif (' + condExpr + ') {' + $indent(thenExpr) + '}'

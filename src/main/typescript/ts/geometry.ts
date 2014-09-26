@@ -2,7 +2,6 @@ import macro = require('ts/macro')
 
 module geometry {
   
-  var math_pow = Math.pow
   var math_sqrt = Math.sqrt
 
 
@@ -312,16 +311,16 @@ module geometry {
   var Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array
     
   var $context: {[key:string]: any} = {
-    "math_sqrt": Math.sqrt
+    "math_sqrt": math_sqrt
   }
   var $if = macro.$if
   var $else = macro.$else
   var $assign = macro.$assign
   var $attr = macro.$attr
-  var $fori = function (each: (i: string, l: string) => string, lenExpr: string): string {
+  var $fora = function (arrayExpr: string, each: (i: string, l: string) => string): string {
     var l = $name('l')
-    var returnValue = $var(l, lenExpr) 
-    var forDefault = macro.$fori(each, l)
+    var returnValue = $var(l, arrayExpr + '.length') 
+    var forDefault = macro.$fori("0", l, "1", (i) => { return each(i, l) })
     var unrollValues = [2, 3, 4, 9, 16]
     if (unrollValues) {
       returnValue += macro.$switch(
@@ -356,18 +355,18 @@ module geometry {
   //specific
   function $array_op(op: string, a: string, b: string, dest: string): string {
     return (
-      $fori((i: string, l: string) => {
+      $fora(a, (i: string, l: string) => {
         return $object_assign(dest, i, $op($attr(a, i), op, $attr(b, i)))
-      }, a + '.length') //length expression
+      }) //length expression
     )
   }
   
   function $array_copy(a: string, ret: string): string {
     return (
       $if($op(a, '!==', ret),
-        $fori((i: string, l: string) => {
+        $fora(a, (i: string, l: string) => {
           return $object_assign(ret, i, $attr(a, i))
-        }, a + '.length')
+        })
       )
     )
   }
@@ -377,12 +376,12 @@ module geometry {
     return (
       $var(val) + 
       $assign(ret, '0') +
-      $fori((i: string, l: string) => {
+      $fora(a, (i: string, l: string) => {
         return (
           $assign(val, $attr(a, i)) + 
           '\n' + $op(ret, '+=', $op(val, '*', val)) + ';'
         )
-      }, a + '.length')
+      })
     )
   }
   
@@ -398,9 +397,9 @@ module geometry {
       $assign(ret, '0') +
       $if($op(a, '===', b), $array_frob_squared(a, ret)) +
       $else(
-        $fori((i: string, l: string) => {
+        $fora(a, (i: string, l: string) => {
           return '\n' + $op(ret, '+=', $op($attr(a, i), '*', $attr(b, i))) + ';'
-        }, a + '.length')
+        })
       )
     )
   }
@@ -421,9 +420,9 @@ module geometry {
   
   function $array_scale(a: string, scalar: string, ret: string): string {
     return (
-      $fori((i: string, l: string) => {
+      $fora(a, (i: string, l: string) => {
         return $object_assign(ret, i, $op($attr(a, i), '*', scalar))
-      }, a + '.length')
+      })
     )
   }
   
@@ -436,7 +435,7 @@ module geometry {
     var r = $name()
     
     return (
-      $fori((i: string, l: string) => {
+      $fora(a, (i: string, l: string) => {
         //return '||'  + $op($attr(a, i), '-', $attr(b, i))
         
         
@@ -444,7 +443,7 @@ module geometry {
           $assign(r, $op($attr(a, i), '-', $attr(b, i))) +
           $if($op(r, '==', '0'), 'break')
         )
-      }, a + '.length') + 
+      }) + 
       $return(r)
     )
   }, $context)
