@@ -48,9 +48,20 @@ module random {
     
     export class Engine implements IEngine {
 
+      static seedDefault(): string {
+        return Math.random().toString(36)
+      }
+      
       name = "<anonymous>"
       
-      seed(s: string) { }
+      constructor(seed?: string) {
+        if (seed == null) {
+          seed = Engine.seedDefault()
+        }
+        this.seed(seed)
+      }
+      
+      seed(str: string) { }
       
       generate(): number {
         throw Error()
@@ -81,13 +92,6 @@ module random {
       name = "pseudo"
       
       private _state: number = 0
-      
-      constructor(seed?: string) {
-        super()
-        if (seed != undefined) {
-          this.seed(seed)
-        }
-      }
       
       seed(str: string) {
         var state = 0        
@@ -148,19 +152,11 @@ module random {
       private _i = 0
       private _j = 0
       
-      constructor(seed?: string) {
-        super()
-        this._s = RC4._createState()
-        if (seed) {
-          this.seed(seed)
-        }
-      }
-      
       seed(str: string) {
         var input = RC4._getStringBytes(str)
         var inputlen = input.length
         var j = 0
-        var s = this._s
+        var s = this._s || (this._s = RC4._createState())
         for (var i = 0; i < RC4_WIDTH; i++) {
           j += s[i] + input[i % inputlen]
           j %= RC4_WIDTH
