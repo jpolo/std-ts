@@ -183,7 +183,7 @@ module geometry {
       return array_frob(m)
     }
     
-    function identity<T extends IMatrix>(dest: T): T {
+    export function identity<T extends IMatrix>(dest: T): T {
       switch(dest.length) {
         case 4: 
           array_copy(IDENTITY4, dest)
@@ -200,7 +200,7 @@ module geometry {
       return dest;
     }
 
-    function invert<T extends IMatrix>(m: T, dest?: T): T {
+    export function invert<T extends IMatrix>(m: T, dest?: T): T {
       dest = dest || array_create(m.length)
         
       switch(dest.length) {

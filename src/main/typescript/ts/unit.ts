@@ -37,6 +37,7 @@ module unit {
     testEquals(actual: any, expected: any): boolean
     testEqualsStrict(actual: any, expected: any): boolean
     testEqualsNear(actual: any, expected: any, epsilon?: number): boolean
+    testEqualsDeep(actual: any, expected: any): boolean
   }
 
   export interface ITest {
@@ -147,10 +148,47 @@ module unit {
         var to2 = typeof o2
 
         return (
-          (to1 === "number" || to2 === "number") ? this.testEqualsStrict(to1, to2) && (o1 == o2 || this._floatNearEquals(o1, o2, epsilon)) :
+          (to1 === "number" || to2 === "number") ? this.testEqualsStrict(to1, to2) && (o1 == o2 || this._equalsFloat(o1, o2, epsilon)) :
           ("nearEquals" in o1) ? o1.nearEquals(o2) :
           false
         )
+      }
+      
+      testEqualsDeep(o1: any, o2: any): boolean {
+        function equals(o1, o2) {
+          if (o1 === o2) {
+            return true
+          }
+          switch (vm.stringTag(o1)) {
+            case 'Undefined':
+            case 'Null':
+              return o1 === o2
+            case 'Number':
+              return +o1 === +o2
+            case 'String':
+              return String(o1) === String(o2)
+            case 'Array':            
+              if (
+                o2 == null ||
+                o1.length !== o2.length
+              ) {
+                return false
+              }
+              for (var i = 0, l = o1.length; i < l; ++i) {
+                if (!equals(o1[i], o2[i])) {
+                  return false
+                }
+              }
+              return true
+              break
+            case 'Object':
+            default:
+              break
+            
+              
+          }
+        }
+        return equals(o1, o2)
       }
 
       run(testCases: ITest[], onComplete?: (reports: ITestReport[]) => void) {
@@ -168,7 +206,7 @@ module unit {
         }
       }
 
-      private _floatNearEquals(actual: number, expected: number, epsilon: number) {
+      private _equalsFloat(actual: number, expected: number, epsilon: number) {
         var returnValue = false
         if (isNaN(expected)) {
           returnValue = isNaN(actual)
@@ -356,6 +394,14 @@ module unit {
       notPropEqual(actual: any, expected: any, message?: string): boolean {
         return this._propEqual(actual, expected, false, message, this.__position__())
       }
+      
+      deepEqual(actual: any, expected: any, message?: string): boolean {
+        return this._deepEqual(actual, expected, false, message, this.__position__())
+      }
+      
+      notDeepEqual(actual: any, expected: any, message?: string): boolean {
+        return this._deepEqual(actual, expected, true, message, this.__position__())
+      }
 
       typeOf(o: any, type: string, message?: string): boolean {
         return this.__assert__(typeof o === type, message, this.__position__())
@@ -464,6 +510,12 @@ module unit {
 
         }
         return this.__assert__(isSuccess, message, position)
+      }
+      
+      _deepEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+        var engine = this.__engine__
+        message = message || (engine.dump(o1) + (' must equals ') + engine.dump(o2))
+        return this.__assert__(engine.testEqualsDeep(o1, o2) === !not, message, position)
       }
     }
     

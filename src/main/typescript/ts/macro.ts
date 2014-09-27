@@ -93,7 +93,7 @@ module macro {
     var values = [0, 1, 2, 3, 4, 5, 6, 7]
     return (
       $var(l, arrayExpr + '.length') +
-      $var(iterations, 'Math.floor(' + $op(arrayExpr, '/', String(bufferc)) + ')') +
+      $var(iterations, 'Math.floor(' + $op(l, '/', String(bufferc)) + ')') +
       $var(leftover, $op(l, '%', String(bufferc))) +
       
       $var(i, '0') +
