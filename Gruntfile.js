@@ -32,17 +32,8 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      main: {
-        files: ['<%= dir.source_ts %>/**/*.ts'],
-        tasks: ['typescript:compile'],
-        options: {
-          atBegin: true,
-          interrupt: true
-          //spawn: false,
-        },
-      },
       test: {
-        files: ['<%= dir.source_test_ts %>/**/*.ts'],
+        files: ['<%= dir.source_ts %>/**/*.ts', '<%= dir.source_test_ts %>/**/*.ts'],
         tasks: ['typescript:compile_test'],
         options: {
           atBegin: true,
@@ -57,22 +48,25 @@ module.exports = function(grunt) {
     typescript: {
       // Compiles the code into a single file. Also generates a typescript declaration file
       compile: {
-      src: ['<%= dir.source_ts %>/**/*.ts'],
+	    src: ['<%= dir.source_ts %>/**/*.ts'],
         dest: '<%= dir.target_js %>',
         options: {
           basePath: '<%= dir.source_ts %>',
+          sourceMap: true,
           target: 'es5',
+          module: 'amd',
           declaration: true,
-          comments: true,
-          module: 'amd'
+          comments: true
         }
       },
+      
       // Compiles the tests.
       compile_test: {
         src: ['<%= dir.source_test_ts %>/**/*.ts','<%= dir.source_ts %>/**/*.ts'],
         dest: '<%= dir.target_test_js %>',
         options: {
           basePath: '<%= dir.source %>',
+          sourceMap: true,
           target: 'es5',
           module: 'amd'
         }

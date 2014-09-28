@@ -355,7 +355,7 @@ module geometry {
   //specific
   function $array_op(op: string, a: string, b: string, dest: string): string {
     return (
-      $fora(a, (i: string, l: string) => {
+      $fora(a, (i: string) => {
         return $object_assign(dest, i, $op($attr(a, i), op, $attr(b, i)))
       }) //length expression
     )
@@ -364,7 +364,7 @@ module geometry {
   function $array_copy(a: string, ret: string): string {
     return (
       $if($op(a, '!==', ret),
-        $fora(a, (i: string, l: string) => {
+        $fora(a, (i: string) => {
           return $object_assign(ret, i, $attr(a, i))
         })
       )
@@ -376,7 +376,7 @@ module geometry {
     return (
       $var(val) + 
       $assign(ret, '0') +
-      $fora(a, (i: string, l: string) => {
+      $fora(a, (i: string) => {
         return (
           $assign(val, $attr(a, i)) + 
           '\n' + $op(ret, '+=', $op(val, '*', val)) + ';'
@@ -397,7 +397,7 @@ module geometry {
       $assign(ret, '0') +
       $if($op(a, '===', b), $array_frob_squared(a, ret)) +
       $else(
-        $fora(a, (i: string, l: string) => {
+        $fora(a, (i: string) => {
           return '\n' + $op(ret, '+=', $op($attr(a, i), '*', $attr(b, i))) + ';'
         })
       )
@@ -420,7 +420,7 @@ module geometry {
   
   function $array_scale(a: string, scalar: string, ret: string): string {
     return (
-      $fora(a, (i: string, l: string) => {
+      $fora(a, (i: string) => {
         return $object_assign(ret, i, $op($attr(a, i), '*', scalar))
       })
     )
@@ -435,10 +435,7 @@ module geometry {
     var r = $name()
     
     return (
-      $fora(a, (i: string, l: string) => {
-        //return '||'  + $op($attr(a, i), '-', $attr(b, i))
-        
-        
+      $fora(a, (i: string) => {
         return (
           $assign(r, $op($attr(a, i), '-', $attr(b, i))) +
           $if($op(r, '==', '0'), 'break')
@@ -459,5 +456,6 @@ module geometry {
   var array_negate = macro.compile((a, r) => { return $array_negate(a, r) + $return(r) }, $context)
   var array_scale = macro.compile((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
 
+  
 }
 export = geometry

@@ -46,7 +46,7 @@ module macro {
   }
   
   export function $do(body: string, whileExpr: string): string {
-    return '\ndo {' + $indent(body) + '\nwhile (' + whileExpr + ');'
+    return '\ndo {' + $indent(body) + '\n} while (' + whileExpr + ');'
   }
   
   export function $for(init: string, cond: string, incr: string, body: string): string {
@@ -87,41 +87,44 @@ module macro {
   export function $fora(arrayExpr: string, each: (i: string) => string): string {
     var i = $name('i')
     var l = $name('l')
-    var iterations = 'iterations'
-    var leftover = 'leftover'
+    var iterations = $name('iter')
+    var leftover = $name('rest')
     var bufferc = 8
     var values = [0, 1, 2, 3, 4, 5, 6, 7]
     return (
       $var(l, arrayExpr + '.length') +
-      $var(iterations, 'Math.floor(' + $op(l, '/', String(bufferc)) + ')') +
       $var(leftover, $op(l, '%', String(bufferc))) +
-      
-      $var(i, '0') +
+      $var(iterations, $op('(' +$op(l, '-', leftover) + ')', '/', String(bufferc))) +
       $if($op(leftover, '>', '0'), 
-        $switch(leftover, values.map((i) => {
-          return $case(String(i), each(String(i)))
+        $switch(leftover, values.slice(1).map((imax) => {
+          return $case(String(imax), 
+            values.slice(0, imax).map((i) => { return each(String(i)) }).join('')
+          )
         }))
       ) +
-      $do(
-        values.map(() => {
-          return each(i) + '\n++' + i + ';' 
-        }).join(''),
-        '--' + iterations + ' > 0'
+      $if($op(iterations, '>', '0'), 
+        $var(i, leftover) +
+        $do(
+          values.map(() => {
+            return each(i) + '\n++' + i + ';' 
+          }).join(''),
+          '--' + iterations + ' > 0'
+        )
       )
     )
   }
     
   
   export function $if(condExpr: string, thenExpr: string): string {
-    return '\nif (' + condExpr + ') {' + $indent(thenExpr) + '}'
+    return '\nif (' + condExpr + ') {' + $indent(thenExpr) + '\n}'
   }
   
   export function $elif(condExpr: string, thenExpr: string): string {
-    return '\nelse if (' + condExpr + ') {' + $indent(thenExpr) + '}'
+    return '\nelse if (' + condExpr + ') {' + $indent(thenExpr) + '\n}'
   }
   
   export function $else(thenExpr: string): string {
-    return '\nelse {' + $indent(thenExpr) + '}'
+    return '\nelse {' + $indent(thenExpr) + '\n}'
   }
   
   export function $function(args: string[], block: string, name: string = ''): string {
