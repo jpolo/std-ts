@@ -96,13 +96,17 @@ module geometry {
   
   export module vector {
   
-    export function create2(x: number, y: number): IVector2 {
-      var v = array_create(2)
-      v[0] = x
-      v[1] = y
+    export function create(x: number, y: number): IVector2
+    export function create(x: number, y: number, z: number): IVector3
+    export function create(x: number, y: number, z: number, w: number): IVector4
+    export function create(): any {
+      var argc = arguments.length
+      var v = array_create(argc)
+      for (var i = 0; i < argc; ++i) {
+        v[i] = arguments[i]
+      }
       return v
     }
-    
   
     export function add<T extends IVector>(v1: T, v2: T, dest?: T): T {
       return array_add(v1, v2, dest || array_create(v1.length))
@@ -317,10 +321,10 @@ module geometry {
   var $else = macro.$else
   var $assign = macro.$assign
   var $attr = macro.$attr
-  var $fora = function (arrayExpr: string, each: (i: string, l: string) => string): string {
+  var $fora = function (arrayExpr: string, each: (i: string) => string): string {
     var l = $name('l')
     var returnValue = $var(l, arrayExpr + '.length') 
-    var forDefault = macro.$fori("0", l, "1", (i) => { return each(i, l) })
+    var forDefault = macro.$fori("0", l, "1", each)
     var unrollValues = [2, 3, 4, 9, 16]
     if (unrollValues) {
       returnValue += macro.$switch(
@@ -329,7 +333,7 @@ module geometry {
           var lenExpr = String(l)
           var caseExpr = ''
           for (var current = 0; current < l; ++current) {
-            caseExpr += each(String(current), lenExpr)
+            caseExpr += each(String(current))
           }
           return macro.$case(lenExpr, caseExpr)
         }),
@@ -347,16 +351,11 @@ module geometry {
   var $return = macro.$return
   var $var = macro.$var
 
-  
-  function $object_assign(objectExpr, attrExpr, valueExpr) {
-    return $assign($attr(objectExpr, attrExpr), valueExpr)
-  }
-
   //specific
   function $array_op(op: string, a: string, b: string, dest: string): string {
     return (
       $fora(a, (i: string) => {
-        return $object_assign(dest, i, $op($attr(a, i), op, $attr(b, i)))
+        return $assign($attr(dest, i), $op($attr(a, i), op, $attr(b, i)))
       }) //length expression
     )
   }
@@ -365,7 +364,7 @@ module geometry {
     return (
       $if($op(a, '!==', ret),
         $fora(a, (i: string) => {
-          return $object_assign(ret, i, $attr(a, i))
+          return $assign($attr(ret, i), $attr(a, i))
         })
       )
     )
@@ -421,7 +420,7 @@ module geometry {
   function $array_scale(a: string, scalar: string, ret: string): string {
     return (
       $fora(a, (i: string) => {
-        return $object_assign(ret, i, $op($attr(a, i), '*', scalar))
+        return $assign($attr(ret, i), $op($attr(a, i), '*', scalar))
       })
     )
   }
@@ -449,13 +448,12 @@ module geometry {
   var array_divide = macro.compile((a, b, r) => { return $array_op('/', a, b, r) + $return(r) }, $context)
   var array_copy: (a, dest) => any = macro.compile((a, r) => { return $array_copy(a, r) + $return(r) }, $context)
   
-  var array_dot = macro.compile((a, b) => { return $array_dot(a, b, 'r') + $return('r') }, $context)
+  var array_dot = macro.compile((a, b) => { return $var('r') + $array_dot(a, b, 'r') + $return('r') }, $context)
   var array_frob_squared = macro.compile((a) => { return $var('r') + $array_frob_squared(a, 'r') + $return('r') }, $context)
   var array_frob = macro.compile((a) => { return $var('r') + $array_frob(a, 'r') + $return('r') }, $context)
   var array_normalize = macro.compile((a, r) => { return $array_normalize(a, r) + $return(r) }, $context)
   var array_negate = macro.compile((a, r) => { return $array_negate(a, r) + $return(r) }, $context)
   var array_scale = macro.compile((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
 
-  
 }
 export = geometry

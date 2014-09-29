@@ -1,4 +1,7 @@
 module.exports = function(grunt) {
+  var TARGET = 'es5';
+  var INDENT = 2;
+	
   grunt.initConfig({
     // ----- Environment
     // read in some metadata from project descriptor
@@ -52,11 +55,12 @@ module.exports = function(grunt) {
         dest: '<%= dir.target_js %>',
         options: {
           basePath: '<%= dir.source_ts %>',
-          sourceMap: true,
-          target: 'es5',
+          target: TARGET,
           module: 'amd',
+          sourceMap: true,
           declaration: true,
-          comments: true
+          comments: true,
+          indentStep: INDENT
         }
       },
       
@@ -66,9 +70,12 @@ module.exports = function(grunt) {
         dest: '<%= dir.target_test_js %>',
         options: {
           basePath: '<%= dir.source %>',
+          target: TARGET,
+          module: 'amd',
           sourceMap: true,
-          target: 'es5',
-          module: 'amd'
+          declaration: false,
+          comments: false,
+          indentStep: INDENT
         }
       }
     },

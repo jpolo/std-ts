@@ -4,6 +4,7 @@ import IContext = vm.IContext
 module macro {
   export var USE_STRICT = '\n"use strict";'
   var ARGS = ['$0', '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9']
+  var __names__ = {}
 
   export function compile(f: () => string, ctx?: IContext): () => any
   export function compile(f: ($0: string) => string, ctx?: IContext): (_0: any) => any
@@ -12,6 +13,7 @@ module macro {
   export function compile(f: ($0: string, $1: string, $2: string, $3: string) => string, ctx?: IContext): (_0: any, _1: any, _2: any, _3: any) => any
   export function compile(f: ($0: string, $1: string, $2: string, $3: string, $4: string) => string, ctx?: IContext): (_0: any, _1: any, _2: any, _3: any, _4: any) => any
   export function compile(f: ($0: string, $1: string, $2: string, $3: string, $4: string, $5: string, ctx?: IContext) => string): (_0: any, _1: any, _2: any, _3: any, _4: any, _5: any) => any
+  export function compile(f: ($0: string, $1: string, $2: string, $3: string, $4: string, $5: string, $6: string, ctx?: IContext) => string): (_0: any, _1: any, _2: any, _3: any, _4: any, _5: any, _6: any) => any
   export function compile(f: any, ctx?: any): any {
     var argc = +f.length
     var args = ARGS.slice(0, argc)
@@ -79,7 +81,7 @@ module macro {
     return $for(
       'var ' + $op(i, '=', min),
       $op(i, '<', max),
-      $op(i, '+= ', step),
+      $op(i, '+=', step),
       each(i)
     )
   }
@@ -90,26 +92,34 @@ module macro {
     var iterations = $name('iter')
     var leftover = $name('rest')
     var bufferc = 8
-    var values = [0, 1, 2, 3, 4, 5, 6, 7]
+
     return (
       $var(l, arrayExpr + '.length') +
       $var(leftover, $op(l, '%', String(bufferc))) +
-      $var(iterations, $op('(' +$op(l, '-', leftover) + ')', '/', String(bufferc))) +
+      $var(iterations, $op('(' + $op(l, '-', leftover) + ')', '/', String(bufferc))) +
       $if($op(leftover, '>', '0'), 
-        $switch(leftover, values.slice(1).map((imax) => {
-          return $case(String(imax), 
-            values.slice(0, imax).map((i) => { return each(String(i)) }).join('')
-          )
-        }))
+        $switch(leftover, (function () {
+          var cases = []
+          for (var imax = 1; imax < bufferc; imax++) {
+            var caseBody = ''
+            for (var casei = 0; casei < imax; casei++) {
+              caseBody += each(String(casei))
+            }
+            cases.push($case(String(imax), caseBody))
+          }
+          return cases
+        }()))
       ) +
       $if($op(iterations, '>', '0'), 
         $var(i, leftover) +
-        $do(
-          values.map(() => {
-            return each(i) + '\n++' + i + ';' 
-          }).join(''),
-          '--' + iterations + ' > 0'
-        )
+        $do((function () {
+          var body = ''
+          for (var ui = 0; ui < bufferc; ++ui) {
+            body += each(i)
+            body += '\n++' + i + ';' 
+          }
+          return body
+        }()), '--' + iterations + ' > 0')     
       )
     )
   }
@@ -135,7 +145,6 @@ module macro {
     return chars + s.replace(/\n/g, '\n' + chars)
   }
   
-  var __names__ = {}
   export function $name(prefix = '$$tmp') {
     var cur = __names__[prefix] || (__names__[prefix] = 0)
     ++__names__[prefix]
@@ -163,6 +172,10 @@ module macro {
   
   export function $var(varName: string, valExpr?: string) {
     return $assign(varName, valExpr, true)
+  }
+  
+  export function $while(whileExpr: string, bodyExpr: string): string {
+    return '\nwhile (' + whileExpr + ') {' + $indent(bodyExpr) + '\n}'
   }
   
 
