@@ -170,6 +170,10 @@ module macro {
     return s
   }
   
+  export function $throw(throwExpr) {
+    return '\nthrow ' + throwExpr + ';'
+  }
+  
   export function $var(varName: string, valExpr?: string) {
     return $assign(varName, valExpr, true)
   }

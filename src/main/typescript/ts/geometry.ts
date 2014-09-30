@@ -1,4 +1,13 @@
 import macro = require('ts/macro')
+import $if = macro.$if
+import $else = macro.$else
+import $assign = macro.$assign
+import $attr = macro.$attr
+import $indent = macro.$indent
+import $op = macro.$op
+import $name = macro.$name
+import $return = macro.$return
+import $var = macro.$var
 
 module geometry {
   
@@ -156,8 +165,30 @@ module geometry {
   }
   
   export module matrix {
-    var IDENTITY4 = [1, 0, 0, 1]
-    var IDENTITY9 = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+  
+    export function create(
+      _0: number, _1: number, 
+      _2: number, _3: number
+    ): IMatrix2
+    export function create(
+      _0: number, _1: number, _2: number, 
+      _3: number, _4: number, _5: number, 
+      _6: number, _7: number, _8: number
+    ): IMatrix3
+    export function create(
+       _0: number,  _1: number,  _2: number,  _3: number,
+       _4: number,  _5: number,  _6: number,  _7: number, 
+       _8: number,  _9: number, _10: number, _11: number,
+      _12: number, _13: number, _14: number, _15: number
+    ): IMatrix4
+    export function create(): any {
+      var argc = arguments.length
+      var v = array_create(argc)
+      for (var i = 0; i < argc; ++i) {
+        v[i] = arguments[i]
+      }
+      return v
+    }
   
     export function copy<T extends IMatrix>(m: T, dest?: T): T {
       return array_copy(m, dest)
@@ -188,20 +219,7 @@ module geometry {
     }
     
     export function identity<T extends IMatrix>(dest: T): T {
-      switch(dest.length) {
-        case 4: 
-          array_copy(IDENTITY4, dest)
-          break
-        case 9:
-          array_copy(IDENTITY9, dest)
-          break
-        default:
-          for (var i = 0, l = dest.length; i < l; ++i) {
-          
-          }
-          throw new TypeError()
-      }
-      return dest;
+      return mat_identity(dest)
     }
 
     export function invert<T extends IMatrix>(m: T, dest?: T): T {
@@ -266,7 +284,7 @@ module geometry {
       return dest;
     }
 
-    function scale<IMatrix4>(m: IMatrix4, v: IVector4, dest?: IMatrix3): IMatrix3
+    function scale<IMatrix4>(m: IMatrix4, v: IVector4, dest?: IMatrix4): IMatrix4
     function scale<IMatrix3>(m: IMatrix3, v: IVector3, dest?: IMatrix3): IMatrix3
     function scale<IMatrix2>(m: IMatrix2, v: IVector2, dest?: IMatrix2): IMatrix2
     function scale(m: any, v: any, dest?: any): any {
@@ -317,40 +335,28 @@ module geometry {
   var $context: {[key:string]: any} = {
     "math_sqrt": math_sqrt
   }
-  var $if = macro.$if
-  var $else = macro.$else
-  var $assign = macro.$assign
-  var $attr = macro.$attr
-  var $fora = function (arrayExpr: string, each: (i: string) => string): string {
+  
+
+  function $fora(arrayExpr: string, each: (i: string, l?: string) => string): string {
     var l = $name('l')
-    var returnValue = $var(l, arrayExpr + '.length') 
-    var forDefault = macro.$fori("0", l, "1", each)
-    var unrollValues = [2, 3, 4, 9, 16]
-    if (unrollValues) {
-      returnValue += macro.$switch(
+
+    return (
+      $var(l, arrayExpr + '.length') +
+      macro.$switch(
         l, 
-        unrollValues.map((l) => {
+        [2, 3, 4, 9, 16].map((l) => {
           var lenExpr = String(l)
           var caseExpr = ''
           for (var current = 0; current < l; ++current) {
-            caseExpr += each(String(current))
+            caseExpr += each(String(current), lenExpr)
           }
           return macro.$case(lenExpr, caseExpr)
         }),
-        forDefault
+        macro.$fori("0", l, "1", (i) => { return each(i, l) })
       )
-    } else {
-      returnValue = forDefault
-    }
-    return returnValue
+    )
   }
-
-  var $indent = macro.$indent
-  var $op = macro.$op
-  var $name = macro.$name
-  var $return = macro.$return
-  var $var = macro.$var
-
+  
   //specific
   function $array_op(op: string, a: string, b: string, dest: string): string {
     return (
@@ -428,6 +434,28 @@ module geometry {
   function array_create(l: number) {
     return new Float32Array(l)
   }
+  
+  function $mat_identity(ret: string) {
+    return $fora(ret, (i: string, l: string) => {
+      var index = parseInt(i);
+      var length = parseInt(l);
+      var returnValue = ''
+      if (i && length) {
+        var size = Math.sqrt(length)
+        if (size === Math.floor(size)) {
+          var col = index % size
+          var row = Math.floor(index / size)
+          
+          returnValue = $assign($attr(ret, i), col === row ? '1' : '0')
+        } else {
+          //not square matrix
+        }
+      } else {
+        //do nothin
+      }
+      return returnValue
+    });
+  }
 
   var array_add = macro.compile((a, b, r) => { return $array_op('+', a, b, r) + $return(r) }, $context)
   var array_cmp = macro.compile((a, b) => { 
@@ -454,6 +482,9 @@ module geometry {
   var array_normalize = macro.compile((a, r) => { return $array_normalize(a, r) + $return(r) }, $context)
   var array_negate = macro.compile((a, r) => { return $array_negate(a, r) + $return(r) }, $context)
   var array_scale = macro.compile((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
-
+  
+  
+  var mat_identity = macro.compile((r) => { return $mat_identity(r) + $return(r) }) 
+  
 }
 export = geometry

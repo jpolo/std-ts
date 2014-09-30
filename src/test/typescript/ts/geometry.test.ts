@@ -3,8 +3,9 @@ import suite = unit.suite
 import test = unit.test
 import geometry = require("../../../main/typescript/ts/geometry")
 import vector = geometry.vector
+import matrix = geometry.matrix
 
-var geometrySuite = suite("ts/geometry.vector", (self) => {
+var geometryVectorSuite = suite("ts/geometry.vector", (self) => {
 
   test('add(a, b)', (assert) => {
     //vector2
@@ -133,8 +134,33 @@ var geometrySuite = suite("ts/geometry.vector", (self) => {
     assert.deepEqual(vector.subtract(vector.create(1, 2, 3, 4), vector.create(2, 2, 2, 2)), [-1, 0, 1, 2])
   })
     
+})
   
+var geometryMatrixSuite = suite("ts/geometry.matrix", () => {
+
+  test('identity(a)', (assert) => {
+    
+    //mat2
+    assert.deepEqual(
+      matrix.identity(matrix.create(1, 2, 3, 4)), 
+      [1, 0, 0, 1]
+    )
+      
+    //mat3
+    assert.deepEqual(
+      matrix.identity(matrix.create(1, 2, 3, 4, 5, 6, 7, 8, 9)), 
+      [1, 0, 0, 0, 1, 0, 0, 0, 1]
+    )
+      
+    //mat4
+    assert.deepEqual(
+      matrix.identity(matrix.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)), 
+      [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    )
+  })
   
 })
+  
+var geometrySuite = geometryVectorSuite.concat(geometryMatrixSuite)
   
 export = geometrySuite
