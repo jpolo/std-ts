@@ -158,6 +158,27 @@ var geometryMatrixSuite = suite("ts/geometry.matrix", () => {
       [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
     )
   })
+    
+  test('transpose(a)', (assert) => {
+    
+    //mat2
+    var mat2 = matrix.create(1, 2, 3, 4)
+    var expected2 = [1, 3, 2, 4]
+    assert.deepEqual(matrix.transpose(mat2), expected2)
+    assert.deepEqual(matrix.transpose(mat2, mat2), expected2)
+      
+    //mat3
+    var mat3 = matrix.create(1, 2, 3, 4, 5, 6, 7, 8, 9)
+    var expected3 = [1, 4, 7, 2, 5, 8, 3, 6, 9]
+    assert.deepEqual(matrix.transpose(mat3), expected3)
+    assert.deepEqual(matrix.transpose(mat3, mat3), expected3)
+      
+    //mat4
+    var mat4 = matrix.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
+    var expected4 = [1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 16]
+    assert.deepEqual(matrix.transpose(mat4), expected4)
+    assert.deepEqual(matrix.transpose(mat4, mat4), expected4)
+  })
   
 })
   

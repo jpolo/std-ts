@@ -10,8 +10,14 @@ import $return = macro.$return
 import $var = macro.$var
 
 module geometry {
-  
+  var SIZES = [2, 3, 4, 9, 16]
+  var math_floor = Math.floor
   var math_sqrt = Math.sqrt
+  var Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array    
+  var $context: {[key:string]: any} = {
+    "math_floor": math_floor,
+    "math_sqrt": math_sqrt
+  }
 
 
   export interface IVector { length: number; 0: number; 1: number; }
@@ -284,56 +290,90 @@ module geometry {
       return dest;
     }
 
-    function scale<IMatrix4>(m: IMatrix4, v: IVector4, dest?: IMatrix4): IMatrix4
-    function scale<IMatrix3>(m: IMatrix3, v: IVector3, dest?: IMatrix3): IMatrix3
-    function scale<IMatrix2>(m: IMatrix2, v: IVector2, dest?: IMatrix2): IMatrix2
-    function scale(m: any, v: any, dest?: any): any {
-      dest = dest || array_create(m.length)
-      
-      switch(m.length) {
-        case 4:
-          var m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3]
-          var v0 = v[0], v1 = v[1]
-          dest[0] = m0 * v0
-          dest[1] = m1 * v0
-          dest[2] = m2 * v1
-          dest[3] = m3 * v1
-          break
-        default:
-          throw new TypeError()
-      }
-      return dest;
+    export function scale<IMatrix4>(m: IMatrix4, v: IVector4, dest?: IMatrix4): IMatrix4
+    export function scale<IMatrix3>(m: IMatrix3, v: IVector3, dest?: IMatrix3): IMatrix3
+    export function scale<IMatrix2>(m: IMatrix2, v: IVector2, dest?: IMatrix2): IMatrix2
+    export function scale(m: any, v: any, dest?: any): any {
+      return mat_scale(m, v, dest || array_create(m.length))
     }
     
-    function transpose<T extends IMatrix>(m: T, dest?: T): T {
-      dest = dest || array_create(m.length)
-        
-      switch(m.length) {
-        case 4:
-          // If we are transposing ourselves we can skip a few steps but have to cache some values
-          if (dest === m) {
-            var m1 = m[1]
-            dest[1] = m[2]
-            dest[2] = m1
+    export function transpose<T extends IMatrix>(m: T, dest?: T): T {
+      return mat_transpose(m, dest || array_create(m.length));
+    }
+    
+    function $form(m: string, each: (col: number, row: number, size?: number) => any) {
+      return $fora(m, (i: string, l: string) => {
+        var index = parseInt(i)
+        var length = parseInt(l)
+        var returnValue = ''
+        if (i && length) {
+          var size = math_sqrt(length)
+          if (size === math_floor(size)) {
+            var col = index % size
+            var row = math_floor(index / size)
+            
+            returnValue = each(col, row, size)
           } else {
-            dest[0] = m[0]
-            dest[1] = m[2]
-            dest[2] = m[1]
-            dest[3] = m[3]
+            //not square matrix
           }
-          break
-        default:
-          throw new TypeError()
-      }
-      return dest
+        } else {
+          //do nothin
+        }
+        return returnValue
+      })
     }
-  }
-  
-  //array util
-  var Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array
     
-  var $context: {[key:string]: any} = {
-    "math_sqrt": math_sqrt
+    function $mat_identity(ret: string) {
+      return $form(ret, (col: number, row: number, size: number) => {
+        var i = row * size + col
+        return $assign($attr(ret, String(i)), col === row ? '1' : '0')
+      })
+    }
+    
+    function $mat_scale(m: string, v, ret: string) {
+      return $form(m, (col: number, row: number, size: number) => {
+        var i = row * size + col
+        
+        return $assign(
+          $attr(ret, String(i)), 
+          $op($attr(ret, String(i)), '*', $attr(v, String(row)))
+        )
+      })
+    }
+    
+    function $mat_transpose(m: string, ret: string) {
+      var tmp = $name('tmp')
+      
+      function gen(isEqual: boolean) {
+        return function (col: number, row: number, size: number) {
+          var returnValue = ''
+          var index = row * size + col
+          var transIndex = col * size + row
+          
+          if (row < col) {                
+            returnValue += $assign(tmp, $attr(m, String(index)))
+            returnValue += $assign($attr(ret, String(index)), $attr(m, String(transIndex)))
+            returnValue += $assign($attr(ret, String(transIndex)), tmp)
+          } else if (!isEqual && row === col) {
+            returnValue += $assign($attr(ret, String(index)), $attr(m, String(index)))
+          }
+              
+          return returnValue
+        }
+      }
+      
+      return (
+        $var(tmp) +
+        $if($op(m, '===', ret), $form(ret, gen(true))) +
+        $else($form(ret, gen(false)))
+      )
+    }
+    
+    var mat_identity = macro.compile((r) => { return $mat_identity(r) + $return(r) })
+    var mat_scale = macro.compile((m, v, r) => { return $mat_scale(m, v, r) + $return(r) })
+    var mat_transpose = macro.compile((m, r) => { return $mat_transpose(m, r) + $return(r) })
+    
+console.warn(mat_scale.toString())
   }
   
 
@@ -344,7 +384,7 @@ module geometry {
       $var(l, arrayExpr + '.length') +
       macro.$switch(
         l, 
-        [2, 3, 4, 9, 16].map((l) => {
+        SIZES.map((l) => {
           var lenExpr = String(l)
           var caseExpr = ''
           for (var current = 0; current < l; ++current) {
@@ -435,27 +475,7 @@ module geometry {
     return new Float32Array(l)
   }
   
-  function $mat_identity(ret: string) {
-    return $fora(ret, (i: string, l: string) => {
-      var index = parseInt(i);
-      var length = parseInt(l);
-      var returnValue = ''
-      if (i && length) {
-        var size = Math.sqrt(length)
-        if (size === Math.floor(size)) {
-          var col = index % size
-          var row = Math.floor(index / size)
-          
-          returnValue = $assign($attr(ret, i), col === row ? '1' : '0')
-        } else {
-          //not square matrix
-        }
-      } else {
-        //do nothin
-      }
-      return returnValue
-    });
-  }
+  
 
   var array_add = macro.compile((a, b, r) => { return $array_op('+', a, b, r) + $return(r) }, $context)
   var array_cmp = macro.compile((a, b) => { 
@@ -484,7 +504,6 @@ module geometry {
   var array_scale = macro.compile((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
   
   
-  var mat_identity = macro.compile((r) => { return $mat_identity(r) + $return(r) }) 
   
 }
 export = geometry
