@@ -173,7 +173,8 @@ module geometry {
   }
   
   export module matrix {
-  
+    var MATRIX_SIZE = [4, 9, 16]
+    
     export function create(
       _0: number, _1: number, 
       _2: number, _3: number
@@ -253,8 +254,9 @@ module geometry {
       return dest;
     }
     
-    function multiply<T extends IMatrix>(a: T, b: T, dest?: T): T {
-      dest = dest || array_create(a.length)
+    export function multiply<T extends IMatrix>(a: T, b: T, dest?: T): T {
+      return mat_multiply(a, b, dest || array_create(a.length))
+      /*dest = dest || array_create(a.length)
         
       switch(a.length) {
         case 4:
@@ -269,7 +271,7 @@ module geometry {
           throw new TypeError()
       }
       
-      return dest;
+      return dest;*/
     }
     
     function rotate<T extends IMatrix>(m: T, rad: number, dest?: T): T {
@@ -303,102 +305,126 @@ module geometry {
       return mat_transpose(m, dest || array_create(m.length));
     }
     
-    function $forMatrix(
+    function $mat_gen(
       m: string, 
-      each: (col: number, row: number, size?: number) => any, 
-      init?: (size?: number) => any
+      f: (size?: number) => any
     ) {
+      var l = $name('l')
 
-      return $forArray(m, 
-        (i: string, l: string) => {
-          var index = parseInt(i)
-          var length = parseInt(l)
-          var returnValue = ''
-          if (i && length) {       
-            var size = math_sqrt(length)
-            if (size === math_floor(size)) {
-              var col = index % size
-              var row = math_floor(index / size)
-              
-              returnValue = each(col, row, size)
-            } else {
-              //not square matrix
-            }
-          } else {
-            //do nothin
-          }
-          return returnValue
-        }, 
-        init ? (l: string) => {
-          var length = parseInt(l)
-          var size = math_sqrt(length)
-          return size === math_floor(size) ? init(size) : ''
-        } : null)
+      return (
+        $var(l, m + '.length') +
+        $switch(l, MATRIX_SIZE.map((l) => {
+          return $case(String(l), f(math_sqrt(l)))
+        }))
+      )
     }
     
     function $mat_identity(ret: string) {
-      return $forMatrix(ret, (col: number, row: number, size: number) => {
-        var i = row * size + col
-        return $assign($attr(ret, String(i)), col === row ? '1' : '0')
+      return $mat_gen(ret, (size: number) => {
+        var returnValue = ''
+        for (var row = 0; row < size; ++row) {
+          for (var col = 0; col < size; ++col) {
+            var i = row * size + col
+            returnValue += $assign($attr(ret, String(i)), col === row ? '1' : '0') 
+          }
+        }
+        return returnValue
+      })
+    }
+    
+    function $mat_multiply(a: string, b: string, ret: string) {
+      return $mat_gen(a, (size: number) => {
+        var length = size * size
+        var head = ''
+        var body = ''
+          
+        for (var i = 0; i < length; ++i) {
+          head += $var(a + '_' + i, $attr(a, String(i)))
+          head += $var(b + '_' + i, $attr(b, String(i)))
+        }
+        
+        for (var row = 0; row < size; ++row) {
+          for (var col = 0; col < size; ++col) {
+            var index = row * size + col
+            var parts = []
+            for (var lambda = 0; lambda < size; ++lambda) {
+              var ai = lambda * size + col
+              var bi = row * size + lambda
+              parts.push($op(a + '_' + ai, '*', b + '_' + bi))
+            }
+            
+            body += $assign($attr(ret, String(index)), parts.join(' + '))
+          }
+        }
+        
+        return head + body
       })
     }
     
     function $mat_scale(m: string, v, ret: string) {
-      return $forMatrix(m, 
-        (col: number, row: number, size: number) => {
-          var i = row * size + col
+      return $mat_gen(m, (size: number) => {
+        var head = ''
+        var body = ''
           
-          return $assign(
-            $attr(ret, String(i)), 
-            $op($attr(ret, String(i)), '*', $attr(v, String(row)))
-          )
-        }, 
-        () => {
-      
-        })
+        for (var i = 0; i < size; ++i) {
+          head += $var(v + '_' + i, $attr(v, String(i)))
+        }
+        
+        for (var row = 0; row < size; ++row) {
+          for (var col = 0; col < size; ++col) {
+          
+            var i = row * size + col
+            body += $assign(
+              $attr(ret, String(i)), 
+              $op($attr(ret, String(i)), '*', v + '_' + row)
+            )
+          }
+        }
+        return head + body
+      })
     }
     
     function $mat_transpose(m: string, ret: string) {
       var tmp = $name('tmp')
       
       function gen(isEqual: boolean) {
-        return function (col: number, row: number, size: number) {
+        return function (size: number) {
           var returnValue = ''
-          var index = row * size + col
-          var transIndex = col * size + row
-          
-          if (row < col) {                
-            returnValue += $assign(tmp, $attr(m, String(index)))
-            returnValue += $assign($attr(ret, String(index)), $attr(m, String(transIndex)))
-            returnValue += $assign($attr(ret, String(transIndex)), tmp)
-          } else if (!isEqual && row === col) {
-            returnValue += $assign($attr(ret, String(index)), $attr(m, String(index)))
-          }
+          for (var row = 0; row < size; ++row) {
+            for (var col = 0; col < size; ++col) {
+              var index = row * size + col
+              var transIndex = col * size + row  
               
+              if (row < col) {                
+                returnValue += $assign(tmp, $attr(m, String(index)))
+                returnValue += $assign($attr(ret, String(index)), $attr(m, String(transIndex)))
+                returnValue += $assign($attr(ret, String(transIndex)), tmp)
+              } else if (!isEqual && row === col) {
+                returnValue += $assign($attr(ret, String(index)), $attr(m, String(index)))
+              }
+            }
+          }   
           return returnValue
         }
       }
       
       return (
         $var(tmp) +
-        $if($op(m, '===', ret), $forMatrix(ret, gen(true))) +
-        $else($forMatrix(ret, gen(false)))
+        $if($op(m, '===', ret), $mat_gen(ret, gen(true))) +
+        $else($mat_gen(ret, gen(false)))
       )
     }
     
     var mat_identity = macro.compile((r) => { return $mat_identity(r) + $return(r) })
+    var mat_multiply = macro.compile((a, b, r) => { return $mat_multiply(a, b, r) + $return(r) })
     var mat_scale = macro.compile((m, v, r) => { return $mat_scale(m, v, r) + $return(r) })
     var mat_transpose = macro.compile((m, r) => { return $mat_transpose(m, r) + $return(r) })
     
-console.warn(mat_scale.toString())
+console.warn(mat_multiply.toString())
   }
   
 
-  function $forArray(
-    arrayExpr: string, 
-    each: (i: string, l?: string) => string,
-    init?: (l?: string) => string
-  ): string {
+  function $forArray(arrayExpr: string, each: (i: string, l?: string) => string): string {
     var l = $name('l')
 
     return (
@@ -407,13 +433,12 @@ console.warn(mat_scale.toString())
         l, 
         SIZES.map((l) => {
           var lenExpr = String(l)
-          var caseExpr = (init ? init(lenExpr) : '')
+          var caseExpr = ''
           for (var current = 0; current < l; ++current) {
             caseExpr += each(String(current), lenExpr)
           }
           return $case(lenExpr, caseExpr)
         }),
-        (init ? init(l) : '') +
         macro.$forRange("0", l, "1", (i) => { return each(i, l) })
       )
     )
@@ -507,7 +532,7 @@ console.warn(mat_scale.toString())
       $forArray(a, (i: string) => {
         return (
           $assign(r, $op($attr(a, i), '-', $attr(b, i))) +
-          $if($op(r, '==', '0'), 'break')
+          $if($op(r, '!==', '0'), 'break')
         )
       }) + 
       $return(r)
