@@ -59,7 +59,7 @@ module macro {
     )
   }
   
-  export function $foreach(o: string, each: (key: string) => string): string {
+  export function $forEach(o: string, each: (key: string) => string): string {
     var keys = $name('keys')
     var keyc = $name('keyc')
     var key = $name('key')
@@ -67,7 +67,7 @@ module macro {
       $var(keys, 'Object.keys(' + o + ')') +
       $var(keyc, keys + '.length') +
       $var(key) +
-      $fori("0", keyc, "1", (i) => {
+      $forRange("0", keyc, "1", (i) => {
         return (
           $assign(key, $attr(o, i)) +
           each(key)
@@ -76,7 +76,7 @@ module macro {
     )
   }
   
-  export function $fori(min: string, max: string, step: string, each: (i: string) => string): string {
+  export function $forRange(min: string, max: string, step: string, each: (i: string) => string): string {
     var i = $name('i')
     return $for(
       'var ' + $op(i, '=', min),
@@ -86,21 +86,20 @@ module macro {
     )
   }
   
-  export function $fora(arrayExpr: string, each: (i: string) => string): string {
+  export function $forArray(arrayExpr: string, each: (i: string) => string, unroll = 8): string {
     var i = $name('i')
     var l = $name('l')
     var iterations = $name('iter')
     var leftover = $name('rest')
-    var bufferc = 8
 
     return (
       $var(l, arrayExpr + '.length') +
-      $var(leftover, $op(l, '%', String(bufferc))) +
-      $var(iterations, $op('(' + $op(l, '-', leftover) + ')', '/', String(bufferc))) +
+      $var(leftover, $op(l, '%', String(unroll))) +
+      $var(iterations, $op('(' + $op(l, '-', leftover) + ')', '/', String(unroll))) +
       $if($op(leftover, '>', '0'), 
         $switch(leftover, (function () {
           var cases = []
-          for (var imax = 1; imax < bufferc; imax++) {
+          for (var imax = 1; imax < unroll; imax++) {
             var caseBody = ''
             for (var casei = 0; casei < imax; casei++) {
               caseBody += each(String(casei))
@@ -114,12 +113,12 @@ module macro {
         $var(i, leftover) +
         $do((function () {
           var body = ''
-          for (var ui = 0; ui < bufferc; ++ui) {
+          for (var ui = 0; ui < unroll; ++ui) {
             body += each(i)
             body += '\n++' + i + ';' 
           }
           return body
-        }()), '--' + iterations + ' > 0')     
+        }()), $op('--' + iterations, '>', '0'))     
       )
     )
   }

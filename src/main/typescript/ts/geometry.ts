@@ -3,10 +3,12 @@ import $if = macro.$if
 import $else = macro.$else
 import $assign = macro.$assign
 import $attr = macro.$attr
+import $case = macro.$case
 import $indent = macro.$indent
 import $op = macro.$op
 import $name = macro.$name
 import $return = macro.$return
+import $switch = macro.$switch
 import $var = macro.$var
 
 module geometry {
@@ -301,44 +303,59 @@ module geometry {
       return mat_transpose(m, dest || array_create(m.length));
     }
     
-    function $form(m: string, each: (col: number, row: number, size?: number) => any) {
-      return $fora(m, (i: string, l: string) => {
-        var index = parseInt(i)
-        var length = parseInt(l)
-        var returnValue = ''
-        if (i && length) {
-          var size = math_sqrt(length)
-          if (size === math_floor(size)) {
-            var col = index % size
-            var row = math_floor(index / size)
-            
-            returnValue = each(col, row, size)
+    function $forMatrix(
+      m: string, 
+      each: (col: number, row: number, size?: number) => any, 
+      init?: (size?: number) => any
+    ) {
+
+      return $forArray(m, 
+        (i: string, l: string) => {
+          var index = parseInt(i)
+          var length = parseInt(l)
+          var returnValue = ''
+          if (i && length) {       
+            var size = math_sqrt(length)
+            if (size === math_floor(size)) {
+              var col = index % size
+              var row = math_floor(index / size)
+              
+              returnValue = each(col, row, size)
+            } else {
+              //not square matrix
+            }
           } else {
-            //not square matrix
+            //do nothin
           }
-        } else {
-          //do nothin
-        }
-        return returnValue
-      })
+          return returnValue
+        }, 
+        init ? (l: string) => {
+          var length = parseInt(l)
+          var size = math_sqrt(length)
+          return size === math_floor(size) ? init(size) : ''
+        } : null)
     }
     
     function $mat_identity(ret: string) {
-      return $form(ret, (col: number, row: number, size: number) => {
+      return $forMatrix(ret, (col: number, row: number, size: number) => {
         var i = row * size + col
         return $assign($attr(ret, String(i)), col === row ? '1' : '0')
       })
     }
     
     function $mat_scale(m: string, v, ret: string) {
-      return $form(m, (col: number, row: number, size: number) => {
-        var i = row * size + col
-        
-        return $assign(
-          $attr(ret, String(i)), 
-          $op($attr(ret, String(i)), '*', $attr(v, String(row)))
-        )
-      })
+      return $forMatrix(m, 
+        (col: number, row: number, size: number) => {
+          var i = row * size + col
+          
+          return $assign(
+            $attr(ret, String(i)), 
+            $op($attr(ret, String(i)), '*', $attr(v, String(row)))
+          )
+        }, 
+        () => {
+      
+        })
     }
     
     function $mat_transpose(m: string, ret: string) {
@@ -364,8 +381,8 @@ module geometry {
       
       return (
         $var(tmp) +
-        $if($op(m, '===', ret), $form(ret, gen(true))) +
-        $else($form(ret, gen(false)))
+        $if($op(m, '===', ret), $forMatrix(ret, gen(true))) +
+        $else($forMatrix(ret, gen(false)))
       )
     }
     
@@ -377,22 +394,27 @@ console.warn(mat_scale.toString())
   }
   
 
-  function $fora(arrayExpr: string, each: (i: string, l?: string) => string): string {
+  function $forArray(
+    arrayExpr: string, 
+    each: (i: string, l?: string) => string,
+    init?: (l?: string) => string
+  ): string {
     var l = $name('l')
 
     return (
       $var(l, arrayExpr + '.length') +
-      macro.$switch(
+      $switch(
         l, 
         SIZES.map((l) => {
           var lenExpr = String(l)
-          var caseExpr = ''
+          var caseExpr = (init ? init(lenExpr) : '')
           for (var current = 0; current < l; ++current) {
             caseExpr += each(String(current), lenExpr)
           }
-          return macro.$case(lenExpr, caseExpr)
+          return $case(lenExpr, caseExpr)
         }),
-        macro.$fori("0", l, "1", (i) => { return each(i, l) })
+        (init ? init(l) : '') +
+        macro.$forRange("0", l, "1", (i) => { return each(i, l) })
       )
     )
   }
@@ -400,7 +422,7 @@ console.warn(mat_scale.toString())
   //specific
   function $array_op(op: string, a: string, b: string, dest: string): string {
     return (
-      $fora(a, (i: string) => {
+      $forArray(a, (i: string) => {
         return $assign($attr(dest, i), $op($attr(a, i), op, $attr(b, i)))
       }) //length expression
     )
@@ -409,7 +431,7 @@ console.warn(mat_scale.toString())
   function $array_copy(a: string, ret: string): string {
     return (
       $if($op(a, '!==', ret),
-        $fora(a, (i: string) => {
+        $forArray(a, (i: string) => {
           return $assign($attr(ret, i), $attr(a, i))
         })
       )
@@ -421,7 +443,7 @@ console.warn(mat_scale.toString())
     return (
       $var(val) + 
       $assign(ret, '0') +
-      $fora(a, (i: string) => {
+      $forArray(a, (i: string) => {
         return (
           $assign(val, $attr(a, i)) + 
           '\n' + $op(ret, '+=', $op(val, '*', val)) + ';'
@@ -442,7 +464,7 @@ console.warn(mat_scale.toString())
       $assign(ret, '0') +
       $if($op(a, '===', b), $array_frob_squared(a, ret)) +
       $else(
-        $fora(a, (i: string) => {
+        $forArray(a, (i: string) => {
           return '\n' + $op(ret, '+=', $op($attr(a, i), '*', $attr(b, i))) + ';'
         })
       )
@@ -465,7 +487,7 @@ console.warn(mat_scale.toString())
   
   function $array_scale(a: string, scalar: string, ret: string): string {
     return (
-      $fora(a, (i: string) => {
+      $forArray(a, (i: string) => {
         return $assign($attr(ret, i), $op($attr(a, i), '*', scalar))
       })
     )
@@ -482,7 +504,7 @@ console.warn(mat_scale.toString())
     var r = $name()
     
     return (
-      $fora(a, (i: string) => {
+      $forArray(a, (i: string) => {
         return (
           $assign(r, $op($attr(a, i), '-', $attr(b, i))) +
           $if($op(r, '==', '0'), 'break')
