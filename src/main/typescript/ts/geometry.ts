@@ -200,7 +200,7 @@ module geometry {
     }
   
     export function copy<T extends IMatrix>(m: T, dest?: T): T {
-      return array_copy(m, dest)
+      return array_copy(m, dest || array_create(m.length))
     }
     
     export function determinant<T extends IMatrix>(m: T): number {
@@ -256,22 +256,6 @@ module geometry {
     
     export function multiply<T extends IMatrix>(a: T, b: T, dest?: T): T {
       return mat_multiply(a, b, dest || array_create(a.length))
-      /*dest = dest || array_create(a.length)
-        
-      switch(a.length) {
-        case 4:
-          var a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3]
-          var b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3]
-          dest[0] = a0 * b0 + a2 * b1
-          dest[1] = a1 * b0 + a3 * b1
-          dest[2] = a0 * b2 + a2 * b3
-          dest[3] = a1 * b2 + a3 * b3
-          break
-        default:
-          throw new TypeError()
-      }
-      
-      return dest;*/
     }
     
     function rotate<T extends IMatrix>(m: T, rad: number, dest?: T): T {

@@ -137,28 +137,86 @@ var geometryVectorSuite = suite("ts/geometry.vector", (self) => {
 })
   
 var geometryMatrixSuite = suite("ts/geometry.matrix", () => {
-
+  var mat2A = matrix.create(
+    1, 2, 
+    3, 4
+  )
+  var mat2B = matrix.create(
+    5, 6, 
+    7, 8
+  )
+  var mat3A = matrix.create( 
+    1, 0, 0,
+    0, 1, 0,
+    1, 2, 1
+  )
+  var mat3B = matrix.create(
+    1, 0, 0,
+    0, 1, 0,
+    3, 4, 1
+  )
+  var mat4A = matrix.create(
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    1, 2, 3, 1
+  )
+  var mat4B = matrix.create(
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    4, 5, 6, 1
+  )
+  
+  
   test('identity(a)', (assert) => {
     
     //mat2
     assert.deepEqual(
-      matrix.identity(matrix.create(1, 2, 3, 4)), 
+      matrix.identity(matrix.copy(mat2A)), 
       [1, 0, 0, 1]
     )
       
     //mat3
     assert.deepEqual(
-      matrix.identity(matrix.create(1, 2, 3, 4, 5, 6, 7, 8, 9)), 
+      matrix.identity(matrix.copy(mat3A)), 
       [1, 0, 0, 0, 1, 0, 0, 0, 1]
     )
       
     //mat4
     assert.deepEqual(
-      matrix.identity(matrix.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)), 
+      matrix.identity(matrix.copy(mat4A)), 
       [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
     )
   })
     
+  test('multiply(a, b)', (assert) => {
+    
+    //mat2
+    assert.deepEqual(
+      matrix.multiply(mat2A, mat2B), 
+      [ 23, 34, 
+        31, 46 ]
+    )
+      
+    //mat3
+    assert.deepEqual(
+      matrix.multiply(mat3A, mat3B), 
+      [ 1, 0, 0,
+        0, 1, 0,
+        4, 6, 1 ]
+    )
+      
+    //mat4
+    assert.deepEqual(
+      matrix.multiply(mat4A, mat4B), 
+      [ 1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        5, 7, 9, 1 ]
+    )
+  })
+  
   test('transpose(a)', (assert) => {
     
     //mat2
