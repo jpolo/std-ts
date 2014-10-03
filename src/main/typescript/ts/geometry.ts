@@ -13,11 +13,15 @@ import $var = macro.$var
 
 module geometry {
   var SIZES = [2, 3, 4, 9, 16]
-  var math_floor = Math.floor
+  var math_cos = Math.cos
+  var math_floor = Math.floor  
+  var math_sin = Math.sin
   var math_sqrt = Math.sqrt
   var Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array    
   var $context: {[key:string]: any} = {
+    "math_cos": math_cos,
     "math_floor": math_floor,
+    "math_sin": math_sin,
     "math_sqrt": math_sqrt
   }
 
@@ -35,9 +39,11 @@ module geometry {
   export interface IMatrix4 extends IMatrix3 { 9: number; 10: number; 11: number; 12: number; 13: number; 14: number; 15: number; }
   
  
+  /*
   export module angle {
   
   }
+  */
   
   export module quaternion {
     var LENGTH = 4
@@ -248,6 +254,8 @@ module geometry {
           dest[2] = -m2 * det;
           dest[3] =  m0 * det;
           break
+        case 9:
+          break
         default:
           throw new TypeError()
       }
@@ -289,6 +297,24 @@ module geometry {
       return mat_transpose(m, dest || array_create(m.length));
     }
     
+    function _index(col: number, row: number, size: number) {
+      return (row * size + col)
+    }
+    
+    /*function $mat_det(m: string, size: number): string {
+      switch(size) {
+        case 2:
+          return m[0] * m[3] - m[2] * m[1]
+        //case 3:
+          var m00 = m[0], m01 = m[1], m02 = m[2]
+          var m10 = m[3], m11 = m[4], m12 = m[5]
+          var m20 = m[6], m21 = m[7], m22 = m[8]
+
+          returnValue = m00 * (m22 * m11 - m12 * m21) + m01 * (-m22 * m10 + m12 * m20) + m02 * (m21 * m10 - m11 * m20)
+      }
+      return ''
+    }*/
+    
     function $mat_gen(
       m: string, 
       f: (size?: number) => any
@@ -308,7 +334,7 @@ module geometry {
         var returnValue = ''
         for (var row = 0; row < size; ++row) {
           for (var col = 0; col < size; ++col) {
-            var i = row * size + col
+            var i = _index(col, row, size)
             returnValue += $assign($attr(ret, String(i)), col === row ? '1' : '0') 
           }
         }
@@ -329,7 +355,7 @@ module geometry {
         
         for (var row = 0; row < size; ++row) {
           for (var col = 0; col < size; ++col) {
-            var index = row * size + col
+            var index = _index(col, row, size)
             var parts = []
             for (var lambda = 0; lambda < size; ++lambda) {
               var ai = lambda * size + col
@@ -357,10 +383,10 @@ module geometry {
         for (var row = 0; row < size; ++row) {
           for (var col = 0; col < size; ++col) {
           
-            var i = row * size + col
+            var index = _index(col, row, size)
             body += $assign(
-              $attr(ret, String(i)), 
-              $op($attr(ret, String(i)), '*', v + '_' + row)
+              $attr(ret, String(index)), 
+              $op($attr(ret, String(index)), '*', v + '_' + row)
             )
           }
         }
@@ -376,8 +402,8 @@ module geometry {
           var returnValue = ''
           for (var row = 0; row < size; ++row) {
             for (var col = 0; col < size; ++col) {
-              var index = row * size + col
-              var transIndex = col * size + row  
+              var index = _index(col, row, size)
+              var transIndex = _index(row, col, size)
               
               if (row < col) {                
                 returnValue += $assign(tmp, $attr(m, String(index)))
@@ -526,7 +552,6 @@ console.warn(mat_multiply.toString())
   var array_subtract = macro.compile((a, b, r) => { return $array_op('-', a, b, r) + $return(r) }, $context)
   var array_divide = macro.compile((a, b, r) => { return $array_op('/', a, b, r) + $return(r) }, $context)
   var array_copy: (a, dest) => any = macro.compile((a, r) => { return $array_copy(a, r) + $return(r) }, $context)
-  
   var array_dot = macro.compile((a, b) => { return $var('r') + $array_dot(a, b, 'r') + $return('r') }, $context)
   var array_frob_squared = macro.compile((a) => { return $var('r') + $array_frob_squared(a, 'r') + $return('r') }, $context)
   var array_frob = macro.compile((a) => { return $var('r') + $array_frob(a, 'r') + $return('r') }, $context)
