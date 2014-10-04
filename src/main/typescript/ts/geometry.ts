@@ -1,20 +1,20 @@
-import macro = require('ts/macro')
-import $if = macro.$if
-import $else = macro.$else
-import $assign = macro.$assign
-import $attr = macro.$attr
-import $case = macro.$case
-import $indent = macro.$indent
-import $op = macro.$op
-import $name = macro.$name
-import $return = macro.$return
-import $switch = macro.$switch
-import $var = macro.$var
+import codegen = require('ts/codegen')
+import $if = codegen.$if
+import $else = codegen.$else
+import $assign = codegen.$assign
+import $attr = codegen.$attr
+import $case = codegen.$case
+import $indent = codegen.$indent
+import $op = codegen.$op
+import $name = codegen.$name
+import $return = codegen.$return
+import $switch = codegen.$switch
+import $var = codegen.$var
 
 module geometry {
   var SIZES = [2, 3, 4, 9, 16]
   var math_cos = Math.cos
-  var math_floor = Math.floor  
+  var math_floor = Math.floor
   var math_sin = Math.sin
   var math_sqrt = Math.sqrt
   var Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array    
@@ -38,12 +38,7 @@ module geometry {
   export interface IMatrix3 extends IMatrix2 { 4: number; 5: number; 6: number; 7: number; 8: number; }
   export interface IMatrix4 extends IMatrix3 { 9: number; 10: number; 11: number; 12: number; 13: number; 14: number; 15: number; }
   
- 
-  /*
-  export module angle {
-  
-  }
-  */
+
   
   export module quaternion {
     var LENGTH = 4
@@ -100,7 +95,7 @@ module geometry {
       var ax = a[0], ay = a[1], az = a[2], aw = a[3]
       var bx = b[0], by = b[1], bz = b[2], bw = b[3]
   
-      dest = dest || array_create(4)
+      dest = dest || array_create(LENGTH)
       dest[0] = ax * bw + aw * bx + ay * bz - az * by
       dest[1] = ay * bw + aw * by + az * bx - ax * bz
       dest[2] = az * bw + aw * bz + ax * by - ay * bx
@@ -209,20 +204,44 @@ module geometry {
       return array_copy(m, dest || array_create(m.length))
     }
     
-    export function determinant<T extends IMatrix>(m: T): number {
+    export function determinant(a: IMatrix2): number 
+    export function determinant(a: IMatrix3): number
+    export function determinant(a: IMatrix4): number
+    export function determinant(a: any): number {
       var returnValue = NaN
-      switch(m.length) {
+      switch(a.length) {
         case 4:
-          returnValue = m[0] * m[3] - m[2] * m[1]
+          returnValue = a[0] * a[3] - a[2] * a[1]
           break
           
         case 9:
-          var m00 = m[0], m01 = m[1], m02 = m[2]
-          var m10 = m[3], m11 = m[4], m12 = m[5]
-          var m20 = m[6], m21 = m[7], m22 = m[8]
+          var a00 = a[0], a01 = a[1], a02 = a[2]
+          var a10 = a[3], a11 = a[4], a12 = a[5]
+          var a20 = a[6], a21 = a[7], a22 = a[8]
 
-          returnValue = m00 * (m22 * m11 - m12 * m21) + m01 * (-m22 * m10 + m12 * m20) + m02 * (m21 * m10 - m11 * m20)
+          returnValue = a00 * (a22 * a11 - a12 * a21) + a01 * (-a22 * a10 + a12 * a20) + a02 * (a21 * a10 - a11 * a20)
           break
+        case 16:
+          var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3]
+          var a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7]
+          var a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11]
+          var a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15]
+          var
+          b00 = a00 * a11 - a01 * a10,
+          b01 = a00 * a12 - a02 * a10,
+          b02 = a00 * a13 - a03 * a10,
+          b03 = a01 * a12 - a02 * a11,
+          b04 = a01 * a13 - a03 * a11,
+          b05 = a02 * a13 - a03 * a12,
+          b06 = a20 * a31 - a21 * a30,
+          b07 = a20 * a32 - a22 * a30,
+          b08 = a20 * a33 - a23 * a30,
+          b09 = a21 * a32 - a22 * a31,
+          b10 = a21 * a33 - a23 * a31,
+          b11 = a22 * a33 - a23 * a32;
+
+          // Calculate the determinant
+          returnValue = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
         default:
           throw new TypeError()
       }
@@ -425,10 +444,10 @@ module geometry {
       )
     }
     
-    var mat_identity = macro.compile((r) => { return $mat_identity(r) + $return(r) })
-    var mat_multiply = macro.compile((a, b, r) => { return $mat_multiply(a, b, r) + $return(r) })
-    var mat_scale = macro.compile((m, v, r) => { return $mat_scale(m, v, r) + $return(r) })
-    var mat_transpose = macro.compile((m, r) => { return $mat_transpose(m, r) + $return(r) })
+    var mat_identity = codegen.compile((r) => { return $mat_identity(r) + $return(r) })
+    var mat_multiply = codegen.compile((a, b, r) => { return $mat_multiply(a, b, r) + $return(r) })
+    var mat_scale = codegen.compile((m, v, r) => { return $mat_scale(m, v, r) + $return(r) })
+    var mat_transpose = codegen.compile((m, r) => { return $mat_transpose(m, r) + $return(r) })
     
 console.warn(mat_multiply.toString())
   }
@@ -449,7 +468,7 @@ console.warn(mat_multiply.toString())
           }
           return $case(lenExpr, caseExpr)
         }),
-        macro.$forRange("0", l, "1", (i) => { return each(i, l) })
+        codegen.$forRange("0", l, "1", (i) => { return each(i, l) })
       )
     )
   }
@@ -534,8 +553,8 @@ console.warn(mat_multiply.toString())
   
   
 
-  var array_add = macro.compile((a, b, r) => { return $array_op('+', a, b, r) + $return(r) }, $context)
-  var array_cmp = macro.compile((a, b) => { 
+  var array_add = codegen.compile((a, b, r) => { return $array_op('+', a, b, r) + $return(r) }, $context)
+  var array_cmp = codegen.compile((a, b) => { 
     var r = $name()
     
     return (
@@ -548,16 +567,17 @@ console.warn(mat_multiply.toString())
       $return(r)
     )
   }, $context)
-  var array_multiply = macro.compile((a, b, r) => { return $array_op('*', a, b, r) + $return(r) }, $context)
-  var array_subtract = macro.compile((a, b, r) => { return $array_op('-', a, b, r) + $return(r) }, $context)
-  var array_divide = macro.compile((a, b, r) => { return $array_op('/', a, b, r) + $return(r) }, $context)
-  var array_copy: (a, dest) => any = macro.compile((a, r) => { return $array_copy(a, r) + $return(r) }, $context)
-  var array_dot = macro.compile((a, b) => { return $var('r') + $array_dot(a, b, 'r') + $return('r') }, $context)
-  var array_frob_squared = macro.compile((a) => { return $var('r') + $array_frob_squared(a, 'r') + $return('r') }, $context)
-  var array_frob = macro.compile((a) => { return $var('r') + $array_frob(a, 'r') + $return('r') }, $context)
-  var array_normalize = macro.compile((a, r) => { return $array_normalize(a, r) + $return(r) }, $context)
-  var array_negate = macro.compile((a, r) => { return $array_negate(a, r) + $return(r) }, $context)
-  var array_scale = macro.compile((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
+  var array_multiply = codegen.compile((a, b, r) => { return $array_op('*', a, b, r) + $return(r) }, $context)
+  var array_subtract = codegen.compile((a, b, r) => { return $array_op('-', a, b, r) + $return(r) }, $context)
+  var array_divide = codegen.compile((a, b, r) => { return $array_op('/', a, b, r) + $return(r) }, $context)
+  var array_copy: (a, dest) => any = codegen.compile((a, r) => { return $array_copy(a, r) + $return(r) }, $context)
+  
+  var array_dot = codegen.compile((a, b) => { return $var('r') + $array_dot(a, b, 'r') + $return('r') }, $context)
+  var array_frob_squared = codegen.compile((a) => { return $var('r') + $array_frob_squared(a, 'r') + $return('r') }, $context)
+  var array_frob = codegen.compile((a) => { return $var('r') + $array_frob(a, 'r') + $return('r') }, $context)
+  var array_normalize = codegen.compile((a, r) => { return $array_normalize(a, r) + $return(r) }, $context)
+  var array_negate = codegen.compile((a, r) => { return $array_negate(a, r) + $return(r) }, $context)
+  var array_scale = codegen.compile((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
   
   
   

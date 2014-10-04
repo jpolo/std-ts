@@ -2,8 +2,31 @@ import unit = require("../../../main/typescript/ts/unit")
 import suite = unit.suite
 import test = unit.test
 import geometry = require("../../../main/typescript/ts/geometry")
+import quaternion = geometry.quaternion
 import vector = geometry.vector
 import matrix = geometry.matrix
+
+
+
+var geometryQuatSuite = suite("ts/geometry.quaternion", (self) => {
+  
+  test('add(a, b)', (assert) => {
+  
+  })
+  
+  test('conjugate(a)', (assert) => {
+  
+  })
+  
+  test('copy(a)', (assert) => {
+  
+  })
+  
+  test('dot(a, b)', (assert) => {
+  
+  })
+  
+})
 
 var geometryVectorSuite = suite("ts/geometry.vector", (self) => {
 
@@ -240,6 +263,6 @@ var geometryMatrixSuite = suite("ts/geometry.matrix", () => {
   
 })
   
-var geometrySuite = geometryVectorSuite.concat(geometryMatrixSuite)
+var geometrySuite = geometryQuatSuite.concat(geometryVectorSuite, geometryMatrixSuite)
   
 export = geometrySuite

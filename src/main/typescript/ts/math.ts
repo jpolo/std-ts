@@ -23,8 +23,11 @@ module math {
   export var LOG2E = Math.LOG2E
   export var LOG10E = Math.LOG10E
   export var PI = Math.PI
+  export var TAU = PI * 2
+  export var PHI = (1 + math_sqrt(5)) /2
   export var SQRT1_2 = Math.SQRT1_2
   export var SQRT2 = Math.SQRT2
+  export var Infinity = Infinity
   
   export function abs(n: number): number
   export function abs(n: Complex): Complex
