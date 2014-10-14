@@ -1,0 +1,210 @@
+module reflect {
+  var __polyfill = function poly<T>(f: T): T { (<any>f).polyfill = true; return f; }
+  var __polyfilled = function (f: any): boolean { return !!f.polyfill }
+  var __str = String
+  var __obj = Object
+  var __create = Object.create
+  var __keys = Object.keys
+  var __proto = Object.getPrototypeOf
+  var __propertyDefine = Object.defineProperty
+  var __propertyDescriptor = Object.getOwnPropertyDescriptor
+  var __propertyNames = Object.getOwnPropertyNames || __polyfill(function (o) { return __keys(o) })
+  var __propertySymbols = Object['getOwnPropertySymbols'] || __polyfill(function (o) { return [] })
+  var __hasOwn = {}.hasOwnProperty
+  var __isFrozen = Object.isFrozen || __polyfill(function (o) { return false; })
+  var __isSealed = Object.isSealed || __isFrozen
+  var __isExtensible = Object.isExtensible || __isFrozen
+  var __freeze = Object.freeze || __polyfill(function (o) { return o; })
+  var __preventExtensions = Object.preventExtensions || __freeze
+  var __seal = Object.seal || __freeze
+  var __fapply = Function.prototype.apply
+  
+  export interface IPropertyDescriptor extends PropertyDescriptor {}
+
+  export function apply(f: Function, thisArg: any, args: any[]): any {
+    return __fapply.call(f, thisArg, args)
+  }
+  
+  export function construct(Constructor: Function, args: any[]): any {
+    var proto = Constructor.prototype
+    var instance = (__obj(proto) === proto) ? __create(proto) : {}
+    var result = __fapply.call(Constructor, instance, args)
+    return __obj(result) === result ? result : instance
+  }
+  
+  export function defineProperty(o: any, propertyName: string, descriptor: IPropertyDescriptor) {
+    return __propertyDefine(o, propertyName, descriptor)
+  }
+  
+  export function deleteProperty(o: any, propertyName: string): boolean {
+    propertyName = __str(propertyName)
+    var target = __obj(o)
+    var descriptor = __propertyDescriptor(target, propertyName)
+    var returnValue = false
+    if (descriptor === undefined) {
+      returnValue = true;
+    } else if (descriptor.configurable === true) {
+      delete target[propertyName]
+      returnValue = true
+    }
+    return returnValue
+  }
+  
+  export function enumerate(o: any) {
+    var returnValue = []
+    for (var key in o) {
+      returnValue.push(key)
+    }
+    var l = +returnValue.length
+    var index = 0
+    return {
+      next: function () {
+        return index === l ? { done: true } : { done: false, value: returnValue[index++] }
+      }
+    }
+  }
+
+  export function freeze(o: any, deep?: boolean): any {
+    __freeze(o) // First freeze the object.
+    if (deep && !__polyfilled(__freeze)) {
+      var keys = __keys(o)
+      for (var i = 0, l = keys.length; i < l; ++i) {
+        var val = o[keys[i]]
+        if ((typeof val === 'object') && !__isFrozen(val)) {
+          freeze(val, deep) // Recursively call freeze().
+        }
+      }
+    }
+    return o
+  }
+  
+  export function get(o: any, propertyName: string, receiver?: any): any {
+    var target = receiver || o
+    var descriptor = __propertyDescriptor(target, propertyName)
+    var returnValue
+    if (descriptor === undefined) {
+      var proto = __proto(target)
+      if (proto != null) {
+        returnValue = get(proto, propertyName, receiver)
+      }
+    } else if (_isDataDescriptor(descriptor)) {
+      returnValue = descriptor.value
+    } else {
+      var getter = descriptor.get
+      if (getter !== undefined) {
+        returnValue = getter.call(receiver)
+      }
+    }
+    
+    return returnValue
+  }
+  
+  export function getOwnPropertyDescriptor(o: any, propertyName: string): IPropertyDescriptor {
+    return __propertyDescriptor(o, propertyName)
+  }
+  
+  export function getOwnPropertyNames(o: any): string[] {
+    return __propertyNames(o)
+  }
+  
+  export function getPrototypeOf(o: any): any {
+    return __proto(o)
+  }
+  
+  export function has(o: any, propertyName: string): boolean {
+    return (propertyName in o)
+  }
+  
+  export function hasOwn(o: any, propertyName: string) {
+    return __hasOwn.call(o, propertyName)
+  }
+  
+  export function isExtensible(o: any): boolean {
+    return __isExtensible(o)
+  }
+  
+  export function isFrozen(o: any): boolean {
+    return __isFrozen(o)
+  }
+  
+  export function isSealed(o: any): boolean {
+    return __isSealed(o)
+  }
+  
+  export function ownKeys(o: any): string[] {
+    var names = __propertyNames(o)
+    return __polyfilled(__propertySymbols) ? names : names.concat(__propertySymbols(o))
+  }
+  
+  export function preventExtensions(o): any {
+    return __preventExtensions(o)
+  }
+  
+  export function seal(o: any): any {
+    return __seal(o)
+  }
+  
+  export function set(o: any, propertyName: string, value: any, receiver: any) {
+    var target = receiver || o
+    var descriptor = __propertyDescriptor(target, name)
+
+    if (descriptor === undefined) {
+      // name is not defined in target, search target's prototype
+      var proto = __proto(target)
+
+      if (proto !== null) {
+        return set(proto, name, value, receiver)
+      }
+      descriptor = { 
+        value: undefined,
+        writable: true,
+        enumerable: true,
+        configurable: true 
+      }
+    }
+
+    // we now know that ownDesc !== undefined
+    if (_isAccessorDescriptor(descriptor)) {
+      var setter = descriptor.set
+      if (setter === undefined) return false
+      setter.call(receiver, value) // assumes Function.prototype.call
+      return true
+    }
+    // otherwise, _isDataDescriptor(ownDesc) must be true
+    if (descriptor.writable === false) return false
+    // we found an existing writable data property on the prototype chain.
+    // Now update or add the data property on the receiver, depending on
+    // whether the receiver already defines the property or not.
+    var existingDesc = __propertyDescriptor(receiver, name)
+    if (existingDesc !== undefined) {
+      var updateDesc = { 
+        value: value,
+        writable:     existingDesc.writable,
+        enumerable:   existingDesc.enumerable,
+        configurable: existingDesc.configurable
+      }
+      __propertyDefine(receiver, name, updateDesc)
+    } else {
+      if (!__isExtensible(receiver)) return false
+      var newDesc = { 
+        value: value,
+        writable: true,
+        enumerable: true,
+        configurable: true 
+      }
+      __propertyDefine(receiver, name, newDesc)
+    }
+    return true
+  }
+  
+  
+  function _isDataDescriptor(descriptor: IPropertyDescriptor) {
+    return ('value' in descriptor || 'writable' in descriptor)
+  }
+  
+  function _isAccessorDescriptor(descriptor: IPropertyDescriptor) {
+    return ('get' in descriptor || 'set' in descriptor)
+  }
+
+}
+export = reflect

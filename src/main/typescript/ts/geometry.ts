@@ -1,4 +1,5 @@
 import codegen = require('ts/codegen')
+import cc = codegen.compile
 import $if = codegen.$if
 import $else = codegen.$else
 import $assign = codegen.$assign
@@ -120,8 +121,27 @@ module geometry {
     export function create(): any {
       var argc = arguments.length
       var v = array_create(argc)
-      for (var i = 0; i < argc; ++i) {
-        v[i] = arguments[i]
+
+      switch(argc) {
+        case 2:
+          v[0] = arguments[0]
+          v[1] = arguments[1]
+          break
+        case 3:
+          v[0] = arguments[0]
+          v[1] = arguments[1]
+          v[2] = arguments[2]
+          break
+        case 4:
+          v[0] = arguments[0]
+          v[1] = arguments[1]
+          v[2] = arguments[2]
+          v[3] = arguments[3]
+          break
+        default:
+          for (var i = 0; i < argc; ++i) {
+            v[i] = arguments[i]
+          }
       }
       return v
     }
@@ -241,7 +261,8 @@ module geometry {
           b11 = a22 * a33 - a23 * a32;
 
           // Calculate the determinant
-          returnValue = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+          returnValue = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06
+          break
         default:
           throw new TypeError()
       }
@@ -291,8 +312,8 @@ module geometry {
       switch(m.length) {
         case 4:
           var m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3]
-          var sin = Math.sin(rad)
-          var cos = Math.cos(rad)
+          var sin = math_sin(rad)
+          var cos = math_cos(rad)
           dest[0] = m0 *  cos + m2 * sin
           dest[1] = m1 *  cos + m3 * sin
           dest[2] = m0 * -sin + m2 * cos
@@ -401,11 +422,11 @@ module geometry {
         
         for (var row = 0; row < size; ++row) {
           for (var col = 0; col < size; ++col) {
-          
             var index = _index(col, row, size)
+            var indexStr = String(index)
             body += $assign(
-              $attr(ret, String(index)), 
-              $op($attr(ret, String(index)), '*', v + '_' + row)
+              $attr(ret, indexStr), 
+              $op($attr(ret, indexStr), '*', v + '_' + row)
             )
           }
         }
@@ -423,13 +444,15 @@ module geometry {
             for (var col = 0; col < size; ++col) {
               var index = _index(col, row, size)
               var transIndex = _index(row, col, size)
+              var indexStr = String(index)
+              var transIndexStr = String(transIndex)
               
               if (row < col) {                
-                returnValue += $assign(tmp, $attr(m, String(index)))
-                returnValue += $assign($attr(ret, String(index)), $attr(m, String(transIndex)))
-                returnValue += $assign($attr(ret, String(transIndex)), tmp)
+                returnValue += $assign(tmp, $attr(m, indexStr))
+                returnValue += $assign($attr(ret, indexStr), $attr(m, transIndexStr))
+                returnValue += $assign($attr(ret, transIndexStr), tmp)
               } else if (!isEqual && row === col) {
-                returnValue += $assign($attr(ret, String(index)), $attr(m, String(index)))
+                returnValue += $assign($attr(ret, indexStr), $attr(m, indexStr))
               }
             }
           }   
@@ -444,10 +467,10 @@ module geometry {
       )
     }
     
-    var mat_identity = codegen.compile((r) => { return $mat_identity(r) + $return(r) })
-    var mat_multiply = codegen.compile((a, b, r) => { return $mat_multiply(a, b, r) + $return(r) })
-    var mat_scale = codegen.compile((m, v, r) => { return $mat_scale(m, v, r) + $return(r) })
-    var mat_transpose = codegen.compile((m, r) => { return $mat_transpose(m, r) + $return(r) })
+    var mat_identity = cc((r) => { return $mat_identity(r) + $return(r) })
+    var mat_multiply = cc((a, b, r) => { return $mat_multiply(a, b, r) + $return(r) })
+    var mat_scale = cc((m, v, r) => { return $mat_scale(m, v, r) + $return(r) })
+    var mat_transpose = cc((m, r) => { return $mat_transpose(m, r) + $return(r) })
     
 console.warn(mat_multiply.toString())
   }
@@ -553,8 +576,8 @@ console.warn(mat_multiply.toString())
   
   
 
-  var array_add = codegen.compile((a, b, r) => { return $array_op('+', a, b, r) + $return(r) }, $context)
-  var array_cmp = codegen.compile((a, b) => { 
+  var array_add = cc((a, b, r) => { return $array_op('+', a, b, r) + $return(r) }, $context)
+  var array_cmp = cc((a, b) => { 
     var r = $name()
     
     return (
@@ -567,17 +590,16 @@ console.warn(mat_multiply.toString())
       $return(r)
     )
   }, $context)
-  var array_multiply = codegen.compile((a, b, r) => { return $array_op('*', a, b, r) + $return(r) }, $context)
-  var array_subtract = codegen.compile((a, b, r) => { return $array_op('-', a, b, r) + $return(r) }, $context)
-  var array_divide = codegen.compile((a, b, r) => { return $array_op('/', a, b, r) + $return(r) }, $context)
-  var array_copy: (a, dest) => any = codegen.compile((a, r) => { return $array_copy(a, r) + $return(r) }, $context)
-  
-  var array_dot = codegen.compile((a, b) => { return $var('r') + $array_dot(a, b, 'r') + $return('r') }, $context)
-  var array_frob_squared = codegen.compile((a) => { return $var('r') + $array_frob_squared(a, 'r') + $return('r') }, $context)
-  var array_frob = codegen.compile((a) => { return $var('r') + $array_frob(a, 'r') + $return('r') }, $context)
-  var array_normalize = codegen.compile((a, r) => { return $array_normalize(a, r) + $return(r) }, $context)
-  var array_negate = codegen.compile((a, r) => { return $array_negate(a, r) + $return(r) }, $context)
-  var array_scale = codegen.compile((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
+  var array_multiply = cc((a, b, r) => { return $array_op('*', a, b, r) + $return(r) }, $context)
+  var array_subtract = cc((a, b, r) => { return $array_op('-', a, b, r) + $return(r) }, $context)
+  var array_divide = cc((a, b, r) => { return $array_op('/', a, b, r) + $return(r) }, $context)
+  var array_copy: (a, dest) => any = cc((a, r) => { return $array_copy(a, r) + $return(r) }, $context)
+  var array_dot = cc((a, b) => { return $var('r') + $array_dot(a, b, 'r') + $return('r') }, $context)
+  var array_frob_squared = cc((a) => { return $var('r') + $array_frob_squared(a, 'r') + $return('r') }, $context)
+  var array_frob = cc((a) => { return $var('r') + $array_frob(a, 'r') + $return('r') }, $context)
+  var array_normalize = cc((a, r) => { return $array_normalize(a, r) + $return(r) }, $context)
+  var array_negate = cc((a, r) => { return $array_negate(a, r) + $return(r) }, $context)
+  var array_scale = cc((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
   
   
   

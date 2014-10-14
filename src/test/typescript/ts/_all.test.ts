@@ -4,6 +4,7 @@ import dateSuite = require("./date.test")
 import geometrySuite = require("./geometry.test")
 import mathSuite = require("./math.test")
 import randomSuite = require("./random.test")
+import reflectSuite = require("./reflect.test")
 import semverSuite = require("./semver.test")
 import unitSuite = require("./unit.test")
 import uriSuite = require("./uri.test")
@@ -14,10 +15,11 @@ var allSuite: unit.ITest[] = [].concat(
   geometrySuite,
   mathSuite,
   randomSuite,
+  reflectSuite,
   semverSuite,
   unitSuite,
   uriSuite,
   vmSuite
 )
 
-export = allSuite;
+export = allSuite
