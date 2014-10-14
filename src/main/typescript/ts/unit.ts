@@ -112,7 +112,7 @@ module unit {
       }
 
       dump(o: any): string {
-        return vm.dump(o)
+        return vm.inspect(o)
       }
 
       currentDate() {

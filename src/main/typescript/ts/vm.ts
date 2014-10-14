@@ -4,8 +4,7 @@ module vm {
   var _Symbol = _global['Symbol']
   //var $$iterator = _Symbol && _Symbol.iterator
   var $$toStringTag = _Symbol && _Symbol.toStringTag
-
-
+  
   enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
 
   export interface IContext { [key: string]: any }
@@ -38,44 +37,56 @@ module vm {
   export function stringTag(o: any): string {
     return $$toStringTag ? o && o[$$toStringTag] : _objectToString.call(o).slice(8, -1)
   }
+  
+  export function inspect(o: any): string {
+    return inspectRec(o, [])
+  }
 
-  export function dump(o: any): string {
+  function inspectRec(o: any, refsReadOnly: any[]): string {
     var maxElements = 7
     var s = ''
-    switch (stringTag(o)) {
-      case 'Boolean':
-      case 'Undefined':
-      case 'Null':
-      case 'Number':
-      case 'RegExp':
-        s = String(o)
-        break
-      case 'String':
-        s = '"' + String(o).replace(/"/g, '\\"' ) + '"'
-        break
-      case 'Function':
-        s = String(o)
-        s = s.slice(0, s.indexOf('{')) + '...}'
-        break
-      case 'Array':
-        var array = (<any[]>o)
-        var truncate = array.length > maxElements
-        if (truncate) {
-          array = array.slice(0, maxElements)
-        }
-        s = '[' + array.map(dump).join(', ') + (truncate ? ', ...' : '') + ']'
-        break
-      case 'Date':
-        var date = (<Date>o)
-        s = 'Date(' + date.toISOString() + ')'
-        break
-      default:
-        if (typeof o.inspect === 'function') {
-          s = o.inspect()
-        } else {
+      
+    if (o !== null && typeof o === 'object' && refsReadOnly.indexOf(o) >= 0) {
+      s = '<Circular>'
+    } else {
+      switch (stringTag(o)) {
+        case 'Boolean':
+        case 'Undefined':
+        case 'Null':
+        case 'Number':
+        case 'RegExp':
           s = String(o)
-        }
+          break
+        case 'String':
+          s = '"' + String(o).replace(/"/g, '\\"' ) + '"'
+          break
+        case 'Function':
+          s = String(o)
+          s = s.slice(0, s.indexOf('{')) + '...}'
+          break
+        case 'Array':
+          var refsChild = [array].concat(refsReadOnly)
+          var array = (<any[]>o)
+          var truncate = array.length > maxElements
+          if (truncate) {
+            array = array.slice(0, maxElements)
+          }
+          s = '[' + array.map((v) => { return inspectRec(v, refsChild) }).join(', ') + (truncate ? ', ...' : '') + ']'
+          break
+        case 'Date':
+          var date = (<Date>o)
+          s = 'Date(' + date.toISOString() + ')'
+          break
+        default:
+          if (typeof o.inspect === 'function') {
+            s = o.inspect()
+          } else {
+            s = String(o)
+          }
+      }
     }
+    
+    
     return s
   }
 

@@ -5,7 +5,7 @@ module reflect {
   var __obj = Object
   var __create = Object.create
   var __keys = Object.keys
-  var __proto = Object.getPrototypeOf
+  var __proto = Object.getPrototypeOf || __polyfill(function (o) { return o.__proto__ })
   var __propertyDefine = Object.defineProperty
   var __propertyDescriptor = Object.getOwnPropertyDescriptor
   var __propertyNames = Object.getOwnPropertyNames || __polyfill(function (o) { return __keys(o) })
@@ -27,7 +27,7 @@ module reflect {
   
   export function construct(Constructor: Function, args: any[]): any {
     var proto = Constructor.prototype
-    var instance = (__obj(proto) === proto) ? __create(proto) : {}
+    var instance = __obj(proto) === proto ? __create(proto) : {}
     var result = __fapply.call(Constructor, instance, args)
     return __obj(result) === result ? result : instance
   }
@@ -37,11 +37,10 @@ module reflect {
   }
   
   export function deleteProperty(o: any, propertyName: string): boolean {
-    propertyName = __str(propertyName)
     var target = __obj(o)
     var descriptor = __propertyDescriptor(target, propertyName)
     var returnValue = false
-    if (descriptor === undefined) {
+    if (descriptor == null) {
       returnValue = true;
     } else if (descriptor.configurable === true) {
       delete target[propertyName]
@@ -82,7 +81,7 @@ module reflect {
     var target = receiver || o
     var descriptor = __propertyDescriptor(target, propertyName)
     var returnValue
-    if (descriptor === undefined) {
+    if (_isUndefined(descriptor)) {
       var proto = __proto(target)
       if (proto != null) {
         returnValue = get(proto, propertyName, receiver)
@@ -91,20 +90,15 @@ module reflect {
       returnValue = descriptor.value
     } else {
       var getter = descriptor.get
-      if (getter !== undefined) {
+      if (!_isUndefined(getter)) {
         returnValue = getter.call(receiver)
       }
     }
-    
     return returnValue
   }
   
   export function getOwnPropertyDescriptor(o: any, propertyName: string): IPropertyDescriptor {
     return __propertyDescriptor(o, propertyName)
-  }
-  
-  export function getOwnPropertyNames(o: any): string[] {
-    return __propertyNames(o)
   }
   
   export function getPrototypeOf(o: any): any {
@@ -144,11 +138,11 @@ module reflect {
     return __seal(o)
   }
   
-  export function set(o: any, propertyName: string, value: any, receiver: any) {
+  export function set(o: any, propertyName: string, value: any, receiver?: any): boolean {
     var target = receiver || o
     var descriptor = __propertyDescriptor(target, name)
 
-    if (descriptor === undefined) {
+    if (_isUndefined(descriptor)) {
       // name is not defined in target, search target's prototype
       var proto = __proto(target)
 
@@ -166,7 +160,7 @@ module reflect {
     // we now know that ownDesc !== undefined
     if (_isAccessorDescriptor(descriptor)) {
       var setter = descriptor.set
-      if (setter === undefined) return false
+      if (_isUndefined(setter)) return false
       setter.call(receiver, value) // assumes Function.prototype.call
       return true
     }
@@ -176,27 +170,28 @@ module reflect {
     // Now update or add the data property on the receiver, depending on
     // whether the receiver already defines the property or not.
     var existingDesc = __propertyDescriptor(receiver, name)
-    if (existingDesc !== undefined) {
-      var updateDesc = { 
+    if (!_isUndefined(existingDesc)) {
+      __propertyDefine(receiver, name, { 
         value: value,
-        writable:     existingDesc.writable,
-        enumerable:   existingDesc.enumerable,
+        writable: existingDesc.writable,
+        enumerable: existingDesc.enumerable,
         configurable: existingDesc.configurable
-      }
-      __propertyDefine(receiver, name, updateDesc)
+      })
     } else {
       if (!__isExtensible(receiver)) return false
-      var newDesc = { 
+      __propertyDefine(receiver, name, {
         value: value,
         writable: true,
         enumerable: true,
         configurable: true 
-      }
-      __propertyDefine(receiver, name, newDesc)
+      })
     }
     return true
   }
   
+  function _isUndefined(o) {
+    return typeof o === 'undefined'
+  }
   
   function _isDataDescriptor(descriptor: IPropertyDescriptor) {
     return ('value' in descriptor || 'writable' in descriptor)
