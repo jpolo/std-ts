@@ -5,6 +5,8 @@ module inspect {
     public maxElements = 7
     public maxString = 15
     
+    PREFIX = 'stringify_'
+    
     constructor(
       conf?: {
         maxDepth?: number;
@@ -13,19 +15,16 @@ module inspect {
       }
     ) {
       if (conf) {
-        this.maxDepth = conf.maxDepth
-        this.maxElements = conf.maxElements
-        this.maxString = conf.maxString
+        this.maxDepth = conf.maxDepth || this.maxDepth
+        this.maxElements = conf.maxElements || this.maxElements
+        this.maxString = conf.maxString || this.maxString
       }
     }
     
-    inspect(o: any): string {
-      return this.inspect1(o, this.maxDepth)
-    }
-    
-    inspect1(o: any, maxDepth: number): string {
+    stringify(o: any, maxDepth?: number): string {
+      var depth = maxDepth == null ? this.maxDepth : maxDepth
       var typeName = this._type(o)
-      var methodName = 'inspect_' + typeName
+      var methodName = this.PREFIX + typeName
       var s = ''
       if (typeof this[methodName] === 'function') {
         s = this[methodName](o, maxDepth)
@@ -41,44 +40,44 @@ module inspect {
       return s
     }
     
-    inspect_Undefined(o: any, maxDepth: number) {
+    stringify_Undefined(o: any, maxDepth: number) {
       return 'undefined'
     }
     
-    inspect_Null(o: any, maxDepth: number) {
+    stringify_Null(o: any, maxDepth: number) {
       return 'null'
     }
     
-    inspect_Boolean(o: boolean, maxDepth: number) {
+    stringify_Boolean(o: boolean, maxDepth: number) {
       return String(o)
     }
     
-    inspect_Date(o: Date, maxDepth: number) {
+    stringify_Date(o: Date, maxDepth: number) {
       return 'Date(' + o.toISOString() + ')'
     }
     
-    inspect_Number(o: number, maxDepth: number) {
+    stringify_Number(o: number, maxDepth: number) {
       return String(o)
     }
     
-    inspect_RegExp(o: RegExp, maxDepth: number) {
+    stringify_RegExp(o: RegExp, maxDepth: number) {
       return String(o)
     }
     
-    inspect_String(o: string, maxDepth: number) {
+    stringify_String(o: string, maxDepth: number) {
       var maxString = this.maxString
       return '"' + 
         (o.length > maxString ? o.slice(0, maxString) + '...' : o).replace(/"/g, '\\"' ) + 
       '"'
     }
     
-    inspect_Function(o: Function, maxDepth: number) {
+    stringify_Function(o: Function, maxDepth: number) {
       var s = String(o)
       s = s.slice(0, s.indexOf('{') + 1) + '...}'
       return s
     }
     
-    inspect_Array(o: any[], maxDepth: number) {
+    stringify_Array(o: any[], maxDepth: number) {
       var maxElements = this.maxElements
       var length = o.length
       var truncate = length > maxElements
@@ -86,10 +85,35 @@ module inspect {
       return (
         maxDepth <= 0 && length ? '...' :
         '[' + 
-          (truncate ? o.slice(0, maxElements) : o).map((v) => this.inspect1(v, maxDepth - 1)).join(', ') + 
+          (truncate ? o.slice(0, maxElements) : o).map((v) => this.stringify(v, maxDepth - 1)).join(', ') + 
           (truncate ? ', ...' : '') + 
         ']'
       )
+    }
+    
+    stringify_Object(o: any, maxDepth: number) {
+      var s = '{'
+      var keys = Object.keys(o)
+      var keyc = keys.length
+      var truncate = false
+      if (keyc > this.maxElements) {
+        keyc = this.maxElements
+        truncate = true
+      }
+      for (var i = 0; i < keyc; ++i) {
+        var key = keys[i]
+        var val = o[key]
+        
+        if (i !== 0) {
+          s += ', '
+        }
+        s += key + ': ' + this.stringify(val, maxDepth -1)
+      }
+      if (truncate) {
+        s += ', ...'
+      }
+      s += '}'
+      return s
     }
 
     _type(o: any): string {
