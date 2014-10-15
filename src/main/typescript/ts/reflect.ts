@@ -11,10 +11,10 @@ module reflect {
   var __propertyNames = Object.getOwnPropertyNames || __polyfill(function (o) { return __keys(o) })
   var __propertySymbols = Object['getOwnPropertySymbols'] || __polyfill(function (o) { return [] })
   var __hasOwn = {}.hasOwnProperty
-  var __isFrozen = Object.isFrozen || __polyfill(function (o) { return false; })
+  var __isFrozen = Object.isFrozen || __polyfill(function (o) { return false })
   var __isSealed = Object.isSealed || __isFrozen
   var __isExtensible = Object.isExtensible || __isFrozen
-  var __freeze = Object.freeze || __polyfill(function (o) { return o; })
+  var __freeze = Object.freeze || __polyfill(function (o) { return o })
   var __preventExtensions = Object.preventExtensions || __freeze
   var __seal = Object.seal || __freeze
   var __fapply = Function.prototype.apply
@@ -79,19 +79,25 @@ module reflect {
   
   export function get(o: any, propertyName: string, receiver?: any): any {
     var target = receiver || o
-    var descriptor = __propertyDescriptor(target, propertyName)
     var returnValue
-    if (_isUndefined(descriptor)) {
-      var proto = __proto(target)
-      if (proto != null) {
-        returnValue = get(proto, propertyName, receiver)
-      }
-    } else if (_isDataDescriptor(descriptor)) {
-      returnValue = descriptor.value
+    
+    if (o === receiver) {
+      //fast case
+      returnValue = o[propertyName]
     } else {
-      var getter = descriptor.get
-      if (!_isUndefined(getter)) {
-        returnValue = getter.call(receiver)
+      var descriptor = __propertyDescriptor(target, propertyName)
+      if (_isUndefined(descriptor)) {
+        var proto = __proto(target)
+        if (proto != null) {
+          returnValue = get(proto, propertyName, receiver)
+        }
+      } else if (_isDataDescriptor(descriptor)) {
+        returnValue = descriptor.value
+      } else {
+        var getter = descriptor.get
+        if (!_isUndefined(getter)) {
+          returnValue = getter.call(receiver)
+        }
       }
     }
     return returnValue
@@ -140,14 +146,14 @@ module reflect {
   
   export function set(o: any, propertyName: string, value: any, receiver?: any): boolean {
     var target = receiver || o
-    var descriptor = __propertyDescriptor(target, name)
+    var descriptor = __propertyDescriptor(target, propertyName)
 
     if (_isUndefined(descriptor)) {
       // name is not defined in target, search target's prototype
       var proto = __proto(target)
 
       if (proto !== null) {
-        return set(proto, name, value, receiver)
+        return set(proto, propertyName, value, receiver)
       }
       descriptor = { 
         value: undefined,
@@ -169,9 +175,9 @@ module reflect {
     // we found an existing writable data property on the prototype chain.
     // Now update or add the data property on the receiver, depending on
     // whether the receiver already defines the property or not.
-    var existingDesc = __propertyDescriptor(receiver, name)
+    var existingDesc = __propertyDescriptor(receiver, propertyName)
     if (!_isUndefined(existingDesc)) {
-      __propertyDefine(receiver, name, { 
+      __propertyDefine(receiver, propertyName, { 
         value: value,
         writable: existingDesc.writable,
         enumerable: existingDesc.enumerable,
@@ -179,7 +185,7 @@ module reflect {
       })
     } else {
       if (!__isExtensible(receiver)) return false
-      __propertyDefine(receiver, name, {
+      __propertyDefine(receiver, propertyName, {
         value: value,
         writable: true,
         enumerable: true,

@@ -467,10 +467,10 @@ module geometry {
       )
     }
     
-    var mat_identity = cc((r) => { return $mat_identity(r) + $return(r) })
-    var mat_multiply = cc((a, b, r) => { return $mat_multiply(a, b, r) + $return(r) })
-    var mat_scale = cc((m, v, r) => { return $mat_scale(m, v, r) + $return(r) })
-    var mat_transpose = cc((m, r) => { return $mat_transpose(m, r) + $return(r) })
+    var mat_identity = cc((r) => $mat_identity(r) + $return(r))
+    var mat_multiply = cc((a, b, r) => $mat_multiply(a, b, r) + $return(r))
+    var mat_scale = cc((m, v, r) => $mat_scale(m, v, r) + $return(r))
+    var mat_transpose = cc((m, r) => $mat_transpose(m, r) + $return(r))
     
 console.warn(mat_multiply.toString())
   }
@@ -576,7 +576,7 @@ console.warn(mat_multiply.toString())
   
   
 
-  var array_add = cc((a, b, r) => { return $array_op('+', a, b, r) + $return(r) }, $context)
+  var array_add = cc((a, b, r) => $array_op('+', a, b, r) + $return(r), $context)
   var array_cmp = cc((a, b) => { 
     var r = $name()
     
@@ -590,16 +590,16 @@ console.warn(mat_multiply.toString())
       $return(r)
     )
   }, $context)
-  var array_multiply = cc((a, b, r) => { return $array_op('*', a, b, r) + $return(r) }, $context)
-  var array_subtract = cc((a, b, r) => { return $array_op('-', a, b, r) + $return(r) }, $context)
-  var array_divide = cc((a, b, r) => { return $array_op('/', a, b, r) + $return(r) }, $context)
-  var array_copy: (a, dest) => any = cc((a, r) => { return $array_copy(a, r) + $return(r) }, $context)
-  var array_dot = cc((a, b) => { return $var('r') + $array_dot(a, b, 'r') + $return('r') }, $context)
-  var array_frob_squared = cc((a) => { return $var('r') + $array_frob_squared(a, 'r') + $return('r') }, $context)
-  var array_frob = cc((a) => { return $var('r') + $array_frob(a, 'r') + $return('r') }, $context)
-  var array_normalize = cc((a, r) => { return $array_normalize(a, r) + $return(r) }, $context)
-  var array_negate = cc((a, r) => { return $array_negate(a, r) + $return(r) }, $context)
-  var array_scale = cc((a, scalar, r) => { return $array_scale(a, scalar, r) + $return(r) }, $context)
+  var array_multiply = cc((a, b, r) => $array_op('*', a, b, r) + $return(r), $context)
+  var array_subtract = cc((a, b, r) => $array_op('-', a, b, r) + $return(r), $context)
+  var array_divide = cc((a, b, r) => $array_op('/', a, b, r) + $return(r), $context)
+  var array_copy: (a, dest) => any = cc((a, r) => $array_copy(a, r) + $return(r), $context)
+  var array_dot = cc((a, b) => $var('r') + $array_dot(a, b, 'r') + $return('r'), $context)
+  var array_frob_squared = cc((a) => $var('r') + $array_frob_squared(a, 'r') + $return('r'), $context)
+  var array_frob = cc((a) => $var('r') + $array_frob(a, 'r') + $return('r'), $context)
+  var array_normalize = cc((a, r) => $array_normalize(a, r) + $return(r), $context)
+  var array_negate = cc((a, r) => $array_negate(a, r) + $return(r), $context)
+  var array_scale = cc((a, scalar, r) => $array_scale(a, scalar, r) + $return(r), $context)
   
   
   

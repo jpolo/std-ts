@@ -2,6 +2,7 @@ import unit = require("../../../main/typescript/ts/unit")
 
 import dateSuite = require("./date.test")
 import geometrySuite = require("./geometry.test")
+import inspectSuite = require("./inspect.test")
 import mathSuite = require("./math.test")
 import randomSuite = require("./random.test")
 import reflectSuite = require("./reflect.test")
@@ -13,6 +14,7 @@ import vmSuite = require("./vm.test")
 var allSuite: unit.ITest[] = [].concat(
   dateSuite,
   geometrySuite,
+  inspectSuite,
   mathSuite,
   randomSuite,
   reflectSuite,

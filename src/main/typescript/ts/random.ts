@@ -44,12 +44,12 @@ module random {
   }*/
 
   export module engine {
-    var mathrandom = Math.random
+    var math_random = Math.random
     
     export class Engine implements IEngine {
 
       static seedDefault(): string {
-        return Math.random().toString(36)
+        return math_random().toString(36)
       }
       
       name = "<anonymous>"
@@ -78,7 +78,7 @@ module random {
     
     export class Native extends Engine {
       name = "native"
-      generate() { return mathrandom() }
+      generate() { return math_random() }
     }
     
     var PSEUDO_M = 2147483647
