@@ -1,3 +1,4 @@
+import inspect = require("ts/inspect")
 import vm = require("ts/vm")
 import ICallStack = vm.ICallStack
 import ICallSite = vm.ICallSite
@@ -112,7 +113,7 @@ module unit {
       }
 
       dump(o: any): string {
-        return vm.inspect(o)
+        return inspect.stringify(o)
       }
 
       currentDate() {

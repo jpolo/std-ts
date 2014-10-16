@@ -23,8 +23,7 @@ module inspect {
     
     stringify(o: any, maxDepth?: number): string {
       var depth = maxDepth == null ? this.maxDepth : maxDepth
-      var typeName = this._type(o)
-      var methodName = this.PREFIX + typeName
+      var methodName = this.PREFIX + this._stringTag(o)
       var s = ''
       if (typeof this[methodName] === 'function') {
         s = this[methodName](o, maxDepth)
@@ -33,7 +32,7 @@ module inspect {
           if (o && o.inspect) {
             s = o.inspect()//TODO inject this or depth
           } else {
-            s = String(o)
+            s = this.stringify_Object(o, maxDepth)
           }
         }
       }
@@ -92,13 +91,23 @@ module inspect {
     }
     
     stringify_Object(o: any, maxDepth: number) {
-      var s = '{'
+      var s = ''
+      var ctor = o.constructor
+      var displayName = ctor && (ctor.displayName || ctor.name)
       var keys = Object.keys(o)
       var keyc = keys.length
       var truncate = false
       if (keyc > this.maxElements) {
         keyc = this.maxElements
         truncate = true
+      }
+      
+      if (displayName && displayName != 'Object') {
+        s += displayName + ' '
+      }     
+      s += '{'
+      if (keyc > 0) {
+        s += ' '
       }
       for (var i = 0; i < keyc; ++i) {
         var key = keys[i]
@@ -112,11 +121,14 @@ module inspect {
       if (truncate) {
         s += ', ...'
       }
+      if (keyc > 0) {
+        s += ' '
+      }
       s += '}'
       return s
     }
 
-    _type(o: any): string {
+    _stringTag(o: any): string {
       var s = ''
       if (o === null) {
         s = 'Null'
@@ -132,6 +144,12 @@ module inspect {
       return s
     }
     
+  }
+  
+  var inspectDefault = new Inspect();
+  
+  export function stringify(o: any): string {
+    return inspectDefault.stringify(o)
   }
   
 }
