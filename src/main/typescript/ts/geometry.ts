@@ -45,6 +45,15 @@ module geometry {
     var LENGTH = 4
     var IDENTITY = [0, 0, 0, 1]
     
+    export function create(x: number, y: number, z: number, w: number): IQuaternion {
+      var v = array_create(LENGTH)
+      v[0] = x
+      v[1] = y
+      v[2] = z
+      v[3] = w
+      return v
+    }
+    
     export function add(q1: IQuaternion, q2: IQuaternion, dest?: IQuaternion): IQuaternion {
       return array_add(q1, q2, dest || array_create(LENGTH))
     }

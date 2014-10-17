@@ -155,7 +155,7 @@ module uri {
           this.domain === o.domain &&
           this.port === o.port &&
           this.path === o.path &&
-          eq(this.query, o.query)
+          _queryEquals(this.query, o.query)
         )
       )
     }
@@ -266,7 +266,7 @@ module uri {
   export function encodeQuery(qs: IQueryString): string {
     var s = null, okeys, i, l, key, val;
     if (qs) {
-      okeys = $keys(qs);
+      okeys = _keys(qs);
 
       for (i = 0, l = okeys.length; i < l; ++i) {
         if (i === 0) {
@@ -333,11 +333,11 @@ module uri {
   
   
   
-  function eq(l, r): boolean {
+  function _queryEquals(l, r): boolean {
     var returnValue = true;
     if (l !== r) {
-      var lkeys = $keys(l);
-      var rkeys = $keys(r);
+      var lkeys = _keys(l);
+      var rkeys = _keys(r);
       var lkeyc: number = lkeys.length;
       var rkeyc: number = rkeys.length;
       
@@ -363,7 +363,7 @@ module uri {
     return !o || o.length === 0;
   }
   
-  function $keys(o) {
+  function _keys(o) {
     return Object.keys(o);
   }
   

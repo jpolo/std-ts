@@ -6,12 +6,10 @@ import quaternion = geometry.quaternion
 import vector = geometry.vector
 import matrix = geometry.matrix
 
-
-
 var geometryQuatSuite = suite("ts/geometry.quaternion", (self) => {
   
   test('add(a, b)', (assert) => {
-  
+    assert.deepEqual(quaternion.add(quaternion.create(1, 2, 3, 4), quaternion.create(2, 2, 2, 2)), [3, 4, 5, 6])
   })
   
   test('conjugate(a)', (assert) => {
@@ -19,7 +17,9 @@ var geometryQuatSuite = suite("ts/geometry.quaternion", (self) => {
   })
   
   test('copy(a)', (assert) => {
-  
+    var quat = quaternion.create(0, 0, 0, 0)
+    quaternion.copy(quaternion.create(1, 2, 3, 4), quat)
+    assert.deepEqual(quat, [1, 2, 3, 4])
   })
   
   test('dot(a, b)', (assert) => {

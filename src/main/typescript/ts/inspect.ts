@@ -1,9 +1,31 @@
 module inspect {
 
+  var __ostring = Object.prototype.toString
+  var __keys = Object.keys
+  var __str = String
+  var __stringTag = (o: any) => {
+    var s = ''
+    if (o === null) {
+      s = 'Null'
+    } else {
+      switch(typeof o) {
+        case 'boolean': s = 'Boolean'; break
+        case 'function': s = 'Function'; break
+        case 'number': s = 'Number'; break
+        case 'string': s = 'String'; break
+        case 'undefined': s = 'Undefined'; break
+        default: /*object*/
+          s = __ostring.call(o).slice(8, -1)
+      }
+    }
+    return s
+  }
+
+  
   export class Inspect {
     public maxDepth = 6
     public maxElements = 7
-    public maxString = 15
+    public maxString = 30
     
     PREFIX = 'stringify_'
     
@@ -23,7 +45,7 @@ module inspect {
     
     stringify(o: any, maxDepth?: number): string {
       var depth = maxDepth == null ? this.maxDepth : maxDepth
-      var methodName = this.PREFIX + this._stringTag(o)
+      var methodName = this.PREFIX + __stringTag(o)
       var s = ''
       if (typeof this[methodName] === 'function') {
         s = this[methodName](o, maxDepth)
@@ -48,19 +70,19 @@ module inspect {
     }
     
     stringify_Boolean(o: boolean, maxDepth: number) {
-      return String(o)
+      return __str(o)
     }
     
     stringify_Date(o: Date, maxDepth: number) {
-      return 'Date(' + o.toISOString() + ')'
+      return 'Date { ' + o.toISOString() + ' }'
     }
     
     stringify_Number(o: number, maxDepth: number) {
-      return String(o)
+      return __str(o)
     }
     
     stringify_RegExp(o: RegExp, maxDepth: number) {
-      return String(o)
+      return __str(o)
     }
     
     stringify_String(o: string, maxDepth: number) {
@@ -71,7 +93,7 @@ module inspect {
     }
     
     stringify_Function(o: Function, maxDepth: number) {
-      var s = String(o)
+      var s = __str(o)
       s = s.slice(0, s.indexOf('{') + 1) + '...}'
       return s
     }
@@ -94,11 +116,12 @@ module inspect {
       var s = ''
       var ctor = o.constructor
       var displayName = ctor && (ctor.displayName || ctor.name)
-      var keys = Object.keys(o)
+      var maxElements = this.maxElements
+      var keys = __keys(o)
       var keyc = keys.length
       var truncate = false
-      if (keyc > this.maxElements) {
-        keyc = this.maxElements
+      if (keyc > maxElements) {
+        keyc = maxElements
         truncate = true
       }
       
@@ -127,26 +150,9 @@ module inspect {
       s += '}'
       return s
     }
-
-    _stringTag(o: any): string {
-      var s = ''
-      if (o === null) {
-        s = 'Null'
-      } else {
-        switch(typeof o) {
-          case 'undefined': s = 'Undefined'; break
-          case 'boolean': s = 'Boolean'; break
-          case 'number': s = 'Number'; break
-          case 'string': s = 'String'; break
-          default: s = Object.prototype.toString.call(o).slice(8, -1)
-        }
-      }
-      return s
-    }
-    
   }
   
-  var inspectDefault = new Inspect();
+  var inspectDefault = new Inspect()
   
   export function stringify(o: any): string {
     return inspectDefault.stringify(o)

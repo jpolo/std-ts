@@ -167,7 +167,7 @@ var unitSuite = suite("ts/unit.TestEngine", (self) => {
     assert.ok(engine.dump([1, 2, 3, 4, 5, 6, 7, 8]) === '[1, 2, 3, 4, 5, 6, 7, ...]');
 
     //date
-    assert.ok(engine.dump(new Date('1789-07-14T00:00:00.000Z')) === 'Date(1789-07-14T00:00:00.000Z)');
+    assert.ok(engine.dump(new Date('1789-07-14T00:00:00.000Z')) === 'Date { 1789-07-14T00:00:00.000Z }');
 
     //regexp
     assert.ok(engine.dump(/abc(.*)/gi) === '/abc(.*)/gi');

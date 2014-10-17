@@ -6,16 +6,16 @@ import random = require("../../../main/typescript/ts/random");
 class Assert extends unit.engine.Assert {
   
   generates<T>(f: () => T, expected: T[]) {
-    var isSuccess = true;
-    var message = "";
+    var isSuccess = true
+    var message = ""
     expected.forEach((expected, index) => {
-      var actual = f();
-      if (!this.__engine__.testEquals(expected, actual)) {
-        isSuccess = false;
-        message += this.__dump__(actual) + ' must be ' + this.__dump__(expected) + '\n';
+      var actual = f()
+      if (!this.__engine__.testEqualsStrict(expected, actual)) {
+        isSuccess = false
+        message += this.__dump__(actual) + ' must be ' + this.__dump__(expected) + '\n'
       }
     })
-    this.__assert__(isSuccess, message, this.__position__());
+    this.__assert__(isSuccess, message, this.__position__())
   }
 }
 
@@ -92,6 +92,23 @@ var randomSuite = suite("ts/random", (self) => {
         false
       ]
     );
+  })
+    
+  test("nextChar()", (assert) => {
+    assert.generates(
+      () => { return random.nextChar(undefined, engineTest); }, 
+      [
+        "8",
+        "7",
+        "j",
+        "j",
+        "z",
+        "h",
+        "k",
+        "4"
+      ]
+    );
+
   })
     
   test("nextInt()", (assert) => {

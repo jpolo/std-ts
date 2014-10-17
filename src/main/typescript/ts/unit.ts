@@ -1,7 +1,8 @@
 import inspect = require("ts/inspect")
 import vm = require("ts/vm")
-import ICallStack = vm.ICallStack
-import ICallSite = vm.ICallSite
+import stacktrace = require("ts/stacktrace")
+import ICallStack = stacktrace.ICallStack
+import ICallSite = stacktrace.ICallSite
 
 module unit {
   var TEST_TIMEOUT = 2000;//ms
@@ -109,7 +110,7 @@ module unit {
     export class Engine implements IEngine {
 
       callstack(offset = 0): ICallStack {
-        return vm.callstack(offset)
+        return stacktrace.create(null, offset)
       }
 
       dump(o: any): string {
@@ -157,37 +158,48 @@ module unit {
       
       testEqualsDeep(o1: any, o2: any): boolean {
         function equals(o1, o2) {
-          if (o1 === o2) {
-            return true
-          }
-          switch (vm.stringTag(o1)) {
-            case 'Undefined':
-            case 'Null':
-              return o1 === o2
-            case 'Number':
-              return +o1 === +o2
-            case 'String':
-              return String(o1) === String(o2)
-            case 'Array':            
-              if (
-                o2 == null ||
-                o1.length !== o2.length
-              ) {
-                return false
-              }
-              for (var i = 0, l = o1.length; i < l; ++i) {
-                if (!equals(o1[i], o2[i])) {
+          if (o1 !== o2) {
+            switch (__stringTag(o1)) {
+              case 'Undefined':
+              case 'Null':
+                return o1 === o2
+              case 'Number':
+                return +o1 === +o2
+              case 'String':
+                return String(o1) === String(o2)
+              case 'Array':            
+                if (
+                  o2 == null ||
+                  o1.length !== o2.length
+                ) {
                   return false
                 }
-              }
-              return true
-              break
-            case 'Object':
-            default:
-              break
-            
-              
+                for (var i = 0, l = o1.length; i < l; ++i) {
+                  if (!equals(o1[i], o2[i])) {
+                    return false
+                  }
+                }
+                //return true
+                break
+              case 'Object':
+              case 'Function':
+              default:
+                var keys1 = Object.keys(o1).sort()
+                var keys2 = Object.keys(o2).sort()
+                var keyc = keys1.length
+                if (!equals(keys1, keys2)) {
+                  return false
+                }
+                for (var i = 0; i < keyc; ++i) {
+                  var key = keys1[i]
+                  if (!equals(o1[key], o2[key])) {
+                    return false
+                  }
+                }
+                //return true
+            }
           }
+          return true
         }
         return equals(o1, o2)
       }

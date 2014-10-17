@@ -30,12 +30,6 @@ var vmSuite = suite("ts/vm", (self) => {
     assert.strictEqual(stringTag([]), "Array")
   })
 
-  test("callstack(offset?, error?)", (assert) => {
-    var stack = vm.callstack()
-    assert.instanceOf(stack, Array)
-    assert.ok(stack.length > 0)
-  })
-
   test("eval(jscode: string, context?)", (assert) => {
     // simple
     var returnValue = vm.eval("return 'abc';")
