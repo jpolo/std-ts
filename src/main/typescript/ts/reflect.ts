@@ -1,4 +1,7 @@
 module reflect {
+  var __fidentity = function f<T>() { return function (o: T) { return o } }
+  var __fapply = Function.prototype.apply
+  var __fconst = function f<T>(k: T) { return function () { return k } }
   var __polyfill = function poly<T>(f: T): T { (<any>f).polyfill = true; return f; }
   var __polyfilled = function (f: any): boolean { return !!f.polyfill }
   var __str = String
@@ -11,13 +14,13 @@ module reflect {
   var __propertyNames = Object.getOwnPropertyNames || __polyfill(function (o) { return __keys(o) })
   var __propertySymbols = Object['getOwnPropertySymbols'] || __polyfill(function (o) { return [] })
   var __hasOwn = {}.hasOwnProperty
-  var __isFrozen = Object.isFrozen || __polyfill(function (o) { return false })
-  var __isSealed = Object.isSealed || __isFrozen
-  var __isExtensible = Object.isExtensible || __isFrozen
-  var __freeze = Object.freeze || __polyfill(function (o) { return o })
-  var __preventExtensions = Object.preventExtensions || __freeze
-  var __seal = Object.seal || __freeze
-  var __fapply = Function.prototype.apply
+  var __isFrozen = Object.isFrozen || __polyfill(__fconst(false))
+  var __isSealed = Object.isSealed ||  __polyfill(__fconst(false))
+  var __isExtensible = Object.isExtensible ||  __polyfill(__fconst(true))
+  var __freeze = Object.freeze || __polyfill(__fidentity())
+  var __preventExtensions = Object.preventExtensions || __polyfill(__fidentity())
+  var __seal = Object.seal || __polyfill(__fidentity())
+  
   
   export interface IPropertyDescriptor extends PropertyDescriptor {}
 
