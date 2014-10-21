@@ -1,7 +1,23 @@
-import vm = require("ts/vm")
-
 module stacktrace {
-
+  var __ostring = Object.prototype.toString
+  var __stringTag = (o: any) => {
+    var s = ''
+    if (o === null) {
+      s = 'Null'
+    } else {
+      switch(typeof o) {
+        case 'boolean': s = 'Boolean'; break
+        case 'function': s = 'Function'; break
+        case 'number': s = 'Number'; break
+        case 'string': s = 'String'; break
+        case 'undefined': s = 'Undefined'; break
+        default: /*object*/
+          s = __ostring.call(o).slice(8, -1)
+      }
+    }
+    return s
+  }
+  
   export interface ICallStack extends Array<ICallSite> {}
 
   export interface ICallSite {
@@ -193,7 +209,7 @@ module stacktrace {
     var result = new Array(argc)
     for (var i = 0; i < argc; ++i) {
       var arg = args[i]
-      switch(_stringTag(arg)) {
+      switch(__stringTag(arg)) {
         case 'Undefined':
           result[i] = 'undefined'
           break
@@ -239,10 +255,6 @@ module stacktrace {
       returnValue.push(a[i])
     }
     return returnValue
-  }
-  
-  function _stringTag(o: any) {
-    return vm.stringTag(o)
   }
   
 }
