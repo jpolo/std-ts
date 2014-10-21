@@ -2,14 +2,14 @@ module random {
   //var sqrt = Math.sqrt;
   //var sin = Math.sin;
   //var cos = Math.cos;
-  var floor = Math.floor;
-  var log = Math.log;
-  var pow = Math.pow;
+  var math_floor = Math.floor;
+  var math_log = Math.log;
+  var math_pow = Math.pow;
   
   
   var FLOAT_MIN_VALUE = Number.MIN_VALUE;
   var FLOAT_MAX_VALUE = Number.MAX_VALUE;
-  var INT_MIN_VALUE = pow(2, 31)|0;
+  var INT_MIN_VALUE = math_pow(2, 31)|0;
   var INT_MAX_VALUE = (INT_MIN_VALUE - 1)|0;
 
   export interface IEngine {
@@ -31,12 +31,12 @@ module random {
   }
   
   export function nextInt(min = INT_MIN_VALUE, max = INT_MAX_VALUE, ng: IEngine = engine.current): number {
-    return floor(next(ng) * (max - min + 1)) + min
+    return math_floor(next(ng) * (max - min + 1)) + min
   }
   
   export function nextChar(chars?: string, ng: IEngine = engine.current): string {
     chars = chars || 'abcdefghijklmnopqrstuvwxyz0123456789'
-    return chars.charAt(floor(next(ng) * (chars.length + 1)))
+    return chars.charAt(math_floor(next(ng) * (chars.length + 1)))
   }
   
   /*export function nextExponential(lambda: number, ng: IEngine = engine.current): number {
@@ -110,7 +110,7 @@ module random {
       
       generate() {
         var state = this._state
-        var hi = floor(state / PSEUDO_Q)
+        var hi = math_floor(state / PSEUDO_Q)
         var lo = state % PSEUDO_Q
         var test = PSEUDO_A * lo - PSEUDO_R * hi
         this._state = test > 0 ? test : test + PSEUDO_M
@@ -122,7 +122,7 @@ module random {
     var RC4_WIDTH = 256
     var RC4_MASK = RC4_WIDTH - 1
     var RC4_BYTES = 7; // 56 bits to make a 53-bit double
-    var RC4_DENOM = (pow(2, RC4_BYTES * 8) - 1)
+    var RC4_DENOM = (math_pow(2, RC4_BYTES * 8) - 1)
     export class RC4 extends Engine {
       name = "rc4"
       
