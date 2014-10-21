@@ -62,6 +62,19 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.ok(reflect.isFrozen(obj))
   })
   
+  test("get()", (assert) => {
+    var obj = {}
+    obj['_accessorProp'] = 'private'
+    obj['valueProp'] = 'value'
+    Object.defineProperty(obj, 'accessorProp', {
+      get: function () { return obj['_accessorProp'] },
+      set: function () {}
+    })
+    
+    assert.strictEqual(reflect.get(obj, 'valueProp'), 'value')
+    assert.strictEqual(reflect.get(obj, 'accessorProp'), 'private')
+  })
+  
   test("getPrototypeOf()", (assert) => {
     assert.strictEqual(reflect.getPrototypeOf(childObj), Child.prototype)
     assert.strictEqual(reflect.getPrototypeOf(parentObj), Parent.prototype)
@@ -105,6 +118,33 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.ok(!reflect.isSealed(obj))
     assert.ok(reflect.seal(obj))
     assert.ok(reflect.isSealed(obj))
+  })
+    
+  test("set()", (assert) => {
+    var obj = {}
+    obj['_accessorProp'] = ''
+    obj['valueProp'] = ''
+    Object.defineProperty(obj, 'accessorProp', {
+      get: function () { return obj['_accessorProp'] },
+      set: function (val) { obj['_accessorProp'] = val }
+    })
+      
+    Object.defineProperty(obj, 'readonlyProp', {
+      value: 'defaultValue',
+      writable: false,
+    })
+    
+    //value
+    assert.strictEqual(reflect.set(obj, 'valueProp', 'value'), true)
+    assert.strictEqual(obj['valueProp'], 'value')
+      
+    //non writable
+    assert.strictEqual(reflect.set(obj, 'readonlyProp', 'newValue'), false)
+    assert.strictEqual(obj['readonlyProp'], 'defaultValue')
+        
+    //accessor
+    assert.strictEqual(reflect.set(obj, 'accessorProp', 'private'), true)
+    assert.strictEqual(obj['_accessorProp'], 'private')
   })
 })
   

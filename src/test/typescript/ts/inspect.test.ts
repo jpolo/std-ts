@@ -21,6 +21,7 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     assert.strictEqual(inspectObj.stringify(null), 'null')
     assert.strictEqual(inspectObj.stringify(true), 'true')
     assert.strictEqual(inspectObj.stringify(false), 'false')
+    assert.strictEqual(inspectObj.stringify(0), '0')
     assert.strictEqual(inspectObj.stringify(123.4545), '123.4545')
     assert.strictEqual(inspectObj.stringify('foobar'), '"foobar"')
     assert.strictEqual(inspectObj.stringify('lorem ipsum "sorem" foo bar'), '"lorem ipsum \\"so..."')

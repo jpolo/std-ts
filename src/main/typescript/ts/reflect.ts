@@ -81,16 +81,16 @@ module reflect {
   }
   
   export function get(o: any, propertyName: string, receiver?: any): any {
-    var target = receiver || o
+    receiver = receiver || o
     var returnValue
     
     if (o === receiver) {
       //fast case
       returnValue = o[propertyName]
     } else {
-      var descriptor = __propertyDescriptor(target, propertyName)
+      var descriptor = __propertyDescriptor(o, propertyName)
       if (_isUndefined(descriptor)) {
-        var proto = __proto(target)
+        var proto = __proto(o)
         if (proto != null) {
           returnValue = get(proto, propertyName, receiver)
         }
@@ -148,12 +148,21 @@ module reflect {
   }
   
   export function set(o: any, propertyName: string, value: any, receiver?: any): boolean {
-    var target = receiver || o
-    var descriptor = __propertyDescriptor(target, propertyName)
+    receiver = receiver || o    
+    /*if (o === receiver) {
+      try {
+        o[propertyName] = value
+        return true
+      } catch (e) {
+        return false
+      }
+    }*/
+    
+    var descriptor = __propertyDescriptor(o, propertyName)
 
     if (_isUndefined(descriptor)) {
       // name is not defined in target, search target's prototype
-      var proto = __proto(target)
+      var proto = __proto(o)
 
       if (proto !== null) {
         return set(proto, propertyName, value, receiver)
