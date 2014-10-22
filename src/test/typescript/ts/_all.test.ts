@@ -10,6 +10,7 @@ import semverSuite = require("./semver.test")
 import stacktraceSuite = require("./stacktrace.test")
 import unitSuite = require("./unit.test")
 import uriSuite = require("./uri.test")
+import timerSuite = require("./timer.test")
 import vmSuite = require("./vm.test")
 
 var allSuite: unit.ITest[] = [].concat(
@@ -23,6 +24,7 @@ var allSuite: unit.ITest[] = [].concat(
   stacktraceSuite,
   unitSuite,
   uriSuite,
+  timerSuite,
   vmSuite
 )
 
