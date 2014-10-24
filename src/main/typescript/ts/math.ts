@@ -1,22 +1,103 @@
 module math {
-
+  
+  var ONE_THIRD = 1 / 3
+  var RADIAN_TO_DEGREE = 180 / Math.PI
+  var DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE
+  
+  var num = Number
   var isNaN = (n: number) => { return n !== n }
+  var math_acos = Math.acos
+  var math_asin = Math.asin
+  var math_atan = Math.atan
   var math_atan2 = Math.atan2
   var math_eq = (l: number, r: number) => { return isNaN(l) === isNaN(r) && l == r }
   var math_abs = Math.abs
   var math_ceil = Math.ceil
   var math_cos = Math.cos
+  var math_clz32 = function (n) { n = num(n) >>> 0; return n ? 32 - n.toString(2).length : 32 }
   var math_exp = Math.exp
-  var math_fix = (n: number) => { return n > 0 ? math_floor(n) : math_ceil(n) }
+  var math_expm1 = Math['expm1'] || function (n) {
+    n = num(n)
+    return (
+      n === -Infinity ? -1 :
+      (isFinite(n) || n === 0) ? n :
+      math_exp(n) - 1
+    )
+  }
   var math_floor = Math.floor
   var math_log = Math.log
+  var math_log2 = Math['log2'] || function (n) { return math_log(n) * LOG2E }
+  var math_log10 = Math['log10'] || function (n) { return math_log(n) * LOG10E }
   var math_pow = Math.pow
   var math_round = Math.round
-  var math_sign = (n: number) => { return n > 0 ? 1 : n < 0 ? -1 : 0 }
+  var math_sign = Math['sign'] || function (n) { return isNaN(n) ? n : n > 0 ? 1 : n < 0 ? -1 : 0 }
   var math_sin = Math.sin
   var math_sqrt = Math.sqrt
-    
-  enum NumType { Number, Complex, Unknown }
+  var math_cbrt = Math['cbrt'] || function (n) {
+    n = num(n)
+    return (
+      n === 0 ? n :
+      n < 0 ? -math_pow(-n, ONE_THIRD) :
+      math_pow(n, ONE_THIRD)
+    )
+  }     
+  var math_tan = Math.tan
+  var math_trunc = Math['trunc'] || function (n) { return n > 0 ? math_floor(n) : math_ceil(n) } 
+  var math_acosh = Math['acosh'] || function (n) {
+    n = num(n)
+    return (
+      isNaN(n) || n < 1 ? NaN :
+      n === 1 ? 0 :
+      n === Infinity ? n :
+      math_log(n + math_sqrt(n * n - 1))
+    )
+  }
+  var math_asinh = Math['asinh'] || function (n) {
+    n = num(n)
+    return (
+      n === 0 || !isFinite(n) ? n :
+      n < 0 ? -math_asinh(-n) : 
+      math_log(n + math_sqrt(n * n + 1))
+    )
+  }
+  var math_cosh = Math['cosh'] || function (n) {
+    n = num(n)
+    return (
+      n === 0 ? 1 :
+      isNaN(n) ? n :
+      !isFinite(n) ? Infinity :
+      n < 0 ? math_cosh(n) :
+      n > 21 ? math_exp(n) / 2 :
+      math_exp(n) + math_exp(-n) / 2
+    )
+  }
+  var math_atanh = Math['atanh'] || function (n) {
+    n = num(n)
+    return (
+      isNaN(n) || n < -1 || n > 1 ? NaN :
+      n === -1 ? -Infinity :
+      n === 1 ? Infinity :
+      n === 0 ? n :
+      0.5 * math_log((1 + n) / (1 - n))
+    )
+  }
+  var math_sinh = Math['sinh'] || function (n) {
+    n = num(n)
+    return (
+      !isFinite(n) || n === 0 ? n :
+      (math_exp(n) - math_exp(-n)) / 2
+    )
+  }
+  var math_tanh = Math['tanh'] || function (n) {
+    n = num(n)
+    var exp, nexp
+    return (
+      isNaN(n) || n === 0 ? n :
+      n === Infinity ? 1 :
+      n === -Infinity ? -1 :
+      ((exp = math_exp(n)) - (nexp = math_exp(-n))) / (exp + nexp)
+    )
+  }
   
   export var E = Math.E
   export var LN10 = Math.LN10
@@ -29,342 +110,162 @@ module math {
   export var SQRT1_2 = Math.SQRT1_2
   export var SQRT2 = Math.SQRT2
   export var Infinity = Infinity
-  
-  export function abs(n: number): number
-  export function abs(n: Complex): Complex
-  export function abs(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex: 
-        var re = n.re
-        var im = n.im
-        returnValue = new Complex(math_sqrt(re * re + im * im), 0)
-        break
-      case NumType.Number: //Number
-        returnValue = math_abs(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
-  }
-  
-  export function ceil(n: number): number
-  export function ceil(n: Complex): Complex 
-  export function ceil(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex: 
-        returnValue = new Complex(math_ceil(n.re), math_ceil(n.im))
-        break
-      case NumType.Number: //Number
-        returnValue = math_ceil(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
-  }
-  
-  export function exp(n: number): number
-  export function exp(n: Complex): Complex
-  export function exp(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex:
-        var re = n.re
-        var im = n.im
-        var r = math_exp(re);
-        returnValue = new Complex(r * math_cos(im), r * math_sin(im))
-        break
-      case NumType.Number: //Number
-        returnValue = math_exp(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
-  }
-  
-  export function fix(n: number): number
-  export function fix(n: Complex): Complex
-  export function fix(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex:
-        returnValue = new Complex(math_fix(n.re), math_fix(n.im))
-        break
-      case NumType.Number: //Number
-        returnValue = math_fix(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
-  }
 
-  export function floor(n: number): number
-  export function floor(n: Complex): Complex
-  export function floor(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex:
-        returnValue = new Complex(math_floor(n.re), math_floor(n.im))
-        break
-      case NumType.Number: //Number
-        returnValue = math_floor(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
+  
+  export function abs(n: number): number {
+    return math_abs(n)
   }
   
-  export function log(n: number): number
-  export function log(n: Complex): Complex
-  export function log(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex:
-        var re = n.re
-        var im = n.im
-        returnValue = new Complex(
-          math_log(math_sqrt(re * re + im * im)),
-          Math.atan2(im, re)
-        )
-        break
-      case NumType.Number: //Number
-        returnValue = math_log(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
+  export function acos(n: number): number {
+    return math_acos(n)
   }
   
-  export function mod(n: number, divisor: number) {
-    var returnValue = NaN
-    if (divisor > 0) {
-      returnValue = n - divisor * math_floor(n / divisor)
-    } else if (divisor == 0) {
-      returnValue = n
-    } else { // y < 0
-      throw new Error('Cannot calculate mod for a negative divisor');
-    }
-    return returnValue
+  export function acosh(n: number): number {
+    return math_acosh(n)
   }
   
-  export function pow(n: number, power: number): number
-  export function pow(n: any, power: any): any {
-    var returnValue
-    switch (numType(n)) {
-      /*case NumType.Complex:
-        
-        break*/
-      case NumType.Number: //Number
-        returnValue = math_pow(n, power)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
+  export function asin(n: number): number {
+    return math_asin(n)
   }
   
-  export function sign(n: number): number
-  export function sign(n: Complex): Complex
-  export function sign(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex:
-        var re = n.re
-        var im = n.im
-        var abs = math_sqrt(re * re + im * im)
-        returnValue = new Complex(re / abs, im / abs)
-        break
-      case NumType.Number: //Number
-        returnValue = math_sign(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
+  export function asinh(n: number): number {
+    return math_asinh(n)
   }
   
-  export function round(n: number): number
-  export function round(n: Complex): Complex
-  export function round(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex:
-        returnValue = new Complex(math_round(n.re), math_round(n.im))
-        break
-      case NumType.Number: //Number
-        returnValue = math_round(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
+  export function atan(n: number): number {
+    return math_atan(n)
   }
   
-  export function sqrt(n: number): number
-  export function sqrt(n: Complex): Complex
-  export function sqrt(n: any): any {
-    var returnValue
-    switch (numType(n)) {
-      case NumType.Complex:
-        var re = n.re
-        var im = n.im
-        var r = math_sqrt(re * re + im * im)
-        var nre, nim
-        if (re >= 0) {
-          nre = 0.5 * math_sqrt(2.0 * (r + re));
-        } else {
-          nre = math_abs(im) / math_sqrt(2 * (r - re));
-        }
-  
-        if (re <= 0) {
-          nim = 0.5 * math_sqrt(2.0 * (r - re));
-        } else {
-          nim = math_abs(im) / math_sqrt(2 * (r + re));
-        }
-        returnValue = new Complex(nre, nim >= 0 ? nim : -nim)
-        break
-      case NumType.Number: //Number
-        returnValue = math_sqrt(n)
-        break
-      default:
-        throw new TypeError()
-    }
-    return returnValue
+  export function atanh(n: number): number {
+    return math_atanh(n)
   }
   
-  export class Complex {
+  export function cbrt(n: number): number {
+    return math_cbrt(n)
+  }
   
-    static cast(o: any): Complex {
-      var returnValue: Complex
-      if (o != null) {
-        if (o instanceof Complex) {
-          returnValue = o
-        } else {
-          switch (typeof o) {
-            case 'boolean':
-            case 'number':
-              returnValue = new Complex(+o)
-              break
-            case 'string':
-              returnValue = Complex.fromString(o)
-              break
-            
-          }
+  export function clz32(n: number): number {
+    return math_clz32(n)
+  }
+  
+  export function ceil(n: number): number {
+    return math_ceil(n)
+  }
+  
+  export function cos(n: number): number {
+    return math_cos(n)
+  }
+  
+  export function cosh(n: number): number {
+    return math_cosh(n)
+  }
+  
+  export function exp(n: number): number {
+    return math_exp(n)
+  }
+  
+  export function expm1(n: number): number {
+    return math_expm1(n)
+  }
+  
+  export function floor(n: number): number {
+    return math_floor(n)
+  }
+  
+  export function isEven(n: number): boolean {
+    return !(n & 1)
+  }
+  
+  export function isInteger(n: number): boolean {
+    return math_round(n) == n
+  }
+  
+  export function isNatural(n: number): boolean {
+    return n >= 0 && math_round(n) == n
+  }
+  
+  export function isOdd(n: number): boolean {
+    return !!(n & 1)
+  }
+  
+  export function isPrime(n: number): boolean {
+    var returnValue = false
+    if (!isNaN(n)) {
+      returnValue = true
+      for (var i = 2, l = math_sqrt(n); i <= l; i++) {
+        if (n % i === 0) {
+          returnValue = false
+          break
         }
       }
-      return returnValue
     }
-    
-    static fromString(s: string) {
-      throw new Error()
-      return new Complex()
-    }
-    
-    static fromObject(o: { re: number; im: number }) {
-      return new Complex(o.re, o.im)
-    }
-    
-    constructor(
-      public re: number = 0, 
-      public im: number = 0
-    ) {}
-    
-    equals(other: any): boolean {
-      return (other instanceof Complex) && math_eq(this.re, other.re) && math_eq(this.im, other.im)
-    }
-    
-    inspect() {
-      return 'Complex(' + this + ')'
-    }
-    
-    toJSON() {
-      var returnValue: any = {};
-      var re = this.re
-      var im = this.im
-         
-      returnValue.re = re
-      if (im != 0) {
-        returnValue.im = im
-      }
-      return returnValue
-    }
-   
-    toString(options?: any) {
-      var str = '';
-      var re = this.re
-      var im = this.im
-      //var strRe = number.format(re, options);
-      //var strIm = number.format(im, options);
-      var strRe = String(re);
-      var strIm = String(im);
-
-      if (im == 0) {
-        // real value
-        str = strRe;
-      } else if (re == 0) {
-        // purely complex value
-        if (im == 1) {
-          str = 'i';
-        } else if (im == -1) {
-          str = '-i';
-        } else {
-          str = strIm + 'i';
-        }
-      } else {
-        // complex value
-        if (im > 0) {
-          if (im == 1) {
-            str = strRe + ' + i';
-          } else {
-            str = strRe + ' + ' + strIm + 'i';
-          }
-        } else {
-          if (im == -1) {
-            str = strRe + ' - i';
-          } else {
-            str = strRe + ' - ' + strIm.substring(1) + 'i';
-          }
-        }
-      }
-    
-      return str;
-    }
-
-    valueOf() {
-      return this.toString()
-    }
-  }
-  
-  function numType(o: any): NumType {
-    var returnValue = NumType.Unknown
-    switch (typeof o) {
-      case 'number':
-        returnValue = NumType.Number
-        break
-      case 'object':
-        if (o != null) {
-          switch (o.constructor) {
-            case Number:
-              returnValue = NumType.Number
-              break
-            case Complex: 
-              returnValue = NumType.Complex
-              break
-          }
-        }
-        break
-      default:
-        //left unknown
-     }  
     return returnValue
   }
+  
+  export function log(n: number): number {
+    return math_log(n)
+  }
+  
+  export function log2(n: number): number {
+    return math_log2(n)
+  }
+  
+  export function log10(n: number): number {
+    return math_log10(n)
+  }
+  
+  export function mod(n: number, divisor: number): number {
+    return (
+      divisor > 0 ? n - divisor * math_floor(n / divisor) :
+      divisor == 0 ? n :
+      NaN
+    )
+  }
+  
+  export function pow(n: number, power: number): number {
+    return math_pow(n, power)
+  }
+  
+  export function round(n: number): number {
+    return math_round(n)
+  }
+  
+  export function sign(n: number): number {
+    return math_sign(n)
+  }
+  
+  export function sin(n: number): number {
+    return math_sin(n)
+  }
+  
+  export function sinh(n: number): number {
+    return math_sinh(n)
+  }
+  
+  export function sqrt(n: number): number {
+    return math_sqrt(n)
+  }
+  
+  export function tan(n: number): number {
+    return math_tan(n)
+  }
+  
+  export function tanh(n: number): number {
+    return math_tanh(n)
+  }
+  
+  export function toDegree(angleRadian: number): number {
+    return angleRadian * RADIAN_TO_DEGREE
+  }
+  
+  export function toRadian(angleDegree: number): number {
+    return angleDegree * DEGREE_TO_RADIAN
+  }
+  
+  export function trunc(n: number): number {
+    return math_trunc(n)
+  }
+ 
   
 
 }

@@ -2,7 +2,6 @@ import unit = require("../../../main/typescript/ts/unit")
 import suite = unit.suite
 import test = unit.test
 import math = require("../../../main/typescript/ts/math")
-import Complex = math.Complex
 
 var mathSuite = suite("ts/math", (self) => {
   
@@ -22,16 +21,6 @@ var mathSuite = suite("ts/math", (self) => {
       assert.strictEqual(actual, expected, "math.abs(" + value + ") -> " + actual + " must be " + expected)
     });
       
-    //Complex
-    [
-      [new Complex(0, 0), new Complex(0, 0)],
-      [new Complex(4, 4), new Complex(5.656854249492381, 0)]
-    ].forEach((pair) => {
-      var value = pair[0]
-      var actual = math.abs(pair[0])
-      var expected = pair[1]
-      assert.equal(actual, expected, "math.abs(" + value + ") -> " + actual + " must be " + expected)
-    })
   })
     
   test("ceil()", (assert) => {

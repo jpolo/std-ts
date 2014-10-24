@@ -14,6 +14,13 @@ module reflect {
   var __propertyNames = Object.getOwnPropertyNames || __polyfill(function (o) { return __keys(o) })
   var __propertySymbols = Object['getOwnPropertySymbols'] || __polyfill(function (o) { return [] })
   var __hasOwn = {}.hasOwnProperty
+  var __isDataDescriptor = function (descriptor: IPropertyDescriptor) {
+    return ('value' in descriptor || 'writable' in descriptor)
+  }
+  var __isAccessorDescriptor = function (descriptor: IPropertyDescriptor) {
+    return ('get' in descriptor || 'set' in descriptor)
+  }
+  var __isUndefined = function (o) { return typeof o === 'undefined' }
   var __isFrozen = Object.isFrozen || __polyfill(__fconst(false))
   var __isSealed = Object.isSealed ||  __polyfill(__fconst(false))
   var __isExtensible = Object.isExtensible ||  __polyfill(__fconst(true))
@@ -52,7 +59,7 @@ module reflect {
     return returnValue
   }
   
-  export function enumerate(o: any) {
+  export function enumerate(o: any): {next: () => { done: boolean; value?: any }} {
     var returnValue = []
     for (var key in o) {
       returnValue.push(key)
@@ -89,16 +96,16 @@ module reflect {
       returnValue = o[propertyName]
     } else {
       var descriptor = __propertyDescriptor(o, propertyName)
-      if (_isUndefined(descriptor)) {
+      if (__isUndefined(descriptor)) {
         var proto = __proto(o)
         if (proto != null) {
           returnValue = get(proto, propertyName, receiver)
         }
-      } else if (_isDataDescriptor(descriptor)) {
+      } else if (__isDataDescriptor(descriptor)) {
         returnValue = descriptor.value
       } else {
         var getter = descriptor.get
-        if (!_isUndefined(getter)) {
+        if (!__isUndefined(getter)) {
           returnValue = getter.call(receiver)
         }
       }
@@ -160,7 +167,7 @@ module reflect {
     
     var descriptor = __propertyDescriptor(o, propertyName)
 
-    if (_isUndefined(descriptor)) {
+    if (__isUndefined(descriptor)) {
       // name is not defined in target, search target's prototype
       var proto = __proto(o)
 
@@ -176,9 +183,9 @@ module reflect {
     }
 
     // we now know that ownDesc !== undefined
-    if (_isAccessorDescriptor(descriptor)) {
+    if (__isAccessorDescriptor(descriptor)) {
       var setter = descriptor.set
-      if (_isUndefined(setter)) return false
+      if (__isUndefined(setter)) return false
       setter.call(receiver, value) // assumes Function.prototype.call
       return true
     }
@@ -188,7 +195,7 @@ module reflect {
     // Now update or add the data property on the receiver, depending on
     // whether the receiver already defines the property or not.
     var existingDesc = __propertyDescriptor(receiver, propertyName)
-    if (!_isUndefined(existingDesc)) {
+    if (!__isUndefined(existingDesc)) {
       __propertyDefine(receiver, propertyName, { 
         value: value,
         writable: existingDesc.writable,
@@ -207,17 +214,7 @@ module reflect {
     return true
   }
   
-  function _isUndefined(o) {
-    return typeof o === 'undefined'
-  }
   
-  function _isDataDescriptor(descriptor: IPropertyDescriptor) {
-    return ('value' in descriptor || 'writable' in descriptor)
-  }
-  
-  function _isAccessorDescriptor(descriptor: IPropertyDescriptor) {
-    return ('get' in descriptor || 'set' in descriptor)
-  }
 
 }
 export = reflect

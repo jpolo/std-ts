@@ -14,8 +14,7 @@ module inspect {
         case 'number': s = 'Number'; break
         case 'string': s = 'String'; break
         case 'undefined': s = 'Undefined'; break
-        default: /*object*/
-          s = __ostring.call(o).slice(8, -1)
+        default: /*object*/ s = __ostring.call(o).slice(8, -1)
       }
     }
     return s
