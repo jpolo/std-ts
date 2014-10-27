@@ -8,27 +8,44 @@ import matrix = geometry.matrix
 
 var geometryQuatSuite = suite("ts/geometry.quaternion", (self) => {
   
+  var quatZ, quatA, quatB, quatID: geometry.IQuaternion
+  var vec3: geometry.IVector3
+  var deg90 = Math.PI / 2
+  
+  self.setUp = () => {
+    quatZ = quaternion.create(0, 0, 0, 0)
+    quatA = quaternion.create(1, 2, 3, 4)
+    quatB = quaternion.create(5, 6, 7, 8)
+    //out = [0, 0, 0, 0]
+    vec3 = vector.create(1, 1, -1)
+    quatID = quaternion.create(0, 0, 0, 1)
+  }
+  
   test('add(a, b)', (assert) => {
-    assert.deepEqual(quaternion.add(quaternion.create(1, 2, 3, 4), quaternion.create(2, 2, 2, 2)), [3, 4, 5, 6])
+    assert.deepEqual(quaternion.add(quatA, quatB), [6, 8, 10, 12])
   })
   
   test('conjugate(a)', (assert) => {
-  
+    assert.deepEqual(quaternion.conjugate(quatA), [-1, -2, -3, 4])
+      
+    var quatCopy = quaternion.copy(quatA)
+    assert.deepEqual(quaternion.conjugate(quatCopy, quatCopy), [-1, -2, -3, 4])
   })
   
   test('copy(a)', (assert) => {
     var quat = quaternion.create(0, 0, 0, 0)
-    quaternion.copy(quaternion.create(1, 2, 3, 4), quat)
+    quaternion.copy(quatA, quat)
     assert.deepEqual(quat, [1, 2, 3, 4])
   })
   
   test('dot(a, b)', (assert) => {
-  
+    assert.strictEqual(quaternion.dot(quatA, quatB), 70)
   })
   
 })
 
 var geometryVectorSuite = suite("ts/geometry.vector", (self) => {
+
 
   test('add(a, b)', (assert) => {
     //vector2
@@ -159,37 +176,43 @@ var geometryVectorSuite = suite("ts/geometry.vector", (self) => {
     
 })
   
-var geometryMatrixSuite = suite("ts/geometry.matrix", () => {
-  var mat2A = matrix.create(
-    1, 2, 
-    3, 4
-  )
-  var mat2B = matrix.create(
-    5, 6, 
-    7, 8
-  )
-  var mat3A = matrix.create( 
-    1, 0, 0,
-    0, 1, 0,
-    1, 2, 1
-  )
-  var mat3B = matrix.create(
-    1, 0, 0,
-    0, 1, 0,
-    3, 4, 1
-  )
-  var mat4A = matrix.create(
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    1, 2, 3, 1
-  )
-  var mat4B = matrix.create(
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    4, 5, 6, 1
-  )
+var geometryMatrixSuite = suite("ts/geometry.matrix", (self) => {
+  var mat2A, mat2B: geometry.IMatrix2
+  var mat3A, mat3B: geometry.IMatrix3
+  var mat4A, mat4B: geometry.IMatrix4
+  
+  self.setUp = () => {
+    mat2A = matrix.create(
+      1, 2, 
+      3, 4
+    )
+    mat2B = matrix.create(
+      5, 6, 
+      7, 8
+    )
+    mat3A = matrix.create( 
+      1, 0, 0,
+      0, 1, 0,
+      1, 2, 1
+    )
+    mat3B = matrix.create(
+      1, 0, 0,
+      0, 1, 0,
+      3, 4, 1
+    )
+    mat4A = matrix.create(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      1, 2, 3, 1
+    )
+    mat4B = matrix.create(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      4, 5, 6, 1
+    )
+  }
   
   
   test('identity(a)', (assert) => {
@@ -246,18 +269,21 @@ var geometryMatrixSuite = suite("ts/geometry.matrix", () => {
     var mat2 = matrix.create(1, 2, 3, 4)
     var expected2 = [1, 3, 2, 4]
     assert.deepEqual(matrix.transpose(mat2), expected2)
+    assert.deepEqual(mat2, [1, 2, 3, 4])
     assert.deepEqual(matrix.transpose(mat2, mat2), expected2)
       
     //mat3
     var mat3 = matrix.create(1, 2, 3, 4, 5, 6, 7, 8, 9)
     var expected3 = [1, 4, 7, 2, 5, 8, 3, 6, 9]
     assert.deepEqual(matrix.transpose(mat3), expected3)
+    assert.deepEqual(mat3, [1, 2, 3, 4, 5, 6, 7, 8, 9])
     assert.deepEqual(matrix.transpose(mat3, mat3), expected3)
       
     //mat4
     var mat4 = matrix.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
     var expected4 = [1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 16]
     assert.deepEqual(matrix.transpose(mat4), expected4)
+    assert.deepEqual(mat4, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
     assert.deepEqual(matrix.transpose(mat4, mat4), expected4)
   })
   
