@@ -12,24 +12,21 @@ var vmSuite = suite("ts/vm", (self) => {
     assert.strictEqual(global.clearTimeout, clearTimeout)
   })
 
-  test("isInstanceOf(o, Class)", (assert) => {
-    var isInstanceOf = vm.isInstanceOf
-    assert.ok(isInstanceOf(new String("fsdfs"), String))
-    assert.ok(!isInstanceOf("fsdfs", Number))
-  })
+  test("compile(jscode: string)", (assert) => {
+    // simple
+    var fn = vm.compile("return 'abc';")
+    assert.strictEqual(typeof fn, "function")
+    assert.strictEqual(fn(), 'abc')
 
-  test("stringTag(o)", (assert) => {
-    var stringTag = vm.stringTag
-    assert.strictEqual(stringTag(undefined), "Undefined")
-    assert.strictEqual(stringTag(null), "Null")
-    assert.strictEqual(stringTag(true), "Boolean")
-    assert.strictEqual(stringTag("fsdfs"), "String")
-    assert.strictEqual(stringTag(new String("fsdfs")), "String")
-    assert.strictEqual(stringTag(123), "Number")
-    assert.strictEqual(stringTag(new Number(123.1)), "Number")
-    assert.strictEqual(stringTag([]), "Array")
+    //with context
+    var context: {[key: string]: any} = {a: 1, b: 2, c: null}
+    var fnCtx = vm.compile("c = a + b; this.d = c;return c;")
+    var returnValue = fnCtx(context)
+    assert.strictEqual(returnValue, 3)
+    assert.strictEqual(context['c'], 3)
+    assert.strictEqual(context['d'], 3)
   })
-
+  
   test("eval(jscode: string, context?)", (assert) => {
     // simple
     var returnValue = vm.eval("return 'abc';")

@@ -137,6 +137,7 @@ var unitSuite = suite("ts/unit.TestEngine", (self) => {
 
   test("testEqualStrict(l: any, r: any)", (assert) => {
     assert.ok(engine.testEqualsStrict(1, 1))
+    assert.ok(engine.testEqualsStrict(NaN, NaN))
     assert.ok(!engine.testEqualsStrict(false, 0))
     assert.ok(!engine.testEqualsStrict(0, 1))
     assert.ok(!engine.testEqualsStrict([0], [0]))
@@ -150,6 +151,13 @@ var unitSuite = suite("ts/unit.TestEngine", (self) => {
     assert.ok(!engine.testEqualsNear(false, 0))
     assert.ok(!engine.testEqualsNear(0, 1))
     assert.ok(!engine.testEqualsNear("1", 1))
+  })
+    
+  test("testEqualDeep(l: any, r: any)", (assert) => {
+    assert.ok(engine.testEqualsDeep([1], [1]))
+    assert.ok(engine.testEqualsDeep([NaN], [NaN]))
+    assert.ok(!engine.testEqualsDeep([false], [0]))
+    //assert.ok(!engine.testEqualsDeep(["1"], [1]))
   })
 
   test("dump(v: any)", (assert) => {

@@ -117,6 +117,10 @@ module geometry {
       return array_normalize(q, dest || array_create(LENGTH))
     }
     
+    export function scale(q: IQuaternion, n: number, dest?: IQuaternion) {
+      return array_scale(q, n, dest || array_create(LENGTH))
+    }
+    
     export function subtract(q1: IQuaternion, q2: IQuaternion, dest?: IQuaternion): IQuaternion {
       return array_subtract(q1, q2, dest || array_create(LENGTH))
     }
@@ -294,14 +298,14 @@ module geometry {
           var m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3]
           var det = m0 * m3 - m2 * m1
           if (!det) {
-            return null;
+            return null
           }
-          det = 1.0 / det;
+          det = 1.0 / det
           
-          dest[0] =  m3 * det;
-          dest[1] = -m1 * det;
-          dest[2] = -m2 * det;
-          dest[3] =  m0 * det;
+          dest[0] =  m3 * det
+          dest[1] = -m1 * det
+          dest[2] = -m2 * det
+          dest[3] =  m0 * det
           break
         case 9:
           break
@@ -372,9 +376,9 @@ module geometry {
 
       return (
         $var(l, m + '.length') +
-        $switch(l, MATRIX_SIZE.map((l) => {
-          return $case(String(l), f(math_sqrt(l)))
-        }))
+        $switch(l, MATRIX_SIZE.map((l) => 
+          $case(String(l), f(math_sqrt(l)))
+        ))
       )
     }
     
@@ -507,21 +511,11 @@ console.warn(mat_multiply.toString())
   
   //specific
   function $array_op(op: string, a: string, b: string, dest: string): string {
-    return (
-      $forArray(a, (i: string) => {
-        return $assign($attr(dest, i), $op($attr(a, i), op, $attr(b, i)))
-      }) //length expression
-    )
+    return $forArray(a, (i: string) => $assign($attr(dest, i), $op($attr(a, i), op, $attr(b, i)))) //length expression
   }
   
   function $array_copy(a: string, ret: string): string {
-    return (
-      $if($op(a, '!==', ret),
-        $forArray(a, (i: string) => {
-          return $assign($attr(ret, i), $attr(a, i))
-        })
-      )
-    )
+    return $if($op(a, '!==', ret), $forArray(a, (i: string) => $assign($attr(ret, i), $attr(a, i))))
   }
   
   function $array_frob_squared(a: string, ret: string): string {
@@ -539,10 +533,7 @@ console.warn(mat_multiply.toString())
   }
   
   function $array_frob(a: string, ret: string): string {
-    return (
-      $array_frob_squared(a, ret) +
-      $assign(ret, 'math_sqrt(' + ret + ')')
-    )
+    return $array_frob_squared(a, ret) + $assign(ret, 'math_sqrt(' + ret + ')')
   }
   
   function $array_dot(a: string, b: string, ret: string): string {
@@ -572,11 +563,7 @@ console.warn(mat_multiply.toString())
   }
   
   function $array_scale(a: string, scalar: string, ret: string): string {
-    return (
-      $forArray(a, (i: string) => {
-        return $assign($attr(ret, i), $op($attr(a, i), '*', scalar))
-      })
-    )
+    return $forArray(a, (i: string) => $assign($attr(ret, i), $op($attr(a, i), '*', scalar)))
   }
   
   function array_create(l: number) {
@@ -584,7 +571,7 @@ console.warn(mat_multiply.toString())
   }
   
   
-
+  
   var array_add = cc((a, b, r) => $array_op('+', a, b, r) + $return(r), $context)
   var array_cmp = cc((a, b) => { 
     var r = $name()

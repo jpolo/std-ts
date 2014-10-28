@@ -1,38 +1,9 @@
 module vm {
   var _global: Window = (new Function("return this;")).call(null)
-  var _objectToString = Object.prototype.toString
-  var _Symbol = _global['Symbol']
-  //var $$iterator = _Symbol && _Symbol.iterator
-  var $$toStringTag = _Symbol && _Symbol.toStringTag
 
   export interface IContext { [key: string]: any }
 
   export var global = _global
-
-  export function typeOf(o: any): string {
-    return typeof o
-  }
-
-  export function isInstanceOf(o: any, Class: Function): boolean {
-    return (o != null) && o instanceof Class
-  }
-
-  export function stringTag(o: any): string {
-    var s = ''
-    if (o === null) {
-      s = 'Null'
-    } else {
-      switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break
-        case 'function': s = 'Function'; break
-        case 'number': s = 'Number'; break
-        case 'string': s = 'String'; break
-        case 'undefined': s = 'Undefined'; break
-        default: /*object*/ s = _objectToString.call(o).slice(8, -1)
-      }
-    }
-    return s
-  }
 
   export function compile(jscode: string, fileName?: string): (context?: IContext) => any {
     var fnWithContext: Function
@@ -52,7 +23,6 @@ module vm {
         fnNoContext = fnNoContext || new Function(jscode)
         returnValue = fnNoContext()
       }
-      
       return returnValue
     }
   }

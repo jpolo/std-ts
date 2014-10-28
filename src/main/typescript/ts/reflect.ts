@@ -5,13 +5,14 @@ module reflect {
   var __polyfill = function poly<T>(f: T): T { (<any>f).polyfill = true; return f; }
   var __polyfilled = function (f: any): boolean { return !!f.polyfill }
   var __str = String
+  var __ostring = Object.prototype.toString
+  var __okeys = Object.keys
   var __obj = Object
   var __create = Object.create
-  var __keys = Object.keys
   var __proto = Object.getPrototypeOf || __polyfill(function (o) { return o.__proto__ })
   var __propertyDefine = Object.defineProperty
   var __propertyDescriptor = Object.getOwnPropertyDescriptor
-  var __propertyNames = Object.getOwnPropertyNames || __polyfill(function (o) { return __keys(o) })
+  var __propertyNames = Object.getOwnPropertyNames || __polyfill(function (o) { return __okeys(o) })
   var __propertySymbols = Object['getOwnPropertySymbols'] || __polyfill(function (o) { return [] })
   var __hasOwn = {}.hasOwnProperty
   var __isDataDescriptor = function (descriptor: IPropertyDescriptor) {
@@ -21,6 +22,7 @@ module reflect {
     return ('get' in descriptor || 'set' in descriptor)
   }
   var __isUndefined = function (o) { return typeof o === 'undefined' }
+  var __isObject = function (o) { return typeof o === 'object' && o !== null; }
   var __isFrozen = Object.isFrozen || __polyfill(__fconst(false))
   var __isSealed = Object.isSealed ||  __polyfill(__fconst(false))
   var __isExtensible = Object.isExtensible ||  __polyfill(__fconst(true))
@@ -76,10 +78,10 @@ module reflect {
   export function freeze(o: any, deep?: boolean): any {
     __freeze(o) // First freeze the object.
     if (deep && !__polyfilled(__freeze)) {
-      var keys = __keys(o)
+      var keys = __okeys(o)
       for (var i = 0, l = keys.length; i < l; ++i) {
         var val = o[keys[i]]
-        if ((typeof val === 'object') && !__isFrozen(val)) {
+        if (__isObject(val) && !__isFrozen(val)) {
           freeze(val, deep) // Recursively call freeze().
         }
       }
@@ -143,7 +145,8 @@ module reflect {
   
   export function ownKeys(o: any): string[] {
     var names = __propertyNames(o)
-    return __polyfilled(__propertySymbols) ? names : names.concat(__propertySymbols(o))
+    return names
+    //return __polyfilled(__propertySymbols) ? names : names.concat(__propertySymbols(o))
   }
   
   export function preventExtensions(o): any {
@@ -214,6 +217,22 @@ module reflect {
     return true
   }
   
+  export function stringTag(o: any): string {
+    var s = ''
+    if (o === null) {
+      s = 'Null'
+    } else {
+      switch(typeof o) {
+        case 'boolean': s = 'Boolean'; break
+        case 'function': s = 'Function'; break
+        case 'number': s = 'Number'; break
+        case 'string': s = 'String'; break
+        case 'undefined': s = 'Undefined'; break
+        default: /*object*/ s = __ostring.call(o).slice(8, -1)
+      }
+    }
+    return s
+  }
   
 
 }

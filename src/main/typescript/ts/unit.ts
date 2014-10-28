@@ -1,13 +1,16 @@
 import inspect = require("ts/inspect")
 import vm = require("ts/vm")
+import reflect = require("ts/reflect")
 import stacktrace = require("ts/stacktrace")
 import ICallStack = stacktrace.ICallStack
 import ICallSite = stacktrace.ICallSite
 
 module unit {
   var TEST_TIMEOUT = 2000;//ms
-  var __freeze = Object.freeze || function (o) { return o; }
-  var __stringTag = vm.stringTag
+  var __str = String
+  var __keys = reflect.ownKeys
+  var __freeze = reflect.freeze
+  var __stringTag = reflect.stringTag
   var __now = Date.now || function () { return (new Date()).getTime(); }
 
   export enum AssertionType { Success, Failure, Error, Warning }
@@ -76,6 +79,7 @@ module unit {
 
     equals(o: any): boolean {
       return (
+        o && 
         (o instanceof Assertion) &&
         this.type === o.type &&
         this.test === o.test &&
@@ -162,11 +166,12 @@ module unit {
             switch (__stringTag(o1)) {
               case 'Undefined':
               case 'Null':
+              case 'Boolean':
                 return o1 === o2
               case 'Number':
-                return +o1 === +o2
+                return o1 === o2 || (isNaN(o1) && isNaN(o2))
               case 'String':
-                return String(o1) === String(o2)
+                return __str(o1) === __str(o2)
               case 'Array':            
                 if (
                   o2 == null ||
@@ -184,8 +189,11 @@ module unit {
               case 'Object':
               case 'Function':
               default:
-                var keys1 = Object.keys(o1).sort()
-                var keys2 = Object.keys(o2).sort()
+                var keys1 = __keys(o1)
+                if (o2 == null) {
+                  return false
+                }  
+                var keys2 = __keys(o2)
                 var keyc = keys1.length
                 if (!equals(keys1, keys2)) {
                   return false
@@ -426,10 +434,9 @@ module unit {
 
       throws(block: () => void, expected?: any, message?: string): boolean {
         var isSuccess = false
-        var engine = this.__engine__
         var position = this.__position__()
         var actual
-        message = message || (engine.dump(block) + ' must throw an error')
+        message = message || (this.__dump__(block) + ' must throw an error')
         try {
           block()
         } catch (e) {
@@ -444,26 +451,26 @@ module unit {
           } else {
             switch (typeof expected) {
               case 'string':
-                isSuccess = String(actual) == expected
+                isSuccess = __str(actual) == expected
                 break
               case 'function':
                 isSuccess = actual instanceof expected
-                message = engine.dump(actual) + ' thrown must be instance of ' + engine.dump(expected)
+                message = this.__dump__(actual) + ' thrown must be instance of ' + this.__dump__(expected)
                 break
               case 'object':
-                if (expected instanceof RegExp) {
-                  isSuccess = expected.test(String(actual))
-                  message = engine.dump(actual) + ' thrown must match ' + engine.dump(expected)
+                if (__stringTag(expected) === 'RegExp') {
+                  isSuccess = expected.test(__str(actual))
+                  message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
                 } else {
                   isSuccess = actual instanceof expected.constructor &&
                     actual.name === expected.name &&
                     actual.message === expected.message
-                  message = engine.dump(actual) + ' thrown be like ' + engine.dump(expected)
+                  message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
                 }
                 break
               default:
                 isSuccess = actual === expected
-                message = engine.dump(actual) + ' thrown must be ' + engine.dump(expected)
+                message = this.__dump__(actual) + ' thrown must be ' + this.__dump__(expected)
             }
           }
         }
@@ -472,8 +479,8 @@ module unit {
 
       __assert__(isSuccess: boolean, message: string, position: ICallSite): boolean {
         var assertions = this._report.assertions
-        if (!Object.isExtensible(assertions)) {
-          throw new Error('Assertions were made after report creation in ' + String(this._testCase))
+        if (!reflect.isExtensible(assertions)) {
+          throw new Error('Assertions were made after report creation in ' + __str(this._testCase))
         }
 
         message = message || 'assertion should be true'
@@ -493,42 +500,35 @@ module unit {
       }
 
       private _strictEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
-        var engine = this.__engine__
-        message = message || (engine.dump(o1) + (' must' + (not ? ' not' : '') + ' be ') + engine.dump(o2))
-        return this.__assert__(engine.testEqualsStrict(o1, o2) === !not, message, position)
+        message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' be ') + this.__dump__(o2))
+        return this.__assert__(this.__engine__.testEqualsStrict(o1, o2) === !not, message, position)
       }
 
       private _equal(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
-        var engine = this.__engine__
-        message = message || (engine.dump(o1) + (' must' + (not ? ' not' : '') + ' equal ') + engine.dump(o2))
-        return this.__assert__(engine.testEquals(o1, o2) === !not, message, position)
+        message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' equal ') + this.__dump__(o2))
+        return this.__assert__(this.__engine__.testEquals(o1, o2) === !not, message, position)
       }
 
       private _propEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
         var engine = this.__engine__
-        message = message || (engine.dump(o1) + (' must have same properties as ') + engine.dump(o2))
-        var keys1 = Object.keys(o1).sort()
-        var keys2 = Object.keys(o2).sort()
+        message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
+        var keys1 = __keys(o1)
+        var keys2 = __keys(o2)
         var isSuccess = true
         for (var i = 0, l = keys1.length; i < l; ++i) {
           var key1 = keys1[i]
           var key2 = keys2[i]
-          if (key1 === key2) {
-
-            if (!engine.testEqualsStrict(o1[key1], o2[key2])) {
-              isSuccess = false
-              break
-            }
+          if (key1 === key2 && !engine.testEqualsStrict(o1[key1], o2[key2])) {
+            isSuccess = false
+            break
           }
-
         }
         return this.__assert__(isSuccess, message, position)
       }
       
       _deepEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
-        var engine = this.__engine__
-        message = message || (engine.dump(o1) + (' must equals ') + engine.dump(o2))
-        return this.__assert__(engine.testEqualsDeep(o1, o2) === !not, message, position)
+        message = message || (this.__dump__(o1) + (' must equals ') + this.__dump__(o2))
+        return this.__assert__(this.__engine__.testEqualsDeep(o1, o2) === !not, message, position)
       }
     }
     
@@ -652,7 +652,7 @@ module unit {
         })
       })
 
-      Object.keys(sections).forEach((sectionName) => {
+      __keys(sections).forEach((sectionName) => {
         var matrix = ""
         var messages = ""
         var section = sections[sectionName]

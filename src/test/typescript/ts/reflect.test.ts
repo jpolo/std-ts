@@ -146,6 +146,19 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.strictEqual(reflect.set(obj, 'accessorProp', 'private'), true)
     assert.strictEqual(obj['_accessorProp'], 'private')
   })
+    
+  test("stringTag(o)", (assert) => {
+    var stringTag = reflect.stringTag
+    assert.strictEqual(stringTag(undefined), "Undefined")
+    assert.strictEqual(stringTag(null), "Null")
+    assert.strictEqual(stringTag(true), "Boolean")
+    assert.strictEqual(stringTag("fsdfs"), "String")
+    assert.strictEqual(stringTag(new String("fsdfs")), "String")
+    assert.strictEqual(stringTag(123), "Number")
+    assert.strictEqual(stringTag(NaN), "Number")
+    assert.strictEqual(stringTag(new Number(123.1)), "Number")
+    assert.strictEqual(stringTag([]), "Array")
+  })
 })
   
 export = reflectSuite
