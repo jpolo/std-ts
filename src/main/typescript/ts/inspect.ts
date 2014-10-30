@@ -1,6 +1,8 @@
 module inspect {
 
   var __ostring = Object.prototype.toString
+  var __isObject = function (o) { return (typeof o === 'object') && o !== null }
+  var __isFunction = function (o) { return typeof o === 'function' }
   var __keys = Object.keys
   var __str = String
   var __stringTag = (o: any) => {
@@ -28,6 +30,8 @@ module inspect {
     
     PREFIX = 'stringify_'
     
+    private _refs: any[]
+    
     constructor(
       conf?: {
         maxDepth?: number;
@@ -43,18 +47,38 @@ module inspect {
     }
     
     stringify(o: any, maxDepth?: number): string {
+      var init = !this._refs
+      var refs = init ? (this._refs = []) : this._refs
       var depth = maxDepth == null ? this.maxDepth : maxDepth
       var methodName = this.PREFIX + __stringTag(o)
-      var s = ''
-      if (typeof this[methodName] === 'function') {
-        s = this[methodName](o, maxDepth)
-      } else {
-        if (o != null) {
-          if (o && o.inspect) {
-            s = o.inspect()//TODO inject this or depth
+      var s = '' 
+          
+      if (__isFunction(o) || __isObject(o)) {
+        if (refs.indexOf(o) >= 0) {
+          s = '<circular>'
+        } else {
+          refs.push(o)
+        }
+      }
+      
+      try {
+        if (!s) {
+          if (__isFunction(this[methodName])) {
+            s = this[methodName](o, maxDepth)
           } else {
-            s = this.stringify_Object(o, maxDepth)
+            if (o != null) {
+              if (o && o.inspect) {
+                s = o.inspect()//TODO inject this or depth
+              } else {
+                s = this.stringify_Object(o, maxDepth)
+              }
+            }
           }
+        }
+      } finally {
+        if (init) {
+          //reinit
+          this._refs = null
         }
       }
       return s

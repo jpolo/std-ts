@@ -31,7 +31,7 @@ var randomSuite = suite("ts/random", (self) => {
   
   }
   
-  test("engine.AC4", (assert) => {
+  test("engine.RC4", (assert) => {
     var engine = new random.engine.RC4('Example');
     assert.generates(
       engine.generate.bind(engine), 

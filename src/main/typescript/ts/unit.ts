@@ -111,6 +111,14 @@ module unit {
   export module engine {
     export var FLOAT_EPSILON = 1e-5;
     
+    /**
+     * Default engine 
+     */
+    var _instance: Engine
+    export function get(): Engine {
+      return (_instance || (_instance = new Engine()))
+    }
+    
     export class Engine implements IEngine {
 
       callstack(offset = 0): ICallStack {
@@ -449,24 +457,23 @@ module unit {
           if (!expected) {
             isSuccess = true
           } else {
-            switch (typeof expected) {
-              case 'string':
+            switch (__stringTag(expected)) {
+              case 'String':
                 isSuccess = __str(actual) == expected
                 break
-              case 'function':
+              case 'Function':
                 isSuccess = actual instanceof expected
                 message = this.__dump__(actual) + ' thrown must be instance of ' + this.__dump__(expected)
                 break
+              case 'RegExp':
+                isSuccess = expected.test(__str(actual))
+                message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
+                break
               case 'object':
-                if (__stringTag(expected) === 'RegExp') {
-                  isSuccess = expected.test(__str(actual))
-                  message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
-                } else {
-                  isSuccess = actual instanceof expected.constructor &&
-                    actual.name === expected.name &&
-                    actual.message === expected.message
-                  message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
-                }
+                isSuccess = actual instanceof expected.constructor &&
+                  actual.name === expected.name &&
+                  actual.message === expected.message
+                message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
                 break
               default:
                 isSuccess = actual === expected
@@ -537,6 +544,8 @@ module unit {
      * Default suite 
      */
     export var suiteDefault = new TestSuite("")
+      
+    
   }
    
   var suiteCurrent = engine.suiteDefault

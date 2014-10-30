@@ -1,7 +1,7 @@
 module random {
-  //var sqrt = Math.sqrt;
-  //var sin = Math.sin;
-  //var cos = Math.cos;
+  //var math_sqrt = Math.sqrt;
+  //var math_sin = Math.sin;
+  //var math_cos = Math.cos;
   var math_floor = Math.floor;
   var math_log = Math.log;
   var math_pow = Math.pow;
@@ -18,23 +18,23 @@ module random {
     next(): { done: boolean; value?: number }
   }
 
-  export function next(ng: IEngine = engine.current) {
+  export function next(ng: IEngine = engine.get()) {
     return ng.generate()
   }
   
-  export function nextBoolean(ng: IEngine = engine.current): boolean {
+  export function nextBoolean(ng: IEngine = engine.get()): boolean {
     return next(ng) > 0.5
   }
   
-  export function nextNumber(min = FLOAT_MIN_VALUE, max = FLOAT_MAX_VALUE, ng: IEngine = engine.current): number {
+  export function nextNumber(min = FLOAT_MIN_VALUE, max = FLOAT_MAX_VALUE, ng: IEngine = engine.get()): number {
     return (next(ng) * (max - min)) + min
   }
   
-  export function nextInt(min = INT_MIN_VALUE, max = INT_MAX_VALUE, ng: IEngine = engine.current): number {
+  export function nextInt(min = INT_MIN_VALUE, max = INT_MAX_VALUE, ng: IEngine = engine.get()): number {
     return math_floor(next(ng) * (max - min + 1)) + min
   }
   
-  export function nextChar(chars?: string, ng: IEngine = engine.current): string {
+  export function nextChar(chars?: string, ng: IEngine = engine.get()): string {
     chars = chars || 'abcdefghijklmnopqrstuvwxyz0123456789'
     return chars.charAt(math_floor(next(ng) * (chars.length + 1)))
   }
@@ -45,6 +45,7 @@ module random {
 
   export module engine {
     var math_random = Math.random
+    
     
     export class Engine implements IEngine {
 
@@ -160,7 +161,7 @@ module random {
         for (var i = 0; i < RC4_WIDTH; i++) {
           j += s[i] + input[i % inputlen]
           j %= RC4_WIDTH
-          swap(s, i, j)
+          _swap(s, i, j)
         }
       }
 
@@ -179,20 +180,36 @@ module random {
         var j = this._j
         i = this._i = (i + 1) % RC4_WIDTH
         j = this._j = (j + s[i]) % RC4_WIDTH
-        swap(s, i, j)
+        _swap(s, i, j)
         return s[(s[i] + s[j]) % RC4_WIDTH]
       }
     }
     
-    function swap(array: number[], i: number, j: number) {
+    function _swap(array: number[], i: number, j: number) {
       var tmp = array[i]
       array[i] = array[j]
       array[j] = tmp
     }
     
+    
+    /**
+     * Engines
+     */
     export var pseudo = new Pseudo()
     export var native = new Native()
-    export var current = native
+    export var rc4 = new RC4()
+    
+    /**
+     * Default engine 
+     */
+    var _instance: IEngine = native
+    export function get(): IEngine {
+      return _instance
+    }
+    
+    export function set(ng: IEngine) {
+      _instance = ng
+    }
   }
   
   /*export interface IGenerator<T> {
