@@ -1,6 +1,7 @@
 module log {
   var __now = Date.now || function () { return (new Date()).getTime(); }
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
+  var __str = String
   
   export interface ILevel {
     name: string
@@ -20,6 +21,10 @@ module log {
   
   export class Level implements ILevel {
 
+    static fromString(s: string): Level {
+      return Level._instances[s]
+    }
+    
     static create(name: string, level: number): Level {
       name = name.toUpperCase()
       var levels = Level._instances
@@ -50,8 +55,16 @@ module log {
       return this.value
     }
     
+    inspect() {
+      return __format('Level', 'name: "' + this.name + '", value: ' + this.value)
+    }
+    
+    toJSON() {
+      return this.name
+    }
+    
     toString() {
-      return __format('Level', this.name)
+      return this.name
     }
   }
   
@@ -67,9 +80,8 @@ module log {
       public level: Level, 
       public group: string = "",
       public message: string = "",
-      public timestamp?: number
-    ) { 
-      this.timestamp = this.timestamp || __now()
+      public timestamp: number = __now()
+    ) {
     }
     
     equals(o: any) {
@@ -82,18 +94,22 @@ module log {
       )
     }
     
-    toString() {
+    inspect() {
       return __format('Message', 
-        'level: ' + this.level.name + ', ' +
-        'group: ' + this.group + ', ' +
-        'message: ' + this.message
+        'level: ' + __str(this.level) + ', ' +
+        'group: "' + this.group + '", ' +
+        'message: "' + this.message + '"'
       )
+    }
+    
+    toString() {
+      return '[' + __str(this.level) + '|' + this.group + '] ' + this.message
     }
     
   }
   
   export function logger(group: string) {
-    return engine.get().root.child(group)
+    return engine.get().logger(group)
   }
   
   export class Logger {
@@ -111,9 +127,7 @@ module log {
         }
       }
       return s
-    }
-    
-    children: {[key: string]: Logger} = {}   
+    }  
     
     constructor(
       public name: string, 
@@ -121,24 +135,12 @@ module log {
     ) { }
     
     child(subpath: string): Logger {
-      return this._child(subpath.split(Logger.SEPARATOR), this._engine)
+      return this._engine.logger(Logger.path(this.name, subpath))
     }
     
-    log(level: Level, group: string, message: string) {
-      var reporters = this._reporters()
-      for (var i = 0, l = reporters.length; i < l; ++i) {
-        var target = reporters[i]
-        var config = target.config
-        var reporter = target.reporter
-        var logMessage = new Message(level, group, message)
-
-        if (
-          (config.level.indexOf('*') !== -1 || config.level.indexOf(level) !== -1) &&
-          (config.group.indexOf('*') !== -1 || config.group.indexOf(group) !== -1)
-        ) {
-          reporter.receive(logMessage)
-        }
-      }  
+    log(level: Level, message: string, group?: string) {
+      group = group || this.name
+      this._engine.send(level, group, message)
     }
     
     debug(message: string) {
@@ -164,28 +166,8 @@ module log {
     toString() {
       return __format('Logger', this.name)
     }
-    
-    private _child(path: string[], ng: engine.Engine): Logger {
-      var returnValue = this
-      if (path.length > 0) {
-        var head = path[0]
-        if (head.length !== 0) {
-          var children = this.children
-          returnValue = children[head]  
-          if (!returnValue) {
-            returnValue = children[head] = new Logger(Logger.path(this.name, head), ng)
-          }
-          returnValue = returnValue._child(path.slice(1), ng)
-        }
-      }  
-      return returnValue
-    }
-    
-    private _reporters(): { config: any; reporter: IReporter; }[] {
-      return []
-    }
   }
-  
+
   export module engine {
   
     /**
@@ -196,10 +178,32 @@ module log {
       return (_instance || (_instance = new Engine()))
     }
     
-    export class Engine {
-      root = new Logger("", this)      
+    export class Engine {  
+      reporters: { config: any; reporter: IReporter; }[] = []
       
+      private _loggers: { [name: string]: Logger } = {}
       
+      logger(name: string): Logger {
+        var loggers = this._loggers
+        return loggers[name] || (loggers[name] = new Logger(name, this))
+      }
+
+      send(level: Level, group: string, message: string) {
+        var reporters = this.reporters
+        var logMessage = new Message(level, group, message)
+        for (var i = 0, l = reporters.length; i < l; ++i) {
+          var target = reporters[i]
+          var config = target.config
+          var reporter = target.reporter
+          if (
+            (config.level.indexOf('*') !== -1 || config.level.indexOf(level) !== -1) &&
+            (config.group.indexOf('*') !== -1 || config.group.indexOf(group) !== -1)
+          ) {
+            reporter.receive(logMessage)
+          }
+        }  
+
+      }
     }
     
   }
@@ -223,6 +227,7 @@ module log {
       
       constructor(options?: {
         console?: { 
+          debug: (s: string) => void; 
           info: (s: string) => void; 
           warn: (s: string) => void;
           error: (s: string) => void;
@@ -234,18 +239,16 @@ module log {
       receive(logMessage: IMessage) {
         var console = this._console
         var formatted = '[' + logMessage.level.name + '|' + logMessage.group + '] ' + logMessage.message
-        switch(logMessage.level) {
-          case INFO:
-            console.info(formatted)
-            break
-          case WARN:
-            console.warn(formatted)
-            break
-          case ERROR:
-          case FATAL:
-            console.error(formatted)
-          default:
-            throw new Error()
+        var level = +logMessage.level
+          
+        if (level >= +ERROR) {
+          console.error(formatted)
+        } else if (level >= +WARN) {
+          console.warn(formatted)
+        } else if (level >= +INFO) {
+          console.info(formatted)
+        } else { //Debug
+          console.debug(formatted)
         }
       }
       
