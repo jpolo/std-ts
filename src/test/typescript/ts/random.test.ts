@@ -1,7 +1,7 @@
-import unit = require("../../../main/typescript/ts/unit");
-import suite = unit.suite;
-import test = unit.test;
-import random = require("../../../main/typescript/ts/random");
+import unit = require("../../../main/typescript/ts/unit")
+import suite = unit.suite
+import test = unit.test
+import random = require("../../../main/typescript/ts/random")
 
 class Assert extends unit.engine.Assert {
   
@@ -20,8 +20,8 @@ class Assert extends unit.engine.Assert {
 }
 
 var randomSuite = suite("ts/random", (self) => {
-  var test = unit.testc(Assert);//overload
-  var engineTest = random.engine.pseudo;
+  var test = unit.testc(Assert)//overload
+  var engineTest = random.engine.pseudo
   
   self.setUp = () => {
     engineTest.seed("");
@@ -32,7 +32,7 @@ var randomSuite = suite("ts/random", (self) => {
   }
   
   test("engine.RC4", (assert) => {
-    var engine = new random.engine.RC4('Example');
+    var engine = new random.engine.RC4('Example')
     assert.generates(
       engine.generate.bind(engine), 
       [
@@ -43,11 +43,11 @@ var randomSuite = suite("ts/random", (self) => {
         0.34828409722783166,
         0.0693748445625555
       ]
-    );
+    )
   })
   
   test("engine.Pseudo", (assert) => {
-    var engine = new random.engine.Pseudo("");
+    var engine = new random.engine.Pseudo("")
 
     assert.generates(
       engine.generate.bind(engine), 
@@ -59,7 +59,7 @@ var randomSuite = suite("ts/random", (self) => {
         0.31325315816067667,
         0.01927975276576525
       ]
-    );
+    )
   })
 
   /*test("exponential()", (assert) => {
@@ -91,7 +91,7 @@ var randomSuite = suite("ts/random", (self) => {
         true,
         false
       ]
-    );
+    )
   })
     
   test("nextChar()", (assert) => {
@@ -107,7 +107,7 @@ var randomSuite = suite("ts/random", (self) => {
         "k",
         "4"
       ]
-    );
+    )
 
   })
     
@@ -126,7 +126,7 @@ var randomSuite = suite("ts/random", (self) => {
         3,
         9
       ]
-    );
+    )
 
   })
     
@@ -144,7 +144,7 @@ var randomSuite = suite("ts/random", (self) => {
         7.250694047177509,
         2.774847985862226
       ]
-    );
+    )
 
   })
     

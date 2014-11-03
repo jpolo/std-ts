@@ -1,15 +1,15 @@
-import unit = require("../../../main/typescript/ts/unit");
-import suite = unit.suite;
-import test = unit.test;
+import unit = require("../../../main/typescript/ts/unit")
+import suite = unit.suite
+import test = unit.test
 import TestEngine = unit.engine.Engine
 import Assert = unit.engine.Assert
-import AssertionType = unit.AssertionType;
+import AssertionType = unit.AssertionType
 
 var assertSuite = suite("ts/unit.Assert", (self) => {
-  var engine = new TestEngine();
-  var testCaseMock: unit.ITest;
-  var reportMock: unit.ITestReport;
-  var assertMock: Assert;
+  var engine = new TestEngine()
+  var testCaseMock: unit.ITest
+  var reportMock: unit.ITestReport
+  var assertMock: Assert
   
   var bootstrapDone = false;
   function bootstrap() {
@@ -24,8 +24,8 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
       assertMock.ok(true)
       assertMock.ok(false)
       if (
-        assertions[i++].type !== AssertionType.Success ||
-        assertions[i++].type !== AssertionType.Failure
+        !unit.SUCCESS.equals(assertions[i++].type) ||
+        !unit.FAILURE.equals(assertions[i++].type)
       ) {
         throw new Error('[Fatal] ts/unit.Assert seems broken')
       }
@@ -37,9 +37,9 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
     bootstrap()
       
     //init mock
-    testCaseMock = { category: "", name: "", run: () => {} };
-    reportMock = { assertions: [], startDate: new Date(), elapsedMilliseconds:0 };
-    assertMock = new Assert(engine, testCaseMock, reportMock);
+    testCaseMock = { category: "", name: "", run: () => {} }
+    reportMock = { assertions: [], startDate: new Date(), elapsedMilliseconds:0 }
+    assertMock = new Assert(engine, testCaseMock, reportMock)
   }
 
   /*test("__position__()", (assert) => {
@@ -50,81 +50,81 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
   })*/
 
   test("__engine__", (assert) => {
-    var ng = assert.__engine__;
-    assert.ok(ng instanceof TestEngine);
+    var ng = assert.__engine__
+    assert.ok(ng instanceof TestEngine)
   })
     
   test("ok(cond: boolean)", (assert) => {
-    var assertions = reportMock.assertions;
-    var i = 0;
-    assertMock.ok(true);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    var assertions = reportMock.assertions
+    var i = 0
+    assertMock.ok(true)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
     
-    assertMock.ok(false);
-    assert.ok(assertions[i++].type === AssertionType.Failure);
+    assertMock.ok(false)
+    assert.ok(assertions[i++].type == unit.FAILURE)
   })
 
   test("strictEqual(l: any, r: any)", (assert) => {
-    var assertions = reportMock.assertions;
-    var i = 0;
-    assertMock.strictEqual(null, null);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    var assertions = reportMock.assertions
+    var i = 0
+    assertMock.strictEqual(null, null)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
 
-    assertMock.strictEqual(undefined, null);
-    assert.ok(assertions[i++].type === AssertionType.Failure);
+    assertMock.strictEqual(undefined, null)
+    assert.ok(assertions[i++].type == unit.FAILURE)
 
-    assertMock.strictEqual(1, 1);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.strictEqual(1, 1)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
 
-    assertMock.strictEqual("1", 1);
-    assert.ok(assertions[i++].type === AssertionType.Failure);
+    assertMock.strictEqual("1", 1)
+    assert.ok(assertions[i++].type == unit.FAILURE)
     
-    assertMock.strictEqual(NaN, NaN);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.strictEqual(NaN, NaN)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
   })
 
   test("equal(l: any, r: any)", (assert) => {
-    var assertions = reportMock.assertions;
-    var i = 0;
-    assertMock.equal(null, null);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    var assertions = reportMock.assertions
+    var i = 0
+    assertMock.equal(null, null)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
 
-    assertMock.equal(undefined, null);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.equal(undefined, null)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
 
-    assertMock.equal(1, 1);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.equal(1, 1)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
 
-    assertMock.equal("1", 1);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.equal("1", 1)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
     
-    assertMock.equal(NaN, NaN);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.equal(NaN, NaN)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
   })
 
   test("throws(fn, expected)", (assert) => {
-    var assertions = reportMock.assertions;
-    var i = 0;
-    assertMock.throws(() => {});
-    assert.ok(assertions[i++].type === AssertionType.Failure);
+    var assertions = reportMock.assertions
+    var i = 0
+    assertMock.throws(() => {})
+    assert.ok(assertions[i++].type == unit.FAILURE)
 
-    assertMock.throws(() => { throw new TypeError() });
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.throws(() => { throw new TypeError() })
+    assert.ok(assertions[i++].type == unit.SUCCESS)
 
-    assertMock.throws(() => { throw new TypeError() }, TypeError);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.throws(() => { throw new TypeError() }, TypeError)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
 
-    assertMock.throws(() => { throw new TypeError() }, Error);
-    assert.ok(assertions[i++].type === AssertionType.Success);
+    assertMock.throws(() => { throw new TypeError() }, Error)
+    assert.ok(assertions[i++].type == unit.SUCCESS)
 
-    assertMock.throws(() => { throw new Error() }, TypeError);
-    assert.ok(assertions[i++].type === AssertionType.Failure);
+    assertMock.throws(() => { throw new Error() }, TypeError)
+    assert.ok(assertions[i++].type == unit.FAILURE)
   })
 
 })
 
 var unitSuite = suite("ts/unit.TestEngine", (self) => {
-  var engine = new TestEngine();
+  var engine = new TestEngine()
 
 
   test("testEquals(l: any, r: any)", (assert) => {
@@ -162,25 +162,25 @@ var unitSuite = suite("ts/unit.TestEngine", (self) => {
 
   test("dump(v: any)", (assert) => {
     //primitives
-    assert.ok(engine.dump(null) === 'null');
-    assert.ok(engine.dump(undefined) === 'undefined');
-    assert.ok(engine.dump(true) === 'true');
-    assert.ok(engine.dump(false) === 'false');
-    assert.ok(engine.dump(1) === '1');
-    assert.ok(engine.dump("abc") === '"abc"');
-    assert.ok(engine.dump('ab"c') === '"ab\\"c"');
+    assert.ok(engine.dump(null) === 'null')
+    assert.ok(engine.dump(undefined) === 'undefined')
+    assert.ok(engine.dump(true) === 'true')
+    assert.ok(engine.dump(false) === 'false')
+    assert.ok(engine.dump(1) === '1')
+    assert.ok(engine.dump("abc") === '"abc"')
+    assert.ok(engine.dump('ab"c') === '"ab\\"c"')
 
     //array
-    assert.ok(engine.dump(['abc', 1, true]) === '["abc", 1, true]');
-    assert.ok(engine.dump([1, 2, 3, 4, 5, 6, 7, 8]) === '[1, 2, 3, 4, 5, 6, 7, ...]');
+    assert.ok(engine.dump(['abc', 1, true]) === '["abc", 1, true]')
+    assert.ok(engine.dump([1, 2, 3, 4, 5, 6, 7, 8]) === '[1, 2, 3, 4, 5, 6, 7, ...]')
 
     //date
-    assert.ok(engine.dump(new Date('1789-07-14T00:00:00.000Z')) === 'Date { 1789-07-14T00:00:00.000Z }');
+    assert.ok(engine.dump(new Date('1789-07-14T00:00:00.000Z')) === 'Date { 1789-07-14T00:00:00.000Z }')
 
     //regexp
-    assert.ok(engine.dump(/abc(.*)/gi) === '/abc(.*)/gi');
+    assert.ok(engine.dump(/abc(.*)/gi) === '/abc(.*)/gi')
   })
 });
-var exportSuite = assertSuite.concat(unitSuite);
+var exportSuite = assertSuite.concat(unitSuite)
 
 export = exportSuite

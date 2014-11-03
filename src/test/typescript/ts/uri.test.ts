@@ -46,7 +46,12 @@ var uriSuite = suite("ts/uri", (self) => {
   test("URI#toJSON()", (assert) => {
     assert.strictEqual(uriDefault.toJSON(), 'http://localhost:8080/titi/tata?q=blah#id')
   })
-  
+    
+  test("URI#inspect()", (assert) => {
+    assert.strictEqual(uri.parse('').inspect(), 'URI {}')
+    assert.strictEqual(uriDefault.inspect(), 'URI { http://localhost:8080/titi/tata?q=blah#id }')
+  })
+    
   test("URI#toString()", (assert) => {
     assert.strictEqual(String(uriDefault), 'http://localhost:8080/titi/tata?q=blah#id')
   })

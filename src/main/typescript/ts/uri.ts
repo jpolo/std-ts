@@ -141,7 +141,6 @@ module uri {
       public query: IQueryString, 
       public fragment: string
     ) {
-    
       //make non mutable
       //Object.freeze(this);
     }
@@ -165,7 +164,9 @@ module uri {
     //}
       
     inspect(): string {
-      return 'URI(' + this.toString() + ')';
+      var s = this.toString()
+      var sep = s.length > 0 ? ' ' : ''
+      return 'URI {' + sep + s + sep + '}';
     }
       
     isAbsolute(): boolean {

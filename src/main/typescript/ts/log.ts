@@ -1,6 +1,6 @@
 module log {
-  var __now = Date.now || function () { return (new Date()).getTime(); }
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
+  var __now = Date.now || function () { return (new Date()).getTime(); }
   var __str = String
   
   export interface ILevel {
@@ -28,12 +28,12 @@ module log {
     static create(name: string, level: number): Level {
       name = name.toUpperCase()
       var levels = Level._instances
-      var logger = levels[name]
-      if (logger) {
-        throw new Error(logger + ' is already defined')
+      var levelObj = levels[name]
+      if (levelObj) {
+        throw new Error(levelObj + ' is already defined')
       }
-      logger = levels[name] = new Level(name, level >>> 0)
-      return logger
+      levelObj = levels[name] = new Level(name, level >>> 0)
+      return levelObj
     }
     
     private static _instances: {[key: string]: Level} = {}
@@ -44,11 +44,7 @@ module log {
     ) { }
     
     equals(o: any) {
-      return (
-        o && 
-        (o instanceof Level) && 
-        o.value === this.value
-      )
+      return this === o || (o && (o instanceof this.constructor) && o.value === this.value)
     }
     
     valueOf() {
@@ -69,10 +65,10 @@ module log {
   }
   
   export var DEBUG = Level.create('DEBUG', 0)
-  export var INFO = Level.create('INFO', 1)
-  export var WARN = Level.create('WARN', 2)
-  export var ERROR = Level.create('ERROR', 3)
-  export var FATAL = Level.create('FATAL', 4)
+  export var INFO = Level.create('INFO', 10)
+  export var WARN = Level.create('WARN', 20)
+  export var ERROR = Level.create('ERROR', 30)
+  export var FATAL = Level.create('FATAL', 40)
   
   export class Message implements IMessage {
   
@@ -85,10 +81,10 @@ module log {
     }
     
     equals(o: any) {
-      return (
+      return this === o || (
         o && 
         (o instanceof Message) && 
-        this.level.equals(o.level) &&
+        +this.level === +o.level &&
         this.group === o.group &&
         this.message === o.message
       )

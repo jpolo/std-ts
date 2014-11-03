@@ -1,9 +1,9 @@
 module vm {
-  var _global: Window = (new Function("return this;")).call(null)
+  var __global: Window = (new Function("return this;")).call(null)
 
   export interface IContext { [key: string]: any }
 
-  export var global = _global
+  export var global = __global
 
   export function compile(jscode: string, fileName?: string): (context?: IContext) => any {
     var fnWithContext: Function

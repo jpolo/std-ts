@@ -1,5 +1,4 @@
 module timer {
-
   var __setTimeout = window.setTimeout
   var __clearTimeout = window.clearTimeout
   var __setInterval = window.setInterval

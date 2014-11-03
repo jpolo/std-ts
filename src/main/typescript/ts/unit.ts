@@ -1,5 +1,4 @@
 import inspect = require("ts/inspect")
-import vm = require("ts/vm")
 import reflect = require("ts/reflect")
 import stacktrace = require("ts/stacktrace")
 import ICallStack = stacktrace.ICallStack
@@ -12,8 +11,8 @@ module unit {
   var __freeze = reflect.freeze
   var __stringTag = reflect.stringTag
   var __now = Date.now || function () { return (new Date()).getTime(); }
+  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
 
-  export enum AssertionType { Success, Failure, Error, Warning }
 
   export interface IAssertion {
     type: AssertionType
@@ -50,23 +49,66 @@ module unit {
     name: string
     run(engine: IEngine, onComplete: (report: ITestReport) => void): void
   }
+  
+  export class AssertionType {
+  
+    static create(name: string): AssertionType {
+      name = name.toUpperCase()
+      var assertionTypes = AssertionType._instances
+      var assertionType = assertionTypes[name]
+      if (assertionType) {
+        throw new Error(assertionType + ' is already defined')
+      }
+      assertionType = assertionTypes[name] = new AssertionType(name, AssertionType._nextValue++)
+      return assertionType
+    }
+    
+    private static _instances: {[key: string]: AssertionType} = {}
+    private static _nextValue = 0
 
+    constructor(public name: string, public value: number) {}
+    
+    equals(o: any): boolean { 
+      return this === o || (o && (o instanceof this.constructor) && this.value === o.value) 
+    }
+    
+    valueOf() { 
+      return this.value 
+    }
+    
+    inspect() { 
+      return __format('AssertionType', this.name) 
+    }
+    
+    toJSON() {
+      return this.toString()
+    }
+    
+    toString() { 
+      return this.name 
+    }
+  }
+  export var SUCCESS = AssertionType.create("SUCCESS")
+  export var FAILURE = AssertionType.create("FAILURE")
+  export var ERROR = AssertionType.create("ERROR")
+  export var WARNING = AssertionType.create("WARNING")
+  
   export class Assertion implements IAssertion {
-
+    
     static success(testCase: ITest, message: string, position?: ICallSite) {
-      return new Assertion(AssertionType.Success, testCase, message, position)
+      return new Assertion(SUCCESS, testCase, message, position)
     }
 
     static failure(testCase: ITest, message: string, position?: ICallSite) {
-      return new Assertion(AssertionType.Failure, testCase,  message, position)
+      return new Assertion(FAILURE, testCase, message, position)
     }
 
     static error(testCase: ITest, message: string, position?: ICallSite, stack = null) {
-      return new Assertion(AssertionType.Error, testCase, message, position, stack)
+      return new Assertion(ERROR, testCase, message, position, stack)
     }
 
     static warning(testCase: ITest, message: string, position?: ICallSite) {
-      return new Assertion(AssertionType.Warning, testCase, message, position)
+      return new Assertion(WARNING, testCase, message, position)
     }
     
     constructor(
@@ -78,33 +120,21 @@ module unit {
     ) { }
 
     equals(o: any): boolean {
-      return (
+      return this === o || (
         o && 
-        (o instanceof Assertion) &&
-        this.type === o.type &&
+        (o instanceof this.constructor) &&
+        +this.type === +o.type &&
         this.test === o.test &&
         this.message === o.message
       )
     }
+    
+    inspect() {
+      return this.toString()
+    }
 
     toString() {
-      var s = ''
-      switch (this.type) {
-        case AssertionType.Success:
-          s += 'Success'
-          break
-        case AssertionType.Failure:
-          s += 'Failure'
-          break
-        case AssertionType.Error:
-          s += 'Error'
-          break
-        case AssertionType.Warning:
-          s += 'Warning'
-          break
-      }
-      s += '(' + this.message + ')'
-      return s
+      return __format(__str(this.type), this.message)
     }
   }
 
@@ -383,9 +413,13 @@ module unit {
         }
       }
 
+      inspect() {
+        return __format('Test', this.toString())
+      }
+      
       toString() {
         var category = this.category
-        return 'Test(' + (category ? category + this._separator : '' ) + this.name + ')'
+        return (category ? category + this._separator : '' ) + this.name
       }
     }
 
@@ -469,7 +503,7 @@ module unit {
                 isSuccess = expected.test(__str(actual))
                 message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
                 break
-              case 'object':
+              case 'Object':
                 isSuccess = actual instanceof expected.constructor &&
                   actual.name === expected.name &&
                   actual.message === expected.message
@@ -493,7 +527,7 @@ module unit {
         message = message || 'assertion should be true'
 
         assertions.push(
-          new Assertion(isSuccess ? AssertionType.Success : AssertionType.Failure, this._testCase, message, position)
+          new Assertion(isSuccess ? SUCCESS : FAILURE, this._testCase, message, position)
         )
         return isSuccess
       }
@@ -583,7 +617,7 @@ module unit {
 
   export class Runner {
     constructor(
-      private _engine: IEngine = new engine.Engine(),
+      private _engine: IEngine = engine.get(),
       private _printers: IPrinter[] = []
     ) { }
 
@@ -635,16 +669,16 @@ module unit {
           var position = assertion.position
           var category = assertion.test.category + '::' + assertion.test.name
 
-          switch (assertion.type) {
-            case AssertionType.Success:
+          switch (+assertion.type) {
+            case +SUCCESS:
               push(category, assertion)
               ++statSuccess
               break
-            case AssertionType.Failure:
+            case +FAILURE:
               push(category, assertion)
               ++statFailed
               break
-            case AssertionType.Error:
+            case +ERROR:
               if (category) {
                 push(category, assertion)
               } else {
@@ -652,7 +686,7 @@ module unit {
               }
               ++statError
               break
-            case AssertionType.Warning:
+            case +WARNING:
               push(category, assertion)
               break
             default:
@@ -670,22 +704,23 @@ module unit {
           var message = assertion.message
           var position = assertion.position
           var positionMessage = position ? " (" + position.fileName + ":" + position.lineNumber + ")" : ""
-
-          switch(assertion.type) {
-            case AssertionType.Success:
+          var typeName = __str(assertion.type)
+          
+          switch(+assertion.type) {
+            case +SUCCESS:
               matrix += "."
               break
-            case AssertionType.Failure:
+            case +FAILURE:
               matrix += "F"
-              messages += "\n  [Failure]  " + message + positionMessage
+              messages += "\n  [" + typeName + "]  " + message + positionMessage
               break
-            case AssertionType.Warning:
+            case +WARNING:
               matrix += "W"
-              messages += "\n  [Warning]  " + message + positionMessage
+              messages += "\n  [" + typeName + "]  " + message + positionMessage
               break
-            case AssertionType.Error:
+            case +ERROR:
               matrix += "E"
-              messages += "\n  [Error] " + (assertion.stack || message)
+              messages += "\n  [" + typeName + "] " + (assertion.stack || message)
               break
             default:
               throw TypeError(JSON.stringify(assertion))
@@ -723,8 +758,6 @@ module unit {
         document.body.appendChild(element)
       }
       var html = s.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;")
-
-
       element.innerHTML += html
     }
 

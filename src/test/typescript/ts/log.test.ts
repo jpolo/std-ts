@@ -35,18 +35,18 @@ var logSuite = suite("ts/log", (self) => {
   
   test("Level#valueOf()", (assert) => {
     assert.strictEqual(+log.DEBUG, 0)
-    assert.strictEqual(+log.INFO, 1)
-    assert.strictEqual(+log.WARN, 2) 
-    assert.strictEqual(+log.ERROR, 3)
-    assert.strictEqual(+log.FATAL, 4)
+    assert.strictEqual(+log.INFO, 10)
+    assert.strictEqual(+log.WARN, 20) 
+    assert.strictEqual(+log.ERROR, 30)
+    assert.strictEqual(+log.FATAL, 40)
   })
     
   test("Level#inspect()", (assert) => {
     assert.strictEqual(log.DEBUG.inspect(), 'Level { name: "DEBUG", value: 0 }')
-    assert.strictEqual(log.INFO.inspect(), 'Level { name: "INFO", value: 1 }')
-    assert.strictEqual(log.WARN.inspect(), 'Level { name: "WARN", value: 2 }') 
-    assert.strictEqual(log.ERROR.inspect(), 'Level { name: "ERROR", value: 3 }')
-    assert.strictEqual(log.FATAL.inspect(), 'Level { name: "FATAL", value: 4 }')
+    assert.strictEqual(log.INFO.inspect(), 'Level { name: "INFO", value: 10 }')
+    assert.strictEqual(log.WARN.inspect(), 'Level { name: "WARN", value: 20 }') 
+    assert.strictEqual(log.ERROR.inspect(), 'Level { name: "ERROR", value: 30 }')
+    assert.strictEqual(log.FATAL.inspect(), 'Level { name: "FATAL", value: 40 }')
   })
     
   test("Level#toString()", (assert) => {

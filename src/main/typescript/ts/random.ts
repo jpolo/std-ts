@@ -1,4 +1,5 @@
 module random {
+  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
   //var math_sqrt = Math.sqrt;
   //var math_sin = Math.sin;
   //var math_cos = Math.cos;
@@ -72,8 +73,12 @@ module random {
         return { done: false, value: this.generate() }
       }
       
+      inspect() {
+        return this.toString()
+      }
+      
       toString() {
-        return 'RandomEngine(' + this.name + ')'
+        return __format('RandomEngine', this.name)
       }
     }
     
