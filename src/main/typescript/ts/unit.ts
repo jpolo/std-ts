@@ -6,12 +6,13 @@ import ICallSite = stacktrace.ICallSite
 
 module unit {
   var TEST_TIMEOUT = 2000;//ms
-  var __str = String
-  var __keys = reflect.ownKeys
+  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
   var __freeze = reflect.freeze
+  var __keys = reflect.ownKeys
+  var __str = String  
   var __stringTag = reflect.stringTag
   var __now = Date.now || function () { return (new Date()).getTime(); }
-  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
+  
 
 
   export interface IAssertion {
@@ -66,7 +67,10 @@ module unit {
     private static _instances: {[key: string]: AssertionType} = {}
     private static _nextValue = 0
 
-    constructor(public name: string, public value: number) {}
+    constructor(
+      public name: string, 
+      public value: number
+    ) {}
     
     equals(o: any): boolean { 
       return this === o || (o && (o instanceof this.constructor) && this.value === o.value) 

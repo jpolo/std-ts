@@ -13,7 +13,7 @@ class TestClass {
 
 var inspectSuite = suite("ts/inspect.Inspect", (self) => {
   
-  var inspectObj = new inspect.Inspect({ maxElements: 3, maxString: 15 })
+  var inspectObj = new inspect.engine.Engine({ maxElements: 3, maxString: 15 })
   
   test("stringify()", (assert) => {
     

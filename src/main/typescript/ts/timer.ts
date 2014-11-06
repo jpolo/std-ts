@@ -10,7 +10,7 @@ module timer {
     return __setTimeout(f, milliseconds)
   }
   
-  export function clearTimeout(id: number) {
+  export function clearTimeout(id: number): void {
     return __clearTimeout(id)
   }
   
@@ -18,7 +18,7 @@ module timer {
     return __setInterval(f, milliseconds)
   }
   
-  export function clearInterval(id: number) {
+  export function clearInterval(id: number): void {
     return __clearInterval(id)
   }
   
@@ -26,7 +26,7 @@ module timer {
     return __setImmediate(f)
   }
   
-  export function clearImmediate(id: number) {
+  export function clearImmediate(id: number): void {
     return __clearImmediate(id)
   }
   

@@ -1,5 +1,10 @@
 module uri {
-
+  var __isArray = Array.isArray
+  var __isString = function (o) { return typeof o === 'string' }
+  var __keys = Object.keys
+  var __str = String
+    
+  
   export function parse(s: string): URI {
     return URI.fromString(s);
   }
@@ -78,11 +83,11 @@ module uri {
       if (o) {
         if (o instanceof URI) {
           returnValue = o;
-        } else if (typeof o === 'string') {
+        } else if (__isString(o)) {
           returnValue = URI.fromString(o);
         } else if ('toURI' in o) {
           returnValue = URI.cast(o.toURI());
-        } else if (Array.isArray(o)) {
+        } else if (__isArray(o)) {
           returnValue = URI.fromArray(o);
         } else {
           returnValue = URI.fromObject(o);
@@ -149,7 +154,8 @@ module uri {
       return (
         this === o ||
         (
-          o && (o instanceof URI) &&
+          o && 
+          (o instanceof this.constructor) &&
           this.scheme === o.scheme &&
           this.domain === o.domain &&
           this.port === o.port &&
@@ -164,9 +170,9 @@ module uri {
     //}
       
     inspect(): string {
-      var s = this.toString()
+      var s = __str(this)
       var sep = s.length > 0 ? ' ' : ''
-      return 'URI {' + sep + s + sep + '}';
+      return 'URI {' + sep + s + sep + '}'
     }
       
     isAbsolute(): boolean {
@@ -174,15 +180,15 @@ module uri {
         !strIsEmpty(this.scheme) &&
         !strIsEmpty(this.domain) && //port?
         !strIsEmpty(this.path)
-      );
+      )
     }
 
     isRelative(): boolean {
-      return !this.isAbsolute();
+      return !this.isAbsolute()
     }
 
     toJSON(): string {
-      return this.toString();
+      return __str(this)
     }
 
     toArray(): Array<any> {
@@ -223,7 +229,7 @@ module uri {
     }*/
 
     valueOf() {
-      return this.toString();
+      return __str(this)
     }
   }
   
@@ -246,17 +252,19 @@ module uri {
     '$');
 
   export function encodeComponent(s: string): string {
-    return s == null ? '' : encodeURIComponent(s);
+    return s == null ? '' : encodeURIComponent(s)
   }
 
   export function decodeComponent(s: string): string {
-    return s == null ? null : decodeURIComponent(s);
+    return s == null ? null : decodeURIComponent(s)
   }
   
   function encodeSpecialChars(unescapedPart: string, extra) {
-    return typeof unescapedPart === 'string' ?
+    return (
+      __isString(unescapedPart) ?
       encodeURI(unescapedPart).replace(extra, encodeChar) :
-      null;
+      null
+    )
   }
 
   function encodeChar(ch: string): string {
@@ -267,7 +275,7 @@ module uri {
   export function encodeQuery(qs: IQueryString): string {
     var s = null, okeys, i, l, key, val;
     if (qs) {
-      okeys = _keys(qs);
+      okeys = __keys(qs);
 
       for (i = 0, l = okeys.length; i < l; ++i) {
         if (i === 0) {
@@ -278,7 +286,7 @@ module uri {
         key = okeys[i];
         val = qs[key];
 
-        if (Array.isArray(val) && typeof val != 'string') {
+        if (__isArray(val) && !__isString(val)) {
           for (i = 0, l = val.length; i < l; ++i) {
             if (s.length > 0) {
               s += '&';
@@ -319,7 +327,7 @@ module uri {
         val = decodeComponent(val);
         qsval = qs[key];
         if (qsval) {
-          if (!Array.isArray(qsval)) {
+          if (!__isArray(qsval)) {
             qs[key] = [qsval, val];
           } else {
             qs[key].push(val);
@@ -337,8 +345,8 @@ module uri {
   function _queryEquals(l, r): boolean {
     var returnValue = true;
     if (l !== r) {
-      var lkeys = _keys(l);
-      var rkeys = _keys(r);
+      var lkeys = __keys(l);
+      var rkeys = __keys(r);
       var lkeyc: number = lkeys.length;
       var rkeyc: number = rkeys.length;
       
@@ -362,10 +370,6 @@ module uri {
   
   function strIsEmpty(o: string) {
     return !o || o.length === 0;
-  }
-  
-  function _keys(o) {
-    return Object.keys(o);
   }
   
 }

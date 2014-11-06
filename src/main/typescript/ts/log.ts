@@ -3,6 +3,10 @@ module log {
   var __now = Date.now || function () { return (new Date()).getTime(); }
   var __str = String
   
+  export interface IEngine {
+    send(level: ILevel, group: string, message: string)
+  }
+  
   export interface ILevel {
     name: string
     value: number
@@ -43,7 +47,7 @@ module log {
       public value: number
     ) { }
     
-    equals(o: any) {
+    equals(o: any): boolean {
       return this === o || (o && (o instanceof this.constructor) && o.value === this.value)
     }
     
@@ -51,7 +55,7 @@ module log {
       return this.value
     }
     
-    inspect() {
+    inspect(): string {
       return __format('Level', 'name: "' + this.name + '", value: ' + this.value)
     }
     
@@ -59,7 +63,7 @@ module log {
       return this.name
     }
     
-    toString() {
+    toString(): string {
       return this.name
     }
   }
@@ -73,35 +77,34 @@ module log {
   export class Message implements IMessage {
   
     constructor(
-      public level: Level, 
+      public level: ILevel, 
       public group: string = "",
       public message: string = "",
       public timestamp: number = __now()
     ) {
     }
     
-    equals(o: any) {
+    equals(o: any): boolean {
       return this === o || (
         o && 
-        (o instanceof Message) && 
+        (o instanceof this.constructor) && 
         +this.level === +o.level &&
         this.group === o.group &&
         this.message === o.message
       )
     }
     
-    inspect() {
+    inspect(): string {
       return __format('Message', 
-        'level: ' + __str(this.level) + ', ' +
+        'level: ' + this.level.name + ', ' +
         'group: "' + this.group + '", ' +
         'message: "' + this.message + '"'
       )
     }
     
-    toString() {
-      return '[' + __str(this.level) + '|' + this.group + '] ' + this.message
+    toString(): string {
+      return '[' + this.level.name + '|' + this.group + '] ' + this.message
     }
-    
   }
   
   export function logger(group: string) {
@@ -159,7 +162,7 @@ module log {
       return this.log(FATAL, this.name, message)
     }
     
-    toString() {
+    toString(): string {
       return __format('Logger', this.name)
     }
   }
@@ -174,7 +177,7 @@ module log {
       return (_instance || (_instance = new Engine()))
     }
     
-    export class Engine {  
+    export class Engine implements IEngine {  
       reporters: { config: any; reporter: IReporter; }[] = []
       
       private _loggers: { [name: string]: Logger } = {}
@@ -184,7 +187,7 @@ module log {
         return loggers[name] || (loggers[name] = new Logger(name, this))
       }
 
-      send(level: Level, group: string, message: string) {
+      send(level: ILevel, group: string, message: string): void {
         var reporters = this.reporters
         var logMessage = new Message(level, group, message)
         for (var i = 0, l = reporters.length; i < l; ++i) {
@@ -197,8 +200,7 @@ module log {
           ) {
             reporter.receive(logMessage)
           }
-        }  
-
+        }
       }
     }
     
@@ -211,8 +213,7 @@ module log {
       logs: string[] = []
     
       receive(logMessage: IMessage) {
-        var formatted = '[' + logMessage.level + '|' + logMessage.group + '] ' + logMessage.message
-        this.logs.push(formatted)
+        this.logs.push(__str(logMessage))
       }
     
     }
@@ -234,7 +235,7 @@ module log {
       
       receive(logMessage: IMessage) {
         var console = this._console
-        var formatted = '[' + logMessage.level.name + '|' + logMessage.group + '] ' + logMessage.message
+        var formatted = __str(logMessage)
         var level = +logMessage.level
           
         if (level >= +ERROR) {
