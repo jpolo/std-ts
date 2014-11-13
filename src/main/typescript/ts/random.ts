@@ -3,15 +3,15 @@ module random {
   //var math_sqrt = Math.sqrt;
   //var math_sin = Math.sin;
   //var math_cos = Math.cos;
-  var math_floor = Math.floor;
-  var math_log = Math.log;
-  var math_pow = Math.pow;
+  var math_floor = Math.floor
+  var math_log = Math.log
+  var math_pow = Math.pow
   
   
-  var FLOAT_MIN_VALUE = Number.MIN_VALUE;
-  var FLOAT_MAX_VALUE = Number.MAX_VALUE;
-  var INT_MIN_VALUE = math_pow(2, 31)|0;
-  var INT_MAX_VALUE = (INT_MIN_VALUE - 1)|0;
+  var FLOAT_MIN_VALUE = Number.MIN_VALUE
+  var FLOAT_MAX_VALUE = Number.MAX_VALUE
+  var INT_MIN_VALUE = math_pow(2, 31)|0
+  var INT_MAX_VALUE = (INT_MIN_VALUE - 1)|0
 
   export interface IEngine {
     //generate must return value [0, 1)
@@ -19,7 +19,7 @@ module random {
     next(): { done: boolean; value?: number }
   }
 
-  export function next(ng: IEngine = engine.get()) {
+  export function next(ng: IEngine = engine.get()): number {
     return ng.generate()
   }
   
@@ -54,37 +54,36 @@ module random {
         return math_random().toString(36)
       }
       
-      name = "<anonymous>"
+      name = "<ANONYMOUS>"
       
       constructor(seed?: string) {
-        if (seed == null) {
-          seed = Engine.seedDefault()
-        }
-        this.seed(seed)
+        this.seed(seed == null ? Engine.seedDefault() : seed)
       }
       
       seed(str: string) { }
       
       generate(): number {
-        throw Error()
+        return NaN
       }
-      
-      next() {
+
+      next(): { done: boolean; value: number; } {
         return { done: false, value: this.generate() }
       }
       
-      inspect() {
+      inspect(): string {
         return this.toString()
       }
       
-      toString() {
-        return __format('RandomEngine', this.name)
+      toString(): string {
+        return __format('Engine', this.name)
       }
     }
     
     export class Native extends Engine {
-      name = "native"
-      generate() { return math_random() }
+      name = "NATIVE"
+      generate(): number { 
+        return math_random() 
+      }
     }
     
     var PSEUDO_M = 2147483647
@@ -95,7 +94,7 @@ module random {
     var PSEUDO_ONE_OVER_M_MINUS_ONE = 1.0 / PSEUDO_M_MINUS_ONE
     
     export class Pseudo extends Engine {
-      name = "pseudo"
+      name = "PSEUDO"
       
       private _state: number = 0
       
@@ -114,7 +113,7 @@ module random {
         this._state = state
       }
       
-      generate() {
+      generate(): number {
         var state = this._state
         var hi = math_floor(state / PSEUDO_Q)
         var lo = state % PSEUDO_Q
@@ -130,7 +129,7 @@ module random {
     var RC4_BYTES = 7; // 56 bits to make a 53-bit double
     var RC4_DENOM = (math_pow(2, RC4_BYTES * 8) - 1)
     export class RC4 extends Engine {
-      name = "rc4"
+      name = "RC4"
       
       private static _getStringBytes(s: string): number[] {
         var output = []
@@ -170,7 +169,7 @@ module random {
         }
       }
 
-      generate() {
+      generate(): number {
         var output = 0
         for (var i = 0; i < RC4_BYTES; i++) {
           output *= RC4_WIDTH
@@ -217,7 +216,8 @@ module random {
     }
   }
   
-  /*export interface IGenerator<T> {
+  /*
+  export interface IGenerator<T> {
     (): T
     next(): { done: boolean; value?: T }
   }

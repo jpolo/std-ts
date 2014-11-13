@@ -8,9 +8,16 @@ import Message = log.Message
 
 var logSuite = suite("ts/log", (self) => {
   var ng: Engine
+  var logger: Logger
   
   self.setUp = () => {
     ng = new Engine()
+    logger = ng.logger('test')
+      
+    ng.reporters['fds'] = {
+      filter: null,
+      reporter: new log.reporter.Simple()
+    }
   }
   
   test("logger()", (assert) => {
@@ -21,6 +28,8 @@ var logSuite = suite("ts/log", (self) => {
       
     assert.strictEqual(log.logger('test.foo.bar'), log.logger('test.foo.bar'))
   })
+    
+  
     
   test("Message#inspect()", (assert) => {
     var message = new Message(log.DEBUG, "mygroup", "mymessage")
@@ -58,9 +67,12 @@ var logSuite = suite("ts/log", (self) => {
   })
   
   
+  test("Logger#inspect()", (assert) => {
+    assert.strictEqual((new Logger('test.foo', ng)).toString(), 'Logger { name: "test.foo" }')
+  })
   
   test("Logger#toString()", (assert) => {
-    assert.strictEqual((new Logger('test.foo', ng)).toString(), 'Logger { test.foo }')
+    assert.strictEqual((new Logger('test.foo', ng)).toString(), 'Logger { name: "test.foo" }')
   })
 })
 
