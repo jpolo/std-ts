@@ -1,9 +1,12 @@
 module log {
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
+  var __isNumber = function (o) { return typeof o == 'number'; }
   var __isString = function (o) { return typeof o == 'string'; }
   var __isFunction = function (o) { return typeof o == 'function'; }
+  var __keys = Object.keys
   var __now = Date.now || function () { return (new Date()).getTime(); }
   var __str = String
+  var __throwAsync = function (e) { setTimeout(() => { throw e }, 0) }
   
   export interface IEngine {
     isEnabledFor(level: ILevel, group: string): boolean
@@ -35,6 +38,8 @@ module log {
     static cast(o: any): Level {
       if (o instanceof Level) {
         return o
+      } else if (__isNumber(o)) {
+        return Level.fromNumber(o)
       } else if (__isString(o)) {
         return Level.fromString(o)
       }
@@ -44,22 +49,31 @@ module log {
       return a.value - b.value
     }
     
+    static fromNumber(val: number): Level {
+      return Level._byValue[val >>> 0]
+    }
+    
     static fromString(s: string): Level {
       return Level._instances[s.toUpperCase()]
     }
     
     static create(name: string, level: number): Level {
       name = name.toUpperCase()
-      var levels = Level._instances
-      var levelObj = levels[name]
-      if (levelObj) {
-        throw new Error(levelObj + ' is already defined')
+      level = level >>> 0
+      var byName = Level._byValue
+      var byValue = Level._byValue
+      if (byName[name]) {
+        throw new Error(byName[name] + ' is already defined')
       }
-      levelObj = levels[name] = new Level(name, level >>> 0)
+      if (byValue[level]) {
+        throw new Error(byValue[level] + ' is already defined')
+      }
+      var levelObj = byName[name] = byValue[level] = new Level(name, level)
       return levelObj
     }
     
     private static _instances: {[key: string]: Level} = {}
+    private static _byValue: {[key: number]: Level} = {}
     
     constructor(
       public name: string, 
@@ -83,7 +97,7 @@ module log {
     }
     
     toJSON() {
-      return this.name
+      return this.value
     }
     
     toString(): string {
@@ -123,6 +137,15 @@ module log {
         'group: "' + this.group + '", ' +
         'message: "' + this.message + '"'
       )
+    }
+    
+    toJSON() {
+      return {
+        level: this.level.value,
+        group: this.group,
+        message: this.message,
+        timestamp: this.timestamp
+      }
     }
     
     toString(): string {
@@ -206,7 +229,7 @@ module log {
     }
     
     export class Engine implements IEngine {  
-      reporters: { [key: string]: { filter: IFilter; reporter: IReporter; } } = {}
+      reporters: { [key: string]: { filter?: IFilter; reporter: IReporter; } } = {}
       
       private _loggers: { [name: string]: Logger } = {}
       
@@ -219,11 +242,10 @@ module log {
         var returnValue = false
         var reporters = this.reporters
         var logMessage = new Message(level, group, null)
-        var names = Object.keys(reporters)
+        var names = __keys(reporters)
         for (var i = 0, l = names.length; i < l; ++i) {
           var target = reporters[names[i]]
-          var filter = target.filter
-          if (filter(logMessage)) {
+          if (this._filter(target.filter, logMessage)) {
             returnValue = true
             break
           }
@@ -233,17 +255,27 @@ module log {
 
       send(level: ILevel, group: string, message: string): void {
         var reporters = this.reporters
-        var logMessage = new Message(level, group, message)
-          
-        var names = Object.keys(reporters)
+        var logMessage = new Message(level, group, message)    
+        var names = __keys(reporters)
         for (var i = 0, l = names.length; i < l; ++i) {
           var target = reporters[names[i]]
-          var filter = target.filter
-          var reporter = target.reporter
-          if (filter(logMessage)) {
-            reporter.receive(logMessage)
+          if (this._filter(target.filter, logMessage)) {
+            target.reporter.receive(logMessage)
           }
         }
+      }
+      
+      private _filter(f: IFilter, m: IMessage): boolean {
+        var returnValue = true
+        if (f) {
+          returnValue = false
+          try {
+            returnValue = f(m)
+          } catch (e) {
+            __throwAsync(e)
+          }
+        }
+        return returnValue
       }
     }
     
@@ -256,6 +288,9 @@ module log {
   
   export module filter {
   
+    export function always(b: boolean) {
+      return _create((m: IMessage) => b)
+    }
     
     export function level(l: ILevel, op?: string): IFilter
     export function level(l: string, op?: string): IFilter
@@ -272,9 +307,9 @@ module log {
       return returnValue
     }
     
-    export function name(s: string): IFilter
-    export function name(s: RegExp): IFilter
-    export function name(s: any): IFilter {
+    export function group(s: string): IFilter
+    export function group(s: RegExp): IFilter
+    export function group(s: any): IFilter {
       var fn = _matcher(s)
       return _create((m: IMessage) => fn(m.group))
     }
@@ -292,11 +327,11 @@ module log {
     }
     
     function _create(f: (m: IMessage) => boolean): IFilter {
-      return { filter: f }
+      return f
     }
     
     function _call(f: IFilter, m: IMessage) {
-      return f.filter(m)
+      return f(m)
     }
     
     function _matcher(s: any): (o: any) => boolean {
@@ -314,10 +349,10 @@ module log {
   
   export module reporter {
   
-    export class Simple implements IReporter {
+    export class Array implements IReporter {
     
-      logs: string[] = []
-    
+      constructor(public logs: string[] = []) { }
+      
       receive(logMessage: IMessage) {
         this.logs.push(__str(logMessage))
       }

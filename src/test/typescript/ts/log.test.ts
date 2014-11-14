@@ -9,14 +9,16 @@ import Message = log.Message
 var logSuite = suite("ts/log", (self) => {
   var ng: Engine
   var logger: Logger
+  var logs: string[]
   
   self.setUp = () => {
     ng = new Engine()
     logger = ng.logger('test')
+    logs = []
       
-    ng.reporters['fds'] = {
+    ng.reporters['simple'] = {
       filter: null,
-      reporter: new log.reporter.Simple()
+      reporter: new log.reporter.Array(logs)
     }
   }
   
