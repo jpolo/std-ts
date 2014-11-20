@@ -13,6 +13,7 @@ import unitSuite = require("./unit.test")
 import uriSuite = require("./uri.test")
 import timerSuite = require("./timer.test")
 import vmSuite = require("./vm.test")
+import yamlSuite = require("./yaml.test")
 
 var allSuite: unit.ITest[] = [].concat(
   dateSuite,
@@ -27,7 +28,8 @@ var allSuite: unit.ITest[] = [].concat(
   unitSuite,
   uriSuite,
   timerSuite,
-  vmSuite
+  vmSuite,
+  yamlSuite
 )
 
 export = allSuite

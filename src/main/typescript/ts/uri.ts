@@ -10,58 +10,7 @@ module uri {
   }
 
   export function stringify(uri: IURI): string {
-    var reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
-    var reDisallowedInFragment = /#/g;
-    var reDisallowedInAbsolutePath = /[\#\?]/g;
-    var reDisallowedInRelativePath =/[\#\?:]/g;
-    
-    var scheme = uri.scheme;
-    var userInfo = uri.userInfo;
-    var domain = uri.domain;
-    var port = uri.port;
-    var path = uri.path;
-    var query = uri.query;
-    var fragment = uri.fragment;
-    
-    var s = '';
-    
-    if (scheme != null) {
-      s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ':';
-    }
-
-    if (domain != null) {
-      s += '//';
-
-      if (userInfo != null) {
-        s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + '@';
-      }
-
-      s += encodeComponent(domain);
-      if (port != null) {
-        s += ':' + port;
-      }
-    }
-
-    if (path != null) {
-      if (domain && path.charAt(0) != '/') {
-        s += '/';
-      }
-      s += encodeSpecialChars(
-        path,
-        path.charAt(0) == '/' ? 
-          reDisallowedInAbsolutePath : 
-          reDisallowedInRelativePath
-      );
-    }
-
-    if (query != null) {
-      s += '?' + encodeQuery(query);
-    }
-
-    if (fragment != null) {
-      s += '#' + encodeSpecialChars(fragment, reDisallowedInFragment);
-    }
-    return s;
+    return URI.stringify(uri)
   }
 
   export interface IQueryString { [s: string]: string; }
@@ -100,6 +49,16 @@ module uri {
       return returnValue;
     }
     
+    static compare(a: IURI, b: IURI): number {
+      var aStr = URI.stringify(a)
+      var bStr = URI.stringify(b)
+      return (
+        aStr === bStr ? 0 :
+        aStr > bStr ? 1 :
+        -1
+      )
+    }
+    
     static fromArray(a: any[]): URI {
       return new URI(a[0], a[1], a[2], a[3] != null ? parseInt(a[3]) : null, a[4], a[5], a[6]);
     }
@@ -135,6 +94,61 @@ module uri {
       );
     }
     
+    static stringify(uri: IURI): string {
+      var reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
+      var reDisallowedInFragment = /#/g;
+      var reDisallowedInAbsolutePath = /[\#\?]/g;
+      var reDisallowedInRelativePath =/[\#\?:]/g;
+      
+      var scheme = uri.scheme;
+      var userInfo = uri.userInfo;
+      var domain = uri.domain;
+      var port = uri.port;
+      var path = uri.path;
+      var query = uri.query;
+      var fragment = uri.fragment;
+      
+      var s = '';
+      
+      if (scheme != null) {
+        s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ':';
+      }
+  
+      if (domain != null) {
+        s += '//';
+  
+        if (userInfo != null) {
+          s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + '@';
+        }
+  
+        s += encodeComponent(domain);
+        if (port != null) {
+          s += ':' + port;
+        }
+      }
+  
+      if (path != null) {
+        if (domain && path.charAt(0) != '/') {
+          s += '/';
+        }
+        s += encodeSpecialChars(
+          path,
+          path.charAt(0) == '/' ? 
+            reDisallowedInAbsolutePath : 
+            reDisallowedInRelativePath
+        );
+      }
+  
+      if (query != null) {
+        s += '?' + encodeQuery(query);
+      }
+  
+      if (fragment != null) {
+        s += '#' + encodeSpecialChars(fragment, reDisallowedInFragment);
+      }
+      return s;
+    }
+    
     private _href = null;
 
     constructor(
@@ -148,6 +162,10 @@ module uri {
     ) {
       //make non mutable
       //Object.freeze(this);
+    }
+    
+    compare(u: IURI): number {
+      return URI.compare(this, u)  
     }
 
     equals(o: any): boolean {

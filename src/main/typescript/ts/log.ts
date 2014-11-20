@@ -6,7 +6,7 @@ module log {
   var __keys = Object.keys
   var __now = Date.now || function () { return (new Date()).getTime(); }
   var __str = String
-  var __throwAsync = function (e) { setTimeout(() => { throw e }, 0) }
+  var __strCmp = function (a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 }
   
   export interface IEngine {
     isEnabledFor(level: ILevel, group: string): boolean
@@ -49,14 +49,6 @@ module log {
       return a.value - b.value
     }
     
-    static fromNumber(val: number): Level {
-      return Level._byValue[val >>> 0]
-    }
-    
-    static fromString(s: string): Level {
-      return Level._instances[s.toUpperCase()]
-    }
-    
     static create(name: string, level: number): Level {
       name = name.toUpperCase()
       level = level >>> 0
@@ -71,6 +63,14 @@ module log {
       var levelObj = byName[name] = byValue[level] = new Level(name, level)
       return levelObj
     }
+
+    static fromNumber(val: number): Level {
+      return Level._byValue[val >>> 0]
+    }
+    
+    static fromString(s: string): Level {
+      return Level._instances[s.toUpperCase()]
+    }
     
     private static _instances: {[key: string]: Level} = {}
     private static _byValue: {[key: number]: Level} = {}
@@ -80,14 +80,14 @@ module log {
       public value: number
     ) { }
     
-    equals(o: any): boolean {
-      return this === o || (o && (o instanceof this.constructor) && o.value === this.value)
-    }
-    
     compare(l: ILevel): number {
       return Level.compare(this, l)
     }
     
+    equals(o: any): boolean {
+      return this === o || (!!o && (o instanceof this.constructor) && o.value === this.value)
+    }
+
     valueOf() {
       return this.value
     }
@@ -113,6 +113,14 @@ module log {
   
   export class Message implements IMessage {
   
+    static compare(a: IMessage, b: IMessage): number {
+      return (
+        Level.compare(a.level, b.level) ||
+        __strCmp(a.group, b.group) ||
+        __strCmp(a.message, b.message)
+      )
+    }
+    
     constructor(
       public level: ILevel, 
       public group: string = "",
@@ -121,9 +129,13 @@ module log {
     ) {
     }
     
+    compare(o: IMessage): number {
+      return Message.compare(this, o)
+    }
+    
     equals(o: any): boolean {
       return this === o || (
-        o && 
+        !!o && 
         (o instanceof this.constructor) && 
         this.level.value === o.level.value &&
         this.group === o.group &&
@@ -219,6 +231,30 @@ module log {
   }
 
   export module engine {
+    interface IEngineReporter { filter?: IFilter; reporter: IReporter; }
+    
+     var __apply = function (f: Function, thisp?: any, args?: any[]) {
+      var returnValue
+      var argc = args ? args.length : 0
+      try {
+        switch (argc) {
+        case 0: returnValue = thisp ? f.call(thisp) : f(); break;
+        case 1: returnValue = thisp ? f.call(thisp, args[0]) : f(args[0]); break;
+        case 2: returnValue = thisp ? f.call(thisp, args[0], args[1]) : f(args[0], args[1]); break;
+        default: returnValue = f.apply(thisp, args)
+        }
+      } catch (e) {
+        setTimeout(function () { throw e }, 0)
+      }
+      return returnValue
+    }
+    var __filter = function (f: IEngineReporter, m: IMessage): boolean {
+      return f.filter ? __apply(f.filter, f, [ m ]) || false : true
+    }
+    var __send = function (f: IEngineReporter, m: IMessage) {
+      var reporter = f.reporter
+      return __apply(reporter.receive, reporter, [ m ])
+    }
     
     /**
      * Default engine 
@@ -245,7 +281,7 @@ module log {
         var names = __keys(reporters)
         for (var i = 0, l = names.length; i < l; ++i) {
           var target = reporters[names[i]]
-          if (this._filter(target.filter, logMessage)) {
+          if (__filter(target, logMessage)) {
             returnValue = true
             break
           }
@@ -259,24 +295,12 @@ module log {
         var names = __keys(reporters)
         for (var i = 0, l = names.length; i < l; ++i) {
           var target = reporters[names[i]]
-          if (this._filter(target.filter, logMessage)) {
-            target.reporter.receive(logMessage)
+          if (__filter(target, logMessage)) {
+            __send(target, logMessage)
           }
         }
       }
-      
-      private _filter(f: IFilter, m: IMessage): boolean {
-        var returnValue = true
-        if (f) {
-          returnValue = false
-          try {
-            returnValue = f(m)
-          } catch (e) {
-            __throwAsync(e)
-          }
-        }
-        return returnValue
-      }
+
     }
     
   }
@@ -351,10 +375,10 @@ module log {
   
     export class Array implements IReporter {
     
-      constructor(public logs: string[] = []) { }
+      constructor(public logs: IMessage[] = []) { }
       
       receive(logMessage: IMessage) {
-        this.logs.push(__str(logMessage))
+        this.logs.push(logMessage)
       }
     
     }

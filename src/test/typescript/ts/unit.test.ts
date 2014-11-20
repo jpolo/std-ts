@@ -119,6 +119,12 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
 
     assertMock.throws(() => { throw new Error() }, TypeError)
     assert.ok(assertions[i++].type == unit.FAILURE)
+    
+    assertMock.throws(() => { throw new Error("blah") }, "Error: blah")
+    assert.ok(assertions[i++].type == unit.SUCCESS)
+    
+    assertMock.throws(() => { throw new Error("foo") }, "Error: blah")
+    assert.ok(assertions[i++].type == unit.FAILURE)
   })
 
 })

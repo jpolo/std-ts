@@ -9,7 +9,7 @@ import Message = log.Message
 var logSuite = suite("ts/log", (self) => {
   var ng: Engine
   var logger: Logger
-  var logs: string[]
+  var logs: log.IMessage[]
   
   self.setUp = () => {
     ng = new Engine()
@@ -31,7 +31,13 @@ var logSuite = suite("ts/log", (self) => {
     assert.strictEqual(log.logger('test.foo.bar'), log.logger('test.foo.bar'))
   })
     
-  
+  test("Message#equals()", (assert) => {
+    var message = new Message(log.DEBUG, "mygroup", "mymessage")
+    assert.strictEqual(message.equals(null), false)
+    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygroup", "mymessage")), true)
+    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygrou", "mymessage")), false)
+    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygroup", "mymessag")), false)
+  })
     
   test("Message#inspect()", (assert) => {
     var message = new Message(log.DEBUG, "mygroup", "mymessage")
@@ -52,6 +58,14 @@ var logSuite = suite("ts/log", (self) => {
     assert.strictEqual(+log.FATAL, 40)
   })
     
+  test("Level#equals()", (assert) => {
+    var level = new log.Level("BLAH", log.DEBUG.value)
+    assert.strictEqual(level.equals(null), false)
+    assert.strictEqual(level.equals(log.DEBUG), true)
+    assert.strictEqual(level.equals(log.INFO), false)
+    assert.strictEqual(level.equals({ name: "BLAH", value: log.DEBUG.value}), false)
+  })
+    
   test("Level#inspect()", (assert) => {
     assert.strictEqual(log.DEBUG.inspect(), 'Level { name: "DEBUG", value: 0 }')
     assert.strictEqual(log.INFO.inspect(), 'Level { name: "INFO", value: 10 }')
@@ -70,11 +84,21 @@ var logSuite = suite("ts/log", (self) => {
   
   
   test("Logger#inspect()", (assert) => {
-    assert.strictEqual((new Logger('test.foo', ng)).toString(), 'Logger { name: "test.foo" }')
+    assert.strictEqual(ng.logger("test").inspect(), 'Logger { name: "test" }')
+    assert.strictEqual(ng.logger("test.foo").inspect(), 'Logger { name: "test.foo" }')
+    assert.strictEqual(ng.logger("test.foo.bar").inspect(), 'Logger { name: "test.foo.bar" }')
+  })
+    
+  test("Logger#log()", (assert) => {
+    assert.strictEqual(logs.length, 0)
+    logger.log(log.DEBUG, "blah blah")
+    assert.strictEqual(logs.length, 1)
+    assert.equal(logs[0], new log.Message(log.DEBUG, "test", "blah blah"))
   })
   
   test("Logger#toString()", (assert) => {
-    assert.strictEqual((new Logger('test.foo', ng)).toString(), 'Logger { name: "test.foo" }')
+    assert.strictEqual(ng.logger("test").toString(), 'Logger { name: "test" }')
+    assert.strictEqual(ng.logger("test.foo").toString(), 'Logger { name: "test.foo" }')
   })
 })
 

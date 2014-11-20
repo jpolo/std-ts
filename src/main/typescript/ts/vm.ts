@@ -1,4 +1,5 @@
 module vm {
+  var __empty = {}
   var __global: Window = (new Function("return this;")).call(null)
 
   export interface IOption {
@@ -12,7 +13,7 @@ module vm {
   export var global = __global
 
   export function compile(jscode: string, options?: IOption): (context?: IContext) => any {
-    options = options || {}
+    options = options || __empty
     var fnWithContext: Function
     var fnNoContext: Function
     var fileName = options.fileName

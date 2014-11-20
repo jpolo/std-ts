@@ -211,9 +211,9 @@ module unit {
               case 'Boolean':
                 return o1 === o2
               case 'Number':
-                return o1 === o2 || (isNaN(o1) && isNaN(o2))
+                return o1 === o2 || ((__stringTag(o2) === 'Number') && (isNaN(o1) && isNaN(o2)))
               case 'String':
-                return __str(o1) === __str(o2)
+                return o1 === o2 || ((__stringTag(o2) === 'String') && (__str(o1) === __str(o2)))
               case 'Array':            
                 if (
                   o2 == null ||
@@ -232,7 +232,7 @@ module unit {
               case 'Function':
               default:
                 var keys1 = __keys(o1)
-                if (o2 == null) {
+                if (o2 == null || typeof o2 != "object") {
                   return false
                 }  
                 var keys2 = __keys(o2)
@@ -482,16 +482,14 @@ module unit {
         var isSuccess = false
         var position = this.__position__()
         var actual
-        message = message || (this.__dump__(block) + ' must throw an error')
+        message = message || ('`' + block.toString().slice(13, -1).trim() + '` must throw an error')
         try {
           block()
         } catch (e) {
           actual = e
         }
 
-        if (!actual) {
-          isSuccess = false
-        } else {
+        if (actual) {
           if (!expected) {
             isSuccess = true
           } else {
