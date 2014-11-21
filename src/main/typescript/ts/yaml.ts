@@ -1,9 +1,9 @@
 module yaml {
   var __t = function (t: Token, re: RegExp): {0: Token; 1: RegExp} { return <any>[t, re] }
-  var __strCount = function (str: string, needle: string, last: number): number {
+  var __strCount = function (str: string, needle: string, toIndex: number): number {
     var n = 0;
     var i = str.indexOf(needle);
-    while (i != -1 && i < last) {
+    while (i != -1 && i < toIndex) {
       n++;
       i = str.indexOf(needle, i + 1);
     }
@@ -44,6 +44,10 @@ module yaml {
     columnNumber: number
   }
   
+  export interface IParserOption { 
+    fileName?: string
+  } 
+  
   var TOKENS: {0: Token; 1: RegExp}[] = [
     __t(Token.COMMENT, /^#[^\n]*/),
     __t(Token.INDENT, /^\n( *)/),
@@ -70,8 +74,8 @@ module yaml {
   
 
   
-  export function parse(s: string) {
-    return parser.parse(parser.tokenize(s))
+  export function parse(s: string, options?: IParserOption) {
+    return parser.parse(parser.tokenize(s, options || {}))
   }
   
   
@@ -82,15 +86,19 @@ module yaml {
 
   
   module parser {
+    var FILE_ANONYMOUS = "<anonymous>"
+    
     interface IState extends Array<ITokenMatch> { } 
     
     function error(fileName: string, lineNumber: number, columnNumber: number, message: string) {
-      var s = ""
-      if (fileName) {
-        s += fileName
-      }
-      s += "(" + lineNumber + "," + columnNumber + "):"
-      s += message
+      var s = (
+        message +
+        " (" +
+        (fileName == null ? FILE_ANONYMOUS : fileName) +
+        ":" + lineNumber +
+        ":" + columnNumber +
+        ")"
+      )
       return new SyntaxError(s)
     }
     
@@ -227,7 +235,7 @@ module yaml {
       accept(state, Token.CURLY_BRACE_OPEN)
       while (!accept(state, Token.CURLY_BRACE_CLOSE)) {
         ignoreSpace(state)
-        if (i)  {
+        if (i !== 0)  {
           expect(state, Token.COMMA, 'expected comma')
         }
         ignoreWhitespace(state)
@@ -305,7 +313,9 @@ module yaml {
       return date
     }
     
-    export function tokenize(str: string): ITokenMatch[] {
+    export function tokenize(str: string, options: IParserOption): ITokenMatch[] {
+      var strLength = str.length
+      var strConsumedLength = 0
       var TOKEN_COUNT = TOKENS.length
       var tokenMatch: ITokenMatch
       var captures: RegExpExecArray
@@ -315,21 +325,26 @@ module yaml {
       var lastIndents = 0
       var stack = []
       var indentAmount = -1
-      var fileName = ""
+      var fileName = options.fileName
       var lineNumber = NaN
       var columnNumber = NaN
+      var buffer = str
     
       // Windows new line support (CR+LF, \r\n)
-      str = str.replace(/\r\n/g, "\n")
+      buffer = buffer.replace(/\r\n/g, "\n")
     
-      while (str.length) {
+      while (buffer.length) {
         for (var i = 0; i < TOKEN_COUNT; ++i) {
           var matcher = TOKENS[i]
           var tokenType = matcher[0]
           var re = matcher[1]
-          if (captures = re.exec(str)) {
-            lineNumber = __strCount(str, "\n", captures.index)
-            columnNumber = captures.index - str.lastIndexOf("\n", captures.index)
+          if (captures = re.exec(buffer)) {
+            //consume
+            buffer = buffer.replace(re, '')
+            strConsumedLength = (strLength - buffer.length)
+            
+            lineNumber = __strCount(str, "\n", strConsumedLength)
+            columnNumber = strConsumedLength - str.lastIndexOf("\n", strConsumedLength)
             tokenMatch = { 
               token: tokenType, 
               matches: captures, 
@@ -337,7 +352,7 @@ module yaml {
               lineNumber: lineNumber,
               columnNumber: columnNumber
             }
-            str = str.replace(re, '')
+
             switch (tokenMatch.token) {
               case Token.COMMENT:
                 ignore = true
@@ -377,7 +392,7 @@ module yaml {
             stack.push(tokenMatch)
             tokenMatch = null
           } else {
-            throw new SyntaxError(_context(str))
+            throw new SyntaxError(_context(buffer))
           }
         }
           

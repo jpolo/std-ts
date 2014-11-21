@@ -98,16 +98,18 @@ var yamlSuite = suite("ts/yaml", (self) => {
     )
     
     //Error
+    var wrong = 
+      "---\n" +
+      "  name:\n" +
+      "    - lots of milk\n" +
+      "    - 'cookies':\n" +
+      "    - 'something'\n"
     assert.throws(() => {
-      yaml.parse(
-        "name: ['MyName'\n"
-      )
-    }, "blah")
+      yaml.parse(wrong, { fileName: "ts/yaml.test.ts" })
+    }, 'SyntaxError: hash not properly dedented, near ":\n    - \'something\'\n" (ts/yaml.test.yaml:3:0)')
     
-    yaml.parse(
-        "name: ['MyName'\n"
-      )
-    
+
+    console.warn(yaml.parse(wrong, { fileName: "ts/yaml.test.yaml" }))
   })
   
 })

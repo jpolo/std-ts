@@ -185,6 +185,7 @@ var unitSuite = suite("ts/unit.TestEngine", (self) => {
 
     //regexp
     assert.ok(engine.dump(/abc(.*)/gi) === '/abc(.*)/gi')
+    
   })
 });
 var exportSuite = assertSuite.concat(unitSuite)

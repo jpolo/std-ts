@@ -35,7 +35,7 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
       '{ _0: "p0", _1: "p1", _2: "p2", ... }'
     )
     assert.strictEqual(inspectObj.stringify(new TestClass()), 'TestClassFoo { foo: true }')
-
+    assert.strictEqual(inspectObj.stringify(new TypeError("blah")), "TypeError {}")
   })
   
   

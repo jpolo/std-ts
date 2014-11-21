@@ -1,6 +1,9 @@
 module inspect {
 
   var __ostring = Object.prototype.toString
+  var __fnName = function (f: any) { 
+    return (f.displayName || f.name || (f.name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
+  }
   var __isObject = function (o) { return (typeof o === 'object') && o !== null }
   var __isFunction = function (o) { return typeof o === 'function' }
   var __keys = Object.keys
@@ -151,7 +154,7 @@ module inspect {
       stringify_Object(o: any, maxDepth: number) {
         var s = ''
         var ctor = o.constructor
-        var displayName = ctor && (ctor.displayName || ctor.name)
+        var displayName = ctor && __fnName(ctor)
         var maxElements = this.maxElements
         var keys = __keys(o)
         var keyc = keys.length
@@ -160,7 +163,7 @@ module inspect {
           keyc = maxElements
           truncate = true
         }
-        
+      
         if (displayName && displayName != 'Object') {
           s += displayName + ' '
         }     
@@ -184,6 +187,7 @@ module inspect {
           s += ' '
         }
         s += '}'
+        
         return s
       }
     }

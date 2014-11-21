@@ -85,7 +85,7 @@ module unit {
     }
     
     toJSON() {
-      return this.toString()
+      return __str(this)
     }
     
     toString() { 
@@ -134,7 +134,7 @@ module unit {
     }
     
     inspect() {
-      return this.toString()
+      return __str(this)
     }
 
     toString() {
@@ -155,6 +155,12 @@ module unit {
     
     export class Engine implements IEngine {
 
+      constructor(
+        options?: {
+          
+        }
+      ) {}
+      
       callstack(offset = 0): ICallStack {
         return stacktrace.create(null, offset)
       }
@@ -418,7 +424,7 @@ module unit {
       }
 
       inspect() {
-        return __format('Test', this.toString())
+        return __format('Test', __str(this))
       }
       
       toString() {
@@ -482,20 +488,24 @@ module unit {
         var isSuccess = false
         var position = this.__position__()
         var actual
-        message = message || ('`' + block.toString().slice(13, -1).trim() + '` must throw an error')
+        message = message || ('`' + __str(block).slice(13, -1).trim() + '` must throw an error')
         try {
           block()
         } catch (e) {
+          isSuccess = true
           actual = e
         }
 
         if (actual) {
+          isSuccess = false
           if (!expected) {
             isSuccess = true
           } else {
             switch (__stringTag(expected)) {
               case 'String':
-                isSuccess = __str(actual) == expected
+                var actualStr = __str(actual)
+                isSuccess = actualStr == expected
+                message = this.__dump__(actualStr) + ' thrown must be ' + this.__dump__(expected)
                 break
               case 'Function':
                 isSuccess = actual instanceof expected
@@ -512,7 +522,7 @@ module unit {
                 message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
                 break
               default:
-                isSuccess = actual === expected
+                isSuccess = actual === this.__engine__.testEqualsStrict(actual, expected)
                 message = this.__dump__(actual) + ' thrown must be ' + this.__dump__(expected)
             }
           }
@@ -569,10 +579,11 @@ module unit {
         return this.__assert__(isSuccess, message, position)
       }
       
-      _deepEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+      private _deepEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
         message = message || (this.__dump__(o1) + (' must equals ') + this.__dump__(o2))
         return this.__assert__(this.__engine__.testEqualsDeep(o1, o2) === !not, message, position)
       }
+
     }
     
 
@@ -759,7 +770,11 @@ module unit {
         element.id = id
         document.body.appendChild(element)
       }
-      var html = s.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;")
+      var html = s
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\n/g, "<br>")
+        .replace(/ /g, "&nbsp;")
       element.innerHTML += html
     }
 
