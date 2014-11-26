@@ -1,7 +1,6 @@
-import vm = require("ts/vm")
-import IContext = vm.IContext
-
-module macro {
+module codegen {
+  export interface IContext { [key: string]: any }
+  
   export var USE_STRICT = '\n"use strict";'
   var ARGS = ['$0', '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9']
   var __names__ = {}
@@ -183,4 +182,4 @@ module macro {
   
 
 }
-export = macro
+export = codegen
