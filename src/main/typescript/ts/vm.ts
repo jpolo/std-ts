@@ -3,24 +3,26 @@ module vm {
   var __global: Window = (new Function("return this;")).call(null)
 
   export interface IOption {
-    fileName?: string
-  }
-  
-  export interface IContext {
-    [key: string]: any 
+    sourceURL?: string
+    sourceMappingURL?: string
   }
 
   export var global = __global
 
-  export function compile(jscode: string, options?: IOption): (context?: IContext) => any {
+  export function compile(jscode: string, options?: IOption): (context?: { [key: string]: any }) => any {
     options = options || __empty
     var fnWithContext: Function
     var fnNoContext: Function
-    var fileName = options.fileName
+    var sourceURL = options.sourceURL
+    var sourceMappingURL = options.sourceMappingURL
     
-    if (fileName) {
+    if (sourceURL) {
       //Firebug and Webkit annotation
-      jscode += "\n//@ sourceURL=" + fileName
+      jscode += "\n//# sourceURL=" + sourceURL
+    }
+    
+    if (sourceURL) {
+      jscode += "\n//# sourceMappingURL=" + sourceMappingURL
     }
     
     return function (context) {
@@ -36,11 +38,9 @@ module vm {
     }
   }
 
-  export function eval(jscode: string, context?: IContext, options?: IOption): any {
+  export function eval(jscode: string, context?: { [key: string]: any }, options?: IOption): any {
     return compile(jscode, options)(context)
   }
-
-
 }
 
 export = vm
