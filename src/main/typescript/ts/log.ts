@@ -269,6 +269,19 @@ module log {
       
       private _loggers: { [name: string]: Logger } = {}
       
+      //Services
+      private $time: { now: () => number } = { now: __now }
+      
+      constructor(
+        deps?: {
+          $time?: { now: () => number }
+        }
+      ) {
+        if (deps) {
+          this.$time = deps.$time || this.$time
+        }
+      }
+      
       logger(name: string): Logger {
         var loggers = this._loggers
         return loggers[name] || (loggers[name] = new Logger(name, this))
@@ -277,7 +290,7 @@ module log {
       isEnabledFor(level: ILevel, group: string): boolean {
         var returnValue = false
         var reporters = this.reporters
-        var logMessage = new Message(level, group, null)
+        var logMessage = this.message(level, group, null)
         var names = __keys(reporters)
         for (var i = 0, l = names.length; i < l; ++i) {
           var target = reporters[names[i]]
@@ -288,10 +301,14 @@ module log {
         } 
         return returnValue
       }
+      
+      message(level: ILevel, group: string, message: string): Message {
+        return new Message(level, group, message, this.$time.now())
+      }
 
       send(level: ILevel, group: string, message: string): void {
         var reporters = this.reporters
-        var logMessage = new Message(level, group, message)    
+        var logMessage = this.message(level, group, message)
         var names = __keys(reporters)
         for (var i = 0, l = names.length; i < l; ++i) {
           var target = reporters[names[i]]
