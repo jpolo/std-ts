@@ -105,7 +105,7 @@ var yamlSuite = suite("ts/yaml", (self) => {
       "    - 'cookies':\n" +
       "    - 'something'\n"
     assert.throws(() => {
-      yaml.parse(wrong, { fileName: "ts/yaml.test.ts" })
+      yaml.parse(wrong, { fileName: "ts/yaml.test.yaml" })
     }, 'SyntaxError: hash not properly dedented, near ":\n    - \'something\'\n" (ts/yaml.test.yaml:3:0)')
     
 
