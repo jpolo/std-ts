@@ -6,8 +6,37 @@ import ICallSite = stacktrace.ICallSite
 
 module unit {
   var TEST_TIMEOUT = 2000;//ms
+  var __equals = function (a: any, b: any) { return a === b }
+  var __equalsFloat = function (a: number, b: number, epsilon: number) {
+    return (
+      __isNaN(b) ? __isNaN(a) :
+      __isNaN(a) ? false :
+      !__isFinite(b) && !__isFinite(a) ? (b > 0) == (a > 0) :
+      Math.abs(a - b) < epsilon
+    )
+  }
+  var __equalsArray = function (a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
+    var returnValue = true
+    var al = a.length
+    var bl = b.length
+    
+    if (al === bl) {
+      for (var i = 0, l = al; i < l; ++i) {
+        if (!equalFn(a[i], b[i])) {
+          returnValue = false
+          break
+        }
+      }
+    }
+    return returnValue
+  }
+  var __fnSource = function (f: Function) { return __str(f).slice(13, -1).trim() }
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
   var __freeze = reflect.freeze
+  var __isFinite = isFinite
+  var __isNaN = isNaN
+  var __isNumber = function (o) { return typeof o === 'number' }
+  var __isObject = function (o) { return o != null && (typeof o == "object") }
   var __keys = reflect.ownKeys
   var __str = String  
   var __stringTag = reflect.stringTag
@@ -64,7 +93,7 @@ module unit {
       return assertionType
     }
     
-    private static _instances: {[key: string]: AssertionType} = {}
+    private static _instances: { [key: string]: AssertionType } = {}
     private static _nextValue = 0
 
     constructor(
@@ -134,11 +163,11 @@ module unit {
     }
     
     inspect() {
-      return __str(this)
+      return __format(__str(this.type), this.message)
     }
 
     toString() {
-      return __format(__str(this.type), this.message)
+      return this.inspect()
     }
   }
 
@@ -154,27 +183,37 @@ module unit {
     }
     
     export class Engine implements IEngine {
-
+      
+      //Services
+      private $inspect: inspect.IEngine = inspect.engine.get()
+      private $time: { now: () => number } = { now: __now }
+      
       constructor(
-        options?: {
-          
+        deps?: {
+          $inspect?: inspect.IEngine
+          $time?: { now: () => number }
         }
-      ) {}
+      ) {
+        if (deps) {
+          this.$inspect = deps.$inspect || this.$inspect
+          this.$time = deps.$time || this.$time
+        }
+      }
       
       callstack(offset = 0): ICallStack {
         return stacktrace.create(null, offset)
       }
 
       dump(o: any): string {
-        return inspect.stringify(o)
+        return this.$inspect.stringify(o)
       }
 
-      currentDate() {
-        return new Date()
+      currentDate(): Date {
+        return new Date(this.$time.now())
       }
 
-      currentTime() {
-        return __now()
+      currentTime(): number {
+        return this.$time.now()
       }
 
       testEqualsStrict(a: any, b: any): boolean {
@@ -190,69 +229,54 @@ module unit {
         return (
           this.testEqualsStrict(o1, o2) ||
           (
-            o1 && o1.equals ? o1.equals(o2) :
-            o2 && o2.equals ? o2.equals(o1) :
+            (o1 != null) && o1.equals ? o1.equals(o2) :
+            (o2 != null) && o2.equals ? o2.equals(o1) :
             o1 == o2
           )
         )
       }
 
       testEqualsNear(o1: any, o2: any, epsilon: number = FLOAT_EPSILON): boolean {
-        var to1 = typeof o1
-        var to2 = typeof o2
-
+        var isnum1 = __isNumber(o1)
+        var isnum2 = __isNumber(o2) 
         return (
-          (to1 === "number" || to2 === "number") ? this.testEqualsStrict(to1, to2) && (o1 == o2 || this._equalsFloat(o1, o2, epsilon)) :
-          ("nearEquals" in o1) ? o1.nearEquals(o2) :
+          (isnum1 || isnum2) ? (isnum1 === isnum2) && (o1 == o2 || __equalsFloat(o1, o2, epsilon)) :
+          (o1 != null && o1.nearEquals) ? o1.nearEquals(o2) :
+          (o2 != null && o2.nearEquals) ? o2.nearEquals(o1) :
           false
         )
       }
       
       testEqualsDeep(o1: any, o2: any): boolean {
+        var self = this
         function equals(o1, o2) {
-          if (o1 !== o2) {
+          if (!self.testEqualsStrict(o1, o2)) {
             switch (__stringTag(o1)) {
               case 'Undefined':
               case 'Null':
               case 'Boolean':
-                return o1 === o2
+                return false
               case 'Number':
-                return o1 === o2 || ((__stringTag(o2) === 'Number') && (isNaN(o1) && isNaN(o2)))
+                return (__stringTag(o2) === 'Number') && (isNaN(o1) && isNaN(o2))
               case 'String':
-                return o1 === o2 || ((__stringTag(o2) === 'String') && (__str(o1) === __str(o2)))
-              case 'Array':            
-                if (
-                  o2 == null ||
-                  o1.length !== o2.length
-                ) {
-                  return false
-                }
-                for (var i = 0, l = o1.length; i < l; ++i) {
-                  if (!equals(o1[i], o2[i])) {
-                    return false
-                  }
-                }
-                //return true
-                break
+                return (__stringTag(o2) === 'String') && (o1 == o2)
+              case 'Array':   
+                return (o2 != null) && __equalsArray(o1, o2, equals)         
               case 'Object':
               case 'Function':
               default:
                 var keys1 = __keys(o1)
-                if (o2 == null || typeof o2 != "object") {
-                  return false
-                }  
-                var keys2 = __keys(o2)
+                var keys2 = __isObject(o2) ? __keys(o2) : null
                 var keyc = keys1.length
-                if (!equals(keys1, keys2)) {
-                  return false
-                }
-                for (var i = 0; i < keyc; ++i) {
-                  var key = keys1[i]
-                  if (!equals(o1[key], o2[key])) {
-                    return false
+                if (keys2 && __equalsArray(keys1, keys2, __equals)) {
+                  for (var i = 0; i < keyc; ++i) {
+                    var key = keys1[i]
+                    if (!equals(o1[key], o2[key])) {
+                      return false
+                    }
                   }
                 }
-                //return true
+                return true
             }
           }
           return true
@@ -273,20 +297,6 @@ module unit {
         for (var i = 0, l = testCases.length; i < l; ++i) {
           testCases[i].run(this, onrun)
         }
-      }
-
-      private _equalsFloat(actual: number, expected: number, epsilon: number) {
-        var returnValue = false
-        if (isNaN(expected)) {
-          returnValue = isNaN(actual)
-        } else if (isNaN(actual)) {
-          returnValue = false
-        } else if (!isFinite(expected) && !isFinite(actual)) {
-          returnValue = (expected > 0) == (actual > 0)
-        } else {
-          returnValue = (Math.abs(actual - expected) < epsilon)
-        }
-        return returnValue
       }
     }
 
@@ -488,7 +498,7 @@ module unit {
         var isSuccess = false
         var position = this.__position__()
         var actual
-        message = message || ('`' + __str(block).slice(13, -1).trim() + '` must throw an error')
+        message = message || ('`' + __fnSource(block) + '` must throw an error')
         try {
           block()
         } catch (e) {
