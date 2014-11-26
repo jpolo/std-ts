@@ -71,11 +71,11 @@ module random {
       }
       
       inspect(): string {
-        return this.toString()
+        return __format('Engine', this.name)
       }
       
       toString(): string {
-        return __format('Engine', this.name)
+        return this.inspect()
       }
     }
     

@@ -1,6 +1,6 @@
 module stacktrace {
   var __ostring = Object.prototype.toString
-  var __stringTag = (o: any) => {
+  var __stringTag = (o: any): string => {
     var s = ''
     if (o === null) {
       s = 'Null'
