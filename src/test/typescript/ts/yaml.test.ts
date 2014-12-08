@@ -105,11 +105,10 @@ var yamlSuite = suite("ts/yaml", (self) => {
       "    - 'cookies':\n" +
       "    - 'something'\n"
     assert.throws(() => {
-      yaml.parse(wrong, { fileName: "ts/yaml.test.yaml" })
-    }, 'SyntaxError: hash not properly dedented, near ":\n    - \'something\'\n" (ts/yaml.test.yaml:3:0)')
+      yaml.parse(wrong, { sourceURL: "ts/yaml.test.yaml" })
+    }, 'SyntaxError: hash not properly dedented, near ":\\n    - \'something\'\\n" (ts/yaml.test.yaml:4:0)')
     
-
-    console.warn(yaml.parse(wrong, { fileName: "ts/yaml.test.yaml" }))
+    //console.warn(yaml.parse(wrong, { sourceURL: "ts/yaml.test.yaml" }))
   })
   
 })

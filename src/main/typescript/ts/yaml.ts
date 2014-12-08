@@ -39,13 +39,13 @@ module yaml {
   interface ITokenMatch {
     token: Token
     matches: RegExpExecArray
-    fileName: string
+    sourceURL: string
     lineNumber: number
     columnNumber: number
   }
   
   export interface IParserOption { 
-    fileName?: string
+    sourceURL?: string
   } 
   
   var TOKENS: {0: Token; 1: RegExp}[] = [
@@ -90,11 +90,11 @@ module yaml {
     
     interface IState extends Array<ITokenMatch> { } 
     
-    function error(fileName: string, lineNumber: number, columnNumber: number, message: string) {
+    function error(sourceURL: string, lineNumber: number, columnNumber: number, message: string) {
       var s = (
         message +
         " (" +
-        (fileName == null ? FILE_ANONYMOUS : fileName) +
+        (sourceURL == null ? FILE_ANONYMOUS : sourceURL) +
         ":" + lineNumber +
         ":" + columnNumber +
         ")"
@@ -127,7 +127,7 @@ module yaml {
       if (!accept(state, type)) {
         var tokenMatch = peek(state)
         throw error(
-          tokenMatch.fileName, 
+          tokenMatch.sourceURL, 
           tokenMatch.lineNumber, 
           tokenMatch.columnNumber,
           message + ', ' + _context(tokenMatch.matches.input)
@@ -325,7 +325,7 @@ module yaml {
       var lastIndents = 0
       var stack = []
       var indentAmount = -1
-      var fileName = options.fileName
+      var sourceURL = options.sourceURL
       var lineNumber = NaN
       var columnNumber = NaN
       var buffer = str
@@ -343,12 +343,12 @@ module yaml {
             buffer = buffer.replace(re, '')
             strConsumedLength = (strLength - buffer.length)
             
-            lineNumber = __strCount(str, "\n", strConsumedLength)
+            lineNumber = __strCount(str, "\n", strConsumedLength) + 1
             columnNumber = strConsumedLength - str.lastIndexOf("\n", strConsumedLength)
             tokenMatch = { 
               token: tokenType, 
               matches: captures, 
-              fileName: fileName,
+              sourceURL: sourceURL,
               lineNumber: lineNumber,
               columnNumber: columnNumber
             }
@@ -374,7 +374,7 @@ module yaml {
                   tokenMatch = { 
                     token: Token.DEDENT, 
                     matches: null,
-                    fileName: fileName,
+                    sourceURL: sourceURL,
                     lineNumber: lineNumber,
                     columnNumber: columnNumber
                   }
