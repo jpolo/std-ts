@@ -173,6 +173,9 @@ module unit {
 
   export module engine {
     export var FLOAT_EPSILON = 1e-5;
+    var $inspectDefault = new inspect.engine.Engine({ maxString: 70 })
+    var $timeDefault = { now: __now }
+    
     
     /**
      * Default engine 
@@ -185,8 +188,8 @@ module unit {
     export class Engine implements IEngine {
       
       //Services
-      private $inspect: inspect.IEngine = inspect.engine.get()
-      private $time: { now: () => number } = { now: __now }
+      private $inspect: inspect.IEngine = $inspectDefault
+      private $time: { now: () => number } = $timeDefault
       
       constructor(
         deps?: {
@@ -526,14 +529,21 @@ module unit {
                 message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
                 break
               case 'Object':
-                isSuccess = actual instanceof expected.constructor &&
+                isSuccess = reflect.getPrototypeOf(actual) === reflect.getPrototypeOf(expected) &&
                   actual.name === expected.name &&
                   actual.message === expected.message
                 message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
                 break
               default:
-                isSuccess = actual === this.__engine__.testEqualsStrict(actual, expected)
-                message = this.__dump__(actual) + ' thrown must be ' + this.__dump__(expected)
+                if (expected instanceof Error) {
+                  isSuccess = reflect.getPrototypeOf(actual) === reflect.getPrototypeOf(expected) &&
+                    actual.name === expected.name &&
+                    actual.message === expected.message
+                  message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
+                } else {
+                  isSuccess = actual === this.__engine__.testEqualsStrict(actual, expected)
+                  message = this.__dump__(actual) + ' thrown must be ' + this.__dump__(expected)
+                }
             }
           }
         }

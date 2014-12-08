@@ -127,7 +127,9 @@ module inspect {
       stringify_String(o: string, maxDepth: number) {
         var maxString = this.maxString
         return '"' + 
-          (o.length > maxString ? o.slice(0, maxString) + '...' : o).replace(/"/g, '\\"' ) + 
+          (o.length > maxString ? o.slice(0, maxString) + '...' : o)
+          .replace(/"/g, '\\"' )
+          .replace(/[\n\r]/g, "↵") + 
         '"'
       }
       
