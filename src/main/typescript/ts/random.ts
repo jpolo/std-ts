@@ -1,5 +1,9 @@
 module random {
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
+  var __bool = function (n: number, trueWeight: number): boolean {
+    return trueWeight * n > 1
+  }
+  
   //var math_sqrt = Math.sqrt;
   //var math_sin = Math.sin;
   //var math_cos = Math.cos;
@@ -24,7 +28,7 @@ module random {
   }
   
   export function nextBoolean(ng: IEngine = engine.get()): boolean {
-    return next(ng) > 0.5
+    return __bool(next(ng), 2)
   }
   
   export function nextNumber(min = FLOAT_MIN_VALUE, max = FLOAT_MAX_VALUE, ng: IEngine = engine.get()): number {
@@ -64,6 +68,10 @@ module random {
       
       generate(): number {
         return NaN
+      }
+      
+      generateBoolean(trueWeight: number = 2): boolean {
+        return __bool(this.generate(), trueWeight)
       }
 
       next(): { done: boolean; value: number; } {
