@@ -1,5 +1,23 @@
 module base64 {
   
+  export function btoa(asciiString: string): string {
+    return __btoa(asciiString)
+  }
+  
+  export function atob(base64String: string): string {
+    return __atob(base64String)
+  }
+  
+  export function encode(utf8String: string): string {
+    return __encode(utf8String)
+  }
+  
+  export function decode(base64String: string): string {
+    return __decode(base64String)
+  }
+  
+  
+  declare function require(name: string);//NodeJS
   var B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
   var B64_TABLE = (function (chars) {
     var t: { [key: string]: number } = {};
@@ -12,6 +30,8 @@ module base64 {
   var __global: Window = (new Function("return this;")).call(null)
   var __str = String
   var __strFromCharCode = String.fromCharCode
+  
+  var Buffer = typeof require !== 'undefined' ? require('buffer').Buffer : null
   
   //native encode
   var __btoa = __global.btoa || (function () {
@@ -64,9 +84,7 @@ module base64 {
     return atob
   }())
   
-  
-  
-  
+  //utf decode
   var __utob = (function () {
     var re_utob = /[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g;
     
@@ -99,14 +117,52 @@ module base64 {
     return utob
   }())
   
-  
+  //utf8 encode
+  var __btou = (function () {
+    var re_btou = new RegExp([
+        '[\xC0-\xDF][\x80-\xBF]',
+        '[\xE0-\xEF][\x80-\xBF]{2}',
+        '[\xF0-\xF7][\x80-\xBF]{3}'
+    ].join('|'), 'g');
+    
+    function cb_btou(cccc: string) {
+      switch(cccc.length) {
+      case 4:
+        var cp = ((0x07 & cccc.charCodeAt(0)) << 18)
+            |    ((0x3f & cccc.charCodeAt(1)) << 12)
+            |    ((0x3f & cccc.charCodeAt(2)) <<  6)
+            |     (0x3f & cccc.charCodeAt(3)),
+        offset = cp - 0x10000;
+        return (__strFromCharCode((offset  >>> 10) + 0xD800)
+                + __strFromCharCode((offset & 0x3FF) + 0xDC00));
+      case 3:
+        return __strFromCharCode(
+            ((0x0f & cccc.charCodeAt(0)) << 12)
+                | ((0x3f & cccc.charCodeAt(1)) << 6)
+                |  (0x3f & cccc.charCodeAt(2))
+        );
+      default:
+        return  __strFromCharCode(
+            ((0x1f & cccc.charCodeAt(0)) << 6)
+                |  (0x3f & cccc.charCodeAt(1))
+        );
+      }
+    }
+    
+    function btou(b: string) {
+        return b.replace(re_btou, cb_btou);
+    }
+    return btou
+  }())
 
-  declare function require(name:string);//NodeJS
-  var Buffer = typeof require !== 'undefined' ? require('buffer').Buffer : null
+  var __encode = Buffer ? 
+    function (u: string) { return (new Buffer(u)).toString('base64') } : 
+    function (u: string) { return __btoa(__utob(u)) }
+
+  var __decode = Buffer ? 
+    function(a: string) { return (new Buffer(a, 'base64')).toString() } : 
+    function(a: string) { return __btou(__atob(a)) };
   
-  var _encode = Buffer ? function (u: string) { return (new Buffer(u)).toString('base64') } 
-    : function (u: string) { return __btoa(__utob(u)) }
-    ;
   
   
   
@@ -114,64 +170,24 @@ module base64 {
     
 }
 
-(function(global) {
+/*(function(global) {
 
     // constants
     
 
     // encoder stuff
-    
-    
-    var _encode = Buffer ? function (u: string) { return (new Buffer(u)).toString('base64') } 
-    : function (u: string) { return __btoa(__utob(u)) }
-    ;
+
     var encode = function(u, urisafe) {
         return !urisafe 
-            ? _encode(u)
-            : _encode(u).replace(/[+\/]/g, function(m0) {
+            ? __encode(u)
+            : __encode(u).replace(/[+\/]/g, function(m0) {
                 return m0 == '+' ? '-' : '_';
             }).replace(/=/g, '');
     };
     var encodeURI = function(u) { return encode(u, true) };
   
   
-    // decoder stuff
-    var re_btou = new RegExp([
-        '[\xC0-\xDF][\x80-\xBF]',
-        '[\xE0-\xEF][\x80-\xBF]{2}',
-        '[\xF0-\xF7][\x80-\xBF]{3}'
-    ].join('|'), 'g');
-    var cb_btou = function(cccc) {
-        switch(cccc.length) {
-        case 4:
-            var cp = ((0x07 & cccc.charCodeAt(0)) << 18)
-                |    ((0x3f & cccc.charCodeAt(1)) << 12)
-                |    ((0x3f & cccc.charCodeAt(2)) <<  6)
-                |     (0x3f & cccc.charCodeAt(3)),
-            offset = cp - 0x10000;
-            return (fromCharCode((offset  >>> 10) + 0xD800)
-                    + fromCharCode((offset & 0x3FF) + 0xDC00));
-        case 3:
-            return fromCharCode(
-                ((0x0f & cccc.charCodeAt(0)) << 12)
-                    | ((0x3f & cccc.charCodeAt(1)) << 6)
-                    |  (0x3f & cccc.charCodeAt(2))
-            );
-        default:
-            return  fromCharCode(
-                ((0x1f & cccc.charCodeAt(0)) << 6)
-                    |  (0x3f & cccc.charCodeAt(1))
-            );
-        }
-    };
-    var btou = function(b) {
-        return b.replace(re_btou, cb_btou);
-    };
-    
-    var _decode = buffer
-        ? function(a) { return (new buffer(a, 'base64')).toString() }
-    : function(a) { return btou(atob(a)) };
-    var decode = function(a){
+    var decode = function (a) {
         return _decode(
             a.replace(/[-_]/g, function(m0) { return m0 == '-' ? '+' : '/' })
                 .replace(/[^A-Za-z0-9\+\/]/g, '')
@@ -180,7 +196,6 @@ module base64 {
 
     // export Base64
     global.Base64 = {
-        VERSION: version,
         atob: atob,
         btoa: btoa,
         fromBase64: decode,
@@ -190,28 +205,8 @@ module base64 {
         encodeURI: encodeURI,
         btou: btou,
         decode: decode,
-        noConflict: noConflict
     };
-    // if ES5 is available, make Base64.extendString() available
-    if (typeof Object.defineProperty === 'function') {
-        var noEnum = function(v){
-            return {value:v,enumerable:false,writable:true,configurable:true};
-        };
-        global.Base64.extendString = function () {
-            Object.defineProperty(
-                String.prototype, 'fromBase64', noEnum(function () {
-                    return decode(this)
-                }));
-            Object.defineProperty(
-                String.prototype, 'toBase64', noEnum(function (urisafe) {
-                    return encode(this, urisafe)
-                }));
-            Object.defineProperty(
-                String.prototype, 'toBase64URI', noEnum(function () {
-                    return encode(this, true)
-                }));
-        };
-    }
+
     // that's it!
-})(this);
+})(this);*/
 
