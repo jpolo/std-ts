@@ -1,12 +1,7 @@
 module log {
-  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
-  var __isNumber = function (o) { return typeof o == 'number'; }
-  var __isString = function (o) { return typeof o == 'string'; }
-  var __isFunction = function (o) { return typeof o == 'function'; }
-  var __keys = Object.keys
-  var __now = Date.now || function () { return (new Date()).getTime(); }
-  var __str = String
-  var __strCmp = function (a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 }
+  //default time
+  var $timeDefault = { now: Date.now || function () { return (new Date()).getTime(); } };
+  
   
   export interface IEngine {
     isEnabledFor(level: ILevel, group: string): boolean
@@ -123,9 +118,9 @@ module log {
     
     constructor(
       public level: ILevel, 
-      public group: string = "",
-      public message: string = "",
-      public timestamp: number = __now()
+      public group: string,
+      public message: string,
+      public timestamp: number = NaN
     ) {
     }
     
@@ -233,7 +228,7 @@ module log {
   export module engine {
     interface IEngineReporter { filter?: IFilter; reporter: IReporter; }
     
-     var __apply = function (f: Function, thisp?: any, args?: any[]) {
+    function __apply(f: Function, thisp?: any, args?: any[]) {
       var returnValue
       var argc = args ? args.length : 0
       try {
@@ -248,10 +243,12 @@ module log {
       }
       return returnValue
     }
-    var __filter = function (f: IEngineReporter, m: IMessage): boolean {
+    
+    function __filter(f: IEngineReporter, m: IMessage): boolean {
       return f.filter ? __apply(f.filter, f, [ m ]) || false : true
     }
-    var __send = function (f: IEngineReporter, m: IMessage) {
+    
+    function __send(f: IEngineReporter, m: IMessage) {
       var reporter = f.reporter
       return __apply(reporter.receive, reporter, [ m ])
     }
@@ -270,7 +267,7 @@ module log {
       private _loggers: { [name: string]: Logger } = {}
       
       //Services
-      private $time: { now: () => number } = { now: __now }
+      private $time: { now: () => number } = $timeDefault
       
       constructor(
         deps?: {
@@ -278,7 +275,9 @@ module log {
         }
       ) {
         if (deps) {
-          this.$time = deps.$time || this.$time
+          if (deps.$time) {
+            this.$time = deps.$time;
+          }
         }
       }
       
@@ -434,6 +433,15 @@ module log {
     }
   
   }
+  
+  //util
+  function __format(n: string, s: string) { return n + ' { ' + s + ' }' }
+  function __isNumber(o: any) { return typeof o == 'number'; }
+  function __isString(o: any) { return typeof o == 'string'; }
+  function __isFunction(o: any) { return typeof o == 'function'; }
+  function __keys(o: any) { return Object.keys(o); }  
+  function __str(o: any) { return String(o); }
+  function __strCmp(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 }
   
 }
 export = log
