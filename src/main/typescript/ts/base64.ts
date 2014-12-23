@@ -16,8 +16,23 @@ module base64 {
     return __decode(base64String)
   }
   
+  export function encodeURI(s: string) {
+    return __encode(s)
+        .replace(/[+\/]/g, function(m0) {
+            return m0 == '+' ? '-' : '_';
+        })
+        .replace(/=/g, '')
+  }
+  
+  export function decodeURI(s: string) {
+    return __decode(
+      s.replace(/[-_]/g, function(m0) { return m0 == '-' ? '+' : '/' })
+       .replace(/[^A-Za-z0-9\+\/]/g, '')
+    )
+  }
   
   declare function require(name: string);//NodeJS
+  var B64_ENCODING = 'base64';
   var B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
   var B64_TABLE = (function (chars) {
     var t: { [key: string]: number } = {};
@@ -28,61 +43,16 @@ module base64 {
   }(B64_CHARS));
   
   var __global: Window = (new Function("return this;")).call(null)
+  var __isNodeJS = !!__global['process']
   var __str = String
   var __strFromCharCode = String.fromCharCode
-  
-  var Buffer = typeof require !== 'undefined' ? require('buffer').Buffer : null
+  var Buffer = __isNodeJS ? require('buffer').Buffer : null
   
   //native encode
-  var __btoa = __global.btoa || (function () {
-    var re_encode = /[\s\S]{1,3}/g
-    
-    function cb_encode(ccc) {
-      var padlen = [0, 2, 1][ccc.length % 3],
-      ord = ccc.charCodeAt(0) << 16
-          | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
-          | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0)),
-      chars = [
-        B64_CHARS.charAt( ord >>> 18),
-        B64_CHARS.charAt((ord >>> 12) & 63),
-        padlen >= 2 ? '=' : B64_CHARS.charAt((ord >>> 6) & 63),
-        padlen >= 1 ? '=' : B64_CHARS.charAt(ord & 63)
-      ];
-      return chars.join('');
-    };
-    
-    function btoa(rawString: string): string {
-      return __str(rawString).replace(re_encode, cb_encode);
-    };
-    return btoa
-  }())
+  var __btoa = __global.btoa
   
   //native decode
-  var __atob = __global.atob || (function () {
-    var re_atob = /[\s\S]{1,4}/g
-    
-    function cb_decode(cccc: string) {
-      var len = cccc.length,
-      padlen = len % 4,
-      n = (len > 0 ? B64_TABLE[cccc.charAt(0)] << 18 : 0)
-          | (len > 1 ? B64_TABLE[cccc.charAt(1)] << 12 : 0)
-          | (len > 2 ? B64_TABLE[cccc.charAt(2)] <<  6 : 0)
-          | (len > 3 ? B64_TABLE[cccc.charAt(3)]       : 0),
-      chars = [
-        __strFromCharCode( n >>> 16),
-        __strFromCharCode((n >>>  8) & 0xff),
-        __strFromCharCode( n         & 0xff)
-      ];
-      chars.length -= [0, 0, 2, 1][padlen];
-      return chars.join('');
-    }
-    
-    function atob(encodedString: string): string {
-      return __str(encodedString).replace(re_atob, cb_decode);
-    }
-  
-    return atob
-  }())
+  var __atob = __global.atob
   
   //utf decode
   var __utob = (function () {
@@ -156,57 +126,69 @@ module base64 {
   }())
 
   var __encode = Buffer ? 
-    function (u: string) { return (new Buffer(u)).toString('base64') } : 
+    function (u: string) { return (new Buffer(u)).toString(B64_ENCODING) } : 
     function (u: string) { return __btoa(__utob(u)) }
 
   var __decode = Buffer ? 
-    function(a: string) { return (new Buffer(a, 'base64')).toString() } : 
+    function(a: string) { return (new Buffer(a, B64_ENCODING)).toString() } : 
     function(a: string) { return __btou(__atob(a)) };
   
   
   
+  //Shim
+  if (!__btoa) {
+    var __btoa = (function () {
+      var re_encode = /[\s\S]{1,3}/g
+      
+      function cb_encode(ccc) {
+        var padlen = [0, 2, 1][ccc.length % 3],
+        ord = ccc.charCodeAt(0) << 16
+            | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
+            | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0)),
+        chars = [
+          B64_CHARS.charAt( ord >>> 18),
+          B64_CHARS.charAt((ord >>> 12) & 63),
+          padlen >= 2 ? '=' : B64_CHARS.charAt((ord >>> 6) & 63),
+          padlen >= 1 ? '=' : B64_CHARS.charAt(ord & 63)
+        ];
+        return chars.join('');
+      };
+      
+      function btoa(rawString: string): string {
+        return __str(rawString).replace(re_encode, cb_encode);
+      };
+      return btoa
+    }())
+  }
   
-  
+  if (!__atob) {
+    __atob = (function () {
+      var re_atob = /[\s\S]{1,4}/g
+      
+      function cb_decode(cccc: string) {
+        var len = cccc.length,
+        padlen = len % 4,
+        n = (len > 0 ? B64_TABLE[cccc.charAt(0)] << 18 : 0)
+            | (len > 1 ? B64_TABLE[cccc.charAt(1)] << 12 : 0)
+            | (len > 2 ? B64_TABLE[cccc.charAt(2)] <<  6 : 0)
+            | (len > 3 ? B64_TABLE[cccc.charAt(3)]       : 0),
+        chars = [
+          __strFromCharCode( n >>> 16),
+          __strFromCharCode((n >>>  8) & 0xff),
+          __strFromCharCode( n         & 0xff)
+        ];
+        chars.length -= [0, 0, 2, 1][padlen];
+        return chars.join('');
+      }
+      
+      function atob(encodedString: string): string {
+        return __str(encodedString).replace(re_atob, cb_decode);
+      }
     
+      return atob
+    }())  
+  }
+
 }
 
-/*(function(global) {
-
-    // constants
-    
-
-    // encoder stuff
-
-    var encode = function(u, urisafe) {
-        return !urisafe 
-            ? __encode(u)
-            : __encode(u).replace(/[+\/]/g, function(m0) {
-                return m0 == '+' ? '-' : '_';
-            }).replace(/=/g, '');
-    };
-    var encodeURI = function(u) { return encode(u, true) };
-  
-  
-    var decode = function (a) {
-        return _decode(
-            a.replace(/[-_]/g, function(m0) { return m0 == '-' ? '+' : '/' })
-                .replace(/[^A-Za-z0-9\+\/]/g, '')
-        );
-    };
-
-    // export Base64
-    global.Base64 = {
-        atob: atob,
-        btoa: btoa,
-        fromBase64: decode,
-        toBase64: encode,
-        utob: utob,
-        encode: encode,
-        encodeURI: encodeURI,
-        btou: btou,
-        decode: decode,
-    };
-
-    // that's it!
-})(this);*/
-
+export = base64
