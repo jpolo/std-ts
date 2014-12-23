@@ -142,7 +142,7 @@ module hash {
       
       }
       
-      writeBytes(b: number[]) {
+      writeBytes(b: number[]) {        
         var v0 = this._v0;
         var v1 = this._v1;
         var v2 = this._v2;
@@ -150,10 +150,10 @@ module hash {
         var length = b.length;
         this._length += length;
         
+        
         var needed = 0;
         if (this._ntail != 0) {
           needed = 8 - this._ntail;
-          
           
           var m = __u64();
           if (length < needed) {
