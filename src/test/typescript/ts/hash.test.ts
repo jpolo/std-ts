@@ -2,18 +2,26 @@ import unit = require("../../../main/typescript/ts/unit")
 import suite = unit.suite
 import test = unit.test
 import hash = require("../../../main/typescript/ts/hash")
-
+import Int64 = hash.Int64
+import SipState = hash.sip.SipState;
 
 var hashSuite = suite("ts/hash.sip.SipState", (self) => {
   
-  var SipState = hash.sip.SipState
-  function u64(buf: number[]) {
+  function u64(buf: number[]): Int64 {
     return {
-      hi: buf[7] << 24 | buf[6] << 16 | buf[5] << 8 | buf[4],
-      lo: buf[3] << 24 | buf[2] << 16 | buf[1] << 8 | buf[0]
+      hi: (buf[7] << 24 | buf[6] << 16 | buf[5] << 8 | buf[4]) >>> 0,
+      lo: (buf[3] << 24 | buf[2] << 16 | buf[1] << 8 | buf[0]) >>> 0
     };
   }
-  function u8(n: number) { return n & 0xff; }
+  
+  function u8(n: number): number { 
+    return (n & 0xff) >>> 0; 
+  }
+  
+  function u8rand(): number {
+    return u8(Math.random() * 0xff);
+  }
+  
   var DATA: number[][] = [
     [ 0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72 ],
     [ 0xfd, 0x67, 0xdc, 0x93, 0xc5, 0x39, 0xf8, 0x74 ],
@@ -81,22 +89,19 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     [ 0x72, 0x45, 0x06, 0xeb, 0x4c, 0x32, 0x8a, 0x95 ]
   ];
 
-  var k0 = { hi: 0x07060504, lo: 0x03020100 };
-  var k1 = { hi: 0x0f0e0d0c, lo: 0x0b0a0908 };
-  var buf = [];
   
-  var stateInc = new SipState(k0, k1);
-  var stateFull = new SipState(k0, k1);
-
   function toHexString(u8arr: number[]): string {
     var s = "";
+    var padding = 2;
+    var pad = '0000';
     for (var i = 0, l = u8arr.length; i < l; i++) {
-      s += u8arr[i].toString(16);
+      var part = u8arr[i].toString(16);
+      s += pad.slice(0, padding - part.length) + part;
     }
     return s;
   }
 
-  function resultBytes(h: {hi: number; lo: number}): number[] {
+  function resultBytes(h: Int64): number[] {
     return [
       u8(h.lo >>> 0),
       u8(h.lo >>> 8),
@@ -112,29 +117,89 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
   function resultString(h: {hi: number; lo: number}): string {
     return toHexString(resultBytes(h));
   }
-
+  
+  function hashWithKeys(k0: Int64, k1: Int64, bytes: number[]): Int64 {
+    var state = new SipState(k0, k1);
+    state.writeBytes(bytes);
+    return state.result();
+  }
+  
+  (function check() {
+    var vec = [ 0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72 ];
+    
+    //u64
+    var u64_vec = u64(vec);
+    assert(u64_vec.hi === 0x726fdb47);
+    assert(u64_vec.lo === 0xdd0e0e31);
+      
+    //resultBytes
+    var vec_bytes = resultBytes(u64_vec);
+    assert(vec_bytes[0] === 0x31);
+    assert(vec_bytes[1] === 0x0e);
+    assert(vec_bytes[2] === 0x0e);
+    assert(vec_bytes[3] === 0xdd);
+    assert(vec_bytes[4] === 0x47);
+    assert(vec_bytes[5] === 0xdb);
+    assert(vec_bytes[6] === 0x6f);
+    assert(vec_bytes[7] === 0x72);
+    
+    //toHexString
+    assert(toHexString(vec) === "310e0edd47db6f72");
+    
+    function assert(b: boolean, message = 'Fatal Error: assertion failed') {
+      if (!b) {
+        throw new Error(message);
+      }
+    }
+    
+  }());
+  
+  test("reset()", (assert) => {
+    var s1 = new SipState();
+    var s2 = new SipState();
+    
+    //before write should be equals
+    assert.deepEqual(s1.result(), s2.result());
+    
+    //write anything
+    s1.writeBytes([u8rand(), u8rand(), u8rand(), u8rand()]);
+    s2.writeBytes([u8rand(), u8rand(), u8rand(), u8rand()]);
+    assert.notDeepEqual(s1.result(), s2.result());
+    
+    //should be equals after resetting
+    s1.reset();
+    s2.reset();
+    assert.deepEqual(s1.result(), s2.result());
+  });
         
   
   test("writeBytes()", (assert) => {
+    var K0: Int64 = { hi: 0x07060504, lo: 0x03020100 };
+    var K1: Int64 = { hi: 0x0f0e0d0c, lo: 0x0b0a0908 };
+    var buf = [];
+    
+    var stateInc = new SipState(K0, K1);
+    var stateFull = new SipState(K0, K1);
 
     for (var t = 0, l = DATA.length; t < l; ++t) {
       var vec = DATA[t];
-      //debug!("siphash test {}: {}", t, buf);
-      var state = new SipState(k0, k1);
       var vec_u64 = u64(vec);
-      state.writeBytes(buf);
-      var out = state.result();//hash_with_keys(k0, k1, &Bytes(buf.as_slice()));
+      var out = hashWithKeys(K0, K1, buf);
       //debug!("got {:?}, expected {:?}", out, vec);
       assert.deepEqual(vec_u64, out);
+      
+      if (vec_u64.hi === out.hi && vec_u64.lo === out.lo) {
+        console.debug('yeah', vec_u64);
+      }
 
       stateFull.reset();
       stateFull.writeBytes(buf);
       var f = resultString(stateFull.result());
       var i = resultString(stateInc.result());
       var v = toHexString(vec);
-      console.debug(t + ": (" + v + ") => inc=" + i + " full=" + f);
-      //debug!("full state {:?}", state_full);
-      //debug!("inc  state {:?}", state_inc);
+      //console.debug(t + ": (" + v + ") => inc=" + i + " full=" + f);
+      //console.debug("full state {:?}", state_full);
+      //console.debug("inc  state {:?}", state_inc);
 
       assert.strictEqual(f, i);
       assert.strictEqual(f, v);

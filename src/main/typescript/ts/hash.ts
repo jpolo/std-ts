@@ -92,12 +92,17 @@ module hash {
       }
   
       reset(): SipState {
+        var k0 = this._k0;
+        var k1 = this._k1;
+        var tail = this._tail;
         this._length = 0;
-        __u64xor(this._k0, RESET_I0, this._v0);
-        __u64xor(this._k1, RESET_I1, this._v1);
-        __u64xor(this._k0, RESET_I2, this._v2);
-        __u64xor(this._k1, RESET_I3, this._v3);
+        __u64xor(k0, RESET_I0, this._v0);
+        __u64xor(k1, RESET_I1, this._v1);
+        __u64xor(k0, RESET_I2, this._v2);
+        __u64xor(k1, RESET_I3, this._v3);
         this._ntail = 0;
+        tail.hi = 0;
+        tail.lo = 0;
         return this;
       }
       
@@ -199,6 +204,13 @@ module hash {
       }
     }
     
+    function __u8(n: number) {
+      return (n & 0xff);
+    }
+    
+    function __u32(n: number) {
+      return n >>> 0;  
+    }
     
     function __u64(hi: number = 0, lo: number = 0): Int64 {
       return { hi: hi >>> 0, lo: lo >>> 0 };
@@ -225,21 +237,21 @@ module hash {
     }
     
     function __u64or(a: Int64, b: Int64, out: Int64) {
-      out.hi = (a.hi | b.hi) >>> 0;
-      out.lo = (a.lo | b.lo) >>> 0;
+      out.hi = __u32(a.hi | b.hi);
+      out.lo = __u32(a.lo | b.lo);
     }
     
     function __u64xor(a: Int64, b: Int64, r: Int64) {
-      r.hi = (a.hi ^ b.hi) >>> 0;
-      r.lo = (a.lo ^ b.lo) >>> 0;
+      r.hi = __u32(a.hi ^ b.hi);
+      r.lo = __u32(a.lo ^ b.lo);
     }
     
     function __u64rotl(a: Int64, n: number) {
       var ahi = a.hi;
       var alo = a.lo;
       var nrest = 32 - n;
-      a.hi = ahi << n | alo >>> nrest;
-      a.lo = alo << n | ahi >>> nrest;
+      a.hi = (ahi << n | alo >>> nrest) >>> 0;
+      a.lo = (alo << n | ahi >>> nrest) >>> 0;
     }
   
     function __u64rotl32(a: Int64) {
@@ -267,15 +279,25 @@ module hash {
     
     function __u8to64_le(buf: number[], i: number, len: number, out: Int64) {
       if (len === 8) {
-        out.hi = buf[7 + i] << 24 | buf[6 + i] << 16 | buf[5 + i] << 8 | buf[4 + i];
-        out.lo = buf[3 + i] << 24 | buf[2 + i] << 16 | buf[1 + i] << 8 | buf[0 + i];
+        out.hi = __u32(
+          __u8(buf[7 + i]) << 24 |
+          __u8(buf[6 + i]) << 16 | 
+          __u8(buf[5 + i]) << 8 | 
+          __u8(buf[4 + i])
+        );
+        out.lo = __u32(
+          __u8(buf[3 + i]) << 24 | 
+          __u8(buf[2 + i]) << 16 | 
+          __u8(buf[1 + i]) << 8 | 
+          __u8(buf[0 + i])
+        );
       } else {
         var t = 0;
         while (t < len) {
           if (t < 4) {
-            out.lo |= buf[t + i] << t * 8;
+            out.lo |= __u8(buf[t + i]) << t * 8;
           } else {
-            out.hi |= buf[t + i] << t * 8;
+            out.hi |= __u8(buf[t + i]) << t * 8;
           }
           t += 1;
         }
