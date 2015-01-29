@@ -3,6 +3,7 @@ import reflect = require("ts/reflect")
 module hash {
   export interface Int64 { lo: number; hi: number; }
 
+  var __keys = Object.keys;
   var __stringTag = reflect.stringTag;
   
   export function hash(o: any): Int64 {
@@ -15,16 +16,13 @@ module hash {
     switch (__stringTag(o)) {
       case 'Null':
       case 'Undefined':
-        s.writeBytes([0]);
+        s.writeInt8(0);
         break;
       case 'Boolean':
-        s.writeBytes([o ? 1 : 0]);
+        s.writeBoolean(o);
         break;
       case 'String':
-        for (var i = 0, l = o.length; i < l; ++i) {
-          o.charCodeAt(i)  
-        }
-        //s.writeBytes(bytes);
+        s.writeString(o);
         break;
       case 'Number':
         break;
@@ -34,7 +32,7 @@ module hash {
           o.hash(s);
         } else {
           // hash default object
-          var keys = Object.keys(o).sort();
+          var keys = __keys(o).sort();
           var keyc = keys.length;
           for (var i = 0; i < keyc; ++i) {
             var key = keys[i];
@@ -54,7 +52,9 @@ module hash {
   }
 
   export module sip {
-
+    var __buffer1 = new Uint8Array(1);
+    var __buffer2 = new Uint8Array(2);
+    var __buffer4 = new Uint8Array(4);
   
     export class SipState {
   
@@ -73,13 +73,13 @@ module hash {
         this._k0 = k0 ? __u64(k0.hi, k0.lo) : __u64();
         this._k1 = k1 ? __u64(k1.hi, k1.lo) : __u64();
   
-        this._length = 0;
+        //this._length = 0;
         this._v0 = __u64();
         this._v1 = __u64();
         this._v2 = __u64();
         this._v3 = __u64();
         this._tail = __u64();
-        this._ntail = 0;
+        //this._ntail = 0;
   
         this.reset();
       }
@@ -108,12 +108,12 @@ module hash {
       
       result(): Int64 {
         var r: Int64;//return value
-        var v0 = this._v0;
-        var v1 = this._v1;
-        var v2 = this._v2;
-        var v3 = this._v3;
+        var v0 = __u64copy(this._v0);
+        var v1 = __u64copy(this._v1);
+        var v2 = __u64copy(this._v2);
+        var v3 = __u64copy(this._v3);
         var tail = this._tail;
-        var b: Int64 = __u64((this._length & 0xff << 24) | tail.hi, 0 | tail.lo);
+        var b: Int64 = __u64(((this._length & 0xff) << 24) | tail.hi, 0 | tail.lo);
         //let b: u64 = ((self.length as u64 & 0xff) << 56) | self.tail;
   
         __u64xor(v3, b, v3);
@@ -128,33 +128,69 @@ module hash {
         __compress(v0, v1, v2, v3);
         __compress(v0, v1, v2, v3);
   
-        r = __u64(v0.hi, v0.lo);
+        r = __u64copy(v0);
         __u64xor(r, v1, r);
         __u64xor(r, v2, r);
         __u64xor(r, v3, r);
         return r;
       }
       
-      writeBoolean(b: boolean) {
-        this.writeBytes([ b ? 1 : 0 ]);
+      writeBoolean(b: boolean): SipState {
+        this.writeInt8(b ? 1 : 0);
+        return this;
+      }
+      
+      writeInt8(n: number): SipState {
+        __buffer1[0] = n & 0xff;
+        this.writeBytes(__buffer1);
+        return this;
+      }
+      
+      writeInt16(n: number): SipState {
+        //little endian
+        __buffer2[0] = (n /*>>> 0*/) & 0xff;
+        __buffer2[1] = (n >>> 8) & 0xff;
+        this.writeBytes(__buffer2);
+        return this;
+      }
+      
+      writeInt32(n: number): SipState {
+        //little endian
+        __buffer4[0] = (n /*>>> 0*/) & 0xff;
+        __buffer4[1] = (n >>> 8) & 0xff;
+        __buffer4[2] = (n >>> 16) & 0xff;
+        __buffer4[3] = (n >>> 24) & 0xff;
+        this.writeBytes(__buffer4);
+        return this;
+      }
+      
+      writeInt64(n: Int64): SipState {
+        this.writeInt32(n.lo);
+        this.writeInt32(n.hi);
+        return this;
       }
       
       writeNumber(n: number) {
       
       }
       
-      writeString(s: string) {
-      
+      writeString(s: string): SipState {
+        for (var i = 0, l = s.length; i < l; ++i) {
+          this.writeInt16(s.charCodeAt(i));
+        }
+        this.writeInt8(0xff);
+        return this;
       }
       
-      writeBytes(b: number[]) {        
+      writeBytes(b: Uint8Array): SipState
+      writeBytes(b: number[]): SipState
+      writeBytes(b: any): SipState {        
         var v0 = this._v0;
         var v1 = this._v1;
         var v2 = this._v2;
         var v3 = this._v3;
         var length = b.length;
         this._length += length;
-        
         
         var needed = 0;
         if (this._ntail != 0) {
@@ -167,7 +203,7 @@ module hash {
             __u64or(this._tail, m, this._tail);
             //this._tail |= __u8to64_le!(b, 0, length) << 8 * this._ntail;
             this._ntail += length;
-            return
+            return this;
           }
   
           __u8to64_le(b, 0, needed, m)
@@ -201,19 +237,16 @@ module hash {
         
         __u8to64_le(b, i, left, this._tail);
         this._ntail = left;
-      }
-    }
-    
-    function __u8(n: number) {
-      return (n & 0xff);
-    }
-    
-    function __u32(n: number) {
-      return n >>> 0;  
+        return this;
+      }  
     }
     
     function __u64(hi: number = 0, lo: number = 0): Int64 {
       return { hi: hi >>> 0, lo: lo >>> 0 };
+    }
+    
+    function __u64copy(n: Int64): Int64 {
+      return { hi: n.hi, lo: n.lo };
     }
     
     function __u64add(a: Int64, b: Int64, r: Int64) {
@@ -237,13 +270,13 @@ module hash {
     }
     
     function __u64or(a: Int64, b: Int64, out: Int64) {
-      out.hi = __u32(a.hi | b.hi);
-      out.lo = __u32(a.lo | b.lo);
+      out.hi = (a.hi | b.hi) >>> 0;
+      out.lo = (a.lo | b.lo) >>> 0;
     }
     
-    function __u64xor(a: Int64, b: Int64, r: Int64) {
-      r.hi = __u32(a.hi ^ b.hi);
-      r.lo = __u32(a.lo ^ b.lo);
+    function __u64xor(a: Int64, b: Int64, out: Int64) {
+      out.hi = (a.hi ^ b.hi) >>> 0;
+      out.lo = (a.lo ^ b.lo) >>> 0;
     }
     
     function __u64rotl(a: Int64, n: number) {
@@ -278,26 +311,29 @@ module hash {
     }
     
     function __u8to64_le(buf: number[], i: number, len: number, out: Int64) {
+      //little endian
       if (len === 8) {
-        out.hi = __u32(
-          __u8(buf[7 + i]) << 24 |
-          __u8(buf[6 + i]) << 16 | 
-          __u8(buf[5 + i]) << 8 | 
-          __u8(buf[4 + i])
-        );
-        out.lo = __u32(
-          __u8(buf[3 + i]) << 24 | 
-          __u8(buf[2 + i]) << 16 | 
-          __u8(buf[1 + i]) << 8 | 
-          __u8(buf[0 + i])
-        );
+        out.hi = (
+          (buf[7 + i] & 0xff) << 24 |
+          (buf[6 + i] & 0xff) << 16 | 
+          (buf[5 + i] & 0xff) << 8 | 
+          (buf[4 + i] & 0xff)
+        ) >>> 0;
+        out.lo = (
+          (buf[3 + i] & 0xff) << 24 | 
+          (buf[2 + i] & 0xff) << 16 | 
+          (buf[1 + i] & 0xff) << 8 | 
+          (buf[0 + i] & 0xff)
+        ) >>> 0;
       } else {
         var t = 0;
+        out.lo = 0;
+        out.hi = 0;
         while (t < len) {
           if (t < 4) {
-            out.lo |= __u8(buf[t + i]) << t * 8;
+            out.lo |= (buf[t + i] & 0xff) << (t * 8);
           } else {
-            out.hi |= __u8(buf[t + i]) << t * 8;
+            out.hi |= (buf[t + i] & 0xff) << (t * 8);
           }
           t += 1;
         }

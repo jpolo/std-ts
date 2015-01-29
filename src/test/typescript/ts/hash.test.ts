@@ -6,16 +6,42 @@ import Int64 = hash.Int64
 import SipState = hash.sip.SipState;
 
 var hashSuite = suite("ts/hash.sip.SipState", (self) => {
+  var state: SipState;
+
+  self.setUp = () => {
+    state = new SipState();
+  };
   
-  function u64(buf: number[]): Int64 {
+  
+  function u64(hi: number, lo: number): Int64 {
     return {
-      hi: (buf[7] << 24 | buf[6] << 16 | buf[5] << 8 | buf[4]) >>> 0,
-      lo: (buf[3] << 24 | buf[2] << 16 | buf[1] << 8 | buf[0]) >>> 0
+      hi: hi >>> 0,
+      lo: lo >>> 0
     };
   }
   
+  function u64from(buf: number[]): Int64 {
+    return u64(
+      (buf[7] << 24 | buf[6] << 16 | buf[5] << 8 | buf[4]) >>> 0,
+      (buf[3] << 24 | buf[2] << 16 | buf[1] << 8 | buf[0]) >>> 0
+    );
+  }
+  
+  function u64bytes(h: Int64): number[] {
+    return [
+      u8(h.lo >>> 0),
+      u8(h.lo >>> 8),
+      u8(h.lo >>> 16),
+      u8(h.lo >>> 24),
+      u8(h.hi >>> 0),
+      u8(h.hi >>> 8),
+      u8(h.hi >>> 16),
+      u8(h.hi >>> 24)
+    ];
+  }
+  
   function u8(n: number): number { 
-    return (n & 0xff) >>> 0; 
+    return (n & 0xff); 
   }
   
   function u8rand(): number {
@@ -101,21 +127,8 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     return s;
   }
 
-  function resultBytes(h: Int64): number[] {
-    return [
-      u8(h.lo >>> 0),
-      u8(h.lo >>> 8),
-      u8(h.lo >>> 16),
-      u8(h.lo >>> 24),
-      u8(h.hi >>> 0),
-      u8(h.hi >>> 8),
-      u8(h.hi >>> 16),
-      u8(h.hi >>> 24)
-    ];
-  }
-
-  function resultString(h: {hi: number; lo: number}): string {
-    return toHexString(resultBytes(h));
+  function resultString(h: Int64): string {
+    return toHexString(u64bytes(h));
   }
   
   function hashWithKeys(k0: Int64, k1: Int64, bytes: number[]): Int64 {
@@ -128,12 +141,12 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     var vec = [ 0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72 ];
     
     //u64
-    var u64_vec = u64(vec);
+    var u64_vec = u64from(vec);
     assert(u64_vec.hi === 0x726fdb47);
     assert(u64_vec.lo === 0xdd0e0e31);
       
     //resultBytes
-    var vec_bytes = resultBytes(u64_vec);
+    var vec_bytes = u64bytes(u64_vec);
     assert(vec_bytes[0] === 0x31);
     assert(vec_bytes[1] === 0x0e);
     assert(vec_bytes[2] === 0x0e);
@@ -153,13 +166,16 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     }
     
   }());
+
   
   test("reset()", (assert) => {
     var s1 = new SipState();
     var s2 = new SipState();
+    var init1 = s1.result();
+    var init2 = s2.result();
     
     //before write should be equals
-    assert.deepEqual(s1.result(), s2.result());
+    assert.deepEqual(init1, init2);
     
     //write anything
     s1.writeBytes([u8rand(), u8rand(), u8rand(), u8rand()]);
@@ -170,12 +186,83 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     s1.reset();
     s2.reset();
     assert.deepEqual(s1.result(), s2.result());
+    assert.deepEqual(s1.result(), init1);
+    
+    //any reset number should return same result
+    s1.reset();
+    assert.deepEqual(s1.result(), init1);
   });
-        
+       
+  test("result()", (assert) => {
+    var result = state.result();
+    
+    //before write should be equals
+    assert.deepEqual(state.result(), { hi: 0x1e924b9d, lo: 0x737700d7 });
+    assert.deepEqual(state.result(), state.result());
+    assert.deepEqual(state.result(), result);
+    
+  });
+  
+  test("writeBoolean()", (assert) => {
+    //True
+    state.writeBoolean(true);
+    assert.deepEqual(state.result(), u64(0x667dd540, 0x1e6fd800));
+    
+    //False
+    state.reset().writeBoolean(false);
+    assert.deepEqual(state.result(), u64(0x8b5a0baa, 0x49fbc58d));
+  });
+  
+  test("writeInt8()", (assert) => {
+    //0
+    state.writeInt8(0);
+    assert.deepEqual(state.result(), u64(0x8b5a0baa, 0x49fbc58d));
+    
+    //2
+    state.reset().writeInt8(2);
+    assert.deepEqual(state.result(), u64(0x39ac0ea2, 0x89bcb316));
+    
+    //limit
+    state.reset().writeInt8(0xff);
+    assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
+    
+    //overflow
+    state.reset().writeInt8(0xfff);
+    assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
+  });
+  
+  test("writeInt16()", (assert) => {
+    //0
+    state.writeInt16(0);
+    assert.deepEqual(state.result(), u64(0x3a6d9523, 0x170345d0));
+    
+    //limit
+    state.reset().writeInt16(0xffff);
+    assert.deepEqual(state.result(), u64(0x709ab4d6, 0x3a341fbb));
+    
+    //overflow
+    state.reset().writeInt16(0xfffff);
+    assert.deepEqual(state.result(), u64(0x709ab4d6, 0x3a341fbb));
+    
+  });
+  
+  test("writeInt32()", (assert) => {
+    //0
+    state.writeInt32(0);
+    assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    
+  });
+  
+  test("writeString()", (assert) => {
+    //empty string
+    state.writeString("");
+    assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
+    
+  });
   
   test("writeBytes()", (assert) => {
-    var K0: Int64 = { hi: 0x07060504, lo: 0x03020100 };
-    var K1: Int64 = { hi: 0x0f0e0d0c, lo: 0x0b0a0908 };
+    var K0: Int64 = u64(0x07060504, 0x03020100);
+    var K1: Int64 = u64(0x0f0e0d0c, 0x0b0a0908);
     var buf = [];
     
     var stateInc = new SipState(K0, K1);
@@ -183,14 +270,14 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
 
     for (var t = 0, l = DATA.length; t < l; ++t) {
       var vec = DATA[t];
-      var vec_u64 = u64(vec);
+      var vec_u64 = u64from(vec);
       var out = hashWithKeys(K0, K1, buf);
       //debug!("got {:?}, expected {:?}", out, vec);
       assert.deepEqual(vec_u64, out);
       
-      if (vec_u64.hi === out.hi && vec_u64.lo === out.lo) {
+      /*if (vec_u64.hi === out.hi && vec_u64.lo === out.lo) {
         console.debug('yeah', vec_u64);
-      }
+      }*/
 
       stateFull.reset();
       stateFull.writeBytes(buf);
