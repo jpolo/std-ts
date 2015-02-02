@@ -1,7 +1,8 @@
 import reflect = require("ts/reflect")
+import int64 = require("ts/int64")
+import Int64 = int64.IInt64
 
 module hash {
-  export interface Int64 { lo: number; hi: number; }
 
   var __keys = Object.keys;
   var __stringTag = reflect.stringTag;
