@@ -3,7 +3,7 @@ import suite = unit.suite
 import test = unit.test
 import hash = require("../../../main/typescript/ts/hash")
 import int64 = require("../../../main/typescript/ts/int64")
-import Int64 = int64.IInt64
+import Int64 = int64.IInt64;
 import SipState = hash.sip.SipState;
 
 var hashSuite = suite("ts/hash.sip.SipState", (self) => {
@@ -258,6 +258,25 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     //empty string
     state.writeString("");
     assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
+    
+  });
+  
+  test("writeIHash()", (assert) => {
+    var expected = u64(0x20dd4eb3, 0x3d9590f2);
+    var obj: hash.IHash =  {
+      hash: function (s) {
+        s.writeBoolean(true)
+        s.writeInt8(0xef)
+      }
+    };
+     
+    //empty string
+    state.writeIHash(obj);
+    assert.deepEqual(state.result(), expected);
+    
+    state.reset();
+    state.writeIHash(obj);
+    assert.deepEqual(state.result(), expected);
     
   });
   

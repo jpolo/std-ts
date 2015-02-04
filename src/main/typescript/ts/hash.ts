@@ -48,7 +48,7 @@ module hash {
   
   export interface IHash {
     
-    hash(s: sip.SipState): Int64
+    hash(s: sip.SipState)
     
   }
 
@@ -91,7 +91,7 @@ module hash {
             this._k1
         )  
       }
-  
+
       reset(): SipState {
         var k0 = this._k0;
         var k1 = this._k1;
@@ -183,9 +183,14 @@ module hash {
         return this;
       }
       
+      writeIHash(o: IHash): SipState {
+        o.hash(this);
+        return this;
+      }
+      
       writeBytes(b: Uint8Array): SipState
       writeBytes(b: number[]): SipState
-      writeBytes(b: any): SipState {        
+      writeBytes(b: any): SipState {
         var v0 = this._v0;
         var v1 = this._v1;
         var v2 = this._v2;
@@ -239,8 +244,10 @@ module hash {
         __u8to64_le(b, i, left, this._tail);
         this._ntail = left;
         return this;
-      }  
+      }
     }
+    
+    
     
     function __u64(hi: number = 0, lo: number = 0): Int64 {
       return { hi: hi >>> 0, lo: lo >>> 0 };
