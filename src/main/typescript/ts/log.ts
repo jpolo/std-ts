@@ -228,31 +228,6 @@ module log {
   export module engine {
     interface IEngineReporter { filter?: IFilter; reporter: IReporter; }
     
-    function __apply(f: Function, thisp?: any, args?: any[]) {
-      var returnValue
-      var argc = args ? args.length : 0
-      try {
-        switch (argc) {
-        case 0: returnValue = thisp ? f.call(thisp) : f(); break;
-        case 1: returnValue = thisp ? f.call(thisp, args[0]) : f(args[0]); break;
-        case 2: returnValue = thisp ? f.call(thisp, args[0], args[1]) : f(args[0], args[1]); break;
-        default: returnValue = f.apply(thisp, args)
-        }
-      } catch (e) {
-        setTimeout(function () { throw e }, 0)
-      }
-      return returnValue
-    }
-    
-    function __filter(f: IEngineReporter, m: IMessage): boolean {
-      return f.filter ? __apply(f.filter, f, [ m ]) || false : true
-    }
-    
-    function __send(f: IEngineReporter, m: IMessage) {
-      var reporter = f.reporter
-      return __apply(reporter.receive, reporter, [ m ])
-    }
-    
     /**
      * Default engine 
      */
@@ -319,6 +294,22 @@ module log {
 
     }
     
+    //util
+    function __filter(f: IEngineReporter, m: IMessage): boolean {
+      try {
+        return f.filter ? f.filter(m) || false : true
+      } catch (e) {
+        __throwAsync(e);
+      }
+    }
+    
+    function __send(f: IEngineReporter, m: IMessage): boolean {
+      try {
+        return f.reporter.receive(m)
+      } catch (e) {
+        __throwAsync(e);
+      }
+    }
   }
   
   /*filter.and(
@@ -335,7 +326,8 @@ module log {
     export function level(l: ILevel, op?: string): IFilter
     export function level(l: string, op?: string): IFilter
     export function level(l: any, op = '='): IFilter {
-      var lValue = l.value
+      var level = Level.cast(l) || __throw('')
+      var lValue = level.value
       var returnValue: IFilter
       switch (op) {
         case '=':
@@ -442,6 +434,7 @@ module log {
   function __keys(o: any) { return Object.keys(o); }  
   function __str(o: any) { return String(o); }
   function __strCmp(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 }
+  function __throwAsync(e) { setTimeout(() => { throw e; }, 0); }
   
 }
 export = log
