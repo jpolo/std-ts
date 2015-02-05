@@ -83,7 +83,7 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
     assertMock.strictEqual(1, 1)
     assert.ok(assertions[i()].type == unit.SUCCESS)
 
-    assertMock.strictEqual("1", 1)
+    assertMock.strictEqual<any>("1", 1)
     assert.ok(assertions[i()].type == unit.FAILURE)
     
     assertMock.strictEqual(NaN, NaN)
@@ -102,7 +102,7 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
     assertMock.equal(1, 1)
     assert.ok(assertions[i()].type == unit.SUCCESS)
 
-    assertMock.equal("1", 1)
+    assertMock.equal<any>("1", 1)
     assert.ok(assertions[i()].type == unit.SUCCESS)
     
     assertMock.equal(NaN, NaN)
