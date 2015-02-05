@@ -262,7 +262,7 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
   });
   
   test("writeIHash()", (assert) => {
-    var expected = u64(0x20dd4eb3, 0x3d9590f2);
+    var expected = u64(0x4ea02dab, 0x488c25e4);
     var obj: hash.IHash =  {
       hash: function (s) {
         s.writeBoolean(true)

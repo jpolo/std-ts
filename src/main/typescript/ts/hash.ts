@@ -1,4 +1,5 @@
 import reflect = require("ts/reflect")
+import id = require("ts/id")
 import int64 = require("ts/int64")
 import Int64 = int64.IInt64
 
@@ -27,20 +28,8 @@ module hash {
         break;
       case 'Number':
         break;
-        
       default:
-        if ('hash' in o) {
-          o.hash(s);
-        } else {
-          // hash default object
-          var keys = __keys(o).sort();
-          var keyc = keys.length;
-          for (var i = 0; i < keyc; ++i) {
-            var key = keys[i];
-            o.writeString(key);
-            _hash(o[key], s)
-          }
-        }
+        s.writeObject(o);
     }
     return s
   }
@@ -185,6 +174,15 @@ module hash {
       
       writeIHash(o: IHash): SipState {
         o.hash(this);
+        return this;
+      }
+      
+      writeObject(o: any): SipState {
+        if ('hash' in o) {
+          o.hash(this);
+        } else {
+          this.writeInt32(id.id(o));
+        }
         return this;
       }
       
