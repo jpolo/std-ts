@@ -1,29 +1,6 @@
 module inspect {
 
-  var __ostring = Object.prototype.toString
-  var __fnName = function (f: any) { 
-    return (f.displayName || f.name || (f.name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
-  }
-  var __isObject = function (o) { return (typeof o === 'object') && o !== null }
-  var __isFunction = function (o) { return typeof o === 'function' }
-  var __keys = Object.keys
-  var __str = String
-  var __stringTag = (o: any) => {
-    var s = ''
-    if (o === null) {
-      s = 'Null'
-    } else {
-      switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break
-        case 'function': s = 'Function'; break
-        case 'number': s = 'Number'; break
-        case 'string': s = 'String'; break
-        case 'undefined': s = 'Undefined'; break
-        default: /*object*/ s = __ostring.call(o).slice(8, -1)
-      }
-    }
-    return s
-  }
+  
   
   export interface IEngine {
     stringify(o: any, maxDepth?: number): string 
@@ -197,6 +174,32 @@ module inspect {
   
   export function stringify(o: any): string {
     return engine.get().stringify(o)
+  }
+  
+  //util
+  var __ostring = Object.prototype.toString
+  function __fnName(f: any) { 
+    return (f.displayName || f.name || (f.name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
+  }
+  function __isObject(o: any) { return (typeof o === 'object') && o !== null }
+  function __isFunction(o: any) { return typeof o === 'function' }
+  function __keys(o: any) { return Object.keys(o); }
+  function __str(o: any) { return String(o); }
+  function __stringTag(o: any) {
+    var s = ''
+    if (o === null) {
+      s = 'Null'
+    } else {
+      switch(typeof o) {
+        case 'boolean': s = 'Boolean'; break
+        case 'function': s = 'Function'; break
+        case 'number': s = 'Number'; break
+        case 'string': s = 'String'; break
+        case 'undefined': s = 'Undefined'; break
+        default: /*object*/ s = __ostring.call(o).slice(8, -1)
+      }
+    }
+    return s
   }
   
 }

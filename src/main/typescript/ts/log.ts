@@ -1,12 +1,7 @@
 module log {
-  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
-  var __isNumber = function (o) { return typeof o == 'number'; }
-  var __isString = function (o) { return typeof o == 'string'; }
-  var __isFunction = function (o) { return typeof o == 'function'; }
-  var __keys = Object.keys
-  var __now = Date.now || function () { return (new Date()).getTime(); }
-  var __str = String
-  var __strCmp = function (a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 }
+  //default time
+  var $timeDefault = { now: Date.now || function () { return (new Date()).getTime(); } };
+  
   
   export interface IEngine {
     isEnabledFor(level: ILevel, group: string): boolean
@@ -123,9 +118,9 @@ module log {
     
     constructor(
       public level: ILevel, 
-      public group: string = "",
-      public message: string = "",
-      public timestamp: number = __now()
+      public group: string,
+      public message: string,
+      public timestamp: number = NaN
     ) {
     }
     
@@ -233,29 +228,6 @@ module log {
   export module engine {
     interface IEngineReporter { filter?: IFilter; reporter: IReporter; }
     
-     var __apply = function (f: Function, thisp?: any, args?: any[]) {
-      var returnValue
-      var argc = args ? args.length : 0
-      try {
-        switch (argc) {
-        case 0: returnValue = thisp ? f.call(thisp) : f(); break;
-        case 1: returnValue = thisp ? f.call(thisp, args[0]) : f(args[0]); break;
-        case 2: returnValue = thisp ? f.call(thisp, args[0], args[1]) : f(args[0], args[1]); break;
-        default: returnValue = f.apply(thisp, args)
-        }
-      } catch (e) {
-        setTimeout(function () { throw e }, 0)
-      }
-      return returnValue
-    }
-    var __filter = function (f: IEngineReporter, m: IMessage): boolean {
-      return f.filter ? __apply(f.filter, f, [ m ]) || false : true
-    }
-    var __send = function (f: IEngineReporter, m: IMessage) {
-      var reporter = f.reporter
-      return __apply(reporter.receive, reporter, [ m ])
-    }
-    
     /**
      * Default engine 
      */
@@ -270,7 +242,7 @@ module log {
       private _loggers: { [name: string]: Logger } = {}
       
       //Services
-      private $time: { now: () => number } = { now: __now }
+      private $time: { now: () => number } = $timeDefault
       
       constructor(
         deps?: {
@@ -278,7 +250,9 @@ module log {
         }
       ) {
         if (deps) {
-          this.$time = deps.$time || this.$time
+          if (deps.$time) {
+            this.$time = deps.$time;
+          }
         }
       }
       
@@ -320,6 +294,22 @@ module log {
 
     }
     
+    //util
+    function __filter(f: IEngineReporter, m: IMessage): boolean {
+      try {
+        return f.filter ? f.filter(m) || false : true
+      } catch (e) {
+        __throwAsync(e);
+      }
+    }
+    
+    function __send(f: IEngineReporter, m: IMessage): boolean {
+      try {
+        return f.reporter.receive(m)
+      } catch (e) {
+        __throwAsync(e);
+      }
+    }
   }
   
   /*filter.and(
@@ -336,7 +326,8 @@ module log {
     export function level(l: ILevel, op?: string): IFilter
     export function level(l: string, op?: string): IFilter
     export function level(l: any, op = '='): IFilter {
-      var lValue = l.value
+      var level = Level.cast(l) || __throw('')
+      var lValue = level.value
       var returnValue: IFilter
       switch (op) {
         case '=':
@@ -434,6 +425,16 @@ module log {
     }
   
   }
+  
+  //util
+  function __format(n: string, s: string) { return n + ' { ' + s + ' }' }
+  function __isNumber(o: any) { return typeof o == 'number'; }
+  function __isString(o: any) { return typeof o == 'string'; }
+  function __isFunction(o: any) { return typeof o == 'function'; }
+  function __keys(o: any) { return Object.keys(o); }  
+  function __str(o: any) { return String(o); }
+  function __strCmp(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 }
+  function __throwAsync(e) { setTimeout(() => { throw e; }, 0); }
   
 }
 export = log
