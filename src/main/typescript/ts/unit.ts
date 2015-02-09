@@ -37,7 +37,8 @@ module unit {
   var __isNaN = isNaN
   var __isNumber = function (o) { return typeof o === 'number' }
   var __isObject = function (o) { return o != null && (typeof o == "object") }
-  var __keys = reflect.ownKeys
+  var __keys = reflect.ownKeys;
+  var __keysSorted = function (o) { return __keys(o).sort(); }
   var __str = String  
   var __stringTag = reflect.stringTag
   var __now = Date.now || function () { return (new Date()).getTime(); }
@@ -268,8 +269,8 @@ module unit {
               case 'Object':
               case 'Function':
               default:
-                var keys1 = __keys(o1)
-                var keys2 = __isObject(o2) ? __keys(o2) : null
+                var keys1 = __keysSorted(o1)
+                var keys2 = __isObject(o2) ? __keysSorted(o2) : null
                 var keyc = keys1.length
                 if (keys2 && __equalsArray(keys1, keys2, __equals)) {
                   for (var i = 0; i < keyc; ++i) {
@@ -585,8 +586,8 @@ module unit {
       private _propEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
         var engine = this.__engine__
         message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
-        var keys1 = __keys(o1)
-        var keys2 = __keys(o2)
+        var keys1 = __keysSorted(o1)
+        var keys2 = __keysSorted(o2)
         var isSuccess = true
         for (var i = 0, l = keys1.length; i < l; ++i) {
           var key1 = keys1[i]
@@ -728,7 +729,7 @@ module unit {
         })
       })
 
-      __keys(sections).forEach((sectionName) => {
+      __keysSorted(sections).forEach((sectionName) => {
         var matrix = ""
         var messages = ""
         var section = sections[sectionName]
