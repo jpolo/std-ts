@@ -1,16 +1,11 @@
 module uri {
-  var __isArray = Array.isArray
-  var __isString = function (o) { return typeof o === 'string' }
-  var __keys = Object.keys
-  var __str = String
-    
-  
+
   export function parse(s: string): URI {
     return URI.fromString(s);
   }
 
   export function stringify(uri: IURI): string {
-    return URI.stringify(uri)
+    return URI.stringify(uri);
   }
 
   export interface IQueryString { [s: string]: string; }
@@ -195,9 +190,9 @@ module uri {
       
     isAbsolute(): boolean {
       return (
-        !strIsEmpty(this.scheme) &&
-        !strIsEmpty(this.domain) && //port?
-        !strIsEmpty(this.path)
+        !__strIsEmpty(this.scheme) &&
+        !__strIsEmpty(this.domain) && //port?
+        !__strIsEmpty(this.path)
       )
     }
 
@@ -360,7 +355,7 @@ module uri {
   
   
   
-  function _queryEquals(l, r): boolean {
+  function _queryEquals(l: any, r: any): boolean {
     var returnValue = true;
     if (l !== r) {
       var lkeys = __keys(l);
@@ -386,7 +381,13 @@ module uri {
     return returnValue;
   }
   
-  function strIsEmpty(o: string) {
+
+  //util
+  function __isArray(o: any): boolean { return Array.isArray(o); }
+  function __isString(o: any): boolean { return typeof o === 'string'; }
+  function __keys(o: any) { return Object.keys(o); }
+  function __str(o: any): string { return String(o); }
+  function __strIsEmpty(o: string) {
     return !o || o.length === 0;
   }
   

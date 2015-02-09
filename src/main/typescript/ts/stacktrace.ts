@@ -1,21 +1,4 @@
 module stacktrace {
-  var __ostring = Object.prototype.toString
-  var __stringTag = (o: any): string => {
-    var s = ''
-    if (o === null) {
-      s = 'Null'
-    } else {
-      switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break
-        case 'function': s = 'Function'; break
-        case 'number': s = 'Number'; break
-        case 'string': s = 'String'; break
-        case 'undefined': s = 'Undefined'; break
-        default: /*object*/ s = __ostring.call(o).slice(8, -1)
-      }
-    }
-    return s
-  }
   
   export interface ICallStack extends Array<ICallSite> {}
 
@@ -160,7 +143,7 @@ module stacktrace {
     while (curr && stack.length < maxStackSize) {
       fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON
       try {
-        args = _slice(curr['arguments'] || [])
+        args = __arraySlice(curr['arguments'] || [])
       } catch (e) {
         args = ['Cannot access arguments: ' + e]
       }
@@ -220,9 +203,9 @@ module stacktrace {
             result[i] = '[' + _stringifyArguments(arg) + ']'
           } else {
             result[i] = '[' +
-              _stringifyArguments(_slice(arg, 0, 1)) +
+              _stringifyArguments(__arraySlice(arg, 0, 1)) +
               '...' +
-              _stringifyArguments(_slice(arg, -1)) +
+              _stringifyArguments(__arraySlice(arg, -1)) +
               ']'
           }
           break
@@ -245,15 +228,35 @@ module stacktrace {
     return result.join(',')
   }
   
-  function _slice<T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
-    var returnValue = []
-    var l = returnValue.length
-    start = start || 0
-    end = end == null || l < end ? l : end
-    for (var i = start; i < end; ++i) {
-      returnValue.push(a[i])
+  
+  
+  //util
+  var __ostring = Object.prototype.toString
+  function __stringTag(o: any): string {
+    var s = '';
+    if (o === null) {
+      s = 'Null';
+    } else {
+      switch(typeof o) {
+        case 'boolean': s = 'Boolean'; break;
+        case 'function': s = 'Function'; break;
+        case 'number': s = 'Number'; break;
+        case 'string': s = 'String'; break;
+        case 'undefined': s = 'Undefined'; break;
+        default: /*object*/ s = __ostring.call(o).slice(8, -1);
+      }
     }
-    return returnValue
+    return s;
+  }
+  function __arraySlice<T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
+    var returnValue = [];
+    var l = returnValue.length;
+    start = start || 0;
+    end = end == null || l < end ? l : end;
+    for (var i = start; i < end; ++i) {
+      returnValue.push(a[i]);
+    }
+    return returnValue;
   }
   
 }

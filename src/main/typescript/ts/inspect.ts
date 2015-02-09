@@ -1,5 +1,10 @@
 module inspect {
 
+  export interface IInspect {
+    
+    inspect(): string;
+    
+  }
   
   
   export interface IEngine {
@@ -181,25 +186,25 @@ module inspect {
   function __fnName(f: any) { 
     return (f.displayName || f.name || (f.name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
   }
-  function __isObject(o: any) { return (typeof o === 'object') && o !== null }
-  function __isFunction(o: any) { return typeof o === 'function' }
+  function __isObject(o: any) { return (typeof o === 'object') && o !== null; }
+  function __isFunction(o: any) { return typeof o === 'function'; }
   function __keys(o: any) { return Object.keys(o); }
   function __str(o: any) { return String(o); }
   function __stringTag(o: any) {
-    var s = ''
+    var s = '';
     if (o === null) {
-      s = 'Null'
+      s = 'Null';
     } else {
       switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break
-        case 'function': s = 'Function'; break
-        case 'number': s = 'Number'; break
-        case 'string': s = 'String'; break
-        case 'undefined': s = 'Undefined'; break
-        default: /*object*/ s = __ostring.call(o).slice(8, -1)
+        case 'boolean': s = 'Boolean'; break;
+        case 'function': s = 'Function'; break;
+        case 'number': s = 'Number'; break;
+        case 'string': s = 'String'; break;
+        case 'undefined': s = 'Undefined'; break;
+        default: /*object*/ s = __ostring.call(o).slice(8, -1);
       }
     }
-    return s
+    return s;
   }
   
 }
