@@ -66,9 +66,9 @@ module inspect {
             } else {
               if (o != null) {
                 if (o && o.inspect) {
-                  s = o.inspect()//TODO inject this or depth
+                  s = this.stringify_IInspect(o, maxDepth);
                 } else {
-                  s = this.stringify_Object(o, maxDepth)
+                  s = this.stringify_Object(o, maxDepth);
                 }
               }
             }
@@ -135,6 +135,10 @@ module inspect {
         )
       }
       
+      stringify_IInspect(o: IInspect, maxDepth: number) {
+        return o.inspect();
+      }
+      
       stringify_Object(o: any, maxDepth: number) {
         var s = ''
         var ctor = o.constructor
@@ -162,7 +166,7 @@ module inspect {
           if (i !== 0) {
             s += ', '
           }
-          s += key + ': ' + this.stringify(val, maxDepth -1)
+          s += key + ': ' + this.stringify(val, maxDepth - 1)
         }
         if (truncate) {
           s += ', ...'
