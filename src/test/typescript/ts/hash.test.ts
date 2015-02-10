@@ -252,6 +252,14 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     state.writeInt32(0);
     assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
     
+    //limit
+    state.reset().writeInt32(0xffffffff);
+    assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    
+    //overflow
+    state.reset().writeInt32(0xffffffff + 1);
+    assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    
   });
   
   test("writeString()", (assert) => {
