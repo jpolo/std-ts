@@ -187,7 +187,7 @@ module hash {
             __writeString(this, o);
             break;
           case 'Number':
-            this.writeNumber(o);
+            __writeFloat64(this, o);
             break;
           default:
             __writeObject(this, o, true);
