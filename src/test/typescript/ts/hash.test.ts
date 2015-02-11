@@ -214,50 +214,69 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     assert.deepEqual(state.result(), u64(0x8b5a0baa, 0x49fbc58d));
   });
   
-  test("writeInt8()", (assert) => {
+  test("writeUint8()", (assert) => {
     //0
-    state.writeInt8(0);
+    state.writeUint8(0);
     assert.deepEqual(state.result(), u64(0x8b5a0baa, 0x49fbc58d));
     
     //2
-    state.reset().writeInt8(2);
+    state.reset().writeUint8(2);
     assert.deepEqual(state.result(), u64(0x39ac0ea2, 0x89bcb316));
     
     //limit
-    state.reset().writeInt8(0xff);
+    state.reset().writeUint8(0xff);
     assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
     
     //overflow
-    state.reset().writeInt8(0xfff);
+    state.reset().writeUint8(0xfff);
     assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
   });
   
-  test("writeInt16()", (assert) => {
+  test("writeUint16()", (assert) => {
     //0
-    state.writeInt16(0);
+    state.writeUint16(0);
     assert.deepEqual(state.result(), u64(0x3a6d9523, 0x170345d0));
     
     //limit
-    state.reset().writeInt16(0xffff);
+    state.reset().writeUint16(0xffff);
     assert.deepEqual(state.result(), u64(0x709ab4d6, 0x3a341fbb));
     
     //overflow
-    state.reset().writeInt16(0xfffff);
+    state.reset().writeUint16(0xfffff);
     assert.deepEqual(state.result(), u64(0x709ab4d6, 0x3a341fbb));
     
   });
   
-  test("writeInt32()", (assert) => {
+  test("writeUint32()", (assert) => {
     //0
-    state.writeInt32(0);
+    state.writeUint32(0);
+    assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    
+    //1
+    state.reset().writeUint32(1);
+    assert.deepEqual(state.result(), u64(0xbe56355a, 0x5e404435));
+    
+    //limit
+    state.reset().writeUint32(0xffffffff);
+    //assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    
+    //overflow
+    state.reset().writeUint32(0xffffffff + 1);
+    assert.deepEqual(state.result(), u64(0xbe56355a, 0x5e404435));
+    
+  });
+  
+  test("writeUint64()", (assert) => {
+    //0
+    state.writeUint64(u64(0x0, 0x0));
     assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
     
     //limit
-    state.reset().writeInt32(0xffffffff);
-    assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    state.reset().writeUint64(u64(0xffffffff, 0xffffffff));
+    assert.deepEqual(state.result(), u64(0x8050c18b, 0x6ac9d15e));
     
     //overflow
-    state.reset().writeInt32(0xffffffff + 1);
+    state.reset().writeUint64(u64(0xffffffff + 1, 0xffffffff));
     assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
     
   });
@@ -274,7 +293,7 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     var obj: hash.IHash =  {
       hash: function (s) {
         s.writeBoolean(true)
-        s.writeInt8(0xef)
+        s.writeUint8(0xef)
       }
     };
      

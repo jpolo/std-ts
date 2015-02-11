@@ -100,46 +100,46 @@ module hash {
       }
       
       writeUndefined(): SipState {
-        __writeInt8(this, 0);
+        __writeUint8(this, 0);
         return this;
       }
       
       writeNull(): SipState {
-        __writeInt8(this, 0);
+        __writeUint8(this, 0);
         return this;
       }
       
       writeBoolean(b: boolean): SipState {
         if (!__writeEmpty(this, b)) {
-          __writeInt8(this, b ? 1 : 0);
+          __writeUint8(this, b ? 1 : 0);
         }
         return this;
       }
       
-      writeInt8(n: number): SipState {
+      writeUint8(n: number): SipState {
         if (!__writeEmpty(this, n)) {
-          __writeInt8(this, n);
+          __writeUint8(this, n);
         }
         return this;
       }
       
-      writeInt16(n: number): SipState {
+      writeUint16(n: number): SipState {
         if (!__writeEmpty(this, n)) {
-          __writeInt16(this, n);
+          __writeUint16(this, n);
         }
         return this;
       }
       
-      writeInt32(n: number): SipState {
+      writeUint32(n: number): SipState {
         if (!__writeEmpty(this, n)) {
-          __writeInt32(this, n);
+          __writeUint32(this, n);
         }
         return this;
       }
       
-      writeInt64(n: Int64): SipState {
+      writeUint64(n: Int64): SipState {
         if (!__writeEmpty(this, n)) {
-          __writeInt64(this, n);
+          __writeUint64(this, n);
         }
         return this;
       }
@@ -206,22 +206,40 @@ module hash {
     var __hasTypedArray = !!Uint8Array;
     var __buffer: number[] = __hasTypedArray ? <any> new Uint8Array(8) : new Array(8);//64bits
     
-    function __readInt8(n: number) {
+    function __readUint8(n: number) {
       __buffer[0] = n & 0xff;
+      return __buffer;
     }
     
-    function __readInt16(n: number) {
+    function __readUint16(n: number) {
       //little endian
       __buffer[0] = (n /*>>> 0*/) & 0xff;
-      __buffer[1] = (n >>> 8) & 0xff;
+      __buffer[1] = (n >> 8) & 0xff;
+      return __buffer;
     }
     
-    function __readInt32(n: number) {
+    function __readUint32(n: number) {
       //little endian
-      __buffer[0] = (n /*>>> 0*/) & 0xff;
-      __buffer[1] = (n >>> 8) & 0xff;
-      __buffer[2] = (n >>> 16) & 0xff;
-      __buffer[3] = (n >>> 24) & 0xff;
+      __buffer[0] = (n /*>> 0*/) & 0xff;
+      __buffer[1] = (n >> 8) & 0xff;
+      __buffer[2] = (n >> 16) & 0xff;
+      __buffer[3] = (n >> 24) & 0xff;
+      return __buffer;
+    }
+    
+    function __readUint64(n: Int64) {
+      var lo = n.lo;
+      var hi = n.hi;
+      __buffer[0] = (hi /*>> 0*/) & 0xff;
+      __buffer[1] = (hi >> 8) & 0xff;
+      __buffer[2] = (hi >> 16) & 0xff;
+      __buffer[3] = (hi >> 24) & 0xff;
+      
+      __buffer[4] = (lo /*>> 0*/) & 0xff;
+      __buffer[5] = (lo >> 8) & 0xff;
+      __buffer[6] = (lo >> 16) & 0xff;
+      __buffer[7] = (lo >> 24) & 0xff;
+      return __buffer;
     }
     
     function __readFloat64(n: number) {
@@ -241,45 +259,31 @@ module hash {
     }
     
     function __writeUndefined(state: SipState) {
-      __writeInt8(state, 0);
+      __writeUint8(state, 0);
     }
     
     function __writeNull(state: SipState) {
-      __writeInt8(state, 0);
+      __writeUint8(state, 0);
     }
     
     function __writeBoolean(state: SipState, b: boolean) {
-      __writeInt8(state, b ? 1 : 0);
+      __writeUint8(state, b ? 1 : 0);
     }
     
-    function __writeInt8(state: SipState, n: number) {
-      __readInt8(n);
-      __writeBytes(state, __buffer, 1);
+    function __writeUint8(state: SipState, n: number) {
+      __writeBytes(state, __readUint8(n), 1);
     }
     
-    function __writeInt16(state: SipState, n: number) {
-      __readInt16(n);
-      __writeBytes(state, __buffer, 2);
+    function __writeUint16(state: SipState, n: number) {
+      __writeBytes(state, __readUint16(n), 2);
     }
     
-    function __writeInt32(state: SipState, n: number) {
-      __readInt32(n);
-      __writeBytes(state, __buffer, 4);
+    function __writeUint32(state: SipState, n: number) {
+      __writeBytes(state, __readUint32(n), 4);
     }
     
-    function __writeInt64(state: SipState, n: Int64) {
-      var lo = n.lo;
-      var hi = n.hi;
-      __buffer[0] = (hi /*>>> 0*/) & 0xff;
-      __buffer[1] = (hi >>> 8) & 0xff;
-      __buffer[2] = (hi >>> 16) & 0xff;
-      __buffer[3] = (hi >>> 24) & 0xff;
-      
-      __buffer[4] = (lo /*>>> 0*/) & 0xff;
-      __buffer[5] = (lo >>> 8) & 0xff;
-      __buffer[6] = (lo >>> 16) & 0xff;
-      __buffer[7] = (lo >>> 24) & 0xff;
-      __writeBytes(state, __buffer, 8);
+    function __writeUint64(state: SipState, n: Int64) {
+      __writeBytes(state, __readUint64(n), 8);
     }
     
     function __writeIHash(state: SipState, o: IHash) {
@@ -295,15 +299,15 @@ module hash {
       if (delegate && ('hash' in o)) {
         __writeIHash(this, <IHash> o);
       } else {
-        __writeInt32(this, id.id(o));
+        __writeUint32(this, id.id(o));
       }
     }
     
     function __writeString(state: SipState, s: string) {
       for (var i = 0, l = s.length; i < l; ++i) {
-        __writeInt16(state, s.charCodeAt(i));
+        __writeUint16(state, s.charCodeAt(i));
       }
-      __writeInt8(state, 0xff);
+      __writeUint8(state, 0xff);
     }
     
     function __writeBytes(state: SipState, bytes: any, length: number) {
@@ -389,8 +393,24 @@ module hash {
   }
   
   //util
+  var __ostring = Object.prototype.toString;
   function __keys(o: any) { return Object.keys(o); }
-  function __stringTag(o: any) { return reflect.stringTag(o); }
+  function __stringTag(o: any): string {
+    var s = '';
+    if (o === null) {
+      s = 'Null';
+    } else {
+      switch(typeof o) {
+        case 'boolean': s = 'Boolean'; break;
+        case 'function': s = 'Function'; break;
+        case 'number': s = 'Number'; break;
+        case 'string': s = 'String'; break;
+        case 'undefined': s = 'Undefined'; break;
+        default: /*object*/ s = __ostring.call(o).slice(8, -1);
+      }
+    }
+    return s;
+  }
   function __u64(hi: number = 0, lo: number = 0): Int64 { return { hi: hi >>> 0, lo: lo >>> 0 }; }
   function __u64copy(n: Int64): Int64 { return { hi: n.hi, lo: n.lo }; }
   function __u64add(a: Int64, b: Int64, r: Int64) { var rlo = a.lo + b.lo; r.hi = a.hi + b.hi + (rlo / 2 >>> 31) >>> 0; r.lo = rlo >>> 0; }
