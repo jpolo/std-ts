@@ -205,67 +205,59 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
   });
   
   test("writeBoolean()", (assert) => {
-    //True
-    state.writeBoolean(true);
-    assert.strictEqual(resultString(state.result()), "00d86f1e40d57d66");
-    
-    //False
-    state.reset().writeBoolean(false);
-    assert.strictEqual(resultString(state.result()), "8dc5fb49aa0b5a8b");
+    function hashBoolean(b: boolean): string {
+      return resultString((new SipState()).writeBoolean(b).result());
+    }
+    assert.strictEqual(hashBoolean(true), "00d86f1e40d57d66");
+    assert.strictEqual(hashBoolean(false), "8dc5fb49aa0b5a8b");
   });
   
   test("writeUint8()", (assert) => {
+    function hashUint8(n: number): string {
+      return resultString((new SipState()).writeUint8(n).result());
+    }
+    
     //0
-    state.writeUint8(0);
-    assert.strictEqual(resultString(state.result()), "8dc5fb49aa0b5a8b");
-    
+    assert.strictEqual(hashUint8(0), "8dc5fb49aa0b5a8b");
     //2
-    state.reset().writeUint8(2);
-    assert.strictEqual(resultString(state.result()), "16b3bc89a20eac39");
-    
+    assert.strictEqual(hashUint8(2), "16b3bc89a20eac39");
     //limit
-    state.reset().writeUint8(0xff);
-    assert.strictEqual(resultString(state.result()), "f290953db34edd20");
-    
+    assert.strictEqual(hashUint8(0xff), "f290953db34edd20");
     //overflow
-    state.reset().writeUint8(0xfff);
-    assert.strictEqual(resultString(state.result()), "f290953db34edd20");
+    assert.strictEqual(hashUint8(0xff + 1), "8dc5fb49aa0b5a8b");
   });
   
   test("writeUint16()", (assert) => {
+    function hashUint16(n: number): string {
+      return resultString((new SipState()).writeUint16(n).result());
+    }
+    
     //0
-    state.writeUint16(0);
-    assert.strictEqual(resultString(state.result()), "d045031723956d3a");
-    
+    assert.strictEqual(hashUint16(0), "d045031723956d3a");
+    //1
+    assert.strictEqual(hashUint16(1), "3d2142577dbb08e2");
     //limit
-    state.reset().writeUint16(0xffff);
-    assert.strictEqual(resultString(state.result()), "bb1f343ad6b49a70");
-    
+    assert.strictEqual(hashUint16(0xffff), "bb1f343ad6b49a70");
     //overflow
-    state.reset().writeUint16(0xfffff);//TODO check this result!
-    assert.strictEqual(resultString(state.result()), "bb1f343ad6b49a70");
+    assert.strictEqual(hashUint16(0xffff + 1), "d045031723956d3a");//same as 0
+    assert.strictEqual(hashUint16(0xffff + 2), "3d2142577dbb08e2");//same as 1
     
   });
   
   test("writeUint32()", (assert) => {
+    function hashUint32(n: number): string {
+      return resultString((new SipState()).writeUint32(n).result());
+    }
+    
     //0
-    state.writeUint32(0);
-    assert.strictEqual(resultString(state.result()), "98962bb2515ef57b");
-    
+    assert.strictEqual(hashUint32(0), "98962bb2515ef57b");
     //1
-    state.reset().writeUint32(1);
-    assert.strictEqual(resultString(state.result()), "3544405e5a3556be");
-    
+    assert.strictEqual(hashUint32(1), "3544405e5a3556be");
     //limit
-    state.reset().writeUint32(0xffffffff);
-    assert.strictEqual(resultString(state.result()), "0616f9e22e79a509");
-    
+    assert.strictEqual(hashUint32(0xffffffff), "0616f9e22e79a509");
     //overflow
-    state.reset().writeUint32(0xffffffff + 1);//TODO check this result!
-    assert.strictEqual(resultString(state.result()), "98962bb2515ef57b");
-    
-    state.reset().writeUint32(0xffffffff + 2);//TODO check this result!
-    assert.strictEqual(resultString(state.result()), "3544405e5a3556be");
+    assert.strictEqual(hashUint32(0xffffffff + 1), "98962bb2515ef57b");//same as 0
+    assert.strictEqual(hashUint32(0xffffffff + 2), "3544405e5a3556be");//same as 1
     
   });
   
@@ -285,23 +277,26 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
   });
   
   test("writeString()", (assert) => {
+    function hashString(s: string): string {
+      return resultString((new SipState()).writeString(s).result());
+    }
+    
     //empty string
-    state.writeString("");
-    assert.strictEqual(resultString(state.result()), "f290953db34edd20");
+    assert.strictEqual(hashString(""), "f290953db34edd20");
     
     //simple
-    state.reset().writeString("foo");
-    assert.strictEqual(resultString(state.result()), "2c75980448b9c4bd");
+    assert.strictEqual(hashString("foo"), "2c75980448b9c4bd");
     
     //with accents
-    state.reset().writeString("ça et là");
-    assert.strictEqual(resultString(state.result()), "ceede8d51efb3ff1");
+    assert.strictEqual(hashString("ça et là"), "ceede8d51efb3ff1");
   });
   
   test("writeIHash()", (assert) => {
     var expected = u64(0x4ea02dab, 0x488c25e4);
+    var count = 0;
     var obj: hash.IHash =  {
       hash: function (s) {
+        count++;
         s.writeBoolean(true)
         s.writeUint8(0xef)
       }
@@ -309,11 +304,12 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
      
     //empty string
     state.writeIHash(obj);
-    assert.deepEqual(state.result(), expected);
+    assert.strictEqual(count, 1);
+    assert.strictEqual(resultString(state.result()), "e4258c48ab2da04e");
     
-    state.reset();
-    state.writeIHash(obj);
-    assert.deepEqual(state.result(), expected);
+    state.reset().writeIHash(obj);
+    assert.strictEqual(count, 2);
+    assert.strictEqual(resultString(state.result()), "e4258c48ab2da04e");
     
   });
   

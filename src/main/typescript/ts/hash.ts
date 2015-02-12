@@ -1,4 +1,3 @@
-import reflect = require("ts/reflect")
 import id = require("ts/id")
 import int64 = require("ts/int64")
 import Int64 = int64.IInt64
@@ -179,21 +178,11 @@ module hash {
       
       write(o: any): SipState {
         switch (__stringTag(o)) {
-          case 'Null':
-            __writeNull(this);
-            break;
-          case 'Undefined':
-            __writeUndefined(this);
-            break;
-          case 'Boolean':
-            __writeBoolean(this, o);
-            break;
-          case 'String':
-            __writeString(this, o);
-            break;
-          case 'Number':
-            __writeFloat64(this, o);
-            break;
+          case 'Null': __writeNull(this); break;
+          case 'Undefined': __writeUndefined(this); break;
+          case 'Boolean': __writeBoolean(this, o); break;
+          case 'String': __writeString(this, o); break;
+          case 'Number': __writeFloat64(this, o); break;
           default:
             __writeObject(this, o, true);
         }
