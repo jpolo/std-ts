@@ -207,85 +207,95 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
   test("writeBoolean()", (assert) => {
     //True
     state.writeBoolean(true);
-    assert.deepEqual(state.result(), u64(0x667dd540, 0x1e6fd800));
+    assert.strictEqual(resultString(state.result()), "00d86f1e40d57d66");
     
     //False
     state.reset().writeBoolean(false);
-    assert.deepEqual(state.result(), u64(0x8b5a0baa, 0x49fbc58d));
+    assert.strictEqual(resultString(state.result()), "8dc5fb49aa0b5a8b");
   });
   
   test("writeUint8()", (assert) => {
     //0
     state.writeUint8(0);
-    assert.deepEqual(state.result(), u64(0x8b5a0baa, 0x49fbc58d));
+    assert.strictEqual(resultString(state.result()), "8dc5fb49aa0b5a8b");
     
     //2
     state.reset().writeUint8(2);
-    assert.deepEqual(state.result(), u64(0x39ac0ea2, 0x89bcb316));
+    assert.strictEqual(resultString(state.result()), "16b3bc89a20eac39");
     
     //limit
     state.reset().writeUint8(0xff);
-    assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
+    assert.strictEqual(resultString(state.result()), "f290953db34edd20");
     
     //overflow
     state.reset().writeUint8(0xfff);
-    assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
+    assert.strictEqual(resultString(state.result()), "f290953db34edd20");
   });
   
   test("writeUint16()", (assert) => {
     //0
     state.writeUint16(0);
-    assert.deepEqual(state.result(), u64(0x3a6d9523, 0x170345d0));
+    assert.strictEqual(resultString(state.result()), "d045031723956d3a");
     
     //limit
     state.reset().writeUint16(0xffff);
-    assert.deepEqual(state.result(), u64(0x709ab4d6, 0x3a341fbb));
+    assert.strictEqual(resultString(state.result()), "bb1f343ad6b49a70");
     
     //overflow
-    state.reset().writeUint16(0xfffff);
-    assert.deepEqual(state.result(), u64(0x709ab4d6, 0x3a341fbb));
+    state.reset().writeUint16(0xfffff);//TODO check this result!
+    assert.strictEqual(resultString(state.result()), "bb1f343ad6b49a70");
     
   });
   
   test("writeUint32()", (assert) => {
     //0
     state.writeUint32(0);
-    assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    assert.strictEqual(resultString(state.result()), "98962bb2515ef57b");
     
     //1
     state.reset().writeUint32(1);
-    assert.deepEqual(state.result(), u64(0xbe56355a, 0x5e404435));
+    assert.strictEqual(resultString(state.result()), "3544405e5a3556be");
     
     //limit
     state.reset().writeUint32(0xffffffff);
-    //assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    assert.strictEqual(resultString(state.result()), "0616f9e22e79a509");
     
     //overflow
-    state.reset().writeUint32(0xffffffff + 1);
-    assert.deepEqual(state.result(), u64(0xbe56355a, 0x5e404435));
+    state.reset().writeUint32(0xffffffff + 1);//TODO check this result!
+    assert.strictEqual(resultString(state.result()), "98962bb2515ef57b");
+    
+    state.reset().writeUint32(0xffffffff + 2);//TODO check this result!
+    assert.strictEqual(resultString(state.result()), "3544405e5a3556be");
     
   });
   
   test("writeUint64()", (assert) => {
     //0
     state.writeUint64(u64(0x0, 0x0));
-    assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    assert.strictEqual(resultString(state.result()), "6725fe6fbbe849e8");
     
     //limit
     state.reset().writeUint64(u64(0xffffffff, 0xffffffff));
-    assert.deepEqual(state.result(), u64(0x8050c18b, 0x6ac9d15e));
+    assert.strictEqual(resultString(state.result()), "5ed1c96a8bc15080");
     
     //overflow
     state.reset().writeUint64(u64(0xffffffff + 1, 0xffffffff));
-    assert.deepEqual(state.result(), u64(0x7bf55e51, 0xb22b9698));
+    assert.strictEqual(resultString(state.result()), "4497e78fac47c0a2");//TODO: check this result!
     
   });
   
   test("writeString()", (assert) => {
     //empty string
     state.writeString("");
-    assert.deepEqual(state.result(), u64(0x20dd4eb3, 0x3d9590f2));
+    assert.strictEqual(resultString(state.result()), "f290953db34edd20");
     
+    //simple
+    state.reset().writeString("foo");
+    assert.strictEqual(resultString(state.result()), "2c75980448b9c4bd");
+    
+    //with accents
+    state.reset().writeString("ça et là");
+    assert.strictEqual(resultString(state.result()), "ceede8d51efb3ff1");
   });
   
   test("writeIHash()", (assert) => {

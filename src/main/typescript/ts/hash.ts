@@ -3,6 +3,11 @@ import id = require("ts/id")
 import int64 = require("ts/int64")
 import Int64 = int64.IInt64
 
+//assertion
+if (!ArrayBuffer || !Uint8Array || !DataView) {
+  throw new Error("Typed Arrays is required");
+}
+
 module hash {
 
   export function hash(o: any): Int64 {
@@ -203,47 +208,50 @@ module hash {
       }
     }
     
-    var __hasTypedArray = !!Uint8Array;
-    var __buffer: number[] = __hasTypedArray ? <any> new Uint8Array(8) : new Array(8);//64bits
+
+    var __byteBuffer = new ArrayBuffer(8);
+    var __byteArray = new Uint8Array(__byteBuffer);
+    var __dataView = new DataView(__byteBuffer);
     
     function __readUint8(n: number) {
-      __buffer[0] = n & 0xff;
-      return __buffer;
+      __byteArray[0] = n & 0xff;
+      return __byteArray;
     }
     
     function __readUint16(n: number) {
       //little endian
-      __buffer[0] = (n /*>>> 0*/) & 0xff;
-      __buffer[1] = (n >> 8) & 0xff;
-      return __buffer;
+      __byteArray[0] = (n /*>>> 0*/) & 0xff;
+      __byteArray[1] = (n >> 8) & 0xff;
+      return __byteArray;
     }
     
     function __readUint32(n: number) {
       //little endian
-      __buffer[0] = (n /*>> 0*/) & 0xff;
-      __buffer[1] = (n >> 8) & 0xff;
-      __buffer[2] = (n >> 16) & 0xff;
-      __buffer[3] = (n >> 24) & 0xff;
-      return __buffer;
+      __byteArray[0] = (n /*>> 0*/) & 0xff;
+      __byteArray[1] = (n >> 8) & 0xff;
+      __byteArray[2] = (n >> 16) & 0xff;
+      __byteArray[3] = (n >> 24) & 0xff;
+      return __byteArray;
     }
     
     function __readUint64(n: Int64) {
       var lo = n.lo;
       var hi = n.hi;
-      __buffer[0] = (hi /*>> 0*/) & 0xff;
-      __buffer[1] = (hi >> 8) & 0xff;
-      __buffer[2] = (hi >> 16) & 0xff;
-      __buffer[3] = (hi >> 24) & 0xff;
+      __byteArray[0] = (hi /*>> 0*/) & 0xff;
+      __byteArray[1] = (hi >> 8) & 0xff;
+      __byteArray[2] = (hi >> 16) & 0xff;
+      __byteArray[3] = (hi >> 24) & 0xff;
       
-      __buffer[4] = (lo /*>> 0*/) & 0xff;
-      __buffer[5] = (lo >> 8) & 0xff;
-      __buffer[6] = (lo >> 16) & 0xff;
-      __buffer[7] = (lo >> 24) & 0xff;
-      return __buffer;
+      __byteArray[4] = (lo /*>> 0*/) & 0xff;
+      __byteArray[5] = (lo >> 8) & 0xff;
+      __byteArray[6] = (lo >> 16) & 0xff;
+      __byteArray[7] = (lo >> 24) & 0xff;
+      return __byteArray;
     }
     
     function __readFloat64(n: number) {
-      
+      __dataView.setFloat64(0, n, true);
+      return __byteArray;
     }
     
     function __writeEmpty(state: SipState, o: any): boolean {
@@ -291,8 +299,7 @@ module hash {
     }
     
     function __writeFloat64(state: SipState, n: number) {
-      __readFloat64(n);
-      __writeBytes(state, __buffer, 8);
+      __writeBytes(state, __readFloat64(n), 8);
     }
     
     function __writeObject(state: SipState, o: any, delegate: boolean) {
