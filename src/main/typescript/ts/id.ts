@@ -1,4 +1,5 @@
 module id {
+  var ID_PROPERTY = "__id__";
   var __currentId = 0;
   var __nextId = function () { return __currentId++; };
   var __registry = (!!WeakMap ? new WeakMap<any, number>() : null);
@@ -14,11 +15,11 @@ module id {
       return id;
     } : 
     function (o: any) {
-      var id = o.__id__;
+      var id = o[ID_PROPERTY];
       if (id === undefined) {
         id = __nextId();
         __descriptor.value = id;
-        __def(o, "__id__", __descriptor);
+        __def(o, ID_PROPERTY, __descriptor);
       }
       return id;
     };
