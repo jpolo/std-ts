@@ -176,6 +176,13 @@ module hash {
         return this;
       }
       
+      writeFunction(o: any, delegate = true): SipState {
+        if (!__writeEmpty(this, o)) {
+          __writeFunction(this, o);
+        }
+        return this;
+      }
+      
       write(o: any): SipState {
         switch (__stringTag(o)) {
           case 'Null': __writeNull(this); break;
@@ -183,8 +190,8 @@ module hash {
           case 'Boolean': __writeBoolean(this, o); break;
           case 'String': __writeString(this, o); break;
           case 'Number': __writeFloat64(this, o); break;
-          default:
-            __writeObject(this, o, true);
+          case 'Function': __writeFunction(this, o); break;
+          default: __writeObject(this, o, true);
         }
         return this;
       }
@@ -291,14 +298,18 @@ module hash {
       __writeBytes(state, __readFloat64(n), 8);
     }
     
-    function __writeObject(state: SipState, o: any, delegate: boolean) {
-      if (delegate && ('hash' in o)) {
-        __writeIHash(this, <IHash> o);
-      } else {
-        __writeUint32(this, id.id(o));
-      }
+    function __writeFunction(state: SipState, f: Function) {
+      __writeUint32(this, id.id(f));
     }
     
+    function __writeObject(state: SipState, o: any, delegate: boolean) {
+      if (delegate && ('hash' in o)) {
+        __writeIHash(state, <IHash> o);
+      } else {
+        __writeUint32(state, id.id(o));
+      }
+    }
+
     function __writeString(state: SipState, s: string) {
       for (var i = 0, l = s.length; i < l; ++i) {
         __writeUint16(state, s.charCodeAt(i));
@@ -391,7 +402,7 @@ module hash {
   //util
   var __ostring = Object.prototype.toString;
   function __keys(o: any) { return Object.keys(o); }
-  function __stringTag(o: any): string {
+  function __stringTag(o: any) {
     var s = '';
     if (o === null) {
       s = 'Null';
@@ -402,11 +413,12 @@ module hash {
         case 'number': s = 'Number'; break;
         case 'string': s = 'String'; break;
         case 'undefined': s = 'Undefined'; break;
-        default: /*object*/ s = __ostring.call(o).slice(8, -1);
+        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
       }
     }
     return s;
   }
+  
   function __u64(hi: number = 0, lo: number = 0): Int64 { return { hi: hi >>> 0, lo: lo >>> 0 }; }
   function __u64copy(n: Int64): Int64 { return { hi: n.hi, lo: n.lo }; }
   function __u64add(a: Int64, b: Int64, r: Int64) { var rlo = a.lo + b.lo; r.hi = a.hi + b.hi + (rlo / 2 >>> 31) >>> 0; r.lo = rlo >>> 0; }
