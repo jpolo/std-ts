@@ -65,7 +65,7 @@ module inspect {
               s = this[methodName](o, maxDepth)
             } else {
               if (o != null) {
-                if (o && o.inspect) {
+                if (o.inspect) {
                   s = this.stringify_IInspect(o, maxDepth);
                 } else {
                   s = this.stringify_Object(o, maxDepth);
@@ -205,7 +205,7 @@ module inspect {
         case 'number': s = 'Number'; break;
         case 'string': s = 'String'; break;
         case 'undefined': s = 'Undefined'; break;
-        default: /*object*/ s = __ostring.call(o).slice(8, -1);
+        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
       }
     }
     return s;
