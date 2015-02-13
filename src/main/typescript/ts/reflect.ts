@@ -218,20 +218,20 @@ module reflect {
   }
   
   export function stringTag(o: any): string {
-    var s = ''
+    var s = '';
     if (o === null) {
-      s = 'Null'
+      s = 'Null';
     } else {
       switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break
-        case 'function': s = 'Function'; break
-        case 'number': s = 'Number'; break
-        case 'string': s = 'String'; break
-        case 'undefined': s = 'Undefined'; break
-        default: /*object*/ s = __ostring.call(o).slice(8, -1)
+        case 'boolean': s = 'Boolean'; break;
+        case 'function': s = 'Function'; break;
+        case 'number': s = 'Number'; break;
+        case 'string': s = 'String'; break;
+        case 'undefined': s = 'Undefined'; break;
+        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
       }
     }
-    return s
+    return s;
   }
   
 
