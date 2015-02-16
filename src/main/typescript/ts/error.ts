@@ -36,10 +36,6 @@ module error {
       this.message = message;
       __captureStackTrace(this, this.constructor);
     }
-    
-    inspect(): string {
-      return this.name + ' { ' + '' + ' }';
-    }
   }
   
   //util

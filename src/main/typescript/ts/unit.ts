@@ -94,6 +94,10 @@ module unit {
       return assertionType
     }
     
+    static compare(a: AssertionType, b: AssertionType): number {
+      return a.value - b.value;
+    }
+    
     private static _instances: { [key: string]: AssertionType } = {}
     private static _nextValue = 0
 
@@ -101,6 +105,10 @@ module unit {
       public name: string, 
       public value: number
     ) {}
+    
+    compare(o: AssertionType): number {
+      return AssertionType.compare(this, o);
+    }
     
     equals(o: any): boolean { 
       return this === o || (o && (o instanceof this.constructor) && this.value === o.value) 

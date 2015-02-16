@@ -50,6 +50,13 @@ var BaseErrorSuite = suite("ts/error.BaseError", (self) => {
     assert.strictEqual(stackLines[1].slice(0, prefix.length), prefix);
   })
   
+  /*
+  test("#inspect()", (assert) => {
+    var err = new BaseError("my message");
+    assert.strictEqual(err.inspect(), "BaseError { my message }");
+  })
+  */
+  
   test("#toString()", (assert) => {
     var err = new BaseError("my message");
     assert.strictEqual(err.toString(), "BaseError: my message");
