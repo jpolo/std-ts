@@ -17,14 +17,31 @@ module hash {
   
   export interface IHash {
     
-    hash(s: sip.SipState)
+    hash(s: IHashState)
+    
+  }
+  
+  export interface IHashState {
+    
+    write(o: any): void
+    writeUndefined(): void
+    writeNull(): void
+    writeBoolean(b: boolean): void
+    writeNumber(n: number): void
+    writeIHash(o: IHash): void
+    writeFunction(f: Function): void
+    writeObject(o: any, delegate?: boolean): void
+    writeString(s: string): void
+    writeUint8(u: number): void
+    writeUint16(u: number): void
+    writeUint32(u: number): void
     
   }
 
   export module sip {
     
   
-    export class SipState {
+    export class SipState implements IHashState {
   
       private _k0: Int64;
       private _k1: Int64;
@@ -103,87 +120,76 @@ module hash {
         return r;
       }
       
-      writeUndefined(): SipState {
+      writeUndefined(): void {
         __writeUint8(this, 0);
-        return this;
       }
       
-      writeNull(): SipState {
+      writeNull(): void {
         __writeUint8(this, 0);
-        return this;
       }
       
-      writeBoolean(b: boolean): SipState {
+      writeBoolean(b: boolean): void {
         if (!__writeEmpty(this, b)) {
           __writeUint8(this, b ? 1 : 0);
         }
-        return this;
       }
       
-      writeUint8(n: number): SipState {
+      writeUint8(n: number): void {
         if (!__writeEmpty(this, n)) {
           __writeUint8(this, n);
         }
-        return this;
       }
       
-      writeUint16(n: number): SipState {
+      writeUint16(n: number): void {
         if (!__writeEmpty(this, n)) {
           __writeUint16(this, n);
         }
-        return this;
       }
       
-      writeUint32(n: number): SipState {
+      writeUint32(n: number): void {
         if (!__writeEmpty(this, n)) {
           __writeUint32(this, n);
         }
-        return this;
       }
       
-      writeUint64(n: Int64): SipState {
+      /*
+      writeUint64(n: Int64): void {
         if (!__writeEmpty(this, n)) {
           __writeUint64(this, n);
         }
-        return this;
-      }
+      }*/
       
-      writeNumber(n: number): SipState {
+      writeNumber(n: number): void {
         if (!__writeEmpty(this, n)) {
           __writeFloat64(this, n);
         }
-        return this;
       }
       
-      writeString(s: string): SipState {
+      writeString(s: string): void {
         if (!__writeEmpty(this, s)) {
           __writeString(this, s);
         }
-        return this;
       }
       
-      writeIHash(o: IHash): SipState {
+      writeIHash(o: IHash): void {
         if (!__writeEmpty(this, o)) {
           __writeIHash(this, o);
         }
-        return this;
       }
       
-      writeObject(o: any, delegate = true): SipState {
+      writeObject(o: any, delegate = true): void {
         if (!__writeEmpty(this, o)) {
           __writeObject(this, o, delegate);
         }
-        return this;
       }
       
-      writeFunction(o: any, delegate = true): SipState {
+      writeFunction(o: any, delegate = true): void {
         if (!__writeEmpty(this, o)) {
           __writeFunction(this, o);
         }
-        return this;
       }
       
-      write(o: any): SipState {
+      write(o: any): void {
         switch (__stringTag(o)) {
           case 'Null': __writeNull(this); break;
           case 'Undefined': __writeUndefined(this); break;
@@ -191,16 +197,18 @@ module hash {
           case 'String': __writeString(this, o); break;
           case 'Number': __writeFloat64(this, o); break;
           case 'Function': __writeFunction(this, o); break;
+          
+          //useful class:
+          case 'Date': __writeFloat64(this, (<Date>o).getTime()); break;
+          case 'RegExp': __writeString(this, __str(o)); break;
           default: __writeObject(this, o, true);
         }
-        return this;
       }
       
-      writeBytes(b: Uint8Array): SipState
-      writeBytes(b: number[]): SipState
-      writeBytes(b: any): SipState {
+      writeBytes(b: Uint8Array): void
+      writeBytes(b: number[]): void
+      writeBytes(b: any): void {
         __writeBytes(this, b, b.length);
-        return this;
       }
     }
     
@@ -311,9 +319,43 @@ module hash {
     }
 
     function __writeString(state: SipState, s: string) {
-      for (var i = 0, l = s.length; i < l; ++i) {
-        __writeUint16(state, s.charCodeAt(i));
+      var byteLength = 8;
+      var charLength = byteLength / 2;
+      var cycles = s.length % charLength;
+      var i = 0;
+      var n: number;
+
+      //unrolled
+      while (cycles--) {
+        n = s.charCodeAt(i++);
+        __byteArray[0] = (n) & 0xff;
+        __byteArray[1] = (n >> 8) & 0xff;
+        __writeBytes(state, __byteArray, 2);
       }
+      
+      cycles = s.length / charLength >>> 0;
+      while (cycles--) {
+        n = s.charCodeAt(i++);
+        __byteArray[0] = (n) & 0xff;
+        __byteArray[1] = (n >> 8) & 0xff;
+        
+        n = s.charCodeAt(i++);
+        __byteArray[2] = (n) & 0xff;
+        __byteArray[3] = (n >> 8) & 0xff;
+        
+        n = s.charCodeAt(i++);
+        __byteArray[4] = (n) & 0xff;
+        __byteArray[5] = (n >> 8) & 0xff;
+        
+        n = s.charCodeAt(i++);
+        __byteArray[6] = (n) & 0xff;
+        __byteArray[7] = (n >> 8) & 0xff;
+        __writeBytes(state, __byteArray, byteLength);
+      }
+      
+      /*for (var i = 0, l = s.length; i < l; ++i) {
+        __writeUint16(state, s.charCodeAt(i));
+      }*/
       __writeUint8(state, 0xff);
     }
     
@@ -402,6 +444,7 @@ module hash {
   //util
   var __ostring = Object.prototype.toString;
   function __keys(o: any) { return Object.keys(o); }
+  function __str(o: any) { return String(o); }
   function __stringTag(o: any) {
     var s = '';
     if (o === null) {

@@ -169,7 +169,7 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
   }());
 
   
-  test("reset()", (assert) => {
+  test("#reset()", (assert) => {
     var s1 = new SipState();
     var s2 = new SipState();
     var init1 = s1.result();
@@ -194,7 +194,7 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     assert.deepEqual(s1.result(), init1);
   });
        
-  test("result()", (assert) => {
+  test("#result()", (assert) => {
     var result = state.result();
     
     //before write should be equals
@@ -204,17 +204,21 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     
   });
   
-  test("writeBoolean()", (assert) => {
+  test("#writeBoolean()", (assert) => {
     function hashBoolean(b: boolean): string {
-      return resultString((new SipState()).writeBoolean(b).result());
+      var s = (new SipState()); 
+      s.writeBoolean(b);
+      return resultString(s.result());
     }
     assert.strictEqual(hashBoolean(true), "00d86f1e40d57d66");
     assert.strictEqual(hashBoolean(false), "8dc5fb49aa0b5a8b");
   });
   
-  test("writeUint8()", (assert) => {
+  test("#writeUint8()", (assert) => {
     function hashUint8(n: number): string {
-      return resultString((new SipState()).writeUint8(n).result());
+      var s = (new SipState()); 
+      s.writeUint8(n); 
+      return resultString(s.result());
     }
     
     //0
@@ -227,9 +231,11 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     assert.strictEqual(hashUint8(0xff + 1), "8dc5fb49aa0b5a8b");
   });
   
-  test("writeUint16()", (assert) => {
+  test("#writeUint16()", (assert) => {
     function hashUint16(n: number): string {
-      return resultString((new SipState()).writeUint16(n).result());
+      var s = new SipState();
+      s.writeUint16(n);
+      return resultString(s.result());
     }
     
     //0
@@ -244,9 +250,11 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     
   });
   
-  test("writeUint32()", (assert) => {
+  test("#writeUint32()", (assert) => {
     function hashUint32(n: number): string {
-      return resultString((new SipState()).writeUint32(n).result());
+      var s = new SipState();
+      s.writeUint32(n);
+      return resultString(s.result());
     }
     
     //0
@@ -261,7 +269,8 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     
   });
   
-  test("writeUint64()", (assert) => {
+  /*
+  test("#writeUint64()", (assert) => {
     //0
     state.writeUint64(u64(0x0, 0x0));
     assert.strictEqual(resultString(state.result()), "6725fe6fbbe849e8");
@@ -275,23 +284,34 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     assert.strictEqual(resultString(state.result()), "4497e78fac47c0a2");//TODO: check this result!
     
   });
+  */
   
-  test("writeString()", (assert) => {
-    function hashString(s: string): string {
-      return resultString((new SipState()).writeString(s).result());
+  test("#writeString()", (assert) => {
+    function hashString(str: string): string {
+      var s = new SipState();
+      s.writeString(str);
+      return resultString(s.result());
     }
     
     //empty string
     assert.strictEqual(hashString(""), "f290953db34edd20");
     
     //simple
+    assert.strictEqual(hashString("f"), "81b0d085ded0366e");
+    assert.strictEqual(hashString("fo"), "e852fd84d2f35b6c");
     assert.strictEqual(hashString("foo"), "2c75980448b9c4bd");
+    assert.strictEqual(hashString("foob"), "268e51eea162c7b7");
+    assert.strictEqual(hashString("fooba"), "6c30263b448e3c30");
+    assert.strictEqual(hashString("foobar"), "da4c2c0cce9a7d91");
+    assert.strictEqual(hashString("foobarb"), "24e6be3c69b21afd");
+    assert.strictEqual(hashString("foobarba"), "79e15de37d0acda1");
+    assert.strictEqual(hashString("foobarbaz"), "a050a04df51a5904");
     
     //with accents
     assert.strictEqual(hashString("ça et là"), "ceede8d51efb3ff1");
   });
   
-  test("writeIHash()", (assert) => {
+  test("#writeIHash()", (assert) => {
     var expected = u64(0x4ea02dab, 0x488c25e4);
     var count = 0;
     var obj: hash.IHash =  {
@@ -313,7 +333,7 @@ var hashSuite = suite("ts/hash.sip.SipState", (self) => {
     
   });
   
-  test("writeBytes()", (assert) => {
+  test("#writeBytes()", (assert) => {
     var K0: Int64 = u64(0x07060504, 0x03020100);
     var K1: Int64 = u64(0x0f0e0d0c, 0x0b0a0908);
     var buf = [];
