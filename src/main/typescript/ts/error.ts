@@ -3,7 +3,7 @@ module error {
   var __global: any = (new Function("return this;")).call(null);
   var __captureStackTrace = __global.Error.captureStackTrace || function (o, constructor) {
     if (!('stack' in o)) {
-      o.stack = new (__global.Error()).stack;
+      o.stack = (new __global.Error()).stack;
     }
   };
   
