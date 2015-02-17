@@ -1,4 +1,5 @@
 module vm {
+
   var __empty = {};
   var __global: Window = (new Function("return this;")).call(null);
 
@@ -9,7 +10,7 @@ module vm {
 
   export var global = __global;
 
-  export function compile(jscode: string, options?: IOption): (context?: { [key: string]: any }) => any {
+  export function compile(jscode: string, options?: IOption): (locals?: { [key: string]: any }) => any {
     options = options || __empty;
     var fnWithContext: Function;
     var fnNoContext: Function;
@@ -25,11 +26,11 @@ module vm {
       jscode += "\n//# sourceMappingURL=" + sourceMappingURL;
     }
     
-    return function (context) {
+    return function (locals) {
       var returnValue;
-      if (context) {
-        fnWithContext = fnWithContext || new Function("__context__", "with(__context__) {" + jscode + "}");
-        returnValue = fnWithContext.call(context, context);
+      if (locals) {
+        fnWithContext = fnWithContext || new Function("__locals__", "with(__locals__) {" + jscode + "}");
+        returnValue = fnWithContext.call(locals, locals);
       } else {
         fnNoContext = fnNoContext || new Function(jscode);
         returnValue = fnNoContext();
@@ -38,8 +39,8 @@ module vm {
     }
   }
 
-  export function eval(jscode: string, context?: { [key: string]: any }, options?: IOption): any {
-    return compile(jscode, options)(context);
+  export function eval(jscode: string, locals?: { [key: string]: any }, options?: IOption): any {
+    return compile(jscode, options)(locals);
   }
 }
 
