@@ -180,6 +180,10 @@ module math {
   export function isInteger(n: number): boolean {
     return math_round(n) == n
   }
+
+  export function isNaN(n: number): boolean {
+    return __isNaN(n);  
+  }
   
   export function isNatural(n: number): boolean {
     return n >= 0 && math_round(n) == n
