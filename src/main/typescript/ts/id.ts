@@ -1,6 +1,6 @@
 module id {
-  var ID_PROPERTY = "__id__";
-  var __currentId = 0;
+  var ID_PROPERTY = "@@id";
+  var __currentId = 1;
   var __nextId = function () { return __currentId++; };
   var __registry = (!!WeakMap ? new WeakMap<any, number>() : null);
   var __descriptor: PropertyDescriptor = { value: null, enumerable: false, configurable: true, writable: false };
