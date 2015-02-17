@@ -34,7 +34,7 @@ module unit {
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
   var __freeze = reflect.freeze
   var __isFinite = isFinite
-  var __isNaN = isNaN
+  var __isNaN = function (o: any) { return o !== o; }
   var __isNumber = function (o) { return typeof o === 'number' }
   var __isObject = function (o) { return o != null && (typeof o == "object") }
   var __keys = reflect.ownKeys;
