@@ -1,6 +1,6 @@
 module stacktrace {
   
-  export interface ICallStack extends Array<ICallSite> {}
+  //export interface ICallStack extends Array<ICallSite> {}
 
   export interface ICallSite {
     getThis(): any
@@ -149,22 +149,11 @@ module stacktrace {
     return __prepareStackTrace(errorString, frames);
   }
   
-  /*export function capture(e: { stack: any }, stripPoint?: Function) {
-    // Simultaneously traverse the frames in error.stack and the arguments.caller
-    // to build a list of CallSite objects
-    var factory = makeCallSiteFactory(e);
-    var frames = factory(e, arguments.callee);
-    var errorString = __errorString(frames.name, frames.message);
+  export function capture(e: { stack: any }, stripPoint?: Function) {
+    __captureStackTrace(e, stripPoint);
+  }
   
-    // Explicitly set back the error.name and error.message
-    //e.name = frames.name;
-    //e.message = frames.message;
-  
-    // Pass the raw callsite objects through and get back a formatted stack trace
-    e.stack = __prepareStackTrace(errorString, frames.frames);
-  }*/
-  
-  export function create(error?: Error, offset: number = 0): ICallStack {
+  export function create(error?: Error, offset: number = 0): ICallSite[] {
     offset += (error ? 0 : 2);
     var items = _parseError(error || _createError());
     if (offset > 0) {

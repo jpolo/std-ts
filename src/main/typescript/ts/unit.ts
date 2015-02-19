@@ -1,7 +1,6 @@
 import inspect = require("ts/inspect")
 import reflect = require("ts/reflect")
 import stacktrace = require("ts/stacktrace")
-import ICallStack = stacktrace.ICallStack
 import ICallSite = stacktrace.ICallSite
 
 module unit {
@@ -50,7 +49,7 @@ module unit {
     test: ITest
     message: string
     position: ICallSite
-    stack: ICallStack
+    stack: ICallSite[]
   }
 
   export interface ITestReport {
@@ -64,7 +63,7 @@ module unit {
   }
 
   export interface IEngine {
-    callstack(offset?: number): ICallStack
+    callstack(offset?: number): ICallSite[]
     dump(o: any): string
     currentDate(): Date
     currentTime(): number
@@ -158,7 +157,7 @@ module unit {
       public test: ITest,
       public message: string,
       public position?: ICallSite,
-      public stack?: ICallStack
+      public stack?: ICallSite[]
     ) { }
 
     equals(o: any): boolean {
@@ -212,7 +211,7 @@ module unit {
         }
       }
       
-      callstack(offset = 0): ICallStack {
+      callstack(offset = 0): ICallSite[] {
         return stacktrace.create(null, offset)
       }
 
