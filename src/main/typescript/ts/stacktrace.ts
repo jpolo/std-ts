@@ -3,30 +3,179 @@ module stacktrace {
   export interface ICallStack extends Array<ICallSite> {}
 
   export interface ICallSite {
-    typeName: string
-    functionName: string
-    methodName: string
-    fileName: string
-    lineNumber: number
-    columnNumber: number
-    //isToplevel: boolean
-    //isEval: boolean
-    //isNative: boolean
-    //isConstructor: boolean
+    getThis(): any
+    getTypeName(): string;
+    getFunction(): Function
+    getFunctionName(): string
+    getMethodName(): string
+    getFileName(): string
+    getLineNumber(): number
+    getColumnNumber(): number
+    getEvalOrigin(): any
+    isTopLevel(): boolean
+    isEval(): boolean
+    isNative(): boolean
+    isConstructor(): boolean
+    getArguments(): any // {[key: number]: any; length: number}
+    toString(): string
   }
   
+  class CallSite implements ICallSite {
+    private _isParsed = false;
+    
+    private _this: any = window;
+    private _typeName: string;
+    private _function: any;
+    private _functionName: string;
+    private _methodName: string;
+    private _fileName: string;
+    private _lineNumber: number;
+    private _columnNumber: number;
+    private _isTopLevel: boolean = false;
+    private _isEval: boolean = false;
+    private _isNative: boolean = false;
+    private _isConstructor: boolean = false;
+    
+    constructor(private _s: string) {
+    }
+    
+    getThis() {
+      return this._parse()._this;
+    }
+    
+    getTypeName() {
+      return this._parse()._typeName;
+    }
+
+    getFunction(): Function {
+      return this._parse()._function;
+    }
+
+    getFunctionName() {
+      return this._parse()._functionName;
+    }
+
+    getMethodName() {
+      return this._parse()._methodName;
+    }
+
+    getFileName() {
+      return this._parse()._fileName;
+    }
+
+    getLineNumber() {
+      this._parse();
+      return this._lineNumber > 0 ? this._lineNumber : null;
+    }
+
+    getColumnNumber() {
+      this._parse();
+      return this._columnNumber > 0 ? this._columnNumber : null;
+    }
+
+    getEvalOrigin() {
+      //
+    }
+
+    isTopLevel() {
+      return this._parse()._isTopLevel;
+    }
+
+    isEval() {
+      return this._parse()._isEval;
+    }
+
+    isNative() {
+      return this._parse()._isNative;
+    }
+
+    isConstructor() {
+      return this._parse()._isConstructor;
+    }
+
+    getArguments() {
+      this._parse();
+      return this._function && this._function['arguments'] || null;
+    }
+
+    toString() {
+      this._parse();
+      var s = "";
+      var functionName = this._functionName;
+      var lineNumber = this._lineNumber;
+      var columnNumber = this._columnNumber;
+      
+      s += this._fileName;
+      if (lineNumber) {
+        s += ":" + lineNumber;
+        if (columnNumber) {
+          s += ":" + columnNumber;
+        }
+      }
+      return functionName ? functionName + ' (' + s +  ')' : s;
+    }
+    
+    private _parse() {
+      if (!this._isParsed) {
+        this._isParsed = true;
+        var parts = this._s.split("@", 2);
+        var functionName = parts[0] || "";
+        var location = parts[1] || "";
+    
+        var typeName = "";
+        var methodName = "";
+        var fileName = location;
+        var isAnonymous = location.indexOf("{anonymous}") !== -1;
+        if (location.indexOf(':') !== -1) {
+          var locationParts = /(.*):(\d+):(\d+)/.exec(location);
+          this._fileName = locationParts[1];
+          this._lineNumber = parseInt(locationParts[2]);
+          this._columnNumber = parseInt(locationParts[3]);
+        }
+    
+        if (!isAnonymous) {
+          var functionParts = functionName.split('.');
+          this._typeName = functionParts[0];
+          this._methodName = functionParts[functionParts.length - 1];
+        }
+        
+        this._functionName = functionName;
+      }
+      return this;
+    }
+  }
+  
+  export function prepare(errorString: string, frames: ICallSite[]): string {
+    return __prepareStackTrace(errorString, frames);
+  }
+  
+  /*export function capture(e: { stack: any }, stripPoint?: Function) {
+    // Simultaneously traverse the frames in error.stack and the arguments.caller
+    // to build a list of CallSite objects
+    var factory = makeCallSiteFactory(e);
+    var frames = factory(e, arguments.callee);
+    var errorString = __errorString(frames.name, frames.message);
+  
+    // Explicitly set back the error.name and error.message
+    //e.name = frames.name;
+    //e.message = frames.message;
+  
+    // Pass the raw callsite objects through and get back a formatted stack trace
+    e.stack = __prepareStackTrace(errorString, frames.frames);
+  }*/
+  
   export function create(error?: Error, offset: number = 0): ICallStack {
-    offset += (error ? 0 : 2)
-    var items = _parseError(error || _createError())
+    offset += (error ? 0 : 2);
+    var items = _parseError(error || _createError());
     if (offset > 0) {
-      items = items.slice(offset)
+      items = items.slice(offset);
     }
-    var itemc = items.length
-    var parsed = new Array(itemc)
+    var itemc = items.length;
+    var parsed = new Array(itemc);
     for (var i = 0; i < itemc; ++i) {
-      parsed[i] = _parseCallSite(items[i])
+      parsed[i] = _parseCallSite(items[i]);
     }
-    return parsed
+    return parsed;
   }
   
   enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
@@ -48,37 +197,7 @@ module stacktrace {
   }
 
   function _parseCallSite(s: string): ICallSite {
-    var parts = s.split("@", 2)
-    var functionName = parts[0] || ""
-    var location = parts[1] || ""
-
-    var typeName = ""
-    var methodName = ""
-    var fileName = location
-    var lineNumber: number = null
-    var columnNumber: number = null
-    var isAnonymous = location.indexOf("{anonymous}") !== -1
-    if (location.indexOf(':') !== -1) {
-      var locationParts = /(.*):(\d+):(\d+)/.exec(location)
-      fileName = locationParts[1]
-      lineNumber = parseInt(locationParts[2])
-      columnNumber = parseInt(locationParts[3])
-    }
-
-    if (!isAnonymous) {
-      var functionParts = functionName.split('.')
-      typeName = functionParts[0]
-      methodName = functionParts[functionParts.length - 1]
-    }
-
-    return {
-      typeName: typeName,
-      functionName: isAnonymous ? "" : functionName,
-      methodName: methodName,
-      fileName: fileName,
-      lineNumber: lineNumber,
-      columnNumber: columnNumber
-    }
+    return new CallSite(s);
   }
 
   function _parseError_Chrome(error: any): string[] {
@@ -232,6 +351,8 @@ module stacktrace {
   
   //util
   var __ostring = Object.prototype.toString
+  function __isUndefined(o: any) { return typeof o === "undefined"; }
+  function __str(o: any) { return String(o); }
   function __stringTag(o: any): string {
     var s = '';
     if (o === null) {
@@ -243,11 +364,12 @@ module stacktrace {
         case 'number': s = 'Number'; break;
         case 'string': s = 'String'; break;
         case 'undefined': s = 'Undefined'; break;
-        default: /*object*/ s = __ostring.call(o).slice(8, -1);
+        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
       }
     }
     return s;
   }
+  
   function __arraySlice<T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
     var returnValue = [];
     var l = returnValue.length;
@@ -257,6 +379,70 @@ module stacktrace {
       returnValue.push(a[i]);
     }
     return returnValue;
+  }
+  
+  function __errorString(returnValue: string, message: string) {
+    var returnValue = '';
+    if (!__isUndefined(name)) {
+      returnValue += name;
+    }
+    if (!__isUndefined(message)) {
+      returnValue += ': ' + message;
+    }
+    return returnValue;
+  }
+  
+  function __prepareStackTrace(errorString: string, frames: ICallSite[]): string {
+    var prepare = (<any>Error).prepareStackTrace;
+    var returnValue;
+    if (prepare) {
+      returnValue = prepare(errorString, frames);
+    } else {
+      // Adapted from V8 source:
+      // https://github.com/v8/v8/blob/1613b7/src/messages.js#L1051-L1070
+      var lines = [];
+      lines.push(errorString);
+      for (var i = 0; i < frames.length; i++) {
+        var frame = frames[i];
+        var line;
+        try {
+          line = __str(frame);
+        } catch (e) {
+          try {
+            line = "<error: " + e + ">";
+          } catch (ee) {
+            // Any code that reaches this point is seriously nasty!
+            line = "<error>";
+          }
+        }
+        lines.push("    at " + line);
+      }
+      returnValue = lines.join('\n');
+    }
+    return returnValue;
+  }
+  
+  function __captureStackTrace(e: any, topLevel?: Function): void {
+    var capture = (<any>Error).captureStackTrace;
+    if (capture) {
+      capture(e, topLevel);
+    } else {
+      /*
+      // Simultaneously traverse the frames in error.stack and the arguments.caller
+      // to build a list of CallSite objects
+      var factory = makeCallSiteFactory(e);
+      var frames = factory(e, arguments.callee);
+      var errorString = __errorString(frames.name, frames.message);
+    
+      // Explicitly set back the error.name and error.message
+      //e.name = frames.name;
+      //e.message = frames.message;
+    
+      // Pass the raw callsite objects through and get back a formatted stack trace
+      e.stack = __prepareStackTrace(errorString, frames.frames);
+      
+      */
+    }
   }
   
 }

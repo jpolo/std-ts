@@ -12,11 +12,11 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
     
     assert.ok(Array.isArray(callstack))
     assert.ok(callstack.length > 0)
-    assert.strictEqual(callsite.lineNumber, 7)
-    assert.strictEqual(typeof callsite.columnNumber, 'number')
+    assert.strictEqual(callsite.getLineNumber(), 7)
+    assert.strictEqual(typeof callsite.getColumnNumber(), 'number')
       
     var fileName = "stacktrace.test.js"
-    assert.strictEqual(callsite.fileName.slice(-fileName.length), fileName)
+    assert.strictEqual(callsite.getFileName().slice(-fileName.length), fileName)
     
   })
   

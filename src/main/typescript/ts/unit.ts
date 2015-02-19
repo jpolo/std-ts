@@ -745,7 +745,7 @@ module unit {
         section.forEach((assertion) => {
           var message = assertion.message
           var position = assertion.position
-          var positionMessage = position ? " (" + position.fileName + ":" + position.lineNumber + ")" : ""
+          var positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : ""
           var typeName = __str(assertion.type)
           
           switch(+assertion.type) {
