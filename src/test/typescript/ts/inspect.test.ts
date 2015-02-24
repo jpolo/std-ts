@@ -38,6 +38,10 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     assert.strictEqual(inspectObj.stringify(new TypeError("blah")), "TypeError {}")
   })
   
+  test("stringifyUndefined()", (assert) => {
+    //assert.strictEqual(inspectObj.stringifyUndefined());
+  })
+  
   
 })
   

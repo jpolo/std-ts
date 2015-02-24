@@ -6,7 +6,7 @@ module inspect {
     
   }
   
-  
+
   export interface IEngine {
     stringify(o: any, maxDepth?: number): string 
   }
@@ -48,7 +48,6 @@ module inspect {
         var init = !this._refs
         var refs = init ? (this._refs = []) : this._refs
         var depth = maxDepth == null ? this.maxDepth : maxDepth
-        var methodName = this.PREFIX + __stringTag(o)
         var s = '' 
             
         if (__isFunction(o) || __isObject(o)) {
@@ -59,38 +58,50 @@ module inspect {
           }
         }
         
-        try {
-          if (!s) {
-            if (__isFunction(this[methodName])) {
-              s = this[methodName](o, maxDepth)
-            } else {
-              if (o != null) {
-                if (o.inspect) {
-                  s = this.stringify_IInspect(o, maxDepth);
+        
+        if (!s) {
+          switch (__stringTag(o)) {
+            case 'Undefined': s = this.stringify_Undefined(); break;
+            case 'Null': s = this.stringify_Null(); break;
+            case 'Boolean': s = this.stringify_Boolean(o); break;
+            case 'Number': s = this.stringify_Number(o); break;
+            case 'String': s = this.stringify_String(o); break;
+            case 'Function': s = this.stringify_Function(o); break;
+            default:
+              try {
+                var methodName = this.PREFIX + __stringTag(o)
+                if (__isFunction(this[methodName])) {
+                  s = this[methodName](o, maxDepth)
                 } else {
-                  s = this.stringify_Object(o, maxDepth);
+                  if (o != null) {
+                    if (o.inspect) {
+                      s = this.stringify_IInspect(o, maxDepth);
+                    } else {
+                      s = this.stringify_Object(o, maxDepth);
+                    }
+                  }
+                }
+              } finally {
+                if (init) {
+                  //reinit
+                  this._refs = null
                 }
               }
-            }
-          }
-        } finally {
-          if (init) {
-            //reinit
-            this._refs = null
           }
         }
+        
         return s
       }
       
-      stringify_Undefined(o: any, maxDepth: number) {
+      stringify_Undefined(o?: any, maxDepth?: number) {
         return 'undefined'
       }
       
-      stringify_Null(o: any, maxDepth: number) {
+      stringify_Null(o?: any, maxDepth?: number) {
         return 'null'
       }
       
-      stringify_Boolean(o: boolean, maxDepth: number) {
+      stringify_Boolean(o: boolean, maxDepth?: number) {
         return __str(o)
       }
       
@@ -98,7 +109,7 @@ module inspect {
         return 'Date { ' + o.toISOString() + ' }'
       }
       
-      stringify_Number(o: number, maxDepth: number) {
+      stringify_Number(o: number, maxDepth?: number) {
         return __str(o)
       }
       
@@ -106,7 +117,7 @@ module inspect {
         return __str(o)
       }
       
-      stringify_String(o: string, maxDepth: number) {
+      stringify_String(o: string, maxDepth?: number) {
         var maxString = this.maxString
         return '"' + 
           (o.length > maxString ? o.slice(0, maxString) + '...' : o)
@@ -115,7 +126,7 @@ module inspect {
         '"'
       }
       
-      stringify_Function(o: Function, maxDepth: number) {
+      stringify_Function(o: Function, maxDepth?: number) {
         var s = __str(o)
         s = s.slice(0, s.indexOf('{') + 1) + '...}'
         return s
