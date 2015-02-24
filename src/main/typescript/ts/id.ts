@@ -1,20 +1,25 @@
 module id {
-  var ID_PROPERTY = "@@id";
   var __currentId = 1;
   var __nextId = function () { return __currentId++; };
-  var __registry = (!!WeakMap ? new WeakMap<any, number>() : null);
-  var __descriptor: PropertyDescriptor = { value: null, enumerable: false, configurable: true, writable: false };
-  var __def = Object.defineProperty
-  var __get = !!__registry ? 
-    function (o: any) {
+  var __get: (o: any) => number;
+  
+  if (WeakMap) {
+    //weakmap implementation
+    var __registry = new WeakMap<any, number>();
+    __get = function (o: any) {
       var id = __registry.get(o);
       if (id === undefined) {
         id = __nextId();
         __registry.set(o, id);
       }
       return id;
-    } : 
-    function (o: any) {
+    };
+  } else {
+    var ID_PROPERTY = "@@id";//TODO use Symbol if existing ?
+    var __descriptor: PropertyDescriptor = { value: null, enumerable: false, configurable: true, writable: false };
+    var __def = Object.defineProperty;
+    //default implementation
+    __get = function (o: any) {
       var id = o[ID_PROPERTY];
       if (id === undefined) {
         id = __nextId();
@@ -23,12 +28,22 @@ module id {
       }
       return id;
     };
- 
-  
+  }
+
+  /**
+   * Return new generated id
+   *
+   * @return {number}
+   */ 
   export function generate(): number {
     return __nextId();
   }
   
+  /**
+   * Return the corresponding id if able
+   * 
+   * @param o the object
+   */
   export function id(o: any): number {
     var returnValue = NaN;
     switch (typeof o) {
@@ -43,6 +58,5 @@ module id {
     }
     return returnValue;
   }
-
 }
 export = id;
