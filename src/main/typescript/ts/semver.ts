@@ -9,7 +9,15 @@ module semver {
   export class SemVer implements ISemVer {
     
     static compare(a: ISemVer, b: ISemVer): number {
-      return NaN;
+      return __cmpMain(a, b) || __cmpPre(a, b);
+    }
+    
+    static compareMain(a: ISemVer, b: ISemVer): number {
+      return __cmpMain(a, b);
+    }
+    
+    static comparePre(a: ISemVer, b: ISemVer): number {
+      return __cmpPre(a, b);
     }
     
     static stringify(v: ISemVer): string {
@@ -19,7 +27,9 @@ module semver {
     constructor(
       public major = 0,
       public minor = 0,
-      public patch = 0
+      public patch = 0,
+      public prerelease = [],
+      public build: number = null
     ) {
       
     }
@@ -44,6 +54,15 @@ module semver {
       s.writeUint8(this.patch); 
     }
     
+    inspect() {
+      var s = "SemVer { ";
+      s += "major: " + this.major;
+      s += ", minor: " + this.minor;
+      s += ", patch: " + this.patch;
+      s += " }";
+      return s;
+    }
+    
     toJSON() {
       return __str(this);  
     }
@@ -56,6 +75,29 @@ module semver {
   
   //util
   function __str(o) { return String(o); }
+  function __cmp(a: number, b: number) {
+    /*var anum = numeric.test(a);
+    var bnum = numeric.test(b);
+  
+    if (anum && bnum) {
+      a = +a;
+      b = +b;
+    }
+  
+    return (anum && !bnum) ? -1 :
+           (bnum && !anum) ? 1 :
+           a < b ? -1 :
+           a > b ? 1 :
+           0;*/
+  }
+  
+  function __cmpMain(a: ISemVer, b: ISemVer): number {
+    return NaN;
+  }
+  
+  function __cmpPre(a: ISemVer, b: ISemVer): number {
+    return NaN;
+  }
   
 }
 export = semver
