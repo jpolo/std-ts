@@ -15,10 +15,18 @@ module hash {
     return state.result();
   }
   
+  export function hasher<T>(o: T): IHasher<T> {
+    return null;
+  }
+  
   export interface IHash {
     
     hash(s: IHashState)
     
+  }
+  
+  export interface IHasher<T> {
+    (s: IHashState, o: T): void
   }
   
   export interface IHashState {
@@ -35,6 +43,7 @@ module hash {
     writeUint8(u: number): void
     writeUint16(u: number): void
     writeUint32(u: number): void
+    writeArray(a: any[]): void
     
   }
 
@@ -152,13 +161,6 @@ module hash {
         }
       }
       
-      /*
-      writeUint64(n: Int64): void {
-        if (!__writeEmpty(this, n)) {
-          __writeUint64(this, n);
-        }
-      }*/
-      
       writeNumber(n: number): void {
         if (!__writeEmpty(this, n)) {
           __writeFloat64(this, n);
@@ -189,20 +191,14 @@ module hash {
         }
       }
       
-      write(o: any): void {
-        switch (__stringTag(o)) {
-          case 'Null': __writeNull(this); break;
-          case 'Undefined': __writeUndefined(this); break;
-          case 'Boolean': __writeBoolean(this, o); break;
-          case 'String': __writeString(this, o); break;
-          case 'Number': __writeFloat64(this, o); break;
-          case 'Function': __writeFunction(this, o); break;
-          
-          //useful class:
-          case 'Date': __writeFloat64(this, (<Date>o).getTime()); break;
-          case 'RegExp': __writeString(this, __str(o)); break;
-          default: __writeObject(this, o, true);
+      writeArray(a: any[]): void {
+        if (!__writeEmpty(this, a)) {
+          __writeArray(this, a);
         }
+      }
+      
+      write(o: any): void {
+        __writeAny(this, o);
       }
       
       writeBytes(b: Uint8Array): void
@@ -238,24 +234,26 @@ module hash {
       return __byteArray;
     }
     
-    function __readUint64(n: Int64) {
-      var lo = n.lo;
-      var hi = n.hi;
-      __byteArray[0] = (hi /*>> 0*/) & 0xff;
-      __byteArray[1] = (hi >> 8) & 0xff;
-      __byteArray[2] = (hi >> 16) & 0xff;
-      __byteArray[3] = (hi >> 24) & 0xff;
-      
-      __byteArray[4] = (lo /*>> 0*/) & 0xff;
-      __byteArray[5] = (lo >> 8) & 0xff;
-      __byteArray[6] = (lo >> 16) & 0xff;
-      __byteArray[7] = (lo >> 24) & 0xff;
-      return __byteArray;
-    }
-    
     function __readFloat64(n: number) {
       __dataView.setFloat64(0, n, true);
       return __byteArray;
+    }
+    
+    function __writeAny(state: SipState, o: any) {
+      switch (__stringTag(o)) {
+        case 'Null': __writeNull(this); break;
+        case 'Undefined': __writeUndefined(this); break;
+        case 'Boolean': __writeBoolean(this, o); break;
+        case 'String': __writeString(this, o); break;
+        case 'Number': __writeFloat64(this, o); break;
+        case 'Function': __writeFunction(this, o); break;
+        
+        //useful class:
+        case 'Array': __writeArray(this, o); break;
+        case 'Date': __writeFloat64(this, (<Date>o).getTime()); break;
+        case 'RegExp': __writeString(this, __str(o)); break;
+        default: __writeObject(this, o, true);
+      }
     }
     
     function __writeEmpty(state: SipState, o: any): boolean {
@@ -294,10 +292,6 @@ module hash {
       __writeBytes(state, __readUint32(n), 4);
     }
     
-    function __writeUint64(state: SipState, n: Int64) {
-      __writeBytes(state, __readUint64(n), 8);
-    }
-    
     function __writeIHash(state: SipState, o: IHash) {
       o.hash(state);
     }
@@ -315,6 +309,12 @@ module hash {
         __writeIHash(state, <IHash> o);
       } else {
         __writeUint32(state, id.id(o));
+      }
+    }
+    
+    function __writeArray(state: SipState, a: any[]) {
+      for (var i = 0, l = a.length; i < l; i++) {
+        __writeAny(state, a[i]);
       }
     }
 
