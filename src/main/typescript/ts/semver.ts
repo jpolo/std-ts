@@ -4,6 +4,8 @@ module semver {
     major: number;
     minor: number;
     patch: number;
+    prerelease: any[];
+    build: number
   }
   
   export class SemVer implements ISemVer {
