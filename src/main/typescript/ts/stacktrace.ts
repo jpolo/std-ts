@@ -1,4 +1,8 @@
 module stacktrace {
+  var PARSED = "@@data";
+  
+  // https://github.com/mattrobenolt/callsite-shim/blob/master/src/callsite.js
+  // https://github.com/stacktracejs/stacktrace.js/
   
   //export interface ICallStack extends Array<ICallSite> {}
 
@@ -21,20 +25,41 @@ module stacktrace {
   }
   
   class CallSite implements ICallSite {
-    private _isParsed = false;
     
-    private _this: any = window;
-    private _typeName: string;
-    private _function: any;
-    private _functionName: string;
-    private _methodName: string;
-    private _fileName: string;
-    private _lineNumber: number;
-    private _columnNumber: number;
-    private _isTopLevel: boolean = false;
-    private _isEval: boolean = false;
-    private _isNative: boolean = false;
-    private _isConstructor: boolean = false;
+    static parse(s: string): CallSite {
+      return new CallSite(s);
+    }
+    
+    static stringify(o: ICallSite): string {
+      var s = "";
+      var functionName = o.getFunctionName();
+      var lineNumber = o.getLineNumber();
+      var columnNumber = o.getColumnNumber();
+      
+      s += o.getFileName();
+      if (lineNumber) {
+        s += ":" + lineNumber;
+        if (columnNumber) {
+          s += ":" + columnNumber;
+        }
+      }
+      return functionName ? functionName + ' (' + s +  ')' : s;
+    }
+    
+    "@@data": {
+      _this: any;
+      _typeName: string;
+      _function: any;
+      _functionName: string;
+      _methodName: string;
+      _fileName: string;
+      _lineNumber: number;
+      _columnNumber: number;
+      _isTopLevel: boolean;
+      _isEval: boolean;
+      _isNative: boolean;
+      _isConstructor: boolean;
+    };
     
     constructor(private _s: string) {
     }
@@ -64,13 +89,13 @@ module stacktrace {
     }
 
     getLineNumber() {
-      this._parse();
-      return this._lineNumber > 0 ? this._lineNumber : null;
+      var d = this._parse();
+      return d._lineNumber > 0 ? d._lineNumber : null;
     }
 
     getColumnNumber() {
-      this._parse();
-      return this._columnNumber > 0 ? this._columnNumber : null;
+      var d = this._parse();
+      return d._columnNumber > 0 ? d._columnNumber : null;
     }
 
     getEvalOrigin() {
@@ -94,54 +119,55 @@ module stacktrace {
     }
 
     getArguments() {
-      this._parse();
-      return this._function && this._function['arguments'] || null;
+      var d= this._parse();
+      return d._function && d._function['arguments'] || null;
     }
 
     toString() {
-      this._parse();
-      var s = "";
-      var functionName = this._functionName;
-      var lineNumber = this._lineNumber;
-      var columnNumber = this._columnNumber;
-      
-      s += this._fileName;
-      if (lineNumber) {
-        s += ":" + lineNumber;
-        if (columnNumber) {
-          s += ":" + columnNumber;
-        }
-      }
-      return functionName ? functionName + ' (' + s +  ')' : s;
+      return CallSite.stringify(this);
     }
     
     private _parse() {
-      if (!this._isParsed) {
-        this._isParsed = true;
+      var d = this["@@data"];
+      if (!d) {
+        d = this["@@data"] = {
+          _this: window,
+          _typeName: "",
+          _function: null,
+          _functionName: "",
+          _methodName: "",
+          _fileName: "",
+          _lineNumber: NaN,
+          _columnNumber: NaN,
+          _isTopLevel: false,
+          _isEval: false,
+          _isNative: false,
+          _isConstructor: false
+        };
         var parts = this._s.split("@", 2);
         var functionName = parts[0] || "";
         var location = parts[1] || "";
-    
-        var typeName = "";
-        var methodName = "";
-        var fileName = location;
         var isAnonymous = location.indexOf("{anonymous}") !== -1;
+        var isNative = false; //location.indexOf("native") !== -1;
         if (location.indexOf(':') !== -1) {
           var locationParts = /(.*):(\d+):(\d+)/.exec(location);
-          this._fileName = locationParts[1];
-          this._lineNumber = parseInt(locationParts[2]);
-          this._columnNumber = parseInt(locationParts[3]);
+          d._fileName = locationParts[1];
+          d._lineNumber = parseInt(locationParts[2]);
+          d._columnNumber = parseInt(locationParts[3]);
+        } else {
+          d._fileName = location;
         }
-    
+
         if (!isAnonymous) {
           var functionParts = functionName.split('.');
-          this._typeName = functionParts[0];
-          this._methodName = functionParts[functionParts.length - 1];
+          d._typeName = functionParts[0];
+          d._methodName = functionParts[functionParts.length - 1];
         }
         
-        this._functionName = functionName;
+        d._functionName = functionName;
+        d._isNative = isNative;
       }
-      return this;
+      return d;
     }
   }
   
@@ -161,8 +187,9 @@ module stacktrace {
     }
     var itemc = items.length;
     var parsed = new Array(itemc);
+    var parseCallSite = CallSite.parse;
     for (var i = 0; i < itemc; ++i) {
-      parsed[i] = _parseCallSite(items[i]);
+      parsed[i] = parseCallSite(items[i]);
     }
     return parsed;
   }
@@ -183,10 +210,6 @@ module stacktrace {
       case Browser.Safari: return _parseError_Safari(error)
       default: return _parseError_Other(arguments.callee)
     }
-  }
-
-  function _parseCallSite(s: string): ICallSite {
-    return new CallSite(s);
   }
 
   function _parseError_Chrome(error: any): string[] {
