@@ -64,11 +64,11 @@ module stacktrace {
     constructor(private _s: string) {
     }
     
-    getThis() {
+    getThis(): any {
       return this._parse()._this;
     }
     
-    getTypeName() {
+    getTypeName(): string {
       return this._parse()._typeName;
     }
 
@@ -76,45 +76,45 @@ module stacktrace {
       return this._parse()._function;
     }
 
-    getFunctionName() {
+    getFunctionName(): string {
       return this._parse()._functionName;
     }
 
-    getMethodName() {
+    getMethodName(): string {
       return this._parse()._methodName;
     }
 
-    getFileName() {
+    getFileName(): string {
       return this._parse()._fileName;
     }
 
-    getLineNumber() {
+    getLineNumber(): number {
       var d = this._parse();
       return d._lineNumber > 0 ? d._lineNumber : null;
     }
 
-    getColumnNumber() {
+    getColumnNumber(): number {
       var d = this._parse();
       return d._columnNumber > 0 ? d._columnNumber : null;
     }
 
-    getEvalOrigin() {
+    getEvalOrigin(): any {
       //
     }
 
-    isTopLevel() {
+    isTopLevel(): boolean {
       return this._parse()._isTopLevel;
     }
 
-    isEval() {
+    isEval(): boolean {
       return this._parse()._isEval;
     }
 
-    isNative() {
+    isNative(): boolean {
       return this._parse()._isNative;
     }
 
-    isConstructor() {
+    isConstructor(): boolean {
       return this._parse()._isConstructor;
     }
 
@@ -123,49 +123,62 @@ module stacktrace {
       return d._function && d._function['arguments'] || null;
     }
 
-    toString() {
+    toString(): string {
       return CallSite.stringify(this);
     }
     
     private _parse() {
       var d = this["@@data"];
       if (!d) {
-        d = this["@@data"] = {
-          _this: window,
-          _typeName: "",
-          _function: null,
-          _functionName: "",
-          _methodName: "",
-          _fileName: "",
-          _lineNumber: NaN,
-          _columnNumber: NaN,
-          _isTopLevel: false,
-          _isEval: false,
-          _isNative: false,
-          _isConstructor: false
-        };
         var parts = this._s.split("@", 2);
+        var receiver = __global;
+        var fun = null;
         var functionName = parts[0] || "";
+        var fileName = "";
+        var typeName = "";
+        var methodName = "";
+        var lineNumber = NaN;
+        var columnNumber = NaN;
         var location = parts[1] || "";
         var isAnonymous = location.indexOf("{anonymous}") !== -1;
         var isNative = false; //location.indexOf("native") !== -1;
         if (location.indexOf(':') !== -1) {
           var locationParts = /(.*):(\d+):(\d+)/.exec(location);
-          d._fileName = locationParts[1];
-          d._lineNumber = parseInt(locationParts[2]);
-          d._columnNumber = parseInt(locationParts[3]);
+          fileName = locationParts[1];
+          lineNumber = parseInt(locationParts[2]);
+          columnNumber = parseInt(locationParts[3]);
         } else {
-          d._fileName = location;
+          fileName = location;
         }
 
         if (!isAnonymous) {
           var functionParts = functionName.split('.');
-          d._typeName = functionParts[0];
-          d._methodName = functionParts[functionParts.length - 1];
+          typeName = functionParts[0];
+          methodName = functionParts[functionParts.length - 1];
         }
         
-        d._functionName = functionName;
-        d._isNative = isNative;
+        
+        //isConstructor
+        var ctor = __isObject(receiver) ? receiver.constructor : null;
+        var isConstructor = !ctor ? false : fun === ctor;
+        
+        //isTopLevel
+        var isTopLevel = (receiver == null) || __isGlobal(receiver);
+        
+        d = this["@@data"] = {
+          _this: receiver,
+          _typeName: "",
+          _function: fun,
+          _functionName: functionName,
+          _methodName: methodName,
+          _fileName: fileName,
+          _lineNumber: lineNumber,
+          _columnNumber: columnNumber,
+          _isTopLevel: isTopLevel,
+          _isEval: false,
+          _isNative: false,
+          _isConstructor: isConstructor
+        };
       }
       return d;
     }
@@ -175,7 +188,7 @@ module stacktrace {
     return __prepareStackTrace(errorString, frames);
   }
   
-  export function capture(e: { stack: any }, stripPoint?: Function) {
+  export function capture(e: { stack: any }, stripPoint?: Function): void {
     __captureStackTrace(e, stripPoint);
   }
   
@@ -363,7 +376,10 @@ module stacktrace {
   
   //util
   var __ostring = Object.prototype.toString
+  var __global = window;
+  function __isGlobal(o: any) { return o === __global; }
   function __isUndefined(o: any) { return typeof o === "undefined"; }
+  function __isObject(o: any) { return (typeof o === "object") && o !== null; }
   function __str(o: any) { return String(o); }
   function __stringTag(o: any): string {
     var s = '';
