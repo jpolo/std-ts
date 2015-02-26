@@ -3,7 +3,7 @@ module id {
   var __nextId = function () { return __currentId++; };
   var __get: (o: any) => number;
   
-  if (WeakMap) {
+  if (typeof WeakMap !== "undefined") {
     //weakmap implementation
     var __registry = new WeakMap<any, number>();
     __get = function (o: any) {
