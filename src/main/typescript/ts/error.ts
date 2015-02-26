@@ -8,6 +8,7 @@ module error {
   var __global: any = (new Function("return this;")).call(null);
   var __isHandling = false;
   
+  /*
   export function apply(fn: Function, thisArg?, argArray?: any) {
     var result;
     try {
@@ -23,6 +24,7 @@ module error {
     }
     return result;
   }
+  */
   
   export interface IErrorHandler {
     (e: any): boolean  
@@ -30,7 +32,7 @@ module error {
   
   export var onerror: IErrorHandler = null;
 
-  export function handleError(e) {
+  export function handleError(e): boolean {
     var handler: IErrorHandler = error.onerror;
     var uncaught = !handler; 
     var fatalError;
@@ -54,7 +56,7 @@ module error {
     if (fatalError) {
       __handleUncaughtError(fatalError, 'Fatal ');
     }
-    //return uncaught;
+    return uncaught;
   }
   
   //HACK: augment __extends

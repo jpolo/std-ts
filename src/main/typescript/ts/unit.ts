@@ -211,8 +211,8 @@ module unit {
         }
       }
       
-      callstack(offset = 0): ICallSite[] {
-        return stacktrace.create(null, offset)
+      callstack(): ICallSite[] {
+        return stacktrace.create();
       }
 
       dump(o: any): string {

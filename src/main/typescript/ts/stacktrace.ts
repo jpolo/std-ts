@@ -157,6 +157,11 @@ module stacktrace {
           methodName = functionParts[functionParts.length - 1];
         }
         
+        //isEval
+        var isEval = false;
+        
+        //isNative
+        var isNative = false;
         
         //isConstructor
         var ctor = __isObject(receiver) ? receiver.constructor : null;
@@ -167,7 +172,7 @@ module stacktrace {
         
         d = this["@@data"] = {
           _this: receiver,
-          _typeName: "",
+          _typeName: typeName,
           _function: fun,
           _functionName: functionName,
           _methodName: methodName,
@@ -175,8 +180,8 @@ module stacktrace {
           _lineNumber: lineNumber,
           _columnNumber: columnNumber,
           _isTopLevel: isTopLevel,
-          _isEval: false,
-          _isNative: false,
+          _isEval: isEval,
+          _isNative: isNative,
           _isConstructor: isConstructor
         };
       }
@@ -192,8 +197,8 @@ module stacktrace {
     __captureStackTrace(e, stripPoint);
   }
   
-  export function create(error?: Error, offset: number = 0): ICallSite[] {
-    offset += (error ? 0 : 2);
+  export function create(error?: Error): ICallSite[] {
+    var offset = (error ? 0 : 2);
     var items = _parseError(error || _createError());
     if (offset > 0) {
       items = items.slice(offset);
@@ -379,7 +384,8 @@ module stacktrace {
   var __global = window;
   function __isGlobal(o: any) { return o === __global; }
   function __isUndefined(o: any) { return typeof o === "undefined"; }
-  function __isObject(o: any) { return (typeof o === "object") && o !== null; }
+  function __isFunction(o: any) { return typeof o === "function"; }
+  function __isObject(o: any) { return o !== null && (typeof o === "object" || __isFunction(o)); }
   function __str(o: any) { return String(o); }
   function __stringTag(o: any): string {
     var s = '';
