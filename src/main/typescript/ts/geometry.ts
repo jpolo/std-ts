@@ -18,7 +18,7 @@ module geometry {
   var math_floor = Math.floor
   var math_sin = Math.sin
   var math_sqrt = Math.sqrt
-  var Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array    
+  var Float64Array: any = (typeof Float64Array !== 'undefined') ? Float64Array : Array    
   var $context: {[key:string]: any} = {
     "math_cos": math_cos,
     "math_floor": math_floor,
@@ -567,7 +567,7 @@ console.warn(mat_multiply.toString())
   }
   
   function array_create(l: number) {
-    return new Float32Array(l)
+    return new Float64Array(l)
   }
   
   
