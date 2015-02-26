@@ -11,7 +11,7 @@ module semver {
     minor: number;
     patch: number;
     prerelease: Array<number|string>;
-    build: Array<number|string>;
+    build: Array<string>;
   }
   
   export class SemVer implements ISemVer, IHash {
