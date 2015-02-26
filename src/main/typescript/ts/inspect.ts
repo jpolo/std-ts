@@ -28,7 +28,7 @@ module inspect {
       
       PREFIX = 'stringify_'
       
-      private _refs: any[]
+      private _refs = __set()
       
       constructor(
         conf?: {
@@ -46,15 +46,15 @@ module inspect {
       
       stringify(o: any, maxDepth?: number): string {
         var init = !this._refs
-        var refs = init ? (this._refs = []) : this._refs
+        var refs = init ? (this._refs = __set()) : this._refs
         var depth = maxDepth == null ? this.maxDepth : maxDepth
         var s = '' 
             
         if (__isFunction(o) || __isObject(o)) {
-          if (refs.indexOf(o) >= 0) {
+          if (refs.has(o)) {
             s = '<circular>'
           } else {
-            refs.push(o)
+            refs.add(o)
           }
         }
         
@@ -204,6 +204,17 @@ module inspect {
   function __isObject(o: any) { return (typeof o === 'object') && o !== null; }
   function __isFunction(o: any) { return typeof o === 'function'; }
   function __keys(o: any) { return Object.keys(o); }
+  function __set<T>(): { has: (o: T) => boolean; add: (o: T) => void } {
+    if (typeof Set !== "undefined") {
+      return new Set();
+    } else {
+      var d = [];
+      return {
+        has: function (o) { return d.indexOf(o) !== -1; },
+        add: function (o) { if (d.indexOf(o) !== -1) { d.push(o); } }  
+      };
+    }
+  }
   function __str(o: any) { return String(o); }
   function __stringTag(o: any) {
     var s = '';
