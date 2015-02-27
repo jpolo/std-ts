@@ -15,19 +15,16 @@ module hash {
     return state.result();
   }
   
-  export function hasher<T>(o: T): IHasher<T> {
-    return null;
-  }
-  
   export interface IHash {
     
     hash(s: IHashState)
     
   }
   
+  /*
   export interface IHasher<T> {
     (s: IHashState, o: T): void
-  }
+  }*/
   
   export interface IHashState {
     
@@ -130,16 +127,16 @@ module hash {
       }
       
       writeUndefined(): void {
-        __writeUint8(this, 0);
+        __writeUndefined(this);
       }
       
       writeNull(): void {
-        __writeUint8(this, 0);
+        __writeNull(this);
       }
       
       writeBoolean(b: boolean): void {
         if (!__writeEmpty(this, b)) {
-          __writeUint8(this, b ? 1 : 0);
+          __writeBoolean(this, b);
         }
       }
       
@@ -304,7 +301,7 @@ module hash {
       __writeUint32(this, id.id(f));
     }
     
-    function __writeObject(state: SipState, o: any, delegate: boolean) {
+    function __writeObject(state: SipState, o: any, delegate: boolean = true) {
       if (delegate && ('hash' in o)) {
         __writeIHash(state, <IHash> o);
       } else {
