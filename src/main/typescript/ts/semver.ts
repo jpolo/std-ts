@@ -17,7 +17,25 @@ module semver {
   export class SemVer implements ISemVer, IHash {
     
     static cast(o: any): SemVer {
-      return null;
+      var returnValue: SemVer = null;
+      if (o) {
+        if (o instanceof SemVer) {
+          returnValue = o;
+        } else if (__isString(o)) {
+          returnValue = SemVer.parse(o);
+        } else if (
+          ("major" in o) &&
+          ("minor" in o) &&
+          ("patch" in o)
+        ) {
+          returnValue = new SemVer(
+            o.major,
+            o.minor,
+            o.patch
+          );
+        }
+      }
+      return returnValue;
     }
     
     static compare(a: ISemVer, b: ISemVer): number {
@@ -122,6 +140,7 @@ module semver {
   }
   
   //util
+  function __isString(o: any) { return typeof o === "string"; }
   function __str(o) { return String(o); }
   function __cmp(a: ISemVer, b: ISemVer) {
     return __cmpMain(a, b) || __cmpPre(a, b);
