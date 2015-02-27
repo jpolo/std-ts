@@ -3,6 +3,7 @@ module stacktrace {
   
   // https://github.com/mattrobenolt/callsite-shim/blob/master/src/callsite.js
   // https://github.com/stacktracejs/stacktrace.js/
+  // https://github.com/tj/callsite
   
   //export interface ICallStack extends Array<ICallSite> {}
 
@@ -199,7 +200,7 @@ module stacktrace {
   
   export function create(error?: Error): ICallSite[] {
     var offset = (error ? 0 : 2);
-    var items = _parseError(error || _createError());
+    var items = _parseError(error || __errorCreate());
     if (offset > 0) {
       items = items.slice(offset);
     }
@@ -214,12 +215,29 @@ module stacktrace {
   
   enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
   
-  var browser = null
+  var browser: Browser = (function (e: any) {
+
+    var returnValue = Browser.Other
+    if (e['arguments'] && e.stack) {
+      returnValue = Browser.Chrome
+    } else if (e.stack && e.sourceURL) {
+      returnValue = Browser.Safari
+    } else if (e.stack && e['number']) {
+      returnValue = Browser.IE
+    } else if (e.stack && e.fileName) {
+      returnValue = Browser.Firefox
+    } else if (e.message && e.stack && e.stacktrace) {
+      returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
+    } else if (e.stack && !e.fileName) {
+      // Chrome 27 does not have e.arguments as earlier versions,
+      // but still does not have e.fileName as Firefox
+      returnValue = Browser.Chrome
+    }
+    return returnValue
+  }(__errorCreate()));
+  
 
   function _parseError(error: Error): string[] {
-    if (browser == null) {
-      browser = _parseBrowser(error)
-    }
     switch (browser) {
       case Browser.IE: return _parseError_IE(error)
       case Browser.Chrome: return _parseError_Chrome(error)
@@ -307,33 +325,7 @@ module stacktrace {
     return stack
   }
 
-  function _parseBrowser(e: any): Browser {
-    var returnValue = Browser.Other
-    if (e['arguments'] && e.stack) {
-      returnValue = Browser.Chrome
-    } else if (e.stack && e.sourceURL) {
-      returnValue = Browser.Safari
-    } else if (e.stack && e['number']) {
-      returnValue = Browser.IE
-    } else if (e.stack && e.fileName) {
-      returnValue = Browser.Firefox
-    } else if (e.message && e.stack && e.stacktrace) {
-      returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
-    } else if (e.stack && !e.fileName) {
-      // Chrome 27 does not have e.arguments as earlier versions,
-      // but still does not have e.fileName as Firefox
-      returnValue = Browser.Chrome
-    }
-    return returnValue
-  }
-
-  function _createError() {
-    try {
-      this['$$undef$$']()
-    } catch (e) {
-      return e
-    }
-  }
+  
 
   function _stringifyArguments(args: any[]) {
     var argc = args.length
@@ -413,6 +405,14 @@ module stacktrace {
       returnValue.push(a[i]);
     }
     return returnValue;
+  }
+  
+  function __errorCreate() {
+    try {
+      stacktrace['$$undef$$']();
+    } catch (e) {
+      return e;
+    }
   }
   
   function __errorString(returnValue: string, message: string) {
