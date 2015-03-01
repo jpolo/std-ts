@@ -26,11 +26,13 @@
     "grunt-template-jasmine-requirejs": "~0.2.0",
     "grunt-typescript": "^0.6.1",
     "gulp": "^3.8.11",
-    "gulp-tsc": "^0.9.2",
-    "requirejs": "~2.1.15",
-    "typescript": "^1.4.1"
+    "gulp-clean": "^0.3.1",
+    "gulp-typescript": "^2.4.2",
+    "merge2": "^0.3.1",
+    "requirejs": "~2.1.15"
   },
   "scripts": {
-    "build": "grunt --gruntfile Gruntfile.js"
+    "build": "grunt --gruntfile Gruntfile.js",
+    "gulp": "./node_modules/gulp/bin/gulp"
   }
 }
