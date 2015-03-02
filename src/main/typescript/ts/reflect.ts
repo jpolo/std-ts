@@ -21,8 +21,9 @@ module reflect {
   var __isAccessorDescriptor = function (descriptor: IPropertyDescriptor) {
     return ('get' in descriptor || 'set' in descriptor)
   }
-  var __isUndefined = function (o) { return typeof o === 'undefined' }
-  var __isObject = function (o) { return typeof o === 'object' && o !== null; }
+  var __isUndefined = function (o: any) { return typeof o === 'undefined'; }
+  var __isFunction = function (o: any) { return typeof o === 'function'; }
+  var __isObject = function (o: any) { return o !== null && (typeof o === 'object' || __isFunction(o)); }
   var __isFrozen = Object.isFrozen || __polyfill(__fconst(false))
   var __isSealed = Object.isSealed ||  __polyfill(__fconst(false))
   var __isExtensible = Object.isExtensible ||  __polyfill(__fconst(true))

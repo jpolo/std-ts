@@ -198,19 +198,8 @@ module stacktrace {
     __captureStackTrace(e, stripPoint);
   }
   
-  export function create(error?: Error): ICallSite[] {
-    var offset = (error ? 0 : 2);
-    var items = _parseError(error || __errorCreate());
-    if (offset > 0) {
-      items = items.slice(offset);
-    }
-    var itemc = items.length;
-    var parsed = new Array(itemc);
-    var parseCallSite = CallSite.parse;
-    for (var i = 0; i < itemc; ++i) {
-      parsed[i] = parseCallSite(items[i]);
-    }
-    return parsed;
+  export function create(): ICallSite[] {
+    return __errorFrames(1);
   }
   
   enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
@@ -235,18 +224,6 @@ module stacktrace {
     }
     return returnValue
   }(__errorCreate()));
-  
-
-  function _parseError(error: Error): string[] {
-    switch (browser) {
-      case Browser.IE: return _parseError_IE(error)
-      case Browser.Chrome: return _parseError_Chrome(error)
-      case Browser.Firefox: return _parseError_Firefox(error)
-      case Browser.Opera: return _parseError_Opera(error)
-      case Browser.Safari: return _parseError_Safari(error)
-      default: return _parseError_Other(arguments.callee)
-    }
-  }
 
   function _parseError_Chrome(error: any): string[] {
     return (error.stack + '\n')
@@ -426,57 +403,90 @@ module stacktrace {
     return returnValue;
   }
   
-  function __prepareStackTrace(errorString: string, frames: ICallSite[]): string {
-    var prepare = (<any>Error).prepareStackTrace;
-    var returnValue;
-    if (prepare) {
-      returnValue = prepare(errorString, frames);
+  var __errorFrames = (function () {
+    var _Error = (<any>Error);
+    var __errorFrames: (offset: number) => ICallSite[];
+    if (_Error.captureStackTrace) {
+      //v8
+      var prepareStackTrace = _Error.prepareStackTrace;
+      var stackSink = function (_, stack) { return stack; };
+      __errorFrames = function (offset) {
+        _Error.prepareStackTrace = stackSink;
+        var stack = (<any>new Error()).stack.slice(1 + offset);
+        _Error.prepareStackTrace = prepareStackTrace;
+        return stack;
+      };
     } else {
-      // Adapted from V8 source:
-      // https://github.com/v8/v8/blob/1613b7/src/messages.js#L1051-L1070
-      var lines = [];
-      lines.push(errorString);
-      for (var i = 0; i < frames.length; i++) {
-        var frame = frames[i];
-        var line;
-        try {
-          line = __str(frame);
-        } catch (e) {
-          try {
-            line = "<error: " + e + ">";
-          } catch (ee) {
-            // Any code that reaches this point is seriously nasty!
-            line = "<error>";
-          }
-        }
-        lines.push("    at " + line);
+      var __errorParse: (error: Error) => string[] = _parseError_Other;
+      switch (browser) {
+        case Browser.IE: __errorParse = _parseError_IE; break;
+        case Browser.Chrome: __errorParse = _parseError_Chrome; break;
+        case Browser.Firefox: __errorParse = _parseError_Firefox; break;
+        case Browser.Opera: __errorParse = _parseError_Opera; break;
+        case Browser.Safari: __errorParse = _parseError_Safari; break;
+        default: __errorParse = _parseError_Other; break;
       }
-      returnValue = lines.join('\n');
+      __errorFrames = function (offset) {
+        var items = __errorParse(__errorCreate());
+        if (offset > 0) {
+          items = items.slice(offset);
+        }
+        var itemc = items.length;
+        var parsed = new Array(itemc);
+        var parseCallSite = CallSite.parse;
+        for (var i = 0; i < itemc; ++i) {
+          parsed[i] = parseCallSite(items[i]);
+        }
+        return parsed;
+      };
     }
+    
+    return __errorFrames;
+  }());
+  
+  var __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorString: string, frames: ICallSite[]): string {
+    var returnValue;
+
+    // Adapted from V8 source:
+    // https://github.com/v8/v8/blob/1613b7/src/messages.js#L1051-L1070
+    var lines = [];
+    lines.push(errorString);
+    for (var i = 0; i < frames.length; i++) {
+      var frame = frames[i];
+      var line;
+      try {
+        line = __str(frame);
+      } catch (e) {
+        try {
+          line = "<error: " + e + ">";
+        } catch (ee) {
+          // Any code that reaches this point is seriously nasty!
+          line = "<error>";
+        }
+      }
+      lines.push("    at " + line);
+    }
+    returnValue = lines.join('\n');
+    
     return returnValue;
   }
   
-  function __captureStackTrace(e: any, topLevel?: Function): void {
-    var capture = (<any>Error).captureStackTrace;
-    if (capture) {
-      capture(e, topLevel);
-    } else {
-      /*
-      // Simultaneously traverse the frames in error.stack and the arguments.caller
-      // to build a list of CallSite objects
-      var factory = makeCallSiteFactory(e);
-      var frames = factory(e, arguments.callee);
-      var errorString = __errorString(frames.name, frames.message);
+  var __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, topLevel?: Function): void {
+    /*
+    // Simultaneously traverse the frames in error.stack and the arguments.caller
+    // to build a list of CallSite objects
+    var factory = makeCallSiteFactory(e);
+    var frames = factory(e, arguments.callee);
+    var errorString = __errorString(frames.name, frames.message);
+  
+    // Explicitly set back the error.name and error.message
+    //e.name = frames.name;
+    //e.message = frames.message;
+  
+    // Pass the raw callsite objects through and get back a formatted stack trace
+    e.stack = __prepareStackTrace(errorString, frames.frames);
     
-      // Explicitly set back the error.name and error.message
-      //e.name = frames.name;
-      //e.message = frames.message;
-    
-      // Pass the raw callsite objects through and get back a formatted stack trace
-      e.stack = __prepareStackTrace(errorString, frames.frames);
-      
-      */
-    }
+    */
   }
   
 }

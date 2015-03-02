@@ -3,7 +3,11 @@ import int64 = require("ts/int64")
 import Int64 = int64.IInt64
 
 //assertion
-if (!ArrayBuffer || !Uint8Array || !DataView) {
+if (
+  (typeof ArrayBuffer == "undefined") || 
+  (typeof Uint8Array == "undefined") || 
+  (typeof DataView == "undefined")
+) {
   throw new Error("Typed Arrays is required");
 }
 

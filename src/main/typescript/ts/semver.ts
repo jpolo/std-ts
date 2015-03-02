@@ -83,12 +83,7 @@ module semver {
     }
     
     static stringify(v: ISemVer): string {
-      var s = "";
-      s += v.major + '.' + v.minor + '.' + v.patch;
-      if (v.prerelease.length) {
-        s += '-' + v.prerelease.join('.');
-      }
-      return s;
+      return __strSemVer(v);
     }
     
     constructor(
@@ -120,6 +115,7 @@ module semver {
       s.writeUint8(this.minor); 
       s.writeUint8(this.patch);
       s.writeArray(this.prerelease);
+      s.writeArray(this.build);
     }
     
     inspect() {
@@ -134,14 +130,23 @@ module semver {
     }
     
     toString(): string {
-      return SemVer.stringify(this);
+      return __strSemVer(this);
     }
     
   }
   
   //util
+  function __isUndefined(o: any) { return typeof o === "undefined"; }
   function __isString(o: any) { return typeof o === "string"; }
   function __str(o) { return String(o); }
+  function __strSemVer(v: ISemVer) {
+    var s = "";
+    s += v.major + '.' + v.minor + '.' + v.patch;
+    if (v.prerelease.length) {
+      s += '-' + v.prerelease.join('.');
+    }
+    return s;
+  }
   function __cmp(a: ISemVer, b: ISemVer) {
     return __cmpMain(a, b) || __cmpPre(a, b);
   }
@@ -186,12 +191,15 @@ module semver {
     var i = 0;
     do {
       var av = apre[i];
+      var avundef = __isUndefined(av);
       var bv = bpre[i];
-      if (av === undefined && bv === undefined) {
+      var bvundef = __isUndefined(bv);
+      
+      if (avundef && bvundef) {
         return 0;
-      } else if (bv === undefined) {
+      } else if (bvundef) {
         return 1;
-      } else if (av === undefined) {
+      } else if (avundef) {
         return -1;
       } else if (av === bv) {
         continue;

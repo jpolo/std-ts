@@ -50,7 +50,7 @@ module inspect {
         var depth = maxDepth == null ? this.maxDepth : maxDepth
         var s = '' 
             
-        if (__isFunction(o) || __isObject(o)) {
+        if (__isObject(o)) {
           if (refs.has(o)) {
             s = '<circular>'
           } else {
@@ -61,12 +61,12 @@ module inspect {
         
         if (!s) {
           switch (__stringTag(o)) {
-            case 'Undefined': s = this.stringify_Undefined(); break;
-            case 'Null': s = this.stringify_Null(); break;
-            case 'Boolean': s = this.stringify_Boolean(o); break;
-            case 'Number': s = this.stringify_Number(o); break;
-            case 'String': s = this.stringify_String(o); break;
-            case 'Function': s = this.stringify_Function(o); break;
+            case 'Undefined': s = this.stringifyUndefined(); break;
+            case 'Null': s = this.stringifyNull(); break;
+            case 'Boolean': s = this.stringifyBoolean(o); break;
+            case 'Number': s = this.stringifyNumber(o); break;
+            case 'String': s = this.stringifyString(o); break;
+            case 'Function': s = this.stringifyFunction(o); break;
             default:
               try {
                 var methodName = this.PREFIX + __stringTag(o)
@@ -93,43 +93,54 @@ module inspect {
         return s
       }
       
-      stringify_Undefined(o?: any, maxDepth?: number) {
-        return 'undefined'
+      stringifyUndefined() {
+        return 'undefined';
       }
       
-      stringify_Null(o?: any, maxDepth?: number) {
-        return 'null'
+      stringifyNull() {
+        return 'null';
       }
       
-      stringify_Boolean(o: boolean, maxDepth?: number) {
-        return __str(o)
+      stringifyBoolean(o: boolean) {
+        var s = __strEmpty(o);
+        return s === null ? __str(o) : s;
       }
       
       stringify_Date(o: Date, maxDepth: number) {
         return 'Date { ' + o.toISOString() + ' }'
       }
       
-      stringify_Number(o: number, maxDepth?: number) {
-        return __str(o)
+      stringifyNumber(o: number, maxDepth?: number) {
+        var s = __strEmpty(o);
+        return s === null ? __str(o) : s;
       }
       
       stringify_RegExp(o: RegExp, maxDepth: number) {
-        return __str(o)
+        var s = __strEmpty(o);
+        return s === null ? __str(o) : s;
       }
       
-      stringify_String(o: string, maxDepth?: number) {
-        var maxString = this.maxString
-        return '"' + 
-          (o.length > maxString ? o.slice(0, maxString) + '...' : o)
-          .replace(/"/g, '\\"' )
-          .replace(/[\n\r]/g, "↵") + 
-        '"'
+      stringifyString(o: string) {
+        var maxString = this.maxString;
+        var s = __strEmpty(o);
+        return (
+          s === null ?
+          '"' + 
+            (o.length > maxString ? o.slice(0, maxString) + '...' : o)
+            .replace(/"/g, '\\"' )
+            .replace(/[\n\r]/g, "↵") + 
+          '"':
+          s
+        );
       }
       
-      stringify_Function(o: Function, maxDepth?: number) {
-        var s = __str(o)
-        s = s.slice(0, s.indexOf('{') + 1) + '...}'
-        return s
+      stringifyFunction(o: Function) {
+        var s = __strEmpty(o);
+        if (s === null) {
+          s = __str(o);
+          s = s.slice(0, s.indexOf('{') + 1) + '...}';
+        }
+        return s;
       }
       
       stringify_Array(o: any[], maxDepth: number) {
@@ -199,10 +210,10 @@ module inspect {
   //util
   var __ostring = Object.prototype.toString
   function __fnName(f: any) { 
-    return (f.displayName || f.name || (f.name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
+    return (f.displayName || f.name || (f.name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]));
   }
-  function __isObject(o: any) { return (typeof o === 'object') && o !== null; }
   function __isFunction(o: any) { return typeof o === 'function'; }
+  function __isObject(o: any) { return o !== null && (typeof o === 'object' || __isFunction(o)); }
   function __keys(o: any) { return Object.keys(o); }
   function __set<T>(): { has: (o: T) => boolean; add: (o: T) => void } {
     if (typeof Set !== "undefined") {
@@ -216,6 +227,13 @@ module inspect {
     }
   }
   function __str(o: any) { return String(o); }
+  function __strEmpty(o: any): string {
+    return (
+      o === null ? 'null' :
+      o === undefined ? 'undefined' :
+      null
+    );
+  }
   function __stringTag(o: any) {
     var s = '';
     if (o === null) {
@@ -232,6 +250,7 @@ module inspect {
     }
     return s;
   }
+  
   
 }
 export = inspect
