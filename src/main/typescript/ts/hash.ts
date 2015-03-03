@@ -25,10 +25,9 @@ module hash {
     
   }
   
-  /*
   export interface IHasher<T> {
     (s: IHashState, o: T): void
-  }*/
+  }
   
   export interface IHashState {
     
@@ -44,7 +43,12 @@ module hash {
     writeUint8(u: number): void
     writeUint16(u: number): void
     writeUint32(u: number): void
-    writeArray(a: any[]): void
+    
+    writeArray<T>(a: T[], hashFn?: IHasher<T>): void
+    writeMap<K, V>(s: Map<K, V>, hashKeyFn?: IHasher<K>, hashValueFn?: IHasher<V>): void
+    writeSet<T>(s: Set<T>, hashFn?: IHasher<T>): void
+    writeDate(d: Date): void
+    writeRegExp(re: RegExp): void
     
   }
 
@@ -186,15 +190,39 @@ module hash {
         }
       }
       
-      writeFunction(o: any, delegate = true): void {
-        if (!__writeEmpty(this, o)) {
-          __writeFunction(this, o);
+      writeFunction(f: Function): void {
+        if (!__writeEmpty(this, f)) {
+          __writeFunction(this, f);
         }
       }
       
-      writeArray(a: any[]): void {
+      writeArray<T>(a: T[], hashFn?: IHasher<T>): void {
         if (!__writeEmpty(this, a)) {
-          __writeArray(this, a);
+          __writeArray(this, a, hashFn);
+        }
+      }
+      
+      writeMap<K, V>(m: Map<K, V>, hashKeyFn?: IHasher<K>, hashValueFn?: IHasher<V>): void {
+        if (!__writeEmpty(this, m)) {
+          __writeMap(this, m, hashKeyFn, hashValueFn);
+        }
+      }
+      
+      writeSet<T>(s: Set<T>, hashFn?: IHasher<T>): void {
+        if (!__writeEmpty(this, s)) {
+          __writeSet(this, s, hashFn);
+        }
+      }
+      
+      writeDate(d: Date): void {
+        if (!__writeEmpty(this, d)) {
+          __writeDate(this, d);
+        }
+      }
+      
+      writeRegExp(re: RegExp): void {
+        if (!__writeEmpty(this, re)) {
+          __writeRegExp(this, re);
         }
       }
       
@@ -241,19 +269,28 @@ module hash {
     }
     
     function __writeAny(state: SipState, o: any) {
-      switch (__stringTag(o)) {
-        case 'Null': __writeNull(this); break;
-        case 'Undefined': __writeUndefined(this); break;
-        case 'Boolean': __writeBoolean(this, o); break;
-        case 'String': __writeString(this, o); break;
-        case 'Number': __writeFloat64(this, o); break;
-        case 'Function': __writeFunction(this, o); break;
+      var strTag = __stringTag(o);
+      switch (strTag) {
+        case 'Null': __writeNull(state); break;
+        case 'Undefined': __writeUndefined(state); break;
+        case 'Boolean': __writeBoolean(state, o); break;
+        case 'String': __writeString(state, o); break;
+        case 'Number': __writeFloat64(state, o); break;
+        case 'Function': __writeFunction(state, o); break;
         
         //useful class:
-        case 'Array': __writeArray(this, o); break;
-        case 'Date': __writeFloat64(this, (<Date>o).getTime()); break;
-        case 'RegExp': __writeString(this, __str(o)); break;
-        default: __writeObject(this, o, true);
+        case 'Array': __writeArray(state, o); break;
+        case 'Map': __writeMap(state, o); break;
+        case 'Set': __writeSet(state, o); break;
+        case 'Date': __writeDate(state, o); break;
+        case 'RegExp': __writeRegExp(state, o); break;
+        default:
+          var methodName = "hash" + strTag;
+          if (__isFunction(state[methodName])) {
+            state[methodName](o);
+          } else {
+            __writeObject(state, o, true);
+          }
       }
     }
     
@@ -305,6 +342,14 @@ module hash {
       __writeUint32(this, id.id(f));
     }
     
+    function __writeDate(state: SipState, d: Date) {
+      __writeFloat64(state, d.getTime());
+    }
+    
+    function __writeRegExp(state: SipState, re: RegExp) {
+      __writeString(state, __str(re));
+    }
+    
     function __writeObject(state: SipState, o: any, delegate: boolean = true) {
       if (delegate && ('hash' in o)) {
         __writeIHash(state, <IHash> o);
@@ -313,10 +358,23 @@ module hash {
       }
     }
     
-    function __writeArray(state: SipState, a: any[]) {
+    function __writeArray(state: SipState, a: any[], hashFn = __writeAny) {
       for (var i = 0, l = a.length; i < l; i++) {
-        __writeAny(state, a[i]);
+        hashFn(state, a[i]);
       }
+    }
+    
+    function __writeMap(state: SipState, m: Map<any, any>, hashKFn = __writeAny, hashVFn = __writeAny) {
+      //TODO: sort keys?
+      m.forEach((value, key) => {
+        hashKFn(state, key);
+        hashVFn(state, value);
+      });
+    }
+    
+    function __writeSet(state: SipState, s: Set<any>, hashFn = __writeAny) {
+      //TODO: sort elements?
+      s.forEach((v) => hashFn(state, v));
     }
 
     function __writeString(state: SipState, s: string) {
@@ -445,6 +503,7 @@ module hash {
   //util
   var __ostring = Object.prototype.toString;
   function __keys(o: any) { return Object.keys(o); }
+  function __isFunction(o: any) { return typeof o === "function"; }
   function __str(o: any) { return String(o); }
   function __stringTag(o: any) {
     var s = '';

@@ -86,14 +86,34 @@ module semver {
       return __strSemVer(v);
     }
     
+    major: number;
+    minor: number;
+    patch: number;
+    prerelease: Array<number|string>;
+    build: Array<string>;
+    
     constructor(
-      public major = 0,
-      public minor = 0,
-      public patch = 0,
-      public prerelease: Array<number|string> = [],
-      public build: Array<string> = []
+      major = 0,
+      minor = 0,
+      patch = 0,
+      prerelease?: Array<number|string>,
+      build?: Array<string>
     ) {
-      
+      this.major = major >>> 0;
+      this.minor = minor >>> 0;
+      this.patch = patch >>> 0;
+      this.prerelease = prerelease ? prerelease.slice() : [];//copy
+      this.build = build ? build.slice() : [];//copy
+    }
+    
+    clone(): SemVer {
+      return new SemVer(
+        this.major,
+        this.minor,
+        this.patch,
+        this.prerelease,
+        this.build
+      );
     }
     
     compare(o: ISemVer): number {
@@ -111,9 +131,9 @@ module semver {
     }
     
     hash(s: IHashState) {
-      s.writeUint8(this.major);
-      s.writeUint8(this.minor); 
-      s.writeUint8(this.patch);
+      s.writeUint32(this.major);
+      s.writeUint32(this.minor); 
+      s.writeUint32(this.patch);
       s.writeArray(this.prerelease);
       s.writeArray(this.build);
     }
