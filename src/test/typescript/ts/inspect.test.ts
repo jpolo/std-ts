@@ -24,6 +24,7 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     assert.strictEqual(inspectObj.stringify(0), '0')
     assert.strictEqual(inspectObj.stringify(123.4545), '123.4545')
     assert.strictEqual(inspectObj.stringify('foobar'), '"foobar"')
+    assert.strictEqual(inspectObj.stringify(new String('foo')), 'String { "foobar" }')
     assert.strictEqual(inspectObj.stringify('lorem ipsum "sorem" foo bar'), '"lorem ipsum \\"so..."')
     assert.strictEqual(inspectObj.stringify(Math.PI), '3.141592653589793')
     assert.strictEqual(inspectObj.stringify(new Date(0)), 'Date { 1970-01-01T00:00:00.000Z }')
@@ -38,8 +39,19 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     assert.strictEqual(inspectObj.stringify(new TypeError("blah")), "TypeError {}")
   })
   
-  test("stringifyUndefined()", (assert) => {
-    //assert.strictEqual(inspectObj.stringifyUndefined());
+  test("#stringifyUndefined()", (assert) => {
+    assert.strictEqual(inspectObj.stringifyUndefined(), 'undefined');
+  })
+  
+  test("#stringifyNull()", (assert) => {
+    assert.strictEqual(inspectObj.stringifyNull(), 'null');
+  })
+  
+  test("#stringifyString()", (assert) => {
+    assert.strictEqual(inspectObj.stringifyString(undefined), 'undefined');
+    assert.strictEqual(inspectObj.stringifyString(null), 'null');
+    assert.strictEqual(inspectObj.stringifyString('foo'), '"foo"');
+    //assert.strictEqual(inspectObj.stringifyString(new String('foo')), 'String { "foo" }');
   })
   
   
