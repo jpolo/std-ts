@@ -401,30 +401,25 @@ module log {
     
       private _console: any
       
-      constructor(options?: {
-        console?: { 
-          debug: (s: string) => void; 
-          info: (s: string) => void; 
-          warn: (s: string) => void;
-          error: (s: string) => void;
-        }
-      }) {
-        this._console = options.console || window.console
+      constructor() {
+        this._console = __global.console;
       }
       
       receive(logMessage: IMessage) {
         var console = this._console
-        var formatted = __str(logMessage)
-        var levelValue = logMessage.level.value
-          
-        if (levelValue >= ERROR.value) {
-          console.error(formatted)
-        } else if (levelValue >= WARN.value) {
-          console.warn(formatted)
-        } else if (levelValue >= INFO.value) {
-          console.info(formatted)
-        } else { //Debug
-          console.debug(formatted)
+        if (console) {
+          var formatted = __str(logMessage)
+          var levelValue = logMessage.level.value
+            
+          if (levelValue >= ERROR.value) {
+            console.error(formatted)
+          } else if (levelValue >= WARN.value) {
+            console.warn(formatted)
+          } else if (levelValue >= INFO.value) {
+            console.info(formatted)
+          } else { //Debug
+            console.debug(formatted)
+          }
         }
       }
       
@@ -433,6 +428,7 @@ module log {
   }
   
   //util
+  var __global: Window = (new Function("return this;")).call(null);
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
   var __isNumber = function (o: any) { return typeof o == 'number'; };
   var __isString = function (o: any) { return typeof o == 'string'; };
