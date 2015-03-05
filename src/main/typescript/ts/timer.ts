@@ -1,11 +1,20 @@
 module timer {
+  
+  //Util
   var __global: Window = (new Function("return this;")).call(null);
   var __setTimeout = __global.setTimeout;
   var __clearTimeout = __global.clearTimeout;
   var __setInterval = __global.setInterval;
   var __clearInterval = __global.clearInterval;
-  var __setImmediate: any = __global.setImmediate || __setTimeout;
-  var __clearImmediate: any = __global.clearImmediate || __clearTimeout;
+  var __setImmediate = __global.setImmediate;
+  var __clearImmediate = __global.clearImmediate;
+  
+  //Compat
+  if (!__setImmediate) {
+    __setImmediate = function (f) { return __setTimeout(f, 0); };
+    __clearImmediate = function (id) { return __clearTimeout(id); };
+  }
+  
   
   export function setTimeout(f: () => void, milliseconds: number = 0): number {
     return __setTimeout(f, milliseconds);
