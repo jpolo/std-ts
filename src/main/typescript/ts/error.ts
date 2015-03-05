@@ -1,12 +1,26 @@
 import stacktrace = require("ts/stacktrace")
 
 module error {
-  //capture stack trace shim
-  // https://github.com/mattrobenolt/callsite-shim/blob/master/src/callsite.js
-  
-  
+
+  //util
   var __global: any = (new Function("return this;")).call(null);
-  var __isHandling = false;
+  var __str = String;
+  var __inspect = __str;
+  var __name = function (f: Function) {
+    return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
+  };
+  var __captureStackTrace = stacktrace.capture;
+  var __handleUncaughtError = function (error, prefix) {
+    if (console.error) {
+      var str = error && (error instanceof Error) ? __str(error.stack || error) : __inspect(error);
+      console.error(prefix + str);
+    } else {//rethrow so it is catched by global.onerror
+      throw error;
+    }
+  };
+  
+  //private
+  var _isHandling = false;
   
   /*
   export function apply(fn: Function, thisArg?, argArray?: any) {
@@ -36,8 +50,8 @@ module error {
     var handler: IErrorHandler = error.onerror;
     var uncaught = !handler; 
     var fatalError;
-    if (!__isHandling) {
-      __isHandling = true;
+    if (!_isHandling) {
+      _isHandling = true;
       if (!uncaught) {
         try {
           uncaught = !handler(error);
@@ -49,7 +63,7 @@ module error {
       if (uncaught) {
         __handleUncaughtError(error, 'Uncaught ');
       }
-      __isHandling = false;
+      _isHandling = false;
     } else {
       fatalError = error;
     }
@@ -90,23 +104,9 @@ module error {
     }
   }
   
-  //util
-  function __str(o: any) { return String(o); }
-  function __inspect(o: any) { return __str(o); }
-  function __name(f: any) { 
-    return (f.displayName || f.name || (f.name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
-  }
-  function __handleUncaughtError(error, prefix) {
-    if (console.error) {
-      var str = error && (error instanceof Error) ? __str(error.stack || error) : __inspect(error);
-      console.error(prefix + str);
-    } else {//rethrow so it is catched by global.onerror
-      throw error;
-    }
-  }
-  function __captureStackTrace(o, stripPoint) {
-    stacktrace.capture(o, stripPoint);
-  }
+  
+  
+
   
 }
 export = error;
