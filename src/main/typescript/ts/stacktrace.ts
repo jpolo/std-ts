@@ -204,27 +204,7 @@ module stacktrace {
   
   enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
   
-  var browser: Browser = (function (e: any) {
-
-    var returnValue = Browser.Other
-    if (e['arguments'] && e.stack) {
-      returnValue = Browser.Chrome
-    } else if (e.stack && e.sourceURL) {
-      returnValue = Browser.Safari
-    } else if (e.stack && e['number']) {
-      returnValue = Browser.IE
-    } else if (e.stack && e.fileName) {
-      returnValue = Browser.Firefox
-    } else if (e.message && e.stack && e.stacktrace) {
-      returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
-    } else if (e.stack && !e.fileName) {
-      // Chrome 27 does not have e.arguments as earlier versions,
-      // but still does not have e.fileName as Firefox
-      returnValue = Browser.Chrome
-    }
-    return returnValue
-  }(__errorCreate()));
-
+  
   function _parseError_Chrome(error: any): string[] {
     return (error.stack + '\n')
         .replace(/^[\s\S]+?\s+at\s+/, ' at ') // remove message
@@ -349,14 +329,14 @@ module stacktrace {
   
   
   //util
-  var __ostring = Object.prototype.toString
-  var __global = window;
-  function __isGlobal(o: any) { return o === __global; }
-  function __isUndefined(o: any) { return typeof o === "undefined"; }
-  function __isFunction(o: any) { return typeof o === "function"; }
-  function __isObject(o: any) { return o !== null && (typeof o === "object" || __isFunction(o)); }
-  function __str(o: any) { return String(o); }
-  function __stringTag(o: any): string {
+  var __ostring = Object.prototype.toString;
+  var __global: any = (new Function("return this;")).call(null);
+  var __isGlobal = function (o: any) { return o === __global; }
+  var __isUndefined = function (o: any) { return typeof o === "undefined"; }
+  var __isFunction = function (o: any) { return typeof o === "function"; }
+  var __isObject = function (o: any) { return o !== null && (typeof o === "object" || __isFunction(o)); }
+  var __str = String;
+  var __stringTag = function (o: any): string {
     var s = '';
     if (o === null) {
       s = 'Null';
@@ -371,7 +351,7 @@ module stacktrace {
       }
     }
     return s;
-  }
+  };
   
   function __arraySlice<T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
     var returnValue = [];
@@ -384,15 +364,15 @@ module stacktrace {
     return returnValue;
   }
   
-  function __errorCreate() {
+  var __errorCreate = function () {
     try {
       stacktrace['$$undef$$']();
     } catch (e) {
       return e;
     }
-  }
+  };
   
-  function __errorString(returnValue: string, message: string) {
+  var __errorString = function (returnValue: string, message: string) {
     var returnValue = '';
     if (!__isUndefined(name)) {
       returnValue += name;
@@ -401,7 +381,7 @@ module stacktrace {
       returnValue += ': ' + message;
     }
     return returnValue;
-  }
+  };
   
   var __errorFrames = (function () {
     var _Error = (<any>Error);
@@ -445,15 +425,15 @@ module stacktrace {
   }());
   
   var __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorString: string, frames: ICallSite[]): string {
-    var returnValue;
 
     // Adapted from V8 source:
     // https://github.com/v8/v8/blob/1613b7/src/messages.js#L1051-L1070
     var lines = [];
+    var frame: ICallSite;
+    var line;
     lines.push(errorString);
-    for (var i = 0; i < frames.length; i++) {
-      var frame = frames[i];
-      var line;
+    for (var i = 0, l = frames.length; i < l; i++) {
+      frame = frames[i];
       try {
         line = __str(frame);
       } catch (e) {
@@ -466,9 +446,7 @@ module stacktrace {
       }
       lines.push("    at " + line);
     }
-    returnValue = lines.join('\n');
-    
-    return returnValue;
+    return lines.join('\n');
   }
   
   var __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, topLevel?: Function): void {
@@ -487,7 +465,28 @@ module stacktrace {
     e.stack = __prepareStackTrace(errorString, frames.frames);
     
     */
-  }
+  };
+  
+  var browser: Browser = (function (e: any) {
+
+    var returnValue = Browser.Other
+    if (e['arguments'] && e.stack) {
+      returnValue = Browser.Chrome
+    } else if (e.stack && e.sourceURL) {
+      returnValue = Browser.Safari
+    } else if (e.stack && e['number']) {
+      returnValue = Browser.IE
+    } else if (e.stack && e.fileName) {
+      returnValue = Browser.Firefox
+    } else if (e.message && e.stack && e.stacktrace) {
+      returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
+    } else if (e.stack && !e.fileName) {
+      // Chrome 27 does not have e.arguments as earlier versions,
+      // but still does not have e.fileName as Firefox
+      returnValue = Browser.Chrome
+    }
+    return returnValue
+  }(__errorCreate()));
   
 }
 export = stacktrace
