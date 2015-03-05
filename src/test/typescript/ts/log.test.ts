@@ -47,9 +47,14 @@ var logSuite = suite("ts/log", (self) => {
   test("Message#toString()", (assert) => {
     var message = new Message(log.DEBUG, "mygroup", "mymessage")
     assert.strictEqual(message.toString(), '[DEBUG|mygroup] mymessage')
-  })  
+  })
   
-  
+  test("Level#constructor()", (assert) => {
+    assert.throws(() => {
+      var l = new log.Level("blah", 0, {});
+    })
+  })
+
   test("Level#valueOf()", (assert) => {
     assert.strictEqual(+log.DEBUG, 0)
     assert.strictEqual(+log.INFO, 10)
@@ -59,7 +64,7 @@ var logSuite = suite("ts/log", (self) => {
   })
     
   test("Level#equals()", (assert) => {
-    var level = new log.Level("BLAH", log.DEBUG.value)
+    var level = new log.Level("BLAH", log.DEBUG.value, log.Level['_constructorKey'])
     assert.strictEqual(level.equals(null), false)
     assert.strictEqual(level.equals(log.DEBUG), true)
     assert.strictEqual(level.equals(log.INFO), false)

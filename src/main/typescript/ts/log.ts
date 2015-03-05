@@ -41,7 +41,7 @@ module log {
     }
     
     static compare(a: ILevel, b: ILevel): number {
-      return a.value - b.value
+      return a.value - b.value;
     }
     
     static create(name: string, level: number): Level {
@@ -55,25 +55,31 @@ module log {
       if (byValue[level]) {
         throw new Error(byValue[level] + ' is already defined')
       }
-      var levelObj = byName[name] = byValue[level] = new Level(name, level)
+      var levelObj = byName[name] = byValue[level] = new Level(name, level, Level._constructorKey);
       return levelObj
     }
 
     static fromNumber(val: number): Level {
-      return Level._byValue[val >>> 0]
+      return Level._byValue[val >>> 0];
     }
     
     static fromString(s: string): Level {
-      return Level._instances[s.toUpperCase()]
+      return Level._instances[s.toUpperCase()];
     }
     
     private static _instances: {[key: string]: Level} = {}
     private static _byValue: {[key: number]: Level} = {}
+    private static _constructorKey = {};
     
     constructor(
       public name: string, 
-      public value: number
-    ) { }
+      public value: number,
+      constructorKey: any
+    ) {
+      if (constructorKey !== Level._constructorKey) {
+        throw new Error('new Level() cannot be called directly');  
+      }
+    }
     
     compare(l: ILevel): number {
       return Level.compare(this, l)
@@ -427,14 +433,14 @@ module log {
   }
   
   //util
-  function __format(n: string, s: string) { return n + ' { ' + s + ' }' }
-  function __isNumber(o: any) { return typeof o == 'number'; }
-  function __isString(o: any) { return typeof o == 'string'; }
-  function __isFunction(o: any) { return typeof o == 'function'; }
-  function __keys(o: any) { return Object.keys(o); }  
-  function __str(o: any) { return String(o); }
-  function __strCmp(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 }
-  function __throwAsync(e) { setTimeout(() => { throw e; }, 0); }
+  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
+  var __isNumber = function (o: any) { return typeof o == 'number'; };
+  var __isString = function (o: any) { return typeof o == 'string'; };
+  var __isFunction = function(o: any) { return typeof o == 'function'; };
+  var __keys = Object.keys; 
+  var __str = String;
+  var __strCmp = function(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 };
+  var __throwAsync = function(e) { setTimeout(() => { throw e; }, 0); };
   
 }
 export = log
