@@ -398,27 +398,22 @@ module log {
     }
     
     export class Console implements IReporter {
-    
-      private _console: any
-      
-      constructor() {
-        this._console = __global.console;
-      }
+
+      constructor() {}
       
       receive(logMessage: IMessage) {
-        var console = this._console
-        if (console) {
+        if (__console) {
           var formatted = __str(logMessage)
           var levelValue = logMessage.level.value
             
           if (levelValue >= ERROR.value) {
-            console.error(formatted)
+            __console.error(formatted)
           } else if (levelValue >= WARN.value) {
-            console.warn(formatted)
+            __console.warn(formatted)
           } else if (levelValue >= INFO.value) {
-            console.info(formatted)
+            __console.info(formatted)
           } else { //Debug
-            console.debug(formatted)
+            __console.debug(formatted)
           }
         }
       }
@@ -429,6 +424,7 @@ module log {
   
   //util
   var __global: Window = (new Function("return this;")).call(null);
+  var __console: Console = typeof console !== "undefined" ? __global.console : null;
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
   var __isNumber = function (o: any) { return typeof o == 'number'; };
   var __isString = function (o: any) { return typeof o == 'string'; };

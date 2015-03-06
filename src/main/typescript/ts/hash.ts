@@ -51,6 +51,45 @@ module hash {
     writeRegExp(re: RegExp): void
     
   }
+  
+  export class HashState {
+    
+    write(o: any) {
+      var self = <IHashState> this;
+      switch (__stringTag(o)) {
+        case 'Null': self.writeNull(); break;
+        case 'Undefined': self.writeUndefined(); break;
+        case 'Boolean': self.writeBoolean(!!o); break;
+        case 'String': self.writeString(__str(o)); break;
+        case 'Number': self.writeNumber(+o); break;
+        case 'Function': self.writeFunction(o); break;
+        
+        //std class
+      }
+      
+      /*switch (strTag) {
+        case 'Number': __writeFloat64(state, o); break;
+        case 'Function': __writeFunction(state, o); break;
+        
+        //useful class:
+        case 'Array': __writeArray(state, o); break;
+        case 'Map': __writeMap(state, o); break;
+        case 'Set': __writeSet(state, o); break;
+        case 'Date': __writeDate(state, o); break;
+        case 'RegExp': __writeRegExp(state, o); break;
+        default:
+          var methodName = "hash" + strTag;
+          if (__isFunction(state[methodName])) {
+            state[methodName](o);
+          } else {
+            __writeObject(state, o, true);
+          }
+      }*/
+    }
+    
+    writeUndefined() {}
+    //writeNull() {}
+  }
 
   export module sip {
     

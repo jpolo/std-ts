@@ -5,6 +5,7 @@ import ICallSite = stacktrace.ICallSite
 
 module unit {
   var TEST_TIMEOUT = 2000;//ms
+  //var __console: Console = typeof console !== "undefined" ? __global.console : null;
   var __equals = function (a: any, b: any) { return a === b }
   var __equalsFloat = function (a: number, b: number, epsilon: number) {
     return (
@@ -742,6 +743,10 @@ module unit {
         var section = sections[sectionName]
 
         section.forEach((assertion) => {
+if (assertion.position && !assertion.position.getFileName) {
+  console.warn(assertion);
+}
+          
           var message = assertion.message
           var position = assertion.position
           var positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : ""

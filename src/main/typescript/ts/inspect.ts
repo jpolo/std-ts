@@ -1,4 +1,61 @@
 module inspect {
+  
+  //Util
+  var __es3Compat = true;
+  var __es5Compat = __es3Compat || true;
+  var __ostring = Object.prototype.toString
+  var __name = function (f: Function) { 
+    return (<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]);
+  };
+  var __isString = function (o: any) { return typeof o === 'string'; };
+  var __isFunction = function (o: any) { return typeof o === 'function'; };
+  var __isObject = function (o: any) { return o !== null && (typeof o === 'object' || typeof o === 'function'); };
+  var __keys = Object.keys;
+  var __set:<T>() => { has: (o: T) => boolean; add: (o: T) => void } = typeof Set !== "undefined" ? function () { return new Set(); } : null;
+  var __str = String;
+  var __strEmpty = function (o: any): string { return (o === null ? 'null' : o === undefined ? 'undefined' : null); };
+  var __strObject = function (constructorName: string, content: string) {
+    content = __str(content);
+    var sep = content.length ? ' ' : '';
+    return (
+      "" +
+      (constructorName && constructorName !== 'Object' ? constructorName + ' ' : '') +
+      '{' + sep + content + sep + '}'
+    );
+  };
+  var __typeOf = typeof null === "null" ? function (o) { return typeof o; } : null;
+  var __stringTag = function (o: any) {
+    var s = '';
+    if (o === null) {
+      s = 'Null';
+    } else {
+      switch(typeof o) {
+        case 'boolean': s = 'Boolean'; break;
+        case 'function': s = 'Function'; break;
+        case 'number': s = 'Number'; break;
+        case 'string': s = 'String'; break;
+        case 'undefined': s = 'Undefined'; break;
+        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
+      }
+    }
+    return s;
+  };
+  var ELLIPSIS = "...";
+  
+  //Compat
+  if (__es3Compat) {
+    __keys = __keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+  }
+  if (__es5Compat) {
+    __set = __set || function () {
+      var d = [];
+      return {
+        has: function (o) { return d.indexOf(o) !== -1; },
+        add: function (o) { if (d.indexOf(o) !== -1) { d.push(o); } }  
+      };
+    };
+    __typeOf = __typeOf || function (o) { return o === null ? 'null' : typeof o; };
+  }
 
   export interface IInspect {
     
@@ -147,7 +204,7 @@ module inspect {
         return (
           s === null ?
           '"' + 
-            (o.length > maxString ? o.slice(0, maxString) + '...' : o)
+            (o.length > maxString ? o.slice(0, maxString) + ELLIPSIS : o)
             .replace(/"/g, '\\"' )
             .replace(/[\n\r]/g, "↵") + 
           '"':
@@ -159,23 +216,23 @@ module inspect {
         var s = __strEmpty(o);
         if (s === null) {
           s = __str(o);
-          s = s.slice(0, s.indexOf('{') + 1) + '...}';
+          s = s.slice(0, s.indexOf('{') + 1) + ELLIPSIS + '}';
         }
         return s;
       }
       
-      stringifyArray(o: any[], maxDepth: number) {
-        var s = __strEmpty(o);
+      stringifyArray(a: any[], maxDepth: number) {
+        var s = __strEmpty(a);
         if (s === null) {
           var maxElements = this.maxElements;
-          var length = o.length;
+          var length = a.length;
           var truncate = length > maxElements;
           
           s = (
-            maxDepth <= 0 && length ? '...' :
+            maxDepth <= 0 && length ? ELLIPSIS :
             '[' + 
-              (truncate ? o.slice(0, maxElements) : o).map((v) => this.stringify(v, maxDepth - 1)).join(', ') + 
-              (truncate ? ', ...' : '') + 
+              (truncate ? a.slice(0, maxElements) : a).map((v) => this.stringify(v, maxDepth - 1)).join(', ') + 
+              (truncate ? ', ' + ELLIPSIS : '') + 
             ']'
           );
         }
@@ -185,13 +242,20 @@ module inspect {
       stringifySet(o: Set<any>, maxDepth: number) {
         var s = __strEmpty(o);
         if (s === null) {
-          var first = true;
+          var maxElements = this.maxElements;
+          var count = 0;
           o.forEach((v) => {
-            if (first) {
-              first = false;
-              s += ", ";
+            if (count === maxElements) {
+              s += ', ' + ELLIPSIS;
+            } else if (count > maxElements) {
+              //do nothing
+            } else {
+              if (count === 0) {
+                s += ", ";
+              }
+              s += this.stringify(v, maxDepth - 1);
             }
-            s += this.stringify(v, maxDepth - 1);
+            count++;
           });
           s = __strObject("Set", s);
         }
@@ -201,15 +265,22 @@ module inspect {
       stringifyMap(o: Map<any, any>, maxDepth: number) {
         var s = __strEmpty(o);
         if (s === null) {
-          var first = true;
+          var maxElements = this.maxElements;
+          var count = 0;
           o.forEach((v, k) => {
-            if (first) {
-              first = false;
-              s += ", ";
+            if (count === maxElements) {
+              s += ', ' + ELLIPSIS;
+            } else if (count > maxElements) {
+              //do nothing
+            } else {
+              if (count === 0) {
+                s += ", ";
+              }
+              s += this.stringify(k, maxDepth - 1);
+              s += " => ";
+              s += this.stringify(v, maxDepth - 1);
             }
-            s += this.stringify(k, maxDepth - 1);
-            s += " => ";
-            s += this.stringify(v, maxDepth - 1);
+            
           });
           s = __strObject("Map", s);
         }
@@ -230,6 +301,7 @@ module inspect {
       stringifyObject(o: any, maxDepth: number) {
         var s = __strEmpty(o);
         if (s === null) {
+          s = '';
           var ctor = o.constructor
           var maxElements = this.maxElements
           var keys = __keys(o)
@@ -249,9 +321,9 @@ module inspect {
             s += key + ': ' + this.stringify(val, maxDepth - 1)
           }
           if (truncate) {
-            s += ', ...'
+            s += ', ' + ELLIPSIS
           }
-          s = __strObject(__fnName(ctor), s);
+          s = __strObject(__name(ctor), s);
         }
         return s;
       }
@@ -262,61 +334,7 @@ module inspect {
     return engine.get().stringify(o)
   }
   
-  //util
-  var __ostring = Object.prototype.toString
-  function __fnName(f: any) { 
-    return (f.displayName || f.name || (f.name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]));
-  }
-  function __isString(o: any) { return typeof o === 'string'; }
-  function __isFunction(o: any) { return typeof o === 'function'; }
-  function __isObject(o: any) { return o !== null && (typeof o === 'object' || __isFunction(o)); }
-  function __keys(o: any) { return Object.keys(o); }
-  function __set<T>(): { has: (o: T) => boolean; add: (o: T) => void } {
-    if (typeof Set !== "undefined") {
-      return new Set();
-    } else {
-      var d = [];
-      return {
-        has: function (o) { return d.indexOf(o) !== -1; },
-        add: function (o) { if (d.indexOf(o) !== -1) { d.push(o); } }  
-      };
-    }
-  }
-  function __str(o: any) { return String(o); }
-  function __strEmpty(o: any): string {
-    return (
-      o === null ? 'null' :
-      o === undefined ? 'undefined' :
-      null
-    );
-  }
   
-  function __strObject(constructorName: string, content: string) {
-    var sep = content.length ? ' ' : '';
-    return (
-      "" +
-      (constructorName && constructorName !== 'Object' ? constructorName + ' ' : '') +
-      '{' + sep + content + sep + '}'
-    );
-  }
-  
-  function __typeOf(o) { return o === null ? 'null' : typeof o; }
-  function __stringTag(o: any) {
-    var s = '';
-    if (o === null) {
-      s = 'Null';
-    } else {
-      switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break;
-        case 'function': s = 'Function'; break;
-        case 'number': s = 'Number'; break;
-        case 'string': s = 'String'; break;
-        case 'undefined': s = 'Undefined'; break;
-        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
-      }
-    }
-    return s;
-  }
   
   
 }

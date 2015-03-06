@@ -6,14 +6,15 @@ module error {
   var __global: any = (new Function("return this;")).call(null);
   var __str = String;
   var __inspect = __str;
+  var __console: Console = typeof console !== "undefined" ? __global.console : null;
   var __name = function (f: Function) {
     return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
   };
   var __captureStackTrace = stacktrace.capture;
   var __handleUncaughtError = function (error, prefix) {
-    if (console.error) {
+    if (__console) {      
       var str = error && (error instanceof Error) ? __str(error.stack || error) : __inspect(error);
-      console.error(prefix + str);
+      __console.error(prefix + str);
     } else {//rethrow so it is catched by global.onerror
       throw error;
     }

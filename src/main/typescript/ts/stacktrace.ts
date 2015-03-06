@@ -353,7 +353,7 @@ module stacktrace {
     return s;
   };
   
-  function __arraySlice<T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
+  var __arraySlice = function <T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
     var returnValue = [];
     var l = returnValue.length;
     start = start || 0;
@@ -362,7 +362,7 @@ module stacktrace {
       returnValue.push(a[i]);
     }
     return returnValue;
-  }
+  };
   
   var __errorCreate = function () {
     try {
@@ -383,17 +383,42 @@ module stacktrace {
     return returnValue;
   };
   
+  var browser: Browser = (function (e: any) {
+
+    var returnValue = Browser.Other
+    if (e['arguments'] && e.stack) {
+      returnValue = Browser.Chrome
+    } else if (e.stack && e.sourceURL) {
+      returnValue = Browser.Safari
+    } else if (e.stack && e['number']) {
+      returnValue = Browser.IE
+    } else if (e.stack && e.fileName) {
+      returnValue = Browser.Firefox
+    } else if (e.message && e.stack && e.stacktrace) {
+      returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
+    } else if (e.stack && !e.fileName) {
+      // Chrome 27 does not have e.arguments as earlier versions,
+      // but still does not have e.fileName as Firefox
+      returnValue = Browser.Chrome
+    }
+    return returnValue
+  }(__errorCreate()));
+  
   var __errorFrames = (function () {
     var _Error = (<any>Error);
     var __errorFrames: (offset: number) => ICallSite[];
-    if (_Error.captureStackTrace) {
+    if (false && _Error.captureStackTrace) {
       //v8
       var prepareStackTrace = _Error.prepareStackTrace;
       var stackSink = function (_, stack) { return stack; };
       __errorFrames = function (offset) {
         _Error.prepareStackTrace = stackSink;
-        var stack = (<any>new Error()).stack.slice(1 + offset);
-        _Error.prepareStackTrace = prepareStackTrace;
+        var stack = (<any>new _Error()).stack.slice(1 + offset);
+        if (prepareStackTrace === undefined) {
+          delete _Error.prepareStackTrace;  
+        } else {
+          _Error.prepareStackTrace = prepareStackTrace;
+        }
         return stack;
       };
     } else {
@@ -467,26 +492,7 @@ module stacktrace {
     */
   };
   
-  var browser: Browser = (function (e: any) {
-
-    var returnValue = Browser.Other
-    if (e['arguments'] && e.stack) {
-      returnValue = Browser.Chrome
-    } else if (e.stack && e.sourceURL) {
-      returnValue = Browser.Safari
-    } else if (e.stack && e['number']) {
-      returnValue = Browser.IE
-    } else if (e.stack && e.fileName) {
-      returnValue = Browser.Firefox
-    } else if (e.message && e.stack && e.stacktrace) {
-      returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
-    } else if (e.stack && !e.fileName) {
-      // Chrome 27 does not have e.arguments as earlier versions,
-      // but still does not have e.fileName as Firefox
-      returnValue = Browser.Chrome
-    }
-    return returnValue
-  }(__errorCreate()));
+  
   
 }
 export = stacktrace
