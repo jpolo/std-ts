@@ -433,9 +433,9 @@ module stacktrace {
       }
       __errorFrames = function (offset) {
         var items = __errorParse(__errorCreate());
-        if (offset > 0) {
-          items = items.slice(offset);
-        }
+        //shift from offset
+        items = items.slice(offset + 2);
+
         var itemc = items.length;
         var parsed = new Array(itemc);
         var parseCallSite = CallSite.parse;

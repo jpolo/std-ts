@@ -54,7 +54,7 @@ module hash {
   
   export class HashState {
     
-    write(o: any) {
+    write(o: any): void {
       var self = <IHashState> this;
       switch (__stringTag(o)) {
         case 'Null': self.writeNull(); break;
@@ -65,29 +65,21 @@ module hash {
         case 'Function': self.writeFunction(o); break;
         
         //std class
-      }
-      
-      /*switch (strTag) {
-        case 'Number': __writeFloat64(state, o); break;
-        case 'Function': __writeFunction(state, o); break;
-        
-        //useful class:
-        case 'Array': __writeArray(state, o); break;
-        case 'Map': __writeMap(state, o); break;
-        case 'Set': __writeSet(state, o); break;
-        case 'Date': __writeDate(state, o); break;
-        case 'RegExp': __writeRegExp(state, o); break;
+        case 'Array': self.writeArray(o); break;
+        case 'Map': self.writeMap(o); break;
+        case 'Set': self.writeSet(o); break;
+        case 'Date': self.writeDate(o); break;
+        case 'RegExp': self.writeRegExp(o); break;
         default:
-          var methodName = "hash" + strTag;
-          if (__isFunction(state[methodName])) {
-            state[methodName](o);
+          if (__isFunction(o.hash)) {
+            self.writeIHash(o);
           } else {
-            __writeObject(state, o, true);
+            self.writeObject(o);
           }
-      }*/
+      }
     }
     
-    writeUndefined() {}
+    //writeUndefined() {}
     //writeNull() {}
   }
 
@@ -540,11 +532,11 @@ module hash {
   }
   
   //util
-  var __ostring = Object.prototype.toString;
-  function __keys(o: any) { return Object.keys(o); }
-  function __isFunction(o: any) { return typeof o === "function"; }
-  function __str(o: any) { return String(o); }
-  function __stringTag(o: any) {
+  var __ostring = {}.toString;
+  var __keys = Object.keys;
+  var __isFunction = function (o: any) { return typeof o === "function"; };
+  var __str = String;
+  var __stringTag = function (o: any) {
     var s = '';
     if (o === null) {
       s = 'Null';
@@ -559,7 +551,7 @@ module hash {
       }
     }
     return s;
-  }
+  };
   
   function __u64(hi: number = 0, lo: number = 0): Int64 { return { hi: hi >>> 0, lo: lo >>> 0 }; }
   function __u64copy(n: Int64): Int64 { return { hi: n.hi, lo: n.lo }; }

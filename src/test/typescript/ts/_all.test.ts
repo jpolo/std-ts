@@ -6,6 +6,7 @@ import geometrySuite = require("./geometry.test")
 import hashSuite = require("./hash.test")
 import idSuite = require("./id.test")
 import inspectSuite = require("./inspect.test")
+import iteratorSuite = require("./iterator.test")
 import logSuite = require("./log.test")
 import mathSuite = require("./math.test")
 import randomSuite = require("./random.test")
@@ -25,6 +26,7 @@ var allSuite: unit.ITest[] = [].concat(
   hashSuite,
   idSuite,
   inspectSuite,
+  iteratorSuite,
   logSuite,
   mathSuite,
   randomSuite,

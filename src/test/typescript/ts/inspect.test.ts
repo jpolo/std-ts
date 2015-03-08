@@ -15,7 +15,7 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
   
   var inspectObj = new inspect.engine.Engine({ maxElements: 3, maxString: 15 })
   
-  test("stringify()", (assert) => {
+  test("#stringify()", (assert) => {
     
     assert.strictEqual(inspectObj.stringify(undefined), 'undefined')
     assert.strictEqual(inspectObj.stringify(null), 'null')
