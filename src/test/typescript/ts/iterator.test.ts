@@ -35,6 +35,42 @@ var iteratorSuite = suite("ts/iterator", (self) => {
     assert.ok(r.done);
     assert.strictEqual(r.value, undefined);
   })
+  
+  test("fill()", (assert) => {
+    var o = {};
+    var iter = iterator.fill(3, o);
+    
+    for (var i = 0; i < 5; ++i) {
+      var r = iter.next();
+      if (i < 3) {
+        assert.ok(!r.done);
+        assert.strictEqual(r.value, o);
+      } else {
+        assert.ok(r.done);
+        assert.strictEqual(r.value, undefined);
+      }
+    }
+  })
+  
+  test("iterate()", (assert) => {
+    
+    
+    var o = {};
+    var odds = iterator.iterate(1, function (v) {
+      return v + 2;
+    });
+    
+    for (var i = 0; i < 5; ++i) {
+      var r = odds.next();
+      /*if (i < 3) {
+        assert.ok(!r.done);
+        assert.strictEqual(r.value, o);
+      } else {
+        assert.ok(r.done);
+        assert.strictEqual(r.value, undefined);
+      }*/
+    }
+  })
 
 });
 

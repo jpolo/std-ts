@@ -36,7 +36,7 @@ module iterator {
     });
   }
   
-  function fill<T>(length: number, v: T): IIterator<T> {
+  export function fill<T>(length: number, v: T): IIterator<T> {
     var i = 0;
     var done = false;
     var value = v;
@@ -51,7 +51,7 @@ module iterator {
     });  
   }
   
-  function iterate<T>(start: T, f: (v: T) => T): IIterator<T> {
+  export function iterate<T>(start: T, f: (v: T) => T): IIterator<T> {
     var first = true;
     var acc: T;
     
