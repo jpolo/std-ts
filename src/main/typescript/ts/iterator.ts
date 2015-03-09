@@ -10,11 +10,23 @@ module iterator {
   }
   
   function iteratorCreate<T>(next: () => IIteratorResult<T>): IIterator<T> {
-    return { next: next };  
+    return new Iterator(next);  
   }
   
   function iteratorResult<T>(done: boolean, value?: T): IIteratorResult<T> {
     return { done: done, value: value };  
+  }
+  
+  class Iterator<T> {
+    
+    
+    constructor(public next: () => IIteratorResult<T>, public hint = "abstract iterator") { }
+    
+    inspect() { return this.toString(); }
+    
+    toString() {
+      return "Iterator { [" + this.hint + "] }";
+    }
   }
   
   var EMPTY = iteratorCreate(function () { return iteratorResult(true); });
