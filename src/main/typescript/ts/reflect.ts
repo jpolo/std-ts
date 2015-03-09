@@ -31,6 +31,7 @@ module reflect {
   var __freeze = Object.freeze;
   var __preventExtensions = Object.preventExtensions;
   var __seal = Object.seal;
+  var __typeOf = function (o: any): Type { return o === null ? Type.null : Type[typeof o]; };
   
   //Compat
   if (__es5Compat || __es3Compat) {
@@ -78,6 +79,9 @@ module reflect {
     }
   }
   
+  export enum Type {
+    null, boolean, function, number, string, undefined
+  }
   
   export interface IPropertyDescriptor extends PropertyDescriptor {}
 
@@ -255,20 +259,28 @@ module reflect {
   
   export function stringTag(o: any): string {
     var s = '';
-    if (o === null) {
-      s = 'Null';
-    } else {
-      switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break;
-        case 'function': s = 'Function'; break;
-        case 'number': s = 'Number'; break;
-        case 'string': s = 'String'; break;
-        case 'undefined': s = 'Undefined'; break;
-        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
-      }
+    switch(__typeOf(o)) {
+      case Type.null: s= 'Null'; break;
+      case Type.boolean: s = 'Boolean'; break;
+      case Type.function: s = 'Function'; break;
+      case Type.number: s = 'Number'; break;
+      case Type.string: s = 'String'; break;
+      case Type.undefined: s = 'Undefined'; break;
+      default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
     }
     return s;
   }
+  
+  export function typeName(t: Function): string {
+    return ((<any>t).displayName || (<any>t).name || ((<any>t).name = /\W*function\s+([\w\$]+)\(/.exec(__str(t))[1]))
+  }
+  
+  export function typeOf(o: any): Type {
+    return __typeOf(o);  
+  }
+  
+  
+  
   
 
 }
