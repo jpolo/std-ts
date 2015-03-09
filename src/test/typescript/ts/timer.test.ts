@@ -18,7 +18,7 @@ var timerSuite = suite("ts/timer", (self) => {
   }
   
   
-  test("setTimeout()", (assert, done) => {
+  test(".setTimeout()", (assert, done) => {
     var spy = createSpy();
     var timeout = 5;
     var timerId = timer.setTimeout(spy.call, timeout);
@@ -34,7 +34,7 @@ var timerSuite = suite("ts/timer", (self) => {
     assert.strictEqual(typeof timerId, 'number');
   })
   
-  test("clearTimeout()", (assert, done) => {
+  test(".clearTimeout()", (assert, done) => {
     var spy = createSpy();
     var timeout = 5;
     var timerId = timer.setTimeout(spy.call, timeout);
@@ -48,7 +48,7 @@ var timerSuite = suite("ts/timer", (self) => {
     }, timeout + 1);
   })
     
-  test("setInterval()", (assert, done) => {
+  test(".setInterval()", (assert, done) => {
     var spy = createSpy();
     var intervalMs = 50;
     var iterationMax = 4;
@@ -71,7 +71,7 @@ var timerSuite = suite("ts/timer", (self) => {
     assert.strictEqual(typeof timerId, 'number');
   })
   
-  test("clearInterval()", (assert, done) => {
+  test(".clearInterval()", (assert, done) => {
     var spy = createSpy();
     var timeout = 5;
     var timerId = timer.setInterval(spy.call, timeout);
@@ -89,7 +89,7 @@ var timerSuite = suite("ts/timer", (self) => {
     assert.strictEqual(typeof timerId, 'number');
   })
     
-  test("setImmediate()", (assert, done) => {
+  test(".setImmediate()", (assert, done) => {
     var spy = createSpy();
     var timerId = timer.setImmediate(spy.call);
     setTimeout(() => { 
@@ -101,7 +101,7 @@ var timerSuite = suite("ts/timer", (self) => {
     assert.strictEqual(typeof timerId, 'number')
   })
   
-  test("clearImmediate()", (assert, done) => {
+  test(".clearImmediate()", (assert, done) => {
     var spy = createSpy();
     var timerId = timer.setImmediate(spy.call);
     timer.clearImmediate(timerId);
