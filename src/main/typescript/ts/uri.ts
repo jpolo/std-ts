@@ -1,7 +1,7 @@
 module uri {
 
   export function parse(s: string): URI {
-    return URI.fromString(s);
+    return URI.parse(s);
   }
 
   export function stringify(uri: IURI): string {
@@ -38,9 +38,9 @@ module uri {
         }
       }
   
-      if (!returnValue) {
+      /*if (!returnValue) {
         throw new TypeError(o + ' cannot be coerced to URI');
-      }
+      }*/
       return returnValue;
     }
     
@@ -87,6 +87,10 @@ module uri {
         o.query,
         o.fragment
       );
+    }
+    
+    static parse(s: string): URI {
+      return URI.fromString(s);
     }
     
     static stringify(uri: IURI): string {
@@ -178,8 +182,8 @@ module uri {
       )
     }
     
-    //hashCode(): number {
-    //  return std.hash(this.toString());
+    //hash(s: IHashState) {
+    //  
     //}
       
     inspect(): string {
@@ -383,13 +387,11 @@ module uri {
   
 
   //util
-  function __isArray(o: any): boolean { return Array.isArray(o); }
-  function __isString(o: any): boolean { return typeof o === 'string'; }
-  function __keys(o: any) { return Object.keys(o); }
-  function __str(o: any): string { return String(o); }
-  function __strIsEmpty(o: string) {
-    return !o || o.length === 0;
-  }
+  var __isArray = Array.isArray;
+  var __isString = function (o: any): boolean { return typeof o === 'string'; }
+  var __keys = Object.keys;
+  var __str = String;
+  var __strIsEmpty = function (o: string) { return !o || o.length === 0; };
   
 }
 

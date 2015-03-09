@@ -20,17 +20,40 @@ var uriSuite = suite("ts/uri", (self) => {
     assert.strictEqual(u.fragment, 'id')
   })
   
-  test("URI#equals()", (assert) => {
-    assert.ok(!uriDefault.equals(uri.parse('http://localhost:8080/titi/tata?q=bla#id')))
-      
-    //same equality
-    assert.ok(uriDefault.equals(uri.parse('http://localhost:8080/titi/tata?q=blah#id')))
+})
+
+var URISuite = suite("ts/uri.URI", (self) => {
+  
+  var uriDefault: URI;
+  
+  self.setUp = () => {
+    uriDefault = URI.parse('http://localhost:8080/titi/tata?q=blah#id');
+  }
+  
+  
+  test(".parse()", (assert) => {
+    var u = URI.parse('http://localhost:8080/titi/tata?q=blah#id') 
     
-    //fragment is not compared
-    assert.ok(uriDefault.equals(uri.parse('http://localhost:8080/titi/tata?q=blah#ids')))
+    assert.strictEqual(u.scheme, 'http')
+    assert.strictEqual(u.userInfo, null)
+    assert.strictEqual(u.domain, 'localhost')
+    assert.strictEqual(u.port, 8080)
+    assert.strictEqual(u.path, '/titi/tata')
+    assert.strictEqual(u.query["q"], 'blah')
+    assert.strictEqual(u.fragment, 'id')
   })
   
-  test("URI#toArray()", (assert) => {
+  test("#equals()", (assert) => {
+    assert.ok(!uriDefault.equals(URI.parse('http://localhost:8080/titi/tata?q=bla#id')))
+      
+    //same equality
+    assert.ok(uriDefault.equals(URI.parse('http://localhost:8080/titi/tata?q=blah#id')))
+    
+    //fragment is not compared
+    assert.ok(uriDefault.equals(URI.parse('http://localhost:8080/titi/tata?q=blah#ids')))
+  })
+  
+  test("#toArray()", (assert) => {
     var a = uriDefault.toArray()
     
     assert.strictEqual(a[0], 'http')
@@ -43,21 +66,20 @@ var uriSuite = suite("ts/uri", (self) => {
     
   })
   
-  test("URI#toJSON()", (assert) => {
+  test("#toJSON()", (assert) => {
     assert.strictEqual(uriDefault.toJSON(), 'http://localhost:8080/titi/tata?q=blah#id')
   })
     
-  test("URI#inspect()", (assert) => {
+  test("#inspect()", (assert) => {
     assert.strictEqual(uri.parse('').inspect(), 'URI {}')
     assert.strictEqual(uriDefault.inspect(), 'URI { http://localhost:8080/titi/tata?q=blah#id }')
   })
     
-  test("URI#toString()", (assert) => {
+  test("#toString()", (assert) => {
     assert.strictEqual(String(uriDefault), 'http://localhost:8080/titi/tata?q=blah#id')
-  })
-  
-  
-    
+  })  
 })
+
+var allSuite = uriSuite.concat(URISuite);
   
-export = uriSuite;
+export = allSuite;
