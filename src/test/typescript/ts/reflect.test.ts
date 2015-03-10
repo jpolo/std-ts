@@ -152,6 +152,7 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.strictEqual(stringTag(undefined), "Undefined")
     assert.strictEqual(stringTag(null), "Null")
     assert.strictEqual(stringTag(true), "Boolean")
+    assert.strictEqual(stringTag(new Boolean(true)), "Boolean")
     assert.strictEqual(stringTag("fsdfs"), "String")
     assert.strictEqual(stringTag(new String("fsdfs")), "String")
     assert.strictEqual(stringTag(123), "Number")
