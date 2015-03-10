@@ -55,7 +55,6 @@ module inspect {
   }
 
   export module engine {
-    var ignored = [];
     var __inspectEmpty = function (i: Engine, o: any): string { 
       return (o === null ? i.stringifyNull() : o === undefined ? i.stringifyUndefined() : null); 
     };
@@ -150,35 +149,35 @@ module inspect {
         return s
       }
       
-      stringifyUndefined() {
+      stringifyUndefined(): string {
         return 'undefined';
       }
       
-      stringifyNull() {
+      stringifyNull(): string {
         return 'null';
       }
       
-      stringifyBoolean(o: boolean) {
+      stringifyBoolean(o: boolean): string {
         var s = __inspectEmpty(this, o);
         return s === null ? __str(o) : s;
       }
       
-      stringifyDate(o: Date) {
+      stringifyDate(o: Date): string {
         var s = __inspectEmpty(this, o);
         return s === null ? __format('Date', o.toISOString()) : s;
       }
       
-      stringifyNumber(o: number) {
+      stringifyNumber(o: number): string {
         var s = __inspectEmpty(this, o);
         return s === null ? __str(o) : s;
       }
       
-      stringifyRegExp(o: RegExp) {
+      stringifyRegExp(o: RegExp): string {
         var s = __inspectEmpty(this, o);
         return s === null ? __str(o) : s;
       }
       
-      stringifyString(o: string) {
+      stringifyString(o: string): string {
         var maxString = this.maxString;
         var s = __inspectEmpty(this, o);
         return (
@@ -192,7 +191,7 @@ module inspect {
         );
       }
       
-      stringifyFunction(o: Function) {
+      stringifyFunction(o: Function): string {
         var s = __inspectEmpty(this, o);
         if (s === null) {
           s = __str(o);
@@ -201,7 +200,7 @@ module inspect {
         return s;
       }
       
-      stringifyArray(a: any[], maxDepth: number = this.maxDepth) {
+      stringifyArray(a: any[], maxDepth: number = this.maxDepth): string {
         var s = __inspectEmpty(this, a);
         if (s === null) {
           var maxElements = this.maxElements;

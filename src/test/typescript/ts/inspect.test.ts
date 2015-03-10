@@ -18,7 +18,8 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
   
   function generate<T>(assert, data: Array<{ 0: T; 1: string; }>, f: (v: T) => string) {
     for (var i = 0; i < data.length; ++i) {
-      assert.strictEqual(f(data[i][0]), data[i][1]);
+      var r = data[i];
+      assert.strictEqual(f(r[0]), r[1]);
     }
   }
   
@@ -33,7 +34,9 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     [undefined, "undefined"],
     [null, "null"],
     [NaN, "NaN"],
+    [0, "0"],
     [1, "1"],
+    [-1, "-1"],
     [1.234, "1.234"],
     [Math.PI, "3.141592653589793"]
   );
@@ -41,42 +44,41 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     [undefined, "undefined"],
     [null, "null"],
     ['', '""'],
-    ['foobar', '"foobar"']
+    ['foobar', '"foobar"'],
     ['lorem ipsum "sorem" foo bar', '"lorem ipsum \\"so..."']
   );
   var OBJECTS = inspectResults(
     [undefined, "undefined"],
     [null, "null"],
     [new Boolean(true), 'Boolean { true }'],
-    [new Number(123.4545), 'Number { 123.4545 }']
+    [new Number(123.4545), 'Number { 123.4545 }'],
+    [new String("foobar"), 'String { "foobar" }'],
+    [{"foo": true, bar: 123}, '{ foo: true, bar: 123 }'],
+    [{ _0: "p0", _1: "p1", _2: "p2", _3: "p3", _4: "p4", _5: "p5" }, '{ _0: "p0", _1: "p1", _2: "p2", ... }'],
+    [new TestClass(), 'TestClassFoo { foo: true }'],
+    [new TypeError("blah"), "TypeError {}" ]
   );
-  var ALL = [].concat(NUMBERS, BOOLEANS, STRINGS, OBJECTS);
+  var FUNCTIONS = inspectResults(
+    [undefined, "undefined"],
+    [null, "null"],
+    [function (a, b, c) { return 'blah' }, 'function (a, b, c) {...}'],
+    [function foo(a, b, c) { return 'blah' }, 'function foo(a, b, c) {...}']
+  );
+  var DATES = inspectResults(
+    [undefined, "undefined"],
+    [null, "null"],
+    [new Date(0), 'Date { 1970-01-01T00:00:00.000Z }']
+  );
+  var REGEXP = inspectResults(
+    [undefined, "undefined"],
+    [null, "null"],
+    [/abc/gi, '/abc/gi']
+  );
+  var ALL = [].concat(NUMBERS, BOOLEANS, STRINGS, OBJECTS, DATES);
+
   
   test("#stringify()", (assert) => {
-    //generate(assert, ALL, (o) => inspectObj.stringify(o));
-
-    assert.strictEqual(inspectObj.stringify(undefined), 'undefined')
-    assert.strictEqual(inspectObj.stringify(null), 'null')
-    assert.strictEqual(inspectObj.stringify(true), 'true')
-    assert.strictEqual(inspectObj.stringify(false), 'false')
-    assert.strictEqual(inspectObj.stringify(new Boolean(true)), 'Boolean { true }')
-    assert.strictEqual(inspectObj.stringify(0), '0')
-    assert.strictEqual(inspectObj.stringify(123.4545), '123.4545')
-    assert.strictEqual(inspectObj.stringify(new Number(123.4545)), 'Number { 123.4545 }')
-    assert.strictEqual(inspectObj.stringify('foobar'), '"foobar"')
-    assert.strictEqual(inspectObj.stringify(new String('foobar')), 'String { "foobar" }')
-    assert.strictEqual(inspectObj.stringify('lorem ipsum "sorem" foo bar'), '"lorem ipsum \\"so..."')
-    assert.strictEqual(inspectObj.stringify(Math.PI), '3.141592653589793')
-    assert.strictEqual(inspectObj.stringify(new Date(0)), 'Date { 1970-01-01T00:00:00.000Z }')
-    assert.strictEqual(inspectObj.stringify(/abc/gi), '/abc/gi') 
-    assert.strictEqual(inspectObj.stringify(function foo(a, b, c) { return 'blah' }), 'function foo(a, b, c) {...}')
-    assert.strictEqual(inspectObj.stringify({"foo": true, bar: 123}), '{ foo: true, bar: 123 }')
-    assert.strictEqual(
-      inspectObj.stringify({ _0: "p0", _1: "p1", _2: "p2", _3: "p3", _4: "p4", _5: "p5" }), 
-      '{ _0: "p0", _1: "p1", _2: "p2", ... }'
-    )
-    assert.strictEqual(inspectObj.stringify(new TestClass()), 'TestClassFoo { foo: true }')
-    assert.strictEqual(inspectObj.stringify(new TypeError("blah")), "TypeError {}")
+    generate(assert, ALL, (o) => inspectObj.stringify(o));
   })
   
   test("#stringifyUndefined()", (assert) => {
@@ -103,6 +105,9 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     generate(assert, OBJECTS, (o) => inspectObj.stringifyObject(o));
   })
   
+  test("#stringifyDate()", (assert) => {
+    generate(assert, DATES, (d) => inspectObj.stringifyDate(d));
+  })
   
 })
   
