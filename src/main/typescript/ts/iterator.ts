@@ -78,11 +78,11 @@ module iterator {
     });
   }
   
-  function range(start: number, end: number, step = 1): IIterator<number> {
+  export function range(start: number, end: number, step = 1): IIterator<number> {
     var index = start;
     var done = false;
     return iteratorCreate(function () {
-      var value = NaN;
+      var value: number;
       if (index < end) {
         value = index;
         index += step;

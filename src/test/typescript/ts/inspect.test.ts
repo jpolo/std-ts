@@ -12,19 +12,59 @@ class TestClass {
 }
 
 var inspectSuite = suite("ts/inspect.Inspect", (self) => {
+  function inspectResults<T>(...args: Array<{ 0: T; 1: string; }>) {
+    return args;
+  }
+  
+  function generate<T>(assert, data: Array<{ 0: T; 1: string; }>, f: (v: T) => string) {
+    for (var i = 0; i < data.length; ++i) {
+      assert.strictEqual(f(data[i][0]), data[i][1]);
+    }
+  }
   
   var inspectObj = new inspect.engine.Engine({ maxElements: 3, maxString: 15 })
+  var BOOLEANS = inspectResults(
+    [undefined, "undefined"],
+    [null, "null"],
+    [true, "true"],
+    [false, "false"]
+  );
+  var NUMBERS = inspectResults(
+    [undefined, "undefined"],
+    [null, "null"],
+    [NaN, "NaN"],
+    [1, "1"],
+    [1.234, "1.234"],
+    [Math.PI, "3.141592653589793"]
+  );
+  var STRINGS = inspectResults(
+    [undefined, "undefined"],
+    [null, "null"],
+    ['', '""'],
+    ['foobar', '"foobar"']
+    ['lorem ipsum "sorem" foo bar', '"lorem ipsum \\"so..."']
+  );
+  var OBJECTS = inspectResults(
+    [undefined, "undefined"],
+    [null, "null"],
+    [new Boolean(true), 'Boolean { true }'],
+    [new Number(123.4545), 'Number { 123.4545 }']
+  );
+  var ALL = [].concat(NUMBERS, BOOLEANS, STRINGS, OBJECTS);
   
   test("#stringify()", (assert) => {
-    
+    //generate(assert, ALL, (o) => inspectObj.stringify(o));
+
     assert.strictEqual(inspectObj.stringify(undefined), 'undefined')
     assert.strictEqual(inspectObj.stringify(null), 'null')
     assert.strictEqual(inspectObj.stringify(true), 'true')
     assert.strictEqual(inspectObj.stringify(false), 'false')
+    assert.strictEqual(inspectObj.stringify(new Boolean(true)), 'Boolean { true }')
     assert.strictEqual(inspectObj.stringify(0), '0')
     assert.strictEqual(inspectObj.stringify(123.4545), '123.4545')
+    assert.strictEqual(inspectObj.stringify(new Number(123.4545)), 'Number { 123.4545 }')
     assert.strictEqual(inspectObj.stringify('foobar'), '"foobar"')
-    assert.strictEqual(inspectObj.stringify(new String('foo')), 'String { "foobar" }')
+    assert.strictEqual(inspectObj.stringify(new String('foobar')), 'String { "foobar" }')
     assert.strictEqual(inspectObj.stringify('lorem ipsum "sorem" foo bar'), '"lorem ipsum \\"so..."')
     assert.strictEqual(inspectObj.stringify(Math.PI), '3.141592653589793')
     assert.strictEqual(inspectObj.stringify(new Date(0)), 'Date { 1970-01-01T00:00:00.000Z }')
@@ -47,11 +87,20 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     assert.strictEqual(inspectObj.stringifyNull(), 'null');
   })
   
+  test("#stringifyBoolean()", (assert) => {
+    generate(assert, BOOLEANS, (b) => inspectObj.stringifyBoolean(b));
+  })
+  
+  test("#stringifyNumber()", (assert) => {
+    generate(assert, NUMBERS, (n) => inspectObj.stringifyNumber(n));
+  })
+  
   test("#stringifyString()", (assert) => {
-    assert.strictEqual(inspectObj.stringifyString(undefined), 'undefined');
-    assert.strictEqual(inspectObj.stringifyString(null), 'null');
-    assert.strictEqual(inspectObj.stringifyString('foo'), '"foo"');
-    //assert.strictEqual(inspectObj.stringifyString(new String('foo')), 'String { "foo" }');
+    generate(assert, STRINGS, (s) => inspectObj.stringifyString(s));
+  })
+  
+  test("#stringifyObject()", (assert) => {
+    generate(assert, OBJECTS, (o) => inspectObj.stringifyObject(o));
   })
   
   

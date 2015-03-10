@@ -96,17 +96,13 @@ module compare {
   var __str = String;
   var __stringTag = function (o: any) {
     var s = '';
-    if (o === null) {
+    if (o === undefined) {
+      s = 'Undefined';
+    } else if (o === null) {
       s = 'Null';
     } else {
-      switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break;
-        case 'function': s = 'Function'; break;
-        case 'number': s = 'Number'; break;
-        case 'string': s = 'String'; break;
-        case 'undefined': s = 'Undefined'; break;
-        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
-      }
+      var c = o.constructor;
+      s = c && c.name || __ostring.call(o).slice(8, -1);
     }
     return s;
   };

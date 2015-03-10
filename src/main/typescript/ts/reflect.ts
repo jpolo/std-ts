@@ -260,13 +260,15 @@ module reflect {
   export function stringTag(o: any): string {
     var s = '';
     switch(__typeOf(o)) {
-      case Type.null: s= 'Null'; break;
+      case Type.null: s = 'Null'; break;
       case Type.boolean: s = 'Boolean'; break;
       case Type.function: s = 'Function'; break;
       case Type.number: s = 'Number'; break;
       case Type.string: s = 'String'; break;
       case Type.undefined: s = 'Undefined'; break;
-      default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
+      default: /*object*/ 
+        var c = o.constructor;
+        s = c && c.name || __ostring.call(o).slice(8, -1);
     }
     return s;
   }

@@ -13,30 +13,16 @@ module inspect {
   var __keys = Object.keys;
   var __set:<T>() => { has: (o: T) => boolean; add: (o: T) => void } = typeof Set !== "undefined" ? function () { return new Set(); } : null;
   var __str = String;
-  var __strEmpty = function (o: any): string { return (o === null ? 'null' : o === undefined ? 'undefined' : null); };
-  var __strObject = function (constructorName: string, content: string) {
-    content = __str(content);
-    var sep = content.length ? ' ' : '';
-    return (
-      "" +
-      (constructorName && constructorName !== 'Object' ? constructorName + ' ' : '') +
-      '{' + sep + content + sep + '}'
-    );
-  };
   var __typeOf = typeof null === "null" ? function (o) { return typeof o; } : null;
   var __stringTag = function (o: any) {
     var s = '';
-    if (o === null) {
+    if (o === undefined) {
+      s = 'Undefined';
+    } else if (o === null) {
       s = 'Null';
     } else {
-      switch(typeof o) {
-        case 'boolean': s = 'Boolean'; break;
-        case 'function': s = 'Function'; break;
-        case 'number': s = 'Number'; break;
-        case 'string': s = 'String'; break;
-        case 'undefined': s = 'Undefined'; break;
-        default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
-      }
+      var c = o.constructor;
+      s = c && c.name || __ostring.call(o).slice(8, -1);
     }
     return s;
   };
@@ -70,6 +56,18 @@ module inspect {
 
   export module engine {
     var ignored = [];
+    var __inspectEmpty = function (i: Engine, o: any): string { 
+      return (o === null ? i.stringifyNull() : o === undefined ? i.stringifyUndefined() : null); 
+    };
+    var __format = function (constructorName: string, content: string) {
+      content = __str(content);
+      var sep = content.length ? ' ' : '';
+      return (
+        "" +
+        (constructorName && constructorName !== 'Object' ? constructorName + ' ' : '') +
+        '{' + sep + content + sep + '}'
+      );
+    };
     
     /**
      * Default engine 
@@ -103,22 +101,10 @@ module inspect {
         }
       }
       
-      stringify(o: any, maxDepth?: number): string {
-        var init = !this._refs
-        var refs = init ? (this._refs = __set()) : this._refs
-        var depth = maxDepth == null ? this.maxDepth : maxDepth
-        var s = '' 
+      stringify(o: any, maxDepth: number = this.maxDepth): string {
+        var s = ''
             
-        if (__isObject(o)) {
-          if (refs.has(o)) {
-            s = '<circular>'
-          } else {
-            refs.add(o)
-          }
-        }
-        
         if (!s) {
-          
           switch (__typeOf(o)) {
             //Primitive
             case 'undefined': s = this.stringifyUndefined(); break;
@@ -128,7 +114,9 @@ module inspect {
             case 'string': s = this.stringifyString(o); break;
             case 'function': s = this.stringifyFunction(o); break;
             default:
-              var strTag = __stringTag(o);
+              var init = !this._refs;
+              var refs = init ? (this._refs = __set()) : this._refs;
+              var strTag = o.constructor ? __name(o.constructor) : "Object";
               switch (strTag) {
                 //Special
                 case 'Array': s = this.stringifyArray(o, maxDepth); break;
@@ -138,19 +126,14 @@ module inspect {
                 case 'RegExp': s = this.stringifyRegExp(o); break;
                 default:
                   try {
-                    var methodName = this.PREFIX + strTag
-                    if (__isFunction(this[methodName])) {
-                      s = this[methodName](o, maxDepth);
+                    var method = o.inspect;
+                    if (
+                      method &&
+                      !this._ignored.has(method)
+                    ) {
+                      s = this.stringifyIInspect(o, maxDepth);
                     } else {
-                      var method = o.inspect;
-                      if (
-                        method &&
-                        !this._ignored.has(method)
-                      ) {
-                        s = this.stringifyIInspect(o, maxDepth);
-                      } else {
-                        s = this.stringifyObject(o, maxDepth);
-                      }
+                      s = this.stringifyObject(o, maxDepth);
                     }
                   } finally {
                     if (init) {
@@ -159,14 +142,11 @@ module inspect {
                     }
                   }
               }
+              if (init) {
+                this._refs = null
+              }
           }
         }
-        
-        if (init) {
-          //reinit
-          this._refs = null
-        }
-        
         return s
       }
       
@@ -179,28 +159,28 @@ module inspect {
       }
       
       stringifyBoolean(o: boolean) {
-        var s = __strEmpty(o);
+        var s = __inspectEmpty(this, o);
         return s === null ? __str(o) : s;
       }
       
       stringifyDate(o: Date) {
-        var s = __strEmpty(o);
-        return s === null ? __strObject('Date', o.toISOString()) : s;
+        var s = __inspectEmpty(this, o);
+        return s === null ? __format('Date', o.toISOString()) : s;
       }
       
       stringifyNumber(o: number) {
-        var s = __strEmpty(o);
+        var s = __inspectEmpty(this, o);
         return s === null ? __str(o) : s;
       }
       
       stringifyRegExp(o: RegExp) {
-        var s = __strEmpty(o);
+        var s = __inspectEmpty(this, o);
         return s === null ? __str(o) : s;
       }
       
       stringifyString(o: string) {
         var maxString = this.maxString;
-        var s = __strEmpty(o);
+        var s = __inspectEmpty(this, o);
         return (
           s === null ?
           '"' + 
@@ -213,7 +193,7 @@ module inspect {
       }
       
       stringifyFunction(o: Function) {
-        var s = __strEmpty(o);
+        var s = __inspectEmpty(this, o);
         if (s === null) {
           s = __str(o);
           s = s.slice(0, s.indexOf('{') + 1) + ELLIPSIS + '}';
@@ -221,8 +201,8 @@ module inspect {
         return s;
       }
       
-      stringifyArray(a: any[], maxDepth: number) {
-        var s = __strEmpty(a);
+      stringifyArray(a: any[], maxDepth: number = this.maxDepth) {
+        var s = __inspectEmpty(this, a);
         if (s === null) {
           var maxElements = this.maxElements;
           var length = a.length;
@@ -239,8 +219,8 @@ module inspect {
         return s;
       }
       
-      stringifySet(o: Set<any>, maxDepth: number) {
-        var s = __strEmpty(o);
+      stringifySet(o: Set<any>, maxDepth: number = this.maxDepth) {
+        var s = __inspectEmpty(this, o);
         if (s === null) {
           var maxElements = this.maxElements;
           var count = 0;
@@ -257,13 +237,13 @@ module inspect {
             }
             count++;
           });
-          s = __strObject("Set", s);
+          s = __format("Set", s);
         }
         return s;
       }
       
-      stringifyMap(o: Map<any, any>, maxDepth: number) {
-        var s = __strEmpty(o);
+      stringifyMap(o: Map<any, any>, maxDepth: number = this.maxDepth) {
+        var s = __inspectEmpty(this, o);
         if (s === null) {
           var maxElements = this.maxElements;
           var count = 0;
@@ -282,13 +262,13 @@ module inspect {
             }
             
           });
-          s = __strObject("Map", s);
+          s = __format("Map", s);
         }
         return s;
       }
       
-      stringifyIInspect(o: IInspect, maxDepth: number) {
-        var s = __strEmpty(o);
+      stringifyIInspect(o: IInspect, maxDepth: number = this.maxDepth) {
+        var s = __inspectEmpty(this, o);
         if (s === null) {
           s = o.inspect(maxDepth);
           if (!__isString(s)) {
@@ -298,32 +278,50 @@ module inspect {
         return s;
       }
       
-      stringifyObject(o: any, maxDepth: number) {
-        var s = __strEmpty(o);
+      stringifyObject(o: any, maxDepth: number = this.maxDepth) {
+        var s = __inspectEmpty(this, o);
         if (s === null) {
           s = '';
-          var ctor = o.constructor
-          var maxElements = this.maxElements
-          var keys = __keys(o)
-          var keyc = keys.length
-          var truncate = false
-          if (keyc > maxElements) {
-            keyc = maxElements
-            truncate = true
+          var ctor = o.constructor;
+          var ctorName = __name(ctor);
+          switch(ctorName) {
+            //Boxed primitives
+            case 'Boolean':
+              s = this.stringifyBoolean(!!o);
+              break;
+            case 'Number':
+              s = this.stringifyNumber(+o);
+              break;
+            case 'String':
+              s = this.stringifyString(__str(o));
+              break;
+              
+            //Normal boxed
+            default:
+              var maxElements = this.maxElements;
+              var keys = __keys(o);
+              var keyc = keys.length;
+              var truncate = false;
+              if (keyc > maxElements) {
+                keyc = maxElements
+                truncate = true
+              }
+              for (var i = 0; i < keyc; ++i) {
+                var key = keys[i]
+                var val = o[key]
+                
+                if (i !== 0) {
+                  s += ', '
+                }
+                s += key + ': ' + this.stringify(val, maxDepth - 1)
+              }
+              if (truncate) {
+                s += ', ' + ELLIPSIS
+              }
           }
-          for (var i = 0; i < keyc; ++i) {
-            var key = keys[i]
-            var val = o[key]
-            
-            if (i !== 0) {
-              s += ', '
-            }
-            s += key + ': ' + this.stringify(val, maxDepth - 1)
-          }
-          if (truncate) {
-            s += ', ' + ELLIPSIS
-          }
-          s = __strObject(__name(ctor), s);
+          
+          
+          s = __format(ctorName, s);
         }
         return s;
       }
