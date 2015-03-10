@@ -83,14 +83,13 @@ module unit {
   
   export class AssertionType {
   
-    static create(name: string): AssertionType {
+    static for(name: string): AssertionType {
       name = name.toUpperCase()
       var assertionTypes = AssertionType._instances
       var assertionType = assertionTypes[name]
-      if (assertionType) {
-        throw new Error(assertionType + ' is already defined')
+      if (!assertionType) {
+        assertionType = assertionTypes[name] = new AssertionType(name, AssertionType._nextValue++, AssertionType._constructorKey)
       }
-      assertionType = assertionTypes[name] = new AssertionType(name, AssertionType._nextValue++)
       return assertionType
     }
     
@@ -98,13 +97,19 @@ module unit {
       return a.value - b.value;
     }
     
+    static _constructorKey = {};
     private static _instances: { [key: string]: AssertionType } = {}
     private static _nextValue = 0
 
     constructor(
       public name: string, 
-      public value: number
-    ) {}
+      public value: number,
+      key?: any
+    ) {
+      if (key != AssertionType._constructorKey) {
+        throw new Error("new AssertionType() is private, use AssertionType.for instead.");  
+      }
+    }
     
     compare(o: AssertionType): number {
       return AssertionType.compare(this, o);
@@ -130,10 +135,10 @@ module unit {
       return this.name 
     }
   }
-  export var SUCCESS = AssertionType.create("SUCCESS")
-  export var FAILURE = AssertionType.create("FAILURE")
-  export var ERROR = AssertionType.create("ERROR")
-  export var WARNING = AssertionType.create("WARNING")
+  export var SUCCESS = AssertionType.for("SUCCESS")
+  export var FAILURE = AssertionType.for("FAILURE")
+  export var ERROR = AssertionType.for("ERROR")
+  export var WARNING = AssertionType.for("WARNING")
   
   export class Assertion implements IAssertion {
     
@@ -432,7 +437,7 @@ module unit {
               block(assert)
             }
           } catch (e) {
-            assertions.push(Assertion.error(this, e.message, e.stack[0], e.stack))
+            assertions.push(Assertion.error(this, e.message, e.stack && e.stack[0], e.stack))
           } finally {
             if (!isAsync) {
               complete()
@@ -632,6 +637,7 @@ module unit {
   ): ITest[]  {
     var suitePrevious = suiteCurrent
     var suiteNew = new engine.TestSuite(name)
+
     suiteCurrent = suiteNew
     try {
       f(suiteNew)
@@ -742,11 +748,7 @@ module unit {
         var messages = ""
         var section = sections[sectionName]
 
-        section.forEach((assertion) => {
-if (assertion.position && !assertion.position.getFileName) {
-  console.warn(assertion);
-}
-          
+        section.forEach((assertion) => {          
           var message = assertion.message
           var position = assertion.position
           var positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : ""
