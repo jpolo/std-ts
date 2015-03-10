@@ -22,10 +22,10 @@ module iterator {
     
     constructor(public next: () => IIteratorResult<T>, public hint = "abstract iterator") { }
     
-    inspect() { return this.toString(); }
+    inspect() { return "Iterator { [" + this.hint + "] }";}
     
     toString() {
-      return "Iterator { [" + this.hint + "] }";
+      return this.inspect();
     }
   }
   
