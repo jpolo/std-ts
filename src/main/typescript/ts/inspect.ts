@@ -3,7 +3,8 @@ module inspect {
   //Util
   var __es3Compat = true;
   var __es5Compat = __es3Compat || true;
-  var __ostring = Object.prototype.toString
+  var __ostring = Object.prototype.toString;
+  var __fstring = Function.prototype.toString
   var __name = function (f: Function) { 
     return (<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]);
   };
@@ -13,6 +14,9 @@ module inspect {
   var __keys = Object.keys;
   var __set:<T>() => { has: (o: T) => boolean; add: (o: T) => void } = typeof Set !== "undefined" ? function () { return new Set(); } : null;
   var __str = String;
+  var __strTruncate = function (s: string, maxLength: number, ellipsis = "...") {
+    return (s.length > maxLength ? s.slice(0, maxLength) + ellipsis : s);
+  };
   var __typeOf = typeof null === "null" ? function (o) { return typeof o; } : null;
   var __stringTag = function (o: any) {
     var s = '';
@@ -26,7 +30,6 @@ module inspect {
     }
     return s;
   };
-  var ELLIPSIS = "...";
   
   //Compat
   if (__es3Compat) {
@@ -80,6 +83,7 @@ module inspect {
       public maxDepth = 6
       public maxElements = 7
       public maxString = 30
+      public ellipsis = "..."
       
       PREFIX = 'stringify'
       
@@ -178,24 +182,21 @@ module inspect {
       }
       
       stringifyString(o: string): string {
-        var maxString = this.maxString;
         var s = __inspectEmpty(this, o);
-        return (
-          s === null ?
-          '"' + 
-            (o.length > maxString ? o.slice(0, maxString) + ELLIPSIS : o)
-            .replace(/"/g, '\\"' )
-            .replace(/[\n\r]/g, "↵") + 
-          '"':
-          s
-        );
+        return (s === null ? '"' + 
+          (__strTruncate(o, this.maxString, this.ellipsis)
+          .replace(/"/g, '\\"' )
+          .replace(/[\n\r]/g, "↵")) + '"' : s);
       }
       
       stringifyFunction(o: Function): string {
         var s = __inspectEmpty(this, o);
         if (s === null) {
-          s = __str(o);
-          s = s.slice(0, s.indexOf('{') + 1) + ELLIPSIS + '}';
+          s = __fstring.call(o);
+          var i = s.indexOf('{');
+          var head = s.slice(0, i + 1);
+          var content = s.slice(i + 1, -1);
+          s = head + __strTruncate(content, 0, this.ellipsis) + '}';
         }
         return s;
       }
@@ -204,14 +205,15 @@ module inspect {
         var s = __inspectEmpty(this, a);
         if (s === null) {
           var maxElements = this.maxElements;
+          var ellipsis = this.ellipsis;
           var length = a.length;
           var truncate = length > maxElements;
           
           s = (
-            maxDepth <= 0 && length ? ELLIPSIS :
+            maxDepth <= 0 && length ? ellipsis :
             '[' + 
               (truncate ? a.slice(0, maxElements) : a).map((v) => this.stringify(v, maxDepth - 1)).join(', ') + 
-              (truncate ? ', ' + ELLIPSIS : '') + 
+              (truncate ? ', ' + ellipsis : '') + 
             ']'
           );
         }
@@ -222,10 +224,11 @@ module inspect {
         var s = __inspectEmpty(this, o);
         if (s === null) {
           var maxElements = this.maxElements;
+          var ellipsis = this.ellipsis;
           var count = 0;
           o.forEach((v) => {
             if (count === maxElements) {
-              s += ', ' + ELLIPSIS;
+              s += ', ' + ellipsis;
             } else if (count > maxElements) {
               //do nothing
             } else {
@@ -245,10 +248,11 @@ module inspect {
         var s = __inspectEmpty(this, o);
         if (s === null) {
           var maxElements = this.maxElements;
+          var ellipsis = this.ellipsis;
           var count = 0;
           o.forEach((v, k) => {
             if (count === maxElements) {
-              s += ', ' + ELLIPSIS;
+              s += ', ' + ellipsis;
             } else if (count > maxElements) {
               //do nothing
             } else {
@@ -298,6 +302,7 @@ module inspect {
             //Normal boxed
             default:
               var maxElements = this.maxElements;
+              var ellipsis = this.ellipsis;
               var keys = __keys(o);
               var keyc = keys.length;
               var truncate = false;
@@ -315,7 +320,7 @@ module inspect {
                 s += key + ': ' + this.stringify(val, maxDepth - 1)
               }
               if (truncate) {
-                s += ', ' + ELLIPSIS
+                s += ', ' + ellipsis;
               }
           }
           

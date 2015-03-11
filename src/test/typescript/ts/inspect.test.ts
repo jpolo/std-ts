@@ -62,7 +62,8 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     [undefined, "undefined"],
     [null, "null"],
     [function (a, b, c) { return 'blah' }, 'function (a, b, c) {...}'],
-    [function foo(a, b, c) { return 'blah' }, 'function foo(a, b, c) {...}']
+    [function foo(a, b, c) { return 'blah' }, 'function foo(a, b, c) {...}'],
+    [String.prototype.charAt, 'function charAt() {...}']
   );
   var DATES = inspectResults(
     [undefined, "undefined"],
@@ -74,7 +75,7 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     [null, "null"],
     [/abc/gi, '/abc/gi']
   );
-  var ALL = [].concat(NUMBERS, BOOLEANS, STRINGS, OBJECTS, DATES);
+  var ALL = [].concat(NUMBERS, BOOLEANS, STRINGS, OBJECTS, FUNCTIONS, DATES);
 
   
   test("#stringify()", (assert) => {
@@ -103,6 +104,10 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
   
   test("#stringifyObject()", (assert) => {
     generate(assert, OBJECTS, (o) => inspectObj.stringifyObject(o));
+  })
+  
+  test("#stringifyFunction()", (assert) => {
+    generate(assert, FUNCTIONS, (o) => inspectObj.stringifyFunction(o));
   })
   
   test("#stringifyDate()", (assert) => {
