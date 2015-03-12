@@ -2,6 +2,28 @@ module log {
   //default time
   var $timeDefault = { now: Date.now || function () { return (new Date()).getTime(); } };
   
+  //Constant
+  var ES3_COMPAT = true;
+  var ES5_COMPAT = ES3_COMPAT || true;
+  
+  //Util
+  var __global: Window = (new Function("return this;")).call(null);
+  var __console: Console = typeof console !== "undefined" ? __global.console : null;
+  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
+  var __isNumber = function (o: any) { return typeof o == 'number'; };
+  var __isString = function (o: any) { return typeof o == 'string'; };
+  var __isFunction = function(o: any) { return typeof o == 'function'; };
+  var __keys = Object.keys; 
+  var __str = function (o) { return "" + o; };
+  var __strCmp = function(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 };
+  var __throwAsync = function(e) { setTimeout(() => { throw e; }, 0); };
+  
+  //Compat
+  if (ES3_COMPAT) {
+    __keys = __keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+  }
+  if (ES5_COMPAT) {
+  }
   
   export interface IEngine {
     isEnabledFor(level: ILevel, group: string): boolean
@@ -422,17 +444,7 @@ module log {
   
   }
   
-  //util
-  var __global: Window = (new Function("return this;")).call(null);
-  var __console: Console = typeof console !== "undefined" ? __global.console : null;
-  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
-  var __isNumber = function (o: any) { return typeof o == 'number'; };
-  var __isString = function (o: any) { return typeof o == 'string'; };
-  var __isFunction = function(o: any) { return typeof o == 'function'; };
-  var __keys = Object.keys; 
-  var __str = String;
-  var __strCmp = function(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 };
-  var __throwAsync = function(e) { setTimeout(() => { throw e; }, 0); };
+  
   
 }
 export = log

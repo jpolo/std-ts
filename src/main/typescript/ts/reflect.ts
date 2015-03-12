@@ -1,11 +1,14 @@
 module reflect {
-  var __es3Compat = true;
-  var __es5Compat = __es3Compat || true;
+  //Constant
+  var ES3_COMPAT = true;
+  var ES5_COMPAT = ES3_COMPAT || true;
+  
+  //Util
   var __fidentity = function f<T>() { return function (o: T) { return o } };
   var __fapply = Function.prototype.apply;
   var __fconst = function f<T>(k: T) { return function () { return k } };
   var __polyfilled = function (f: Function): boolean { return !!(<any>f).polyfill };
-  var __str = String;
+  var __str = function (o) { return "" + o; };
   var __ohasown = {}.hasOwnProperty;
   var __ostring = Object.prototype.toString;
   var __okeys = Object.keys;
@@ -34,10 +37,10 @@ module reflect {
   var __typeOf = function (o: any): Type { return o === null ? Type.null : Type[typeof o]; };
   
   //Compat
-  if (__es5Compat || __es3Compat) {
+  if (ES5_COMPAT || ES3_COMPAT) {
     var __polyfill = function poly<T>(f: T): T { (<any>f).polyfill = true; return f; };
 
-    if (__es3Compat) {
+    if (ES3_COMPAT) {
       __okeys = __okeys || __polyfill(function (o) { var ks = []; for (var k in o) { if (__hasOwn.call(o, k)) { ks.push(k); } } return ks; });
       __create = __create|| __polyfill(function (proto) { function t() {}; t.prototype = proto.prototype; return new t(); });
       __proto = __proto || __polyfill(function (o) { return o.__proto__ });
@@ -52,7 +55,7 @@ module reflect {
       __seal = __seal || __polyfill(__fidentity());
     }
     
-    if (__es5Compat) {
+    if (ES5_COMPAT) {
       __apply = __apply || __polyfill(function (f, thisArg, args) { return __fapply.call(f, thisArg, args); });
       __construct = __construct || __polyfill(function (Constructor: Function, args: any[]) { 
         var proto = Constructor.prototype

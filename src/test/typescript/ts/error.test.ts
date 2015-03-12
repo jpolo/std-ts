@@ -43,7 +43,7 @@ var BaseErrorSuite = suite("ts/error.BaseError", (self) => {
     var err = new BaseError("foo");
     var stack = String(err.stack);
     var stackLines = stack.split("\n");
-    
+console.warn(err.stack);
     assert.strictEqual(stackLines[0], "BaseError: foo");
     
     var prefix = "    at file:";

@@ -2,10 +2,12 @@ import inspect = require("ts/inspect")
 import reflect = require("ts/reflect")
 import stacktrace = require("ts/stacktrace")
 import ICallSite = stacktrace.ICallSite
+import Inspector = inspect.Inspector
 
 module unit {
+  
+  
   var TEST_TIMEOUT = 2000;//ms
-  //var __console: Console = typeof console !== "undefined" ? __global.console : null;
   var __equals = function (a: any, b: any) { return a === b }
   var __equalsFloat = function (a: number, b: number, epsilon: number) {
     return (
@@ -30,23 +32,24 @@ module unit {
     }
     return returnValue
   }
-  var __fnSource = function (f: Function) { return __str(f).slice(13, -1).trim() }
+  var __fstring = Function.prototype.toString;
+  var __fnSource = function (f: Function) { return __fstring.call(f).slice(13, -1).trim(); };
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
   var __freeze = reflect.freeze
   var __isFinite = isFinite
-  var __isNaN = function (o: any) { return o !== o; }
-  var __isNumber = function (o) { return typeof o === 'number' }
-  var __isObject = function (o) { return o != null && (typeof o == "object") }
+  var __isNaN = function (o: any) { return o !== o; };
+  var __isNumber = function (o) { return typeof o === 'number'; };
+  var __isObject = function (o) { return o != null && (typeof o == "object"); };
   var __keys = reflect.ownKeys;
-  var __keysSorted = function (o) { return __keys(o).sort(); }
-  var __str = String  
-  var __stringTag = reflect.stringTag
-  var __now = Date.now || function () { return (new Date()).getTime(); }
+  var __keysSorted = function (o) { return __keys(o).sort(); };
+  var __str = function (o) { return "" + o; };
+  var __stringTag = reflect.stringTag;
+  var __now = Date.now || function () { return (new Date()).getTime(); };
   
 
 
   export interface IAssertion {
-    type: AssertionType
+    type: string
     test: ITest
     message: string
     position: ICallSite
@@ -81,29 +84,28 @@ module unit {
     run(engine: IEngine, onComplete: (report: ITestReport) => void): void
   }
   
-  export class AssertionType {
+  /*export class AssertionType {
   
     static for(name: string): AssertionType {
       name = name.toUpperCase()
       var assertionTypes = AssertionType._instances
       var assertionType = assertionTypes[name]
       if (!assertionType) {
-        assertionType = assertionTypes[name] = new AssertionType(name, AssertionType._nextValue++, AssertionType._constructorKey)
+        assertionType = assertionTypes[name] = new AssertionType(name, AssertionType._constructorKey)
       }
       return assertionType
     }
     
     static compare(a: AssertionType, b: AssertionType): number {
-      return a.value - b.value;
+      var aname = a.name, bname = b.name;
+      return (aname === bname ? 0 : aname < bname ? -1 : 1);
     }
     
     static _constructorKey = {};
     private static _instances: { [key: string]: AssertionType } = {}
-    private static _nextValue = 0
 
     constructor(
-      public name: string, 
-      public value: number,
+      public name: string,
       key?: any
     ) {
       if (key != AssertionType._constructorKey) {
@@ -116,11 +118,11 @@ module unit {
     }
     
     equals(o: any): boolean { 
-      return this === o || (o && (o instanceof this.constructor) && this.value === o.value) 
+      return this === o || (o && (o instanceof this.constructor) && this.name === o.name) 
     }
     
     valueOf() { 
-      return this.value 
+      return this.name;
     }
     
     inspect() { 
@@ -128,17 +130,17 @@ module unit {
     }
     
     toJSON() {
-      return __str(this)
+      return "" + this;
     }
     
     toString() { 
-      return this.name 
+      return this.name;
     }
-  }
-  export var SUCCESS = AssertionType.for("SUCCESS")
-  export var FAILURE = AssertionType.for("FAILURE")
-  export var ERROR = AssertionType.for("ERROR")
-  export var WARNING = AssertionType.for("WARNING")
+  }*/
+  export var SUCCESS = "SUCCESS"
+  export var FAILURE = "FAILURE"
+  export var ERROR = "ERROR"
+  export var WARNING = "WARNING"
   
   export class Assertion implements IAssertion {
     
@@ -159,7 +161,7 @@ module unit {
     }
     
     constructor(
-      public type: AssertionType,
+      public type: string,
       public test: ITest,
       public message: string,
       public position?: ICallSite,
@@ -170,14 +172,21 @@ module unit {
       return this === o || (
         o && 
         (o instanceof this.constructor) &&
-        +this.type === +o.type &&
+        this.type === o.type &&
         this.test === o.test &&
         this.message === o.message
-      )
+      );
     }
     
     inspect() {
-      return __format(__str(this.type), this.message)
+      return __format("" + this.type, this.message);
+    }
+    
+    toJSON() {
+      return {
+        type: "" + this.type,
+        message: this.message
+      };
     }
 
     toString() {
@@ -187,8 +196,9 @@ module unit {
 
   export module engine {
     export var FLOAT_EPSILON = 1e-5;
-    var $inspectDefault = new inspect.engine.Engine({ maxString: 70 })
+    var $inspectDefault = new inspect.Inspector({ maxString: 70 })
     var $timeDefault = { now: __now }
+    var $stacktraceDefault = stacktrace;
     
     
     /**
@@ -202,23 +212,26 @@ module unit {
     export class Engine implements IEngine {
       
       //Services
-      private $inspect: inspect.IEngine = $inspectDefault
-      private $time: { now: () => number } = $timeDefault
+      private $inspect: inspect.IInspector = $inspectDefault
+      private $time: { now(): number } = $timeDefault
+      private $stacktrace: { create(): ICallSite[] } = $stacktraceDefault;
       
       constructor(
         deps?: {
-          $inspect?: inspect.IEngine
-          $time?: { now: () => number }
+          $inspect?: inspect.IInspector;
+          $time?: { now: () => number };
+          $stacktrace?: { create(): ICallSite[] };
         }
       ) {
         if (deps) {
           this.$inspect = deps.$inspect || this.$inspect
           this.$time = deps.$time || this.$time
+          this.$stacktrace = deps.$stacktrace || this.$stacktrace
         }
       }
       
       callstack(): ICallSite[] {
-        return stacktrace.create();
+        return this.$stacktrace.create();
       }
 
       dump(o: any): string {
@@ -437,7 +450,8 @@ module unit {
               block(assert)
             }
           } catch (e) {
-            assertions.push(Assertion.error(this, e.message, e.stack && e.stack[0], e.stack))
+            var parsed  = e ? stacktrace.get(e) : null;
+            assertions.push(Assertion.error(this, e.message, parsed && parsed[0], parsed))
           } finally {
             if (!isAsync) {
               complete()
@@ -451,7 +465,7 @@ module unit {
       }
 
       inspect() {
-        return __format('Test', __str(this))
+        return __format('Test', "" + this)
       }
       
       toString() {
@@ -567,7 +581,7 @@ module unit {
       __assert__(isSuccess: boolean, message: string, position: ICallSite): boolean {
         var assertions = this._report.assertions
         if (!reflect.isExtensible(assertions)) {
-          throw new Error('Assertions were made after report creation in ' + __str(this._testCase))
+          throw new Error('Assertions were made after report creation in ' + this._testCase)
         }
 
         message = message || 'assertion should be true'
@@ -717,16 +731,16 @@ module unit {
           var position = assertion.position
           var category = assertion.test.category + '::' + assertion.test.name
 
-          switch (+assertion.type) {
-            case +SUCCESS:
+          switch (assertion.type) {
+            case SUCCESS:
               push(category, assertion)
               ++statSuccess
               break
-            case +FAILURE:
+            case FAILURE:
               push(category, assertion)
               ++statFailed
               break
-            case +ERROR:
+            case ERROR:
               if (category) {
                 push(category, assertion)
               } else {
@@ -734,7 +748,7 @@ module unit {
               }
               ++statError
               break
-            case +WARNING:
+            case WARNING:
               push(category, assertion)
               break
             default:
@@ -748,25 +762,29 @@ module unit {
         var messages = ""
         var section = sections[sectionName]
 
-        section.forEach((assertion) => {          
+        section.forEach((assertion) => {
+if (assertion.position && !assertion.position.getFileName) {
+  console.warn(assertion);
+}
+          
           var message = assertion.message
           var position = assertion.position
           var positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : ""
           var typeName = __str(assertion.type)
           
-          switch(+assertion.type) {
-            case +SUCCESS:
+          switch(assertion.type) {
+            case SUCCESS:
               matrix += "."
               break
-            case +FAILURE:
+            case FAILURE:
               matrix += "F"
               messages += "\n  [" + typeName + "]  " + message + positionMessage
               break
-            case +WARNING:
+            case WARNING:
               matrix += "W"
               messages += "\n  [" + typeName + "]  " + message + positionMessage
               break
-            case +ERROR:
+            case ERROR:
               matrix += "E"
               messages += "\n  [" + typeName + "] " + (assertion.stack || message)
               break

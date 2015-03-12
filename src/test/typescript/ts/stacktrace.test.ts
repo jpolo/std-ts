@@ -5,7 +5,24 @@ import stacktrace = require("../../../main/typescript/ts/stacktrace")
 import ICallSite = stacktrace.ICallSite;
 
 var stacktraceSuite = suite("ts/stacktrace", (self) => {
-
+  var FILENAME = "stacktrace.test.js";
+  
+  test("get()", (assert) => {
+  
+    var callstack = stacktrace.get(new Error())
+    var callsite = callstack[0]
+    
+    assert.ok(Array.isArray(callstack))
+    assert.ok(callstack.length > 0)
+    assert.strictEqual(callsite.getLineNumber(), 6)
+    assert.strictEqual(typeof callsite.getColumnNumber(), 'number')
+      
+    assert.strictEqual(callsite.getFileName().slice(-FILENAME.length), FILENAME);
+    assert.strictEqual(callsite.isNative(), false);
+    assert.strictEqual(callsite.isEval(), false);
+  })
+  
+  
   test("create()", (assert) => {
   
     var callstack = stacktrace.create()
@@ -16,8 +33,7 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
     assert.strictEqual(callsite.getLineNumber(), 6)
     assert.strictEqual(typeof callsite.getColumnNumber(), 'number')
       
-    var fileName = "stacktrace.test.js"
-    assert.strictEqual(callsite.getFileName().slice(-fileName.length), fileName);
+    assert.strictEqual(callsite.getFileName().slice(-FILENAME.length), FILENAME);
     assert.strictEqual(callsite.isNative(), false);
     assert.strictEqual(callsite.isEval(), false);
     

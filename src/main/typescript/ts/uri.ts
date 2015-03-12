@@ -94,56 +94,62 @@ module uri {
     }
     
     static stringify(uri: IURI): string {
-      var reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
-      var reDisallowedInFragment = /#/g;
-      var reDisallowedInAbsolutePath = /[\#\?]/g;
-      var reDisallowedInRelativePath =/[\#\?:]/g;
+      var s = "";
       
-      var scheme = uri.scheme;
-      var userInfo = uri.userInfo;
-      var domain = uri.domain;
-      var port = uri.port;
-      var path = uri.path;
-      var query = uri.query;
-      var fragment = uri.fragment;
-      
-      var s = '';
-      
-      if (scheme != null) {
-        s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ':';
-      }
-  
-      if (domain != null) {
-        s += '//';
-  
-        if (userInfo != null) {
-          s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + '@';
+      if (s === undefined || s === null) {
+        s += uri;
+      } else {
+        var reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
+        var reDisallowedInFragment = /#/g;
+        var reDisallowedInAbsolutePath = /[\#\?]/g;
+        var reDisallowedInRelativePath =/[\#\?:]/g;
+        
+        var scheme = uri.scheme;
+        var userInfo = uri.userInfo;
+        var domain = uri.domain;
+        var port = uri.port;
+        var path = uri.path;
+        var query = uri.query;
+        var fragment = uri.fragment;
+        
+        var s = '';
+        
+        if (scheme != null) {
+          s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ':';
         }
-  
-        s += encodeComponent(domain);
-        if (port != null) {
-          s += ':' + port;
+    
+        if (domain != null) {
+          s += '//';
+    
+          if (userInfo != null) {
+            s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + '@';
+          }
+    
+          s += encodeComponent(domain);
+          if (port != null) {
+            s += ':' + port;
+          }
         }
-      }
-  
-      if (path != null) {
-        if (domain && path.charAt(0) != '/') {
-          s += '/';
+    
+        if (path != null) {
+          if (domain && path.charAt(0) != '/') {
+            s += '/';
+          }
+          s += encodeSpecialChars(
+            path,
+            path.charAt(0) == '/' ? 
+              reDisallowedInAbsolutePath : 
+              reDisallowedInRelativePath
+          );
         }
-        s += encodeSpecialChars(
-          path,
-          path.charAt(0) == '/' ? 
-            reDisallowedInAbsolutePath : 
-            reDisallowedInRelativePath
-        );
-      }
-  
-      if (query != null) {
-        s += '?' + encodeQuery(query);
-      }
-  
-      if (fragment != null) {
-        s += '#' + encodeSpecialChars(fragment, reDisallowedInFragment);
+    
+        if (query != null) {
+          s += '?' + encodeQuery(query);
+        }
+    
+        if (fragment != null) {
+          s += '#' + encodeSpecialChars(fragment, reDisallowedInFragment);
+        }
       }
       return s;
     }
@@ -187,7 +193,7 @@ module uri {
     //}
       
     inspect(): string {
-      var s = __str(this)
+      var s = "" + this;
       var sep = s.length > 0 ? ' ' : ''
       return 'URI {' + sep + s + sep + '}'
     }
@@ -205,7 +211,7 @@ module uri {
     }
 
     toJSON(): string {
-      return __str(this)
+      return this.toString();
     }
 
     toArray(): Array<any> {
@@ -246,7 +252,7 @@ module uri {
     }*/
 
     valueOf() {
-      return __str(this)
+      return this.toString();
     }
   }
   
@@ -390,7 +396,6 @@ module uri {
   var __isArray = Array.isArray;
   var __isString = function (o: any): boolean { return typeof o === 'string'; }
   var __keys = Object.keys;
-  var __str = String;
   var __strIsEmpty = function (o: string) { return !o || o.length === 0; };
   
 }

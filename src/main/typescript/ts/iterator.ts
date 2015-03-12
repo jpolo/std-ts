@@ -19,7 +19,6 @@ module iterator {
   
   class Iterator<T> {
     
-    
     constructor(public next: () => IIteratorResult<T>, public hint = "abstract iterator") { }
     
     inspect() { return "Iterator { [" + this.hint + "] }";}
@@ -93,9 +92,38 @@ module iterator {
     });
   }
   
-  function continually<T>(v: T): IIterator<T> {
+  export function continually<T>(v: T): IIterator<T> {
     return iteratorCreate(function () {
       return iteratorResult(false, v);
+    });
+  }
+  
+  export function concat<T>(...args: IIterator<T>[]): IIterator<T> {
+    var i = 0;
+    var argc = args.length;
+    var current = args[0];
+    var done = false;
+    
+    return iteratorCreate(function () {
+      var r: IIteratorResult<T>;
+      if (!done) {
+        while (true) {
+          r = current.next();
+          if (r.done) {
+            if (i < argc) {
+              args[i] = null;//free reference;
+              current = args[i++];
+            } else {
+              done = true;  
+            }
+          } else {
+            break;
+          }
+        }
+      } else {
+        r = iteratorResult(done, undefined);  
+      }
+      return r;
     });
   }
   

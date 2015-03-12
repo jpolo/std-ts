@@ -3,7 +3,6 @@ import suite = unit.suite
 import test = unit.test
 import TestEngine = unit.engine.Engine
 import Assert = unit.engine.Assert
-import AssertionType = unit.AssertionType
 
 var assertSuite = suite("ts/unit.Assert", (self) => {
   var engine = new TestEngine()
@@ -24,8 +23,8 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
       assertMock.ok(true)
       assertMock.ok(false)
       if (
-        !unit.SUCCESS.equals(assertions[i()].type) ||
-        !unit.FAILURE.equals(assertions[i()].type)
+        !unit.SUCCESS === assertions[i()].type ||
+        !unit.FAILURE === assertions[i()].type
       ) {
         throw new Error('[Fatal] ts/unit.Assert seems broken')
       }

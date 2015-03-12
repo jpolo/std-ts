@@ -4,7 +4,7 @@ module error {
 
   //util
   var __global: any = (new Function("return this;")).call(null);
-  var __str = String;
+  var __str = function (o) { return "" + o; };
   var __inspect = __str;
   var __console: Console = typeof console !== "undefined" ? __global.console : null;
   var __name = function (f: Function) {

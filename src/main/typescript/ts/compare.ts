@@ -93,7 +93,7 @@ module compare {
   var __ostring = {}.toString;
   var __isEmpty = function (o) { return o === null  || o === undefined; };
   var __isFunction = function (o) { return typeof o === "function"; };
-  var __str = String;
+  var __str = function (o) { return "" + o; };
   var __stringTag = function (o: any) {
     var s = '';
     if (o === undefined) {

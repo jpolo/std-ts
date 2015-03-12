@@ -23,16 +23,20 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     }
   }
   
-  var inspectObj = new inspect.engine.Engine({ maxElements: 3, maxString: 15 })
-  var BOOLEANS = inspectResults(
+  var inspector = new inspect.Inspector({ maxElements: 3, maxString: 15 })
+  var EMPTY = inspectResults(
     [undefined, "undefined"],
-    [null, "null"],
+    [null, "null"]
+  );
+  var BOOLEANS = inspectResults<boolean|Boolean>(
     [true, "true"],
     [false, "false"]
   );
+  var BOOLEANS_OBJ = inspectResults(
+    [new Boolean(true), "Boolean { true }"],
+    [new Boolean(false), "Boolean { false }"]
+  );
   var NUMBERS = inspectResults(
-    [undefined, "undefined"],
-    [null, "null"],
     [NaN, "NaN"],
     [0, "0"],
     [1, "1"],
@@ -40,16 +44,20 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     [1.234, "1.234"],
     [Math.PI, "3.141592653589793"]
   );
+  var NUMBERS_OBJ = inspectResults(
+    [new Number(0), "Number { 0 }"],
+    [new Number(123), "Number { 123 }"]
+  );
   var STRINGS = inspectResults(
-    [undefined, "undefined"],
-    [null, "null"],
     ['', '""'],
     ['foobar', '"foobar"'],
     ['lorem ipsum "sorem" foo bar', '"lorem ipsum \\"so..."']
   );
+  var STRINGS_OBJ = inspectResults(
+    [new String("foobar"), 'String { "foobar" }'],
+    [new String('lorem ipsum "sorem" foo bar'), 'String { "lorem ipsum \\"so..." }']
+  );
   var OBJECTS = inspectResults(
-    [undefined, "undefined"],
-    [null, "null"],
     [new Boolean(true), 'Boolean { true }'],
     [new Number(123.4545), 'Number { 123.4545 }'],
     [new String("foobar"), 'String { "foobar" }'],
@@ -59,59 +67,57 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
     [new TypeError("blah"), "TypeError {}" ]
   );
   var FUNCTIONS = inspectResults(
-    [undefined, "undefined"],
-    [null, "null"],
     [function (a, b, c) { return 'blah' }, 'function (a, b, c) {...}'],
     [function foo(a, b, c) { return 'blah' }, 'function foo(a, b, c) {...}'],
     [String.prototype.charAt, 'function charAt() {...}']
   );
   var DATES = inspectResults(
-    [undefined, "undefined"],
-    [null, "null"],
     [new Date(0), 'Date { 1970-01-01T00:00:00.000Z }']
   );
   var REGEXP = inspectResults(
-    [undefined, "undefined"],
-    [null, "null"],
     [/abc/gi, '/abc/gi']
   );
-  var ALL = [].concat(NUMBERS, BOOLEANS, STRINGS, OBJECTS, FUNCTIONS, DATES);
+  var ALL = [].concat(NUMBERS, BOOLEANS, BOOLEANS_OBJ, STRINGS, STRINGS_OBJ, OBJECTS, FUNCTIONS, DATES);
 
   
   test("#stringify()", (assert) => {
-    generate(assert, ALL, (o) => inspectObj.stringify(o));
+    generate(assert, ALL, (o) => inspector.stringify(o));
   })
   
   test("#stringifyUndefined()", (assert) => {
-    assert.strictEqual(inspectObj.stringifyUndefined(), 'undefined');
+    assert.strictEqual(inspector.stringifyUndefined(), 'undefined');
   })
   
   test("#stringifyNull()", (assert) => {
-    assert.strictEqual(inspectObj.stringifyNull(), 'null');
+    assert.strictEqual(inspector.stringifyNull(), 'null');
   })
   
   test("#stringifyBoolean()", (assert) => {
-    generate(assert, BOOLEANS, (b) => inspectObj.stringifyBoolean(b));
+    generate(assert, BOOLEANS.concat(BOOLEANS_OBJ, EMPTY), (b) => inspector.stringifyBoolean(b));
   })
   
   test("#stringifyNumber()", (assert) => {
-    generate(assert, NUMBERS, (n) => inspectObj.stringifyNumber(n));
+    generate(assert, NUMBERS.concat(NUMBERS_OBJ, EMPTY), (n) => inspector.stringifyNumber(n));
   })
   
   test("#stringifyString()", (assert) => {
-    generate(assert, STRINGS, (s) => inspectObj.stringifyString(s));
+    generate(assert, STRINGS.concat(STRINGS_OBJ, EMPTY), (s) => inspector.stringifyString(s));
   })
   
   test("#stringifyObject()", (assert) => {
-    generate(assert, OBJECTS, (o) => inspectObj.stringifyObject(o));
+    generate(assert, OBJECTS.concat(EMPTY), (o) => inspector.stringifyObject(o));
   })
   
   test("#stringifyFunction()", (assert) => {
-    generate(assert, FUNCTIONS, (o) => inspectObj.stringifyFunction(o));
+    generate(assert, FUNCTIONS.concat(EMPTY), (o) => inspector.stringifyFunction(o));
   })
   
   test("#stringifyDate()", (assert) => {
-    generate(assert, DATES, (d) => inspectObj.stringifyDate(d));
+    generate(assert, DATES.concat(EMPTY), (d) => inspector.stringifyDate(d));
+  })
+  
+  test("#stringifyRegExp()", (assert) => {
+    generate(assert, REGEXP.concat(EMPTY), (d) => inspector.stringifyRegExp(d));
   })
   
 })

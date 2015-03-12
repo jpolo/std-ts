@@ -1,12 +1,14 @@
 module math {
   
+  //Constant
+  var ES3_COMPAT = true;
+  var ES5_COMPAT = ES3_COMPAT || true;
+  
   //Util
   var ONE_THIRD = 1 / 3
   var RADIAN_TO_DEGREE = 180 / Math.PI
   var DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE
   
-  var __es3Compat = true;
-  var __es5Compat = __es3Compat || true;
   var __num = Number;
   var __isNaN = (n: number) => { return n !== n };
   var __isFinite = isFinite;
@@ -41,11 +43,11 @@ module math {
   var math_tanh = Math['tanh'];
   
   //Compat
-  if (__es3Compat || __es5Compat) {
-    if (__es3Compat) {
+  if (ES3_COMPAT || ES5_COMPAT) {
+    if (ES3_COMPAT) {
       //nothing
     }
-    if (__es5Compat) {
+    if (ES5_COMPAT) {
       math_cbrt = math_cbrt || function (n) {
         n = __num(n);
         return (

@@ -33,18 +33,26 @@ module stacktrace {
     
     static stringify(o: ICallSite): string {
       var s = "";
-      var functionName = o.getFunctionName();
-      var lineNumber = o.getLineNumber();
-      var columnNumber = o.getColumnNumber();
-      
-      s += o.getFileName();
-      if (lineNumber) {
-        s += ":" + lineNumber;
-        if (columnNumber) {
-          s += ":" + columnNumber;
+      if (s === undefined) {
+        s = "undefined";
+      } else if (s === null) {
+        s = "null";
+      } else {
+        var functionName = o.getFunctionName();
+        var lineNumber = o.getLineNumber();
+        var columnNumber = o.getColumnNumber();
+        
+        s += o.getFileName();
+        if (lineNumber) {
+          s += ":" + lineNumber;
+          if (columnNumber) {
+            s += ":" + columnNumber;
+          }
         }
+        
+        s = functionName ? functionName + ' (' + s +  ')' : s;
       }
-      return functionName ? functionName + ' (' + s +  ')' : s;
+      return s;
     }
     
     "@@data": {
@@ -198,134 +206,15 @@ module stacktrace {
     __captureStackTrace(e, stripPoint);
   }
   
+  export function get(error: any): ICallSite[] {
+    return __errorParse(error);
+  }
+  
   export function create(): ICallSite[] {
     return __errorFrames(1);
   }
   
   enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
-  
-  
-  function _parseError_Chrome(error: any): string[] {
-    return (error.stack + '\n')
-        .replace(/^[\s\S]+?\s+at\s+/, ' at ') // remove message
-        .replace(/^\s+(at eval )?at\s+/gm, '') // remove 'at' and indentation
-        .replace(/^([^\(]+?)([\n$])/gm, '{anonymous}() ($1)$2')
-        .replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}() ($1)')
-        .replace(/^(.+) \((.+)\)$/gm, '$1@$2')
-        .split('\n')
-        .slice(0, -1)
-  }
-
-  function _parseError_Firefox(error: any): string[] {
-    return (error.stack)
-      .replace(/(?:\n@:0)?\s+$/m, '')
-      .replace(/^(?:\((\S*)\))?@/gm, '{anonymous}($1)@')
-      .split('\n')
-  }
-
-  function _parseError_IE(error: any): string[] {
-    return (error.stack)
-      .replace(/^\s*at\s+(.*)$/gm, '$1')
-      .replace(/^Anonymous function\s+/gm, '{anonymous}() ')
-      .replace(/^(.+)\s+\((.+)\)$/gm, '$1@$2')
-      .split('\n')
-      .slice(1)
-  }
-
-  function _parseError_Opera(error: any): string[] {
-    var ANON = '{anonymous}'
-    var lineRE = /^.*line (\d+), column (\d+)(?: in (.+))? in (\S+):$/
-    var lines = error.stacktrace.split('\n')
-    var result = []
-
-    for (var i = 0, len = lines.length; i < len; i += 2) {
-      var match = lineRE.exec(lines[i])
-      if (match) {
-        var location = match[4] + ':' + match[1] + ':' + match[2]
-        var fnName = match[3] || "global code"
-        fnName = fnName.replace(/<anonymous function: (\S+)>/, "$1").replace(/<anonymous function>/, ANON)
-        result.push(fnName + '@' + location + ' -- ' + lines[i + 1].replace(/^\s+/, ''))
-      }
-    }
-    return result
-  }
-
-  function _parseError_Safari(error: any): string[] {
-    return (error.stack)
-      .replace(/\[native code\]\n/m, '')
-      .replace(/^(?=\w+Error\:).*$\n/m, '')
-      .replace(/^@/gm, '{anonymous}()@')
-      .split('\n')
-  }
-
-  function _parseError_Other(curr): string[] {
-    var ANON = '{anonymous}'
-    var fnRE = /function(?:\s+([\w$]+))?\s*\(/
-    var stack = []
-    var fn, args
-    var maxStackSize = 10
-    while (curr && stack.length < maxStackSize) {
-      fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON
-      try {
-        args = __arraySlice(curr['arguments'] || [])
-      } catch (e) {
-        args = ['Cannot access arguments: ' + e]
-      }
-      stack[stack.length] = fn + '(' + _stringifyArguments(args) + ')'
-      try {
-        curr = curr.caller
-      } catch (e) {
-        stack[stack.length] = 'Cannot access caller: ' + e
-        break
-      }
-    }
-    return stack
-  }
-
-  
-
-  function _stringifyArguments(args: any[]) {
-    var argc = args.length
-    var result = new Array(argc)
-    for (var i = 0; i < argc; ++i) {
-      var arg = args[i]
-      switch(__stringTag(arg)) {
-        case 'Undefined':
-          result[i] = 'undefined'
-          break
-        case 'Null':
-          result[i] = 'null'
-          break
-        case 'Array':
-          if (arg.length < 3) {
-            result[i] = '[' + _stringifyArguments(arg) + ']'
-          } else {
-            result[i] = '[' +
-              _stringifyArguments(__arraySlice(arg, 0, 1)) +
-              '...' +
-              _stringifyArguments(__arraySlice(arg, -1)) +
-              ']'
-          }
-          break
-        case 'Object':
-          result[i] = '#object'
-          break
-        case 'Function':
-          result[i] = '#function'
-          break
-        case 'String':
-          result[i] = '"' + arg + '"'
-          break
-        case 'Number':
-          result[i] = arg
-          break
-        default:
-          result[i] = '?'
-      }
-    }
-    return result.join(',')
-  }
-  
   
   
   //util
@@ -383,26 +272,175 @@ module stacktrace {
     return returnValue;
   };
   
-  var browser: Browser = (function (e: any) {
+  
+  
+  var __errorParse = (function () {
 
-    var returnValue = Browser.Other
-    if (e['arguments'] && e.stack) {
-      returnValue = Browser.Chrome
-    } else if (e.stack && e.sourceURL) {
-      returnValue = Browser.Safari
-    } else if (e.stack && e['number']) {
-      returnValue = Browser.IE
-    } else if (e.stack && e.fileName) {
-      returnValue = Browser.Firefox
-    } else if (e.message && e.stack && e.stacktrace) {
-      returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
-    } else if (e.stack && !e.fileName) {
-      // Chrome 27 does not have e.arguments as earlier versions,
-      // but still does not have e.fileName as Firefox
-      returnValue = Browser.Chrome
+    //Sniff browser
+    var browser: Browser = (function (e: any) {
+      var returnValue = Browser.Other
+      if (e['arguments'] && e.stack) {
+        returnValue = Browser.Chrome
+      } else if (e.stack && e.sourceURL) {
+        returnValue = Browser.Safari
+      } else if (e.stack && e['number']) {
+        returnValue = Browser.IE
+      } else if (e.stack && e.fileName) {
+        returnValue = Browser.Firefox
+      } else if (e.message && e.stack && e.stacktrace) {
+        returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
+      } else if (e.stack && !e.fileName) {
+        // Chrome 27 does not have e.arguments as earlier versions,
+        // but still does not have e.fileName as Firefox
+        returnValue = Browser.Chrome
+      }
+      return returnValue
+    }(__errorCreate()));
+    
+    //Parse error line
+    var __errorParseLines: (error: Error) => string[] = __errorParseLines_Other;
+    switch (browser) {
+      case Browser.IE: __errorParseLines = __errorParseLines_IE; break;
+      case Browser.Chrome: __errorParseLines = __errorParseLines_Chrome; break;
+      case Browser.Firefox: __errorParseLines = __errorParseLines_Firefox; break;
+      case Browser.Opera: __errorParseLines = __errorParseLines_Opera; break;
+      case Browser.Safari: __errorParseLines = __errorParseLines_Safari; break;
+      default: __errorParseLines = __errorParseLines_Other; break;
     }
-    return returnValue
-  }(__errorCreate()));
+    
+    function __errorParseLines_Chrome(error: any): string[] {
+      return (error.stack + '\n')
+          .replace(/^[\s\S]+?\s+at\s+/, ' at ') // remove message
+          .replace(/^\s+(at eval )?at\s+/gm, '') // remove 'at' and indentation
+          .replace(/^([^\(]+?)([\n$])/gm, '{anonymous}() ($1)$2')
+          .replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}() ($1)')
+          .replace(/^(.+) \((.+)\)$/gm, '$1@$2')
+          .split('\n')
+          .slice(0, -1)
+    }
+  
+    function __errorParseLines_Firefox(error: any): string[] {
+      return (error.stack)
+        .replace(/(?:\n@:0)?\s+$/m, '')
+        .replace(/^(?:\((\S*)\))?@/gm, '{anonymous}($1)@')
+        .split('\n')
+    }
+  
+    function __errorParseLines_IE(error: any): string[] {
+      return (error.stack)
+        .replace(/^\s*at\s+(.*)$/gm, '$1')
+        .replace(/^Anonymous function\s+/gm, '{anonymous}() ')
+        .replace(/^(.+)\s+\((.+)\)$/gm, '$1@$2')
+        .split('\n')
+        .slice(1)
+    }
+  
+    function __errorParseLines_Opera(error: any): string[] {
+      var ANON = '{anonymous}'
+      var lineRE = /^.*line (\d+), column (\d+)(?: in (.+))? in (\S+):$/
+      var lines = error.stacktrace.split('\n')
+      var result = []
+  
+      for (var i = 0, len = lines.length; i < len; i += 2) {
+        var match = lineRE.exec(lines[i])
+        if (match) {
+          var location = match[4] + ':' + match[1] + ':' + match[2]
+          var fnName = match[3] || "global code"
+          fnName = fnName.replace(/<anonymous function: (\S+)>/, "$1").replace(/<anonymous function>/, ANON)
+          result.push(fnName + '@' + location + ' -- ' + lines[i + 1].replace(/^\s+/, ''))
+        }
+      }
+      return result
+    }
+  
+    function __errorParseLines_Safari(error: any): string[] {
+      return (error.stack)
+        .replace(/\[native code\]\n/m, '')
+        .replace(/^(?=\w+Error\:).*$\n/m, '')
+        .replace(/^@/gm, '{anonymous}()@')
+        .split('\n')
+    }
+  
+    function __errorParseLines_Other(curr): string[] {
+      var ANON = '{anonymous}'
+      var fnRE = /function(?:\s+([\w$]+))?\s*\(/
+      var stack = []
+      var fn, args
+      var maxStackSize = 10
+      while (curr && stack.length < maxStackSize) {
+        fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON
+        try {
+          args = __arraySlice(curr['arguments'] || [])
+        } catch (e) {
+          args = ['Cannot access arguments: ' + e]
+        }
+        stack[stack.length] = fn + '(' + _stringifyArguments(args) + ')'
+        try {
+          curr = curr.caller
+        } catch (e) {
+          stack[stack.length] = 'Cannot access caller: ' + e
+          break
+        }
+      }
+      return stack
+    }
+
+    function _stringifyArguments(args: any[]) {
+      var argc = args.length
+      var result = new Array(argc)
+      for (var i = 0; i < argc; ++i) {
+        var arg = args[i]
+        switch(__stringTag(arg)) {
+          case 'Undefined':
+            result[i] = 'undefined'
+            break
+          case 'Null':
+            result[i] = 'null'
+            break
+          case 'Array':
+            if (arg.length < 3) {
+              result[i] = '[' + _stringifyArguments(arg) + ']'
+            } else {
+              result[i] = '[' +
+                _stringifyArguments(__arraySlice(arg, 0, 1)) +
+                '...' +
+                _stringifyArguments(__arraySlice(arg, -1)) +
+                ']'
+            }
+            break
+          case 'Object':
+            result[i] = '#object'
+            break
+          case 'Function':
+            result[i] = '#function'
+            break
+          case 'String':
+            result[i] = '"' + arg + '"'
+            break
+          case 'Number':
+            result[i] = arg
+            break
+          default:
+            result[i] = '?'
+        }
+      }
+      return result.join(',')
+    }
+  
+    return function __errorParse(error: any, offset = 0): CallSite[] {
+      var items = __errorParseLines(error);
+      //shift from offset
+      items = items.slice(offset + 2);
+
+      var itemc = items.length;
+      var parsed = new Array(itemc);
+      var parseCallSite = CallSite.parse;
+      for (var i = 0; i < itemc; ++i) {
+        parsed[i] = parseCallSite(items[i]);
+      }
+      return parsed;
+    };
+  }());
   
   var __errorFrames = (function () {
     var _Error = (<any>Error);
@@ -422,27 +460,8 @@ module stacktrace {
         return stack;
       };
     } else {
-      var __errorParse: (error: Error) => string[] = _parseError_Other;
-      switch (browser) {
-        case Browser.IE: __errorParse = _parseError_IE; break;
-        case Browser.Chrome: __errorParse = _parseError_Chrome; break;
-        case Browser.Firefox: __errorParse = _parseError_Firefox; break;
-        case Browser.Opera: __errorParse = _parseError_Opera; break;
-        case Browser.Safari: __errorParse = _parseError_Safari; break;
-        default: __errorParse = _parseError_Other; break;
-      }
       __errorFrames = function (offset) {
-        var items = __errorParse(__errorCreate());
-        //shift from offset
-        items = items.slice(offset + 2);
-
-        var itemc = items.length;
-        var parsed = new Array(itemc);
-        var parseCallSite = CallSite.parse;
-        for (var i = 0; i < itemc; ++i) {
-          parsed[i] = parseCallSite(items[i]);
-        }
-        return parsed;
+        return __errorParse(__errorCreate(), offset);
       };
     }
     
