@@ -429,8 +429,10 @@ module stacktrace {
   
     return function __errorParse(error: any, offset = 0): CallSite[] {
       var items = __errorParseLines(error);
-      //shift from offset
-      items = items.slice(offset + 2);
+      if (offset > 0) {
+        //shift from offset
+        items = items.slice(offset);
+      }
 
       var itemc = items.length;
       var parsed = new Array(itemc);
@@ -461,7 +463,7 @@ module stacktrace {
       };
     } else {
       __errorFrames = function (offset) {
-        return __errorParse(__errorCreate(), offset);
+        return __errorParse(__errorCreate(), offset + 2);
       };
     }
     

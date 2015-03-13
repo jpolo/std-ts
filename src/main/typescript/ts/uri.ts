@@ -1,5 +1,15 @@
 module uri {
 
+  //Constants
+  var ES3_COMPAT = true;
+  
+  //Util
+  var __isArray = Array.isArray;
+  var __isString = function (o: any): boolean { return typeof o === 'string'; }
+  var __keys = Object.keys;
+  var __strIsEmpty = function (o: string) { return !o || o.length === 0; };
+  
+  //Compat 
   export function parse(s: string): URI {
     return URI.parse(s);
   }
@@ -392,11 +402,7 @@ module uri {
   }
   
 
-  //util
-  var __isArray = Array.isArray;
-  var __isString = function (o: any): boolean { return typeof o === 'string'; }
-  var __keys = Object.keys;
-  var __strIsEmpty = function (o: string) { return !o || o.length === 0; };
+  
   
 }
 

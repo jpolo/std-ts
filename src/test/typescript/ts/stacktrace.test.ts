@@ -7,6 +7,8 @@ import ICallSite = stacktrace.ICallSite;
 var stacktraceSuite = suite("ts/stacktrace", (self) => {
   var FILENAME = "stacktrace.test.js";
   
+  self.setUp = () => {}
+  
   test("get()", (assert) => {
   
     var callstack = stacktrace.get(new Error())
@@ -14,7 +16,7 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
     
     assert.ok(Array.isArray(callstack))
     assert.ok(callstack.length > 0)
-    assert.strictEqual(callsite.getLineNumber(), 6)
+    assert.strictEqual(callsite.getLineNumber(), 9)
     assert.strictEqual(typeof callsite.getColumnNumber(), 'number')
       
     assert.strictEqual(callsite.getFileName().slice(-FILENAME.length), FILENAME);
@@ -30,7 +32,7 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
     
     assert.ok(Array.isArray(callstack))
     assert.ok(callstack.length > 0)
-    assert.strictEqual(callsite.getLineNumber(), 6)
+    assert.strictEqual(callsite.getLineNumber(), 20)
     assert.strictEqual(typeof callsite.getColumnNumber(), 'number')
       
     assert.strictEqual(callsite.getFileName().slice(-FILENAME.length), FILENAME);
