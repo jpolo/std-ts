@@ -88,7 +88,7 @@ var iteratorSuite = suite("ts/iterator", (self) => {
   test(".concat()", (assert) => {
     var iter = iterator.concat(iterator.range(1, 3), iterator.range(4, 7), iterator.range(8, 10));
     var expected = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    /*
+    
     for (var i = 0; i < iterationLimit; ++i) {
       var r = iter.next();
       if (i < 10) {
@@ -99,7 +99,6 @@ var iteratorSuite = suite("ts/iterator", (self) => {
         assert.strictEqual(r.value, undefined);
       }
     }
-    */
   })
 
 });

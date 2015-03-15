@@ -77,7 +77,21 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
   var REGEXP = inspectResults(
     [/abc/gi, '/abc/gi']
   );
-  var ALL = [].concat(NUMBERS, BOOLEANS, BOOLEANS_OBJ, STRINGS, STRINGS_OBJ, OBJECTS, FUNCTIONS, DATES);
+  var ARRAYS = inspectResults(
+    [[ 1, "foobar", true ], '[1, "foobar", true]'],
+    [[ 1, 'lorem ipsum "sorem" foo bar', true ], '[1, "lorem ipsum \\"so...", true]'],
+    [[ 1, 2, 3, 4, 5 ], '[1, 2, 3, ...]']
+  );
+  var ALL = [].concat(
+    NUMBERS, NUMBERS_OBJ, 
+    BOOLEANS, BOOLEANS_OBJ, 
+    STRINGS, STRINGS_OBJ, 
+    OBJECTS, 
+    FUNCTIONS, 
+    DATES, 
+    REGEXP, 
+    ARRAYS
+  );
 
   
   test("#stringify()", (assert) => {
@@ -118,6 +132,10 @@ var inspectSuite = suite("ts/inspect.Inspect", (self) => {
   
   test("#stringifyRegExp()", (assert) => {
     generate(assert, REGEXP.concat(EMPTY), (d) => inspector.stringifyRegExp(d));
+  })
+  
+  test("#stringifyArray()", (assert) => {
+    generate(assert, ARRAYS.concat(EMPTY), (a) => inspector.stringifyArray(a));
   })
   
 })
