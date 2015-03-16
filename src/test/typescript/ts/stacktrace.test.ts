@@ -6,12 +6,26 @@ import ICallSite = stacktrace.ICallSite;
 
 var stacktraceSuite = suite("ts/stacktrace", (self) => {
   var FILENAME = "stacktrace.test.js";
-  
-  self.setUp = () => {}
+  var DATA = {
+    ref: <Error> null,
+    callstack: <ICallSite[]> null
+  };
+
+  //var callstack: ICallSite[];
+
+  self.setUp = () => {
+    
+    (new Function(
+      "stacktrace", "exports",
+      //pseudo script
+      "exports.ref = new Error();\n" + 
+      "exports.callstack = stacktrace.create();\n"
+    ))(stacktrace, DATA)
+  }
   
   test("get()", (assert) => {
   
-    var callstack = stacktrace.get(new Error())
+    var callstack = stacktrace.get(DATA.ref)
     var callsite = callstack[0]
     
     assert.ok(Array.isArray(callstack))
@@ -26,8 +40,7 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
   
   
   test("create()", (assert) => {
-  
-    var callstack = stacktrace.create()
+    var callstack = DATA.callstack;
     var callsite = callstack[0]
     
     assert.ok(Array.isArray(callstack))
