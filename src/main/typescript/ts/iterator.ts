@@ -99,24 +99,28 @@ module iterator {
   }
   
   export function concat<T>(...args: IIterator<T>[]): IIterator<T> {
-    var i = 0;
+    var argi = 0;
     var argc = args.length;
-    var current = args[0];
+    var current = args[argi];
     var done = false;
     
     return iteratorCreate(function () {
       var r: IIteratorResult<T>;
       if (!done) {
         while (true) {
-          r = current.next();
-          if (r.done) {
-            if (i < argc) {
-              args[i] = null;//free reference;
-              current = args[i++];
+          if (current) {
+            r = current.next();
+            if (r.done) {
+              args[argi] = null;//free reference;
+              current = args[++argi];
             } else {
-              done = true;  
+              break;
             }
+          } else if (argi < argc) {
+            args[argi] = null;//free reference;
+            current = args[++argi];
           } else {
+            done = true;
             break;
           }
         }

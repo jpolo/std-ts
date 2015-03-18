@@ -11,7 +11,7 @@ class TestClass {
   
 }
 
-var inspectSuite = suite("ts/inspect.Inspect", (self) => {
+var inspectSuite = suite("ts/inspect.Inspector", (self) => {
   function inspectResults<T>(...args: Array<{ 0: T; 1: string; }>) {
     return args;
   }
