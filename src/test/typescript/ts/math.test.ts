@@ -5,7 +5,23 @@ import math = require("../../../main/typescript/ts/math")
 
 var mathSuite = suite("ts/math", (self) => {
   
-  test("abs()", (assert) => {
+  test(".E", (assert) => {
+    assert.strictEqual(math.E, Math.E);
+  })
+  
+  test(".LN10", (assert) => {
+    assert.strictEqual(math.LN10, Math.LN10);
+  })
+  
+  test(".LN2", (assert) => {
+    assert.strictEqual(math.LN2, Math.LN2);
+  })
+  
+  test(".PI", (assert) => {
+    assert.strictEqual(math.PI, Math.PI);
+  })
+  
+  test(".abs()", (assert) => {
     //Number
     [
       [1, 1],
@@ -23,7 +39,7 @@ var mathSuite = suite("ts/math", (self) => {
       
   })
     
-  test("ceil()", (assert) => {
+  test(".ceil()", (assert) => {
     [
       [1.2, 2],
       [1.7, 2],
@@ -40,7 +56,7 @@ var mathSuite = suite("ts/math", (self) => {
     
   })
     
-  test("exp()", (assert) => {
+  test(".exp()", (assert) => {
     [
       [1.2, 3.3201169227365472],
       [-1.2, 0.30119421191220213 ],
@@ -56,7 +72,7 @@ var mathSuite = suite("ts/math", (self) => {
     
   })
     
-  test("floor()", (assert) => {
+  test(".floor()", (assert) => {
     //Number
     [
       [1.2, 1],

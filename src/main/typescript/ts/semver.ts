@@ -23,11 +23,7 @@ module semver {
           returnValue = o;
         } else if (__isString(o)) {
           returnValue = SemVer.parse(o);
-        } else if (
-          ("major" in o) &&
-          ("minor" in o) &&
-          ("patch" in o)
-        ) {
+        } else if (SemVer.isSemVer(o)) {
           returnValue = new SemVer(
             o.major,
             o.minor,
@@ -40,6 +36,17 @@ module semver {
     
     static compare(a: ISemVer, b: ISemVer): number {
       return __cmp(a, b);
+    }
+    
+    static isSemVer(o: any): boolean {
+      return (o && (
+        o instanceof SemVer ||
+        (
+          ("major" in o) &&
+          ("minor" in o) &&
+          ("patch" in o)
+        )
+      ));
     }
     
     /*static compareMain(a: ISemVer, b: ISemVer): number {

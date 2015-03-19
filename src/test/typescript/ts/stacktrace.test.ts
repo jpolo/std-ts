@@ -52,6 +52,18 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
     assert.strictEqual(callsite.isNative(), false);
     assert.strictEqual(callsite.isEval(), false);
     
+    //Native
+    callstack = stacktrace.get(errorNative)
+    callsite = callstack[0]
+    
+    assert.ok(Array.isArray(callstack));
+    assert.ok(callstack.length > 0);
+    assert.strictEqual(callsite.getFileName(), "native");
+    assert.strictEqual(callsite.getLineNumber(), null);
+    assert.strictEqual(callsite.getColumnNumber(), null);
+    assert.strictEqual(callsite.isNative(), true);
+    assert.strictEqual(callsite.isEval(), false);
+    
     //Eval
     callstack = stacktrace.get(errorEval)
     callsite = callstack[0]

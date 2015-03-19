@@ -55,12 +55,12 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
     assert.ok(pos.columnNumber === 33);
   })*/
 
-  test("__engine__", (assert) => {
+  test(".__engine__", (assert) => {
     var ng = assert.__engine__
     assert.ok(ng instanceof TestEngine)
   })
     
-  test("ok(cond: boolean)", (assert) => {
+  test(".ok(cond: boolean)", (assert) => {
     var assertions = reportMock.assertions
     var i = iter()
     assertMock.ok(true)
@@ -70,7 +70,7 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
     assert.ok(assertions[i()].type == unit.FAILURE)
   })
 
-  test("strictEqual(l: any, r: any)", (assert) => {
+  test(".strictEqual(l: any, r: any)", (assert) => {
     var assertions = reportMock.assertions
     var i = iter()
     assertMock.strictEqual(null, null)
@@ -89,7 +89,7 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
     assert.ok(assertions[i()].type == unit.SUCCESS)
   })
 
-  test("equal(l: any, r: any)", (assert) => {
+  test(".equal(l: any, r: any)", (assert) => {
     var assertions = reportMock.assertions
     var i = iter()
     assertMock.equal(null, null)
@@ -108,7 +108,7 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
     assert.ok(assertions[i()].type == unit.SUCCESS)
   })
 
-  test("throws(fn, expected)", (assert) => {
+  test(".throws(fn, expected)", (assert) => {
     var assertions = reportMock.assertions
     var i = iter()
     assertMock.throws(() => {})

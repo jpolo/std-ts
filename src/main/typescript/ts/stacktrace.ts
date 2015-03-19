@@ -261,7 +261,7 @@ module stacktrace {
     }
   };
   
-  var __errorString = function (returnValue: string, message: string) {
+  var __errorString = function (name: string, message: string) {
     var returnValue = '';
     if (!__isUndefined(name)) {
       returnValue += name;
@@ -271,9 +271,7 @@ module stacktrace {
     }
     return returnValue;
   };
-  
-  
-  
+
   var __errorParse = (function () {
 
     //Sniff browser
@@ -447,7 +445,7 @@ module stacktrace {
   var __errorFrames = (function () {
     var _Error = (<any>Error);
     var __errorFrames: (offset: number) => ICallSite[];
-    if (false && _Error.captureStackTrace) {
+    if (_Error.captureStackTrace) {
       //v8
       var prepareStackTrace = _Error.prepareStackTrace;
       var stackSink = function (_, stack) { return stack; };
@@ -481,7 +479,7 @@ module stacktrace {
     for (var i = 0, l = frames.length; i < l; i++) {
       frame = frames[i];
       try {
-        line = __str(frame);
+        line = CallSite.stringify(frame);//__str(frame);
       } catch (e) {
         try {
           line = "<error: " + e + ">";
@@ -496,21 +494,19 @@ module stacktrace {
   }
   
   var __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, topLevel?: Function): void {
-    /*
+    
     // Simultaneously traverse the frames in error.stack and the arguments.caller
     // to build a list of CallSite objects
-    var factory = makeCallSiteFactory(e);
-    var frames = factory(e, arguments.callee);
-    var errorString = __errorString(frames.name, frames.message);
+    //var factory = makeCallSiteFactory(e);
+    var frames = __errorParse(e);
+    var errorString = __errorString(e.name, e.message);
   
     // Explicitly set back the error.name and error.message
     //e.name = frames.name;
     //e.message = frames.message;
   
     // Pass the raw callsite objects through and get back a formatted stack trace
-    e.stack = __prepareStackTrace(errorString, frames.frames);
-    
-    */
+    e.stack = __prepareStackTrace(errorString, frames);
   };
   
   

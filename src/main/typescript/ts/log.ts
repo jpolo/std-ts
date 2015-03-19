@@ -63,7 +63,13 @@ module log {
     }
     
     static compare(a: ILevel, b: ILevel): number {
-      return a.value - b.value;
+      var returnValue = null;
+      if (a != null && b != null) {
+        var av = a.value;
+        var bv = a.value;
+        returnValue = av === bv ? 0 : av < bv ? -1 : 1;
+      }
+      return returnValue;
     }
     
     static create(name: string, level: number): Level {
@@ -209,6 +215,10 @@ module log {
     log(level: ILevel, o: any): void {
       var name = this.name
       var ng = this._engine
+      if (!ng) {
+        throw new Error("engine is required");  
+      }
+      
       if (__isFunction(o)) {
         if (ng.isEnabledFor(level, name)) {
           ng.send(level, name, o())

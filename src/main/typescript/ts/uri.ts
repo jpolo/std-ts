@@ -21,13 +21,13 @@ module uri {
   export interface IQueryString { [s: string]: string; }
 
   export interface IURI {
-    scheme?: string;
-    userInfo?: string;
-    domain?: string;
-    port?: number;
-    path?: string;
-    query?: IQueryString;
-    fragment?: string;
+    scheme: string;
+    userInfo: string;
+    domain: string;
+    port: number;
+    path: string;
+    query: IQueryString;
+    fragment: string;
   }
 
   export class URI implements IURI {
@@ -97,6 +97,21 @@ module uri {
         o.query,
         o.fragment
       );
+    }
+    
+    static isURI(o: any): boolean {
+      return (
+        o &&
+        (o instanceof URI || (
+          ('scheme' in o) &&
+          ('userInfo' in o) &&
+          ('domain' in o) &&
+          ('port' in o) &&
+          ('path' in o) &&
+          ('query' in o) &&
+          ('fragment' in o)
+        ))
+      );  
     }
     
     static parse(s: string): URI {
