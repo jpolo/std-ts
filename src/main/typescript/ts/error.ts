@@ -95,6 +95,25 @@ module error {
   }
   error['Error'] = __global.Error;
   
+  export declare class EvalError extends Error {}
+  error['EvalError'] = __global.EvalError;
+  
+  export declare class RangeError extends Error {}
+  error['RangeError'] = __global.RangeError;
+  
+  export declare class ReferenceError extends Error {}
+  error['ReferenceError'] = __global.ReferenceError;
+  
+  export declare class SyntaxError extends Error {}
+  error['SyntaxError'] = __global.SyntaxError;
+  
+  export declare class TypeError extends Error {}
+  error['TypeError'] = __global.TypeError;
+  
+  export declare class URIError extends Error {}
+  error['URIError'] = __global.URIError;
+
+  
   export class BaseError extends Error /*HACK: global reference*/ {
     stack: string;
     
@@ -104,11 +123,7 @@ module error {
       __captureStackTrace(this, this.constructor);
     }
   }
-  
-  
-  
 
   
 }
 export = error;
-
