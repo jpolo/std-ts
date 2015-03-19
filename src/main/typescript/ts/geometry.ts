@@ -485,7 +485,7 @@ module geometry {
     var mat_scale = cc((m, v, r) => $mat_scale(m, v, r) + $return(r))
     var mat_transpose = cc((m, r) => $mat_transpose(m, r) + $return(r))
     
-console.warn(mat_multiply.toString())
+//console.warn(mat_multiply.toString())
   }
   
 
