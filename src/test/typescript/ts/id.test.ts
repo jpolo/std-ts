@@ -6,7 +6,7 @@ import id = require("../../../main/typescript/ts/id")
 var idSuite = suite("ts/id", (self) => {
   
   
-  test("generate()", (assert) => {
+  test(".generate()", (assert) => {
     var current = id.generate();
     
     assert.strictEqual(id.generate(), current + 1);
@@ -14,7 +14,7 @@ var idSuite = suite("ts/id", (self) => {
     assert.strictEqual(id.generate(), current + 3);
   })
   
-  test("id()", (assert) => {
+  test(".id()", (assert) => {
     var hasWeakMap = !!WeakMap;
     
     //null, undefined, string, number
