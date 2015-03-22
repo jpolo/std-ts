@@ -5,17 +5,17 @@ import log = require("../../../main/typescript/ts/log")
 import ILevel = log.ILevel
 import IMessage = log.IMessage
 import Logger = log.Logger
-import Engine = log.engine.Engine
+import Dispatcher = log.Dispatcher
 import Message = log.Message
 
 
 var logSuite = suite("ts/log", (self) => {
-  var ng: Engine
+  var ng: Dispatcher
   var logger: Logger
   var logs: log.IMessage[]
   
   self.setUp = () => {
-    ng = new Engine()
+    ng = new Dispatcher()
     logger = ng.logger('test')
     logs = []
       
@@ -39,27 +39,27 @@ var logSuite = suite("ts/log", (self) => {
 var messageSuite = suite("ts/log.Message", () => {
   
   test("#constructor()", (assert) => {
-    var m = new Message(log.DEBUG, "mygroup", "mymessage");
+    var m = new Message(log.DEBUG, "mygroup", ["mymessage"]);
     assert.strictEqual(m.level, log.DEBUG);
     assert.strictEqual(m.group, "mygroup");
-    assert.strictEqual(m.message, "mymessage");
+    assert.equal(m.data, ["mymessage"]);
   })
   
   test("#equals()", (assert) => {
-    var message = new Message(log.DEBUG, "mygroup", "mymessage")
+    var message = new Message(log.DEBUG, "mygroup", ["mymessage"])
     assert.strictEqual(message.equals(null), false)
-    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygroup", "mymessage")), true)
-    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygrou", "mymessage")), false)
-    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygroup", "mymessag")), false)
+    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygroup", ["mymessage"])), true)
+    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygrou", ["mymessage"])), false)
+    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygroup", ["mymessag"])), false)
   })
     
   test("#inspect()", (assert) => {
-    var message = new Message(log.DEBUG, "mygroup", "mymessage")
-    assert.strictEqual(message.inspect(), 'Message { level: DEBUG, group: "mygroup", message: "mymessage" }')
+    var message = new Message(log.DEBUG, "mygroup", ["mymessage"])
+    assert.strictEqual(message.inspect(), 'Message { level: DEBUG, group: "mygroup", data: ["mymessage"] }')
   })
     
   test("#toString()", (assert) => {
-    var message = new Message(log.DEBUG, "mygroup", "mymessage")
+    var message = new Message(log.DEBUG, "mygroup", ["mymessage"])
     assert.strictEqual(message.toString(), '[DEBUG|mygroup] mymessage')
   })
   
@@ -123,15 +123,15 @@ var loggerSuite = suite("ts/log.Logger", (self) => {
   //mock engine
   var logger: Logger;
   var logs: IMessage[] = [];
-  var ng: log.IEngine = {
+  var ng: log.IDispatcher = {
     isEnabledFor: (level: ILevel, group: string) => { return true; },
-    send: (level: ILevel, group: string, message: string) => {
-      logs.push(createMessage(level, group, message));
+    send: (level: ILevel, group: string, data: any[]) => {
+      logs.push(createMessage(level, group, data));
     }
   };
   
-  function createMessage(level: ILevel, group: string, message: string): IMessage {
-    return new Message(level, group, message);
+  function createMessage(level: ILevel, group: string, data: any[]): IMessage {
+    return new Message(level, group, data);
   }
   
   function createLogger(name: string) {
@@ -155,7 +155,7 @@ var loggerSuite = suite("ts/log.Logger", (self) => {
     assert.strictEqual(logs.length, 0)
     logger.debug("blah blah")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.DEBUG, "foobar", "blah blah"))
+    assert.equal(logs[0], new log.Message(log.DEBUG, "foobar", ["blah blah"]))
   })
   
   test("#log()", (assert) => {
@@ -163,11 +163,11 @@ var loggerSuite = suite("ts/log.Logger", (self) => {
     
     logger.log(log.DEBUG, "blah blah")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.DEBUG, "foobar", "blah blah"))
+    assert.equal(logs[0], new log.Message(log.DEBUG, "foobar", ["blah blah"]))
     
     logger.log(log.ERROR, "blah error")
     assert.strictEqual(logs.length, 2)
-    assert.equal(logs[1], new log.Message(log.ERROR, "foobar", "blah error"))
+    assert.equal(logs[1], new log.Message(log.ERROR, "foobar", ["blah error"]))
   })
   
   test("#toString()", (assert) => {
