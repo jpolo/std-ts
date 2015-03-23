@@ -9,11 +9,11 @@ module iterator {
     done: boolean;
   }
   
-  function iteratorCreate<T>(next: () => IIteratorResult<T>): IIterator<T> {
+  function _iteratorCreate<T>(next: () => IIteratorResult<T>): IIterator<T> {
     return new Iterator(next);  
   }
   
-  function iteratorResult<T>(done: boolean, value?: T): IIteratorResult<T> {
+  function _iteratorResult<T>(done: boolean, value?: T): IIteratorResult<T> {
     return { done: done, value: value };  
   }
   
@@ -28,7 +28,7 @@ module iterator {
     }
   }
   
-  var EMPTY = iteratorCreate(function () { return iteratorResult(true); });
+  var EMPTY = _iteratorCreate(function () { return _iteratorResult(true); });
   
   export function empty(): IIterator<any> {
     return EMPTY;
@@ -37,8 +37,8 @@ module iterator {
   export function single<T>(v: T): IIterator<T> {
     var done = false;
     var value = v;
-    return iteratorCreate(function () {
-      var result = iteratorResult(done, value);
+    return _iteratorCreate(function () {
+      var result = _iteratorResult(done, value);
       if (!done) {
         done = true;
         value = undefined;
@@ -51,14 +51,14 @@ module iterator {
     var i = 0;
     var done = false;
     var value = v;
-    return iteratorCreate(function () {
+    return _iteratorCreate(function () {
       if (i < length) {
         i += 1;
       } else {
         done = true;
         value = undefined;
       }
-      return iteratorResult(done, value); 
+      return _iteratorResult(done, value); 
     });  
   }
   
@@ -66,21 +66,21 @@ module iterator {
     var first = true;
     var acc: T;
     
-    return iteratorCreate(function () { 
+    return _iteratorCreate(function () { 
       if (first) {
         acc = start;
         first = false;
       } else {
         acc = f(acc);  
       }
-      return iteratorResult(false, acc);
+      return _iteratorResult(false, acc);
     });
   }
   
   export function range(start: number, end: number, step = 1): IIterator<number> {
     var index = start;
     var done = false;
-    return iteratorCreate(function () {
+    return _iteratorCreate(function () {
       var value: number;
       if (index < end) {
         value = index;
@@ -88,13 +88,13 @@ module iterator {
       } else {
         done = true;
       }
-      return iteratorResult(done, value);
+      return _iteratorResult(done, value);
     });
   }
   
   export function continually<T>(v: T): IIterator<T> {
-    return iteratorCreate(function () {
-      return iteratorResult(false, v);
+    return _iteratorCreate(function () {
+      return _iteratorResult(false, v);
     });
   }
   
@@ -104,7 +104,7 @@ module iterator {
     var current = args[argi];
     var done = false;
     
-    return iteratorCreate(function () {
+    return _iteratorCreate(function () {
       var r: IIteratorResult<T>;
       if (!done) {
         while (true) {
@@ -125,7 +125,7 @@ module iterator {
           }
         }
       } else {
-        r = iteratorResult(done, undefined);  
+        r = _iteratorResult(done, undefined);  
       }
       return r;
     });

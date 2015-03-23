@@ -10,7 +10,7 @@ module math {
   var DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE
   
   var __num = Number;
-  var __isNaN = (n: number) => { return n !== n };
+  var __isNaN = (n: number) => { return n !== n; };
   var __isFinite = isFinite;
   var math_acos = Math.acos;
   var math_asin = Math.asin;

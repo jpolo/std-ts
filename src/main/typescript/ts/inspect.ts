@@ -344,9 +344,9 @@ module inspect {
     }
   }
   
-  var $inspector = new Inspector();
+  var $inspectorDefault = new Inspector();
   export function stringify(o: any): string {
-    return $inspector.stringify(o)
+    return $inspectorDefault.stringify(o)
   }
   
   
