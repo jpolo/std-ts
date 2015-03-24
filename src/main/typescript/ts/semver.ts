@@ -5,6 +5,11 @@ import IHashState = hash.IHashState
 
 //reference: https://github.com/npm/node-semver/blob/master/semver.js
 module semver {
+  
+  //Util
+  var __isUndefined = function (o: any) { return typeof o === "undefined"; };
+  var __isString = function (o: any) { return typeof o === "string"; };
+  var __str = function (o) { return "" + o; };
 
   export interface ISemVer {
     major: number;
@@ -162,10 +167,7 @@ module semver {
     
   }
   
-  //util
-  function __isUndefined(o: any) { return typeof o === "undefined"; }
-  function __isString(o: any) { return typeof o === "string"; }
-  function __str(o) { return String(o); }
+  
   function __strSemVer(v: ISemVer) {
     var s = "";
     s += v.major + '.' + v.minor + '.' + v.patch;
