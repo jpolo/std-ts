@@ -4,12 +4,19 @@ module uri {
   var ES3_COMPAT = true;
   
   //Util
+  var __ostring = {}.toString;
   var __isArray = Array.isArray;
   var __isString = function (o: any): boolean { return typeof o === 'string'; }
   var __keys = Object.keys;
   var __strIsEmpty = function (o: string) { return !o || o.length === 0; };
   
-  //Compat 
+  //Compat
+  if (ES3_COMPAT) {
+    __isArray = __isArray || function (o) { return __ostring.call(o) === "[object Array]"; };
+    __keys = __keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+  }
+  
+  
   export function parse(s: string): URI {
     return URI.parse(s);
   }
