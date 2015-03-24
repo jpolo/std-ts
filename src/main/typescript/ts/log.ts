@@ -77,12 +77,12 @@ module log {
       }
     }
     
-    static compare(a: ILevel, b: ILevel): number {
+    static compare(lhs: ILevel, rhs: ILevel): number {
       var returnValue = null;
-      if (a != null && b != null) {
-        var av = a.value;
-        var bv = a.value;
-        returnValue = av === bv ? 0 : av < bv ? -1 : 1;
+      if (lhs != null && rhs != null) {
+        var lv = lhs.value;
+        var rv = rhs.value;
+        returnValue = lv === rv ? 0 : lv < rv ? -1 : 1;
       }
       return returnValue;
     }
@@ -129,7 +129,7 @@ module log {
     }
     
     equals(o: any): boolean {
-      return this === o || (!!o && (o instanceof Level) && o.value === this.value)
+      return this === o || (!!o && (o instanceof Level) && Level.compare(this, o) === 0)
     }
 
     valueOf() {
