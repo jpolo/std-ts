@@ -3,7 +3,7 @@ import suite = unit.suite
 import test = unit.test
 import random = require("../../../main/typescript/ts/random")
 
-class Assert extends unit.engine.Assert {
+class Assert extends unit.Assert {
   
   generates<T>(f: () => T, expected: T[]) {
     var isSuccess = true

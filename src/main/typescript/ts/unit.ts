@@ -5,10 +5,13 @@ import ICallSite = stacktrace.ICallSite
 import Inspector = inspect.Inspector
 
 module unit {
-  
-  
+
+  //Constant
+  var FLOAT_EPSILON = 1e-5;
   var TEST_TIMEOUT = 2000;//ms
-  var __equals = function (a: any, b: any) { return a === b }
+
+  //Util
+  var __equals = function (a: any, b: any) { return a === b };
   var __equalsFloat = function (a: number, b: number, epsilon: number) {
     return (
       __isNaN(b) ? __isNaN(a) :
@@ -16,12 +19,12 @@ module unit {
       !__isFinite(b) && !__isFinite(a) ? (b > 0) == (a > 0) :
       Math.abs(a - b) < epsilon
     )
-  }
+  };
   var __equalsArray = function (a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
     var returnValue = true
     var al = a.length
     var bl = b.length
-    
+
     if (al === bl) {
       for (var i = 0, l = al; i < l; ++i) {
         if (!equalFn(a[i], b[i])) {
@@ -31,12 +34,12 @@ module unit {
       }
     }
     return returnValue
-  }
+  };
   var __fstring = Function.prototype.toString;
   var __fnSource = function (f: Function) { return __fstring.call(f).slice(13, -1).trim(); };
-  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' }
-  var __freeze = reflect.freeze
-  var __isFinite = isFinite
+  var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
+  var __freeze = reflect.freeze;
+  var __isFinite = isFinite;
   var __isNaN = function (o: any) { return o !== o; };
   var __isNumber = function (o) { return typeof o === 'number'; };
   var __isObject = function (o) { return o != null && (typeof o == "object"); };
@@ -45,7 +48,11 @@ module unit {
   var __str = function (o) { return "" + o; };
   var __stringTag = reflect.stringTag;
   var __now = Date.now || function () { return (new Date()).getTime(); };
-  
+
+  //Service
+  var $inspectDefault = new inspect.Inspector({ maxString: 70 });
+  var $timeDefault = { now: __now };
+  var $stacktraceDefault = stacktrace;
 
 
   export interface IAssertion {
@@ -83,67 +90,14 @@ module unit {
     name: string
     run(engine: IEngine, onComplete: (report: ITestReport) => void): void
   }
-  
-  /*export class AssertionType {
-  
-    static for(name: string): AssertionType {
-      name = name.toUpperCase()
-      var assertionTypes = AssertionType._instances
-      var assertionType = assertionTypes[name]
-      if (!assertionType) {
-        assertionType = assertionTypes[name] = new AssertionType(name, AssertionType._constructorKey)
-      }
-      return assertionType
-    }
-    
-    static compare(a: AssertionType, b: AssertionType): number {
-      var aname = a.name, bname = b.name;
-      return (aname === bname ? 0 : aname < bname ? -1 : 1);
-    }
-    
-    static _constructorKey = {};
-    private static _instances: { [key: string]: AssertionType } = {}
 
-    constructor(
-      public name: string,
-      key?: any
-    ) {
-      if (key != AssertionType._constructorKey) {
-        throw new Error("new AssertionType() is private, use AssertionType.for instead.");  
-      }
-    }
-    
-    compare(o: AssertionType): number {
-      return AssertionType.compare(this, o);
-    }
-    
-    equals(o: any): boolean { 
-      return this === o || (o && (o instanceof this.constructor) && this.name === o.name) 
-    }
-    
-    valueOf() { 
-      return this.name;
-    }
-    
-    inspect() { 
-      return __format('AssertionType', this.name) 
-    }
-    
-    toJSON() {
-      return "" + this;
-    }
-    
-    toString() { 
-      return this.name;
-    }
-  }*/
-  export var SUCCESS = "SUCCESS"
-  export var FAILURE = "FAILURE"
-  export var ERROR = "ERROR"
-  export var WARNING = "WARNING"
-  
+  export var SUCCESS = "SUCCESS";
+  export var FAILURE = "FAILURE";
+  export var ERROR = "ERROR";
+  export var WARNING = "WARNING";
+
   export class Assertion implements IAssertion {
-    
+
     static success(testCase: ITest, message: string, position?: ICallSite) {
       return new Assertion(SUCCESS, testCase, message, position)
     }
@@ -159,7 +113,7 @@ module unit {
     static warning(testCase: ITest, message: string, position?: ICallSite) {
       return new Assertion(WARNING, testCase, message, position)
     }
-    
+
     constructor(
       public type: string,
       public test: ITest,
@@ -170,21 +124,21 @@ module unit {
 
     equals(o: any): boolean {
       return this === o || (
-        o && 
-        (o instanceof this.constructor) &&
+        o &&
+        (o instanceof Assertion) &&
         this.type === o.type &&
         this.test === o.test &&
         this.message === o.message
       );
     }
-    
+
     inspect() {
-      return __format("" + this.type, this.message);
+      return __format(this.type, this.message);
     }
-    
+
     toJSON() {
       return {
-        type: "" + this.type,
+        type: this.type,
         message: this.message
       };
     }
@@ -193,29 +147,326 @@ module unit {
       return this.inspect()
     }
   }
+  
+  export class Assert {
+    constructor(
+      public __engine__: IEngine,
+      private _testCase: ITest,
+      private _report: ITestReport
+    ) { }
+
+    ok(o: boolean, message?: string): boolean {
+      return this.__assert__(!!o, message, this.__position__())
+    }
+
+    strictEqual<T>(actual: T, expected: T, message?: string): boolean {
+      return this._strictEqual(actual, expected, false, message, this.__position__())
+    }
+
+    notStrictEqual<T>(actual: T, expected: T, message?: string): boolean {
+      return this._strictEqual(actual, expected, true, message, this.__position__())
+    }
+
+    equal<T>(actual: T, expected: T, message?: string): boolean {
+      return this._equal(actual, expected, false, message, this.__position__())
+    }
+
+    notEqual<T>(actual: T, expected: T, message?: string): boolean {
+      return this._equal(actual, expected, true, message, this.__position__())
+    }
+
+    propEqual(actual: any, expected: any, message?: string): boolean {
+      return this._propEqual(actual, expected, false, message, this.__position__())
+    }
+
+    notPropEqual(actual: any, expected: any, message?: string): boolean {
+      return this._propEqual(actual, expected, false, message, this.__position__())
+    }
+
+    deepEqual(actual: any, expected: any, message?: string): boolean {
+      return this._deepEqual(actual, expected, false, message, this.__position__())
+    }
+
+    notDeepEqual(actual: any, expected: any, message?: string): boolean {
+      return this._deepEqual(actual, expected, true, message, this.__position__())
+    }
+
+    typeOf(o: any, type: string, message?: string): boolean {
+      return this.__assert__(typeof o === type, message, this.__position__())
+    }
+
+    instanceOf(o: any, constructor: Function, message?: string): boolean {
+      return this.__assert__(o instanceof constructor, message, this.__position__())
+    }
+
+    throws(block: () => void, expected?: any, message?: string): boolean {
+      var isSuccess = false
+      var position = this.__position__()
+      var actual
+      message = message || ('`' + __fnSource(block) + '` must throw an error')
+      try {
+        block()
+      } catch (e) {
+        isSuccess = true
+        actual = e
+      }
+
+      if (actual) {
+        isSuccess = false
+        if (!expected) {
+          isSuccess = true
+        } else {
+          switch (__stringTag(expected)) {
+            case 'String':
+              var actualStr = __str(actual)
+              isSuccess = actualStr == expected
+              message = this.__dump__(actualStr) + ' thrown must be ' + this.__dump__(expected)
+              break
+            case 'Function':
+              isSuccess = actual instanceof expected
+              message = this.__dump__(actual) + ' thrown must be instance of ' + this.__dump__(expected)
+              break
+            case 'RegExp':
+              isSuccess = expected.test(__str(actual))
+              message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
+              break
+            case 'Object':
+              isSuccess = reflect.getPrototypeOf(actual) === reflect.getPrototypeOf(expected) &&
+                actual.name === expected.name &&
+                actual.message === expected.message
+              message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
+              break
+            default:
+              if (expected instanceof Error) {
+                isSuccess = reflect.getPrototypeOf(actual) === reflect.getPrototypeOf(expected) &&
+                  actual.name === expected.name &&
+                  actual.message === expected.message
+                message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
+              } else {
+                isSuccess = actual === this.__engine__.testEqualsStrict(actual, expected)
+                message = this.__dump__(actual) + ' thrown must be ' + this.__dump__(expected)
+              }
+          }
+        }
+      }
+      return this.__assert__(isSuccess, message, position)
+    }
+
+    __assert__(isSuccess: boolean, message: string, position: ICallSite): boolean {
+      var assertions = this._report.assertions
+      if (!reflect.isExtensible(assertions)) {
+        throw new Error('Assertions were made after report creation in ' + this._testCase)
+      }
+
+      message = message || 'assertion should be true'
+
+      assertions.push(
+        new Assertion(isSuccess ? SUCCESS : FAILURE, this._testCase, message, position)
+      )
+      return isSuccess
+    }
+
+    __dump__(o: any): string {
+      return this.__engine__.dump(o)
+    }
+
+    __position__(): ICallSite {
+      return this.__engine__.callstack(3)[0]
+    }
+
+    private _strictEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+      message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' be ') + this.__dump__(o2))
+      return this.__assert__(this.__engine__.testEqualsStrict(o1, o2) === !not, message, position)
+    }
+
+    private _equal(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+      message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' equal ') + this.__dump__(o2))
+      return this.__assert__(this.__engine__.testEquals(o1, o2) === !not, message, position)
+    }
+
+    private _propEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+      var engine = this.__engine__
+      message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
+      var keys1 = __keysSorted(o1)
+      var keys2 = __keysSorted(o2)
+      var isSuccess = true
+      for (var i = 0, l = keys1.length; i < l; ++i) {
+        var key1 = keys1[i]
+        var key2 = keys2[i]
+        if (key1 === key2 && !engine.testEqualsStrict(o1[key1], o2[key2])) {
+          isSuccess = false
+          break
+        }
+      }
+      return this.__assert__(isSuccess, message, position)
+    }
+
+    private _deepEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+      message = message || (this.__dump__(o1) + (' must equals ') + this.__dump__(o2))
+      return this.__assert__(this.__engine__.testEqualsDeep(o1, o2) === !not, message, position)
+    }
+  }
+  
+  export class Test<IAssert> implements ITest {
+
+    private _separator = '::'
+
+    public category: string = ""
+    public blocks: Array<(assert: IAssert, complete?: () => void) => void> = []
+
+    constructor(
+      public suite: TestSuite,
+      public name: string,
+      private _assertFactory: (ng: IEngine, tc: Test<IAssert>, r: ITestReport) => IAssert
+    ) { }
+
+    private _beforeRun() {
+      var suite = this.suite
+      if (suite.setUp) {
+        suite.setUp(this)
+      }
+    }
+
+    private _afterRun() {
+      var suite = this.suite
+      if (suite.tearDown) {
+        suite.tearDown(this)
+      }
+    }
+
+    run(engine: IEngine, onComplete: (report: ITestReport) => void) {
+      var blocks = this.blocks
+      var blockc = blocks.length
+      var assertions: IAssertion[] = []
+      var report: ITestReport = {
+        startDate: engine.currentDate(),
+        elapsedMilliseconds: NaN,
+        assertions: assertions
+      }
+
+      var assert = this._assertFactory(engine, this, report)
+      var startTime  = engine.currentTime()
+      var timeoutMs = TEST_TIMEOUT
+
+
+      //finish test and send to callback
+      var blockComplete = () => {
+        if (--blockc === 0) {
+          //finalize report
+          report.elapsedMilliseconds = engine.currentTime() - startTime
+          __freeze(report)
+          __freeze(assertions)
+
+          onComplete(report)
+        }
+      }
+
+      var runBlock = (block: (assert: IAssert, complete?: () => void) => void, onComplete: () => void) => {
+        var isAsync = block.length >= 2//asynchronous
+        var isFinished = false
+        var timerId = null
+
+        var onTimeout = () => {
+          timerId = null
+          assertions.push(Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
+          complete()
+        }
+
+        var complete = () => {
+          if (!isFinished) {
+            isFinished = true
+            if (timerId) {
+              clearTimeout(timerId)
+              timerId = null
+            }
+
+            if (assertions.length === 0) {
+              assertions.push(Assertion.warning(this, "No assertion found", null))
+            }
+
+            this._afterRun()
+            onComplete()
+          }
+        }
+
+        try {
+          this._beforeRun()
+          if (isAsync) {
+            timerId = setTimeout(onTimeout, timeoutMs)
+            block(assert, complete)
+          } else {
+            block(assert)
+          }
+        } catch (e) {
+          var parsed  = e ? stacktrace.get(e) : null;
+          assertions.push(Assertion.error(this, e.message, parsed && parsed[0], parsed))
+        } finally {
+          if (!isAsync) {
+            complete()
+          }
+        }
+      }
+
+      for (var i = 0, l = blocks.length; i < l; ++i) {
+        runBlock(blocks[i], blockComplete)
+      }
+    }
+
+    inspect() {
+      return __format('Test', "" + this)
+    }
+
+    toString() {
+      var category = this.category
+      return (category ? category + this._separator : '' ) + this.name
+    }
+  }
+  
+  export class TestSuite {
+    public setUp: (test?: Test<any>) => void
+    public tearDown: (test?: Test<any>) => void
+    public tests: Test<any>[] = []
+    private _byNames: {[name: string]: Test<any>} = {}
+
+    constructor(
+      public name: string
+    ) { }
+
+    test<IAssert>(
+      name: string,
+      f: (assert: IAssert, complete?: () => void) => void,
+      assertFactory: (ng: IEngine, tc: Test<IAssert>, r: ITestReport) => IAssert
+    ) {
+      var byNames = this._byNames
+      var test = byNames[name]
+      if (!test) {
+        test = byNames[name] = new Test(this, name, assertFactory)
+        this.tests.push(test)
+        test.category = this.name
+      }
+
+      //add block of code to be executed
+      test.blocks.push(f)
+    }
+  }
 
   export module engine {
-    export var FLOAT_EPSILON = 1e-5;
-    var $inspectDefault = new inspect.Inspector({ maxString: 70 })
-    var $timeDefault = { now: __now }
-    var $stacktraceDefault = stacktrace;
-    
-    
+
     /**
-     * Default engine 
+     * Default engine
      */
     var _instance: Engine
     export function get(): Engine {
       return (_instance || (_instance = new Engine()))
     }
-    
+
     export class Engine implements IEngine {
-      
+
       //Services
-      private $inspect: inspect.IInspector = $inspectDefault
-      private $time: { now(): number } = $timeDefault
+      private $inspect: inspect.IInspector = $inspectDefault;
+      private $time: { now(): number } = $timeDefault;
       private $stacktrace: { create(): ICallSite[] } = $stacktraceDefault;
-      
+
       constructor(
         deps?: {
           $inspect?: inspect.IInspector;
@@ -224,12 +475,18 @@ module unit {
         }
       ) {
         if (deps) {
-          this.$inspect = deps.$inspect || this.$inspect
-          this.$time = deps.$time || this.$time
-          this.$stacktrace = deps.$stacktrace || this.$stacktrace
+          if (deps.$inspect) {
+            this.$inspect = deps.$inspect;
+          }
+          if (deps.$time) {
+            this.$time = deps.$time;
+          }
+          if (deps.$stacktrace) {
+            this.$stacktrace = deps.$stacktrace;
+          }
         }
       }
-      
+
       callstack(): ICallSite[] {
         return this.$stacktrace.create();
       }
@@ -268,7 +525,7 @@ module unit {
 
       testEqualsNear(o1: any, o2: any, epsilon: number = FLOAT_EPSILON): boolean {
         var isnum1 = __isNumber(o1)
-        var isnum2 = __isNumber(o2) 
+        var isnum2 = __isNumber(o2)
         return (
           (isnum1 || isnum2) ? (isnum1 === isnum2) && (o1 == o2 || __equalsFloat(o1, o2, epsilon)) :
           (o1 != null && o1.nearEquals) ? o1.nearEquals(o2) :
@@ -276,7 +533,7 @@ module unit {
           false
         )
       }
-      
+
       testEqualsDeep(o1: any, o2: any): boolean {
         var self = this
         function equals(o1, o2) {
@@ -290,8 +547,8 @@ module unit {
                 return (__stringTag(o2) === 'Number') && (isNaN(o1) && isNaN(o2))
               case 'String':
                 return (__stringTag(o2) === 'String') && (o1 == o2)
-              case 'Array':   
-                return (o2 != null) && __equalsArray(o1, o2, equals)         
+              case 'Array':
+                return (o2 != null) && __equalsArray(o1, o2, equals)
               case 'Object':
               case 'Function':
               default:
@@ -330,329 +587,24 @@ module unit {
       }
     }
 
-    export class TestSuite {
-
-      public setUp: (test?: Test<any>) => void
-      public tearDown: (test?: Test<any>) => void
-      public tests: Test<any>[] = []
-      private _byNames: {[name: string]: Test<any>} = {}
-
-      constructor(
-        public name: string
-      ) { }
-
-      test<IAssert>(
-        name: string,
-        f: (assert: IAssert, complete?: () => void) => void,
-        AssertClass: { new(ng: IEngine, tc: Test<IAssert>, r: ITestReport): IAssert }
-      ) {
-        var byNames = this._byNames
-        var test = byNames[name]
-        if (!test) {
-          test = byNames[name] = new Test(this, name, AssertClass)
-          this.tests.push(test)
-          test.category = this.name
-        }
-
-        //add block of code to be executed
-        test.blocks.push(f)
-      }
-    }
-
-    export class Test<IAssert> implements ITest {
-
-      private _separator = '::'
-
-      public category: string = ""
-      public blocks: Array<(assert: IAssert, complete?: () => void) => void> = []
-
-      constructor(
-        public suite: TestSuite,
-        public name: string,
-        private AssertClass: { new(ng: IEngine, tc: Test<IAssert>, r: ITestReport): IAssert }
-      ) { }
-
-      private _beforeRun() {
-        var suite = this.suite
-        if (suite.setUp) {
-          suite.setUp(this)
-        }
-      }
-
-      private _afterRun() {
-        var suite = this.suite
-        if (suite.tearDown) {
-          suite.tearDown(this)
-        }
-      }
-
-      run(engine: IEngine, onComplete: (report: ITestReport) => void) {
-        var blocks = this.blocks
-        var blockc = blocks.length
-        var assertions: IAssertion[] = []
-        var report: ITestReport = {
-          startDate: engine.currentDate(),
-          elapsedMilliseconds: NaN,
-          assertions: assertions
-        }
-
-        var assert = new this.AssertClass(engine, this, report)
-        var startTime  = engine.currentTime()
-        var timeoutMs = TEST_TIMEOUT
-
-
-        //finish test and send to callback
-        var blockComplete = () => {
-          if (--blockc === 0) {
-            //finalize report
-            report.elapsedMilliseconds = engine.currentTime() - startTime
-            __freeze(report)
-            __freeze(assertions)
-
-            onComplete(report)
-          }
-        }
-
-        var runBlock = (block: (assert: IAssert, complete?: () => void) => void, onComplete: () => void) => {
-          var isAsync = block.length >= 2//asynchronous
-          var isFinished = false
-          var timerId = null
-
-          var onTimeout = () => {
-            timerId = null
-            assertions.push(Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
-            complete()
-          }
-
-          var complete = () => {
-            if (!isFinished) {
-              isFinished = true
-              if (timerId) {
-                clearTimeout(timerId)
-                timerId = null
-              }
-
-              if (assertions.length === 0) {
-                assertions.push(Assertion.warning(this, "No assertion found", null))
-              }
-
-              this._afterRun()
-              onComplete()
-            }
-          }
-
-          try {
-            this._beforeRun()
-            if (isAsync) {
-              timerId = setTimeout(onTimeout, timeoutMs)
-              block(assert, complete)
-            } else {
-              block(assert)
-            }
-          } catch (e) {
-            var parsed  = e ? stacktrace.get(e) : null;
-            assertions.push(Assertion.error(this, e.message, parsed && parsed[0], parsed))
-          } finally {
-            if (!isAsync) {
-              complete()
-            }
-          }
-        }
-
-        for (var i = 0, l = blocks.length; i < l; ++i) {
-          runBlock(blocks[i], blockComplete)
-        }
-      }
-
-      inspect() {
-        return __format('Test', "" + this)
-      }
-      
-      toString() {
-        var category = this.category
-        return (category ? category + this._separator : '' ) + this.name
-      }
-    }
-
-    export class Assert {
-      constructor(
-        public __engine__: IEngine,
-        private _testCase: ITest,
-        private _report: ITestReport
-      ) { }
-
-      ok(o: boolean, message?: string): boolean {
-        return this.__assert__(!!o, message, this.__position__())
-      }
-
-      strictEqual<T>(actual: T, expected: T, message?: string): boolean {
-        return this._strictEqual(actual, expected, false, message, this.__position__())
-      }
-
-      notStrictEqual<T>(actual: T, expected: T, message?: string): boolean {
-        return this._strictEqual(actual, expected, true, message, this.__position__())
-      }
-
-      equal<T>(actual: T, expected: T, message?: string): boolean {
-        return this._equal(actual, expected, false, message, this.__position__())
-      }
-
-      notEqual<T>(actual: T, expected: T, message?: string): boolean {
-        return this._equal(actual, expected, true, message, this.__position__())
-      }
-
-      propEqual(actual: any, expected: any, message?: string): boolean {
-        return this._propEqual(actual, expected, false, message, this.__position__())
-      }
-
-      notPropEqual(actual: any, expected: any, message?: string): boolean {
-        return this._propEqual(actual, expected, false, message, this.__position__())
-      }
-      
-      deepEqual(actual: any, expected: any, message?: string): boolean {
-        return this._deepEqual(actual, expected, false, message, this.__position__())
-      }
-      
-      notDeepEqual(actual: any, expected: any, message?: string): boolean {
-        return this._deepEqual(actual, expected, true, message, this.__position__())
-      }
-
-      typeOf(o: any, type: string, message?: string): boolean {
-        return this.__assert__(typeof o === type, message, this.__position__())
-      }
-
-      instanceOf(o: any, constructor: Function, message?: string): boolean {
-        return this.__assert__(o instanceof constructor, message, this.__position__())
-      }
-
-      throws(block: () => void, expected?: any, message?: string): boolean {
-        var isSuccess = false
-        var position = this.__position__()
-        var actual
-        message = message || ('`' + __fnSource(block) + '` must throw an error')
-        try {
-          block()
-        } catch (e) {
-          isSuccess = true
-          actual = e
-        }
-
-        if (actual) {
-          isSuccess = false
-          if (!expected) {
-            isSuccess = true
-          } else {
-            switch (__stringTag(expected)) {
-              case 'String':
-                var actualStr = __str(actual)
-                isSuccess = actualStr == expected
-                message = this.__dump__(actualStr) + ' thrown must be ' + this.__dump__(expected)
-                break
-              case 'Function':
-                isSuccess = actual instanceof expected
-                message = this.__dump__(actual) + ' thrown must be instance of ' + this.__dump__(expected)
-                break
-              case 'RegExp':
-                isSuccess = expected.test(__str(actual))
-                message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
-                break
-              case 'Object':
-                isSuccess = reflect.getPrototypeOf(actual) === reflect.getPrototypeOf(expected) &&
-                  actual.name === expected.name &&
-                  actual.message === expected.message
-                message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
-                break
-              default:
-                if (expected instanceof Error) {
-                  isSuccess = reflect.getPrototypeOf(actual) === reflect.getPrototypeOf(expected) &&
-                    actual.name === expected.name &&
-                    actual.message === expected.message
-                  message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
-                } else {
-                  isSuccess = actual === this.__engine__.testEqualsStrict(actual, expected)
-                  message = this.__dump__(actual) + ' thrown must be ' + this.__dump__(expected)
-                }
-            }
-          }
-        }
-        return this.__assert__(isSuccess, message, position)
-      }
-
-      __assert__(isSuccess: boolean, message: string, position: ICallSite): boolean {
-        var assertions = this._report.assertions
-        if (!reflect.isExtensible(assertions)) {
-          throw new Error('Assertions were made after report creation in ' + this._testCase)
-        }
-
-        message = message || 'assertion should be true'
-
-        assertions.push(
-          new Assertion(isSuccess ? SUCCESS : FAILURE, this._testCase, message, position)
-        )
-        return isSuccess
-      }
-
-      __dump__(o: any): string {
-        return this.__engine__.dump(o)
-      }
-
-      __position__(): ICallSite {
-        return this.__engine__.callstack(3)[0]
-      }
-
-      private _strictEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
-        message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' be ') + this.__dump__(o2))
-        return this.__assert__(this.__engine__.testEqualsStrict(o1, o2) === !not, message, position)
-      }
-
-      private _equal(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
-        message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' equal ') + this.__dump__(o2))
-        return this.__assert__(this.__engine__.testEquals(o1, o2) === !not, message, position)
-      }
-
-      private _propEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
-        var engine = this.__engine__
-        message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
-        var keys1 = __keysSorted(o1)
-        var keys2 = __keysSorted(o2)
-        var isSuccess = true
-        for (var i = 0, l = keys1.length; i < l; ++i) {
-          var key1 = keys1[i]
-          var key2 = keys2[i]
-          if (key1 === key2 && !engine.testEqualsStrict(o1[key1], o2[key2])) {
-            isSuccess = false
-            break
-          }
-        }
-        return this.__assert__(isSuccess, message, position)
-      }
-      
-      private _deepEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
-        message = message || (this.__dump__(o1) + (' must equals ') + this.__dump__(o2))
-        return this.__assert__(this.__engine__.testEqualsDeep(o1, o2) === !not, message, position)
-      }
-
-    }
-    
-
     /**
-     * Default suite 
+     * Default suite
      */
     export var suiteDefault = new TestSuite("")
-      
-    
+
+
   }
-   
+
   var suiteCurrent = engine.suiteDefault
-      
+
   export function suite(
     name: string,
-    f: (self?: engine.TestSuite) => void
+    f: (self?: TestSuite) => void
   ): ITest[]  {
-    var suitePrevious = suiteCurrent
-    var suiteNew = new engine.TestSuite(name)
+    var suitePrevious = suiteCurrent;
+    var suiteNew = new TestSuite(name);
 
-    suiteCurrent = suiteNew
+    suiteCurrent = suiteNew;
     try {
       f(suiteNew)
     } finally {
@@ -662,20 +614,22 @@ module unit {
   }
 
   export function testc<IAssert>(
-    AssertClass: { new(ng: IEngine, tc: engine.Test<IAssert>, r: ITestReport): IAssert }
+    AssertClass: { new(ng: IEngine, tc: Test<IAssert>, r: ITestReport): IAssert }
   ) {
     return (name: string, f: (assert: IAssert, done?: () => void) => void) => {
-      return suiteCurrent.test(name, f, AssertClass)
+      return suiteCurrent.test(name, f, (ng, tc, r) => {
+        return new AssertClass(ng, tc, r);
+      })
     }
   }
 
   export function test(
     name: string,
-    f: (assert: engine.Assert, done?: () => void) => void
+    f: (assert: Assert, done?: () => void) => void
   ) {
-    suiteCurrent.test(name, f, engine.Assert)
+    testc(Assert)(name, f);
   }
-    
+
 
   export class Runner {
     constructor(
@@ -766,12 +720,12 @@ module unit {
 if (assertion.position && !assertion.position.getFileName) {
   console.warn(assertion);
 }
-          
+
           var message = assertion.message
           var position = assertion.position
           var positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : ""
           var typeName = __str(assertion.type)
-          
+
           switch(assertion.type) {
             case SUCCESS:
               matrix += "."

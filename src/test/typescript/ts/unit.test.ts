@@ -2,7 +2,7 @@ import unit = require("../../../main/typescript/ts/unit")
 import suite = unit.suite
 import test = unit.test
 import TestEngine = unit.engine.Engine
-import Assert = unit.engine.Assert
+import Assert = unit.Assert
 
 var assertSuite = suite("ts/unit.Assert", (self) => {
   var engine = new TestEngine()
