@@ -596,17 +596,27 @@ module unit {
   }
 
   var suiteCurrent = engine.suiteDefault
+  
 
   export function suite(
     name: string,
-    f: (self?: TestSuite) => void
+    f: (
+      self?: TestSuite, 
+      test?: (
+        name: string,
+        f: (assert: Assert, done?: () => void) => void
+      ) => void 
+    ) => void
   ): ITest[]  {
     var suitePrevious = suiteCurrent;
     var suiteNew = new TestSuite(name);
-
+    var testFactory = function (name, f) {
+      return suiteNew.test(name, f, (ng, tc, r) => { return new Assert(ng, tc, r); })
+    }
+    
     suiteCurrent = suiteNew;
     try {
-      f(suiteNew)
+      f(suiteNew, testFactory)
     } finally {
       suiteCurrent = suitePrevious
     }

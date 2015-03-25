@@ -36,7 +36,7 @@ var logSuite = suite("ts/log", (self) => {
 
 })
 
-var messageSuite = suite("ts/log.Message", () => {
+var messageSuite = suite("ts/log.Message", (self, test) => {
   
   test("#constructor()", (assert) => {
     var m = new Message(log.DEBUG, "mygroup", ["mymessage"]);
