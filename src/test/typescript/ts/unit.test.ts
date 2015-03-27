@@ -1,10 +1,10 @@
 import unit = require("../../../main/typescript/ts/unit")
 import suite = unit.suite
 import test = unit.test
-import TestEngine = unit.engine.Engine
+import TestEngine = unit.TestEngine
 import Assert = unit.Assert
 
-var assertSuite = suite("ts/unit.Assert", (self) => {
+var AssertSuite = suite("ts/unit.Assert", (self) => {
   var engine = new TestEngine()
   var testCaseMock: unit.ITest
   var reportMock: unit.ITestReport
@@ -138,7 +138,7 @@ var assertSuite = suite("ts/unit.Assert", (self) => {
 
 })
 
-var unitSuite = suite("ts/unit.TestEngine", (self) => {
+var TestEngineSuite = suite("ts/unit.TestEngine", (self) => {
   var engine = new TestEngine()
 
 
@@ -197,6 +197,6 @@ var unitSuite = suite("ts/unit.TestEngine", (self) => {
     
   })
 });
-var exportSuite = assertSuite.concat(unitSuite)
+var exportSuite = AssertSuite.concat(TestEngineSuite)
 
 export = exportSuite

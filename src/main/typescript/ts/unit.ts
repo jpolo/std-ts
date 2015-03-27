@@ -73,7 +73,7 @@ module unit {
     print(reports: ITestReport[]): void
   }
 
-  export interface IEngine {
+  export interface ITestEngine {
     callstack(offset?: number): ICallSite[]
     dump(o: any): string
     currentDate(): Date
@@ -88,7 +88,7 @@ module unit {
   export interface ITest {
     category: string
     name: string
-    run(engine: IEngine, onComplete: (report: ITestReport) => void): void
+    run(engine: ITestEngine, onComplete: (report: ITestReport) => void): void
   }
 
   export var SUCCESS = "SUCCESS";
@@ -150,7 +150,7 @@ module unit {
   
   export class Assert {
     constructor(
-      public __engine__: IEngine,
+      public __engine__: ITestEngine,
       private _testCase: ITest,
       private _report: ITestReport
     ) { }
@@ -307,17 +307,22 @@ module unit {
     }
   }
   
-  export class Test<IAssert> implements ITest {
+  
+  interface ITestBlock<IAssert> {
+    block: (assert: IAssert, complete?: () => void) => void
+    assertFactory: (ng: ITestEngine, tc: ITest, r: ITestReport) => IAssert
+  }
+
+  export class Test implements ITest {
 
     private _separator = '::'
 
     public category: string = ""
-    public blocks: Array<(assert: IAssert, complete?: () => void) => void> = []
+    public blocks: ITestBlock<any>[] = []
 
     constructor(
       public suite: TestSuite,
-      public name: string,
-      private _assertFactory: (ng: IEngine, tc: Test<IAssert>, r: ITestReport) => IAssert
+      public name: string
     ) { }
 
     private _beforeRun() {
@@ -333,8 +338,18 @@ module unit {
         suite.tearDown(this)
       }
     }
+    
+    addBlock<IAssert>(
+      block: (assert: IAssert, complete?: () => void) => void,
+      assertFactory: (ng: ITestEngine, tc: ITest, r: ITestReport) => IAssert
+    ) {
+      this.blocks.push({
+        block: block,
+        assertFactory: assertFactory
+      });
+    }
 
-    run(engine: IEngine, onComplete: (report: ITestReport) => void) {
+    run(engine: ITestEngine, onComplete: (report: ITestReport) => void) {
       var blocks = this.blocks
       var blockc = blocks.length
       var assertions: IAssertion[] = []
@@ -344,7 +359,6 @@ module unit {
         assertions: assertions
       }
 
-      var assert = this._assertFactory(engine, this, report)
       var startTime  = engine.currentTime()
       var timeoutMs = TEST_TIMEOUT
 
@@ -361,7 +375,10 @@ module unit {
         }
       }
 
-      var runBlock = (block: (assert: IAssert, complete?: () => void) => void, onComplete: () => void) => {
+      var runBlock = (testBlock: ITestBlock<any>, onComplete: () => void) => {
+        var block = testBlock.block;
+        var assertFactory = testBlock.assertFactory;
+        var assert = assertFactory(engine, this, report);
         var isAsync = block.length >= 2//asynchronous
         var isFinished = false
         var timerId = null
@@ -423,179 +440,162 @@ module unit {
   }
   
   export class TestSuite {
-    public setUp: (test?: Test<any>) => void
-    public tearDown: (test?: Test<any>) => void
-    public tests: Test<any>[] = []
-    private _byNames: {[name: string]: Test<any>} = {}
+    public setUp: (test?: Test) => void
+    public tearDown: (test?: Test) => void
+    public tests: Test[] = []
+    private _byNames: {[name: string]: Test} = {}
 
     constructor(
       public name: string
     ) { }
 
-    test<IAssert>(
-      name: string,
-      f: (assert: IAssert, complete?: () => void) => void,
-      assertFactory: (ng: IEngine, tc: Test<IAssert>, r: ITestReport) => IAssert
-    ) {
+    getTest(name: string) {
       var byNames = this._byNames
       var test = byNames[name]
       if (!test) {
-        test = byNames[name] = new Test(this, name, assertFactory)
+        test = byNames[name] = new Test(this, name)
         this.tests.push(test)
         test.category = this.name
       }
-
-      //add block of code to be executed
-      test.blocks.push(f)
+      return test;
     }
   }
 
-  export module engine {
 
-    /**
-     * Default engine
-     */
-    var _instance: Engine
-    export function get(): Engine {
-      return (_instance || (_instance = new Engine()))
+  export class TestEngine implements ITestEngine {
+
+    //Services
+    private $inspect: inspect.IInspector = $inspectDefault;
+    private $time: { now(): number } = $timeDefault;
+    private $stacktrace: { create(): ICallSite[] } = $stacktraceDefault;
+
+    constructor(
+      deps?: {
+        $inspect?: inspect.IInspector;
+        $time?: { now: () => number };
+        $stacktrace?: { create(): ICallSite[] };
+      }
+    ) {
+      if (deps) {
+        if (deps.$inspect) {
+          this.$inspect = deps.$inspect;
+        }
+        if (deps.$time) {
+          this.$time = deps.$time;
+        }
+        if (deps.$stacktrace) {
+          this.$stacktrace = deps.$stacktrace;
+        }
+      }
     }
 
-    export class Engine implements IEngine {
+    callstack(): ICallSite[] {
+      return this.$stacktrace.create();
+    }
 
-      //Services
-      private $inspect: inspect.IInspector = $inspectDefault;
-      private $time: { now(): number } = $timeDefault;
-      private $stacktrace: { create(): ICallSite[] } = $stacktraceDefault;
+    dump(o: any): string {
+      return this.$inspect.stringify(o)
+    }
 
-      constructor(
-        deps?: {
-          $inspect?: inspect.IInspector;
-          $time?: { now: () => number };
-          $stacktrace?: { create(): ICallSite[] };
-        }
-      ) {
-        if (deps) {
-          if (deps.$inspect) {
-            this.$inspect = deps.$inspect;
-          }
-          if (deps.$time) {
-            this.$time = deps.$time;
-          }
-          if (deps.$stacktrace) {
-            this.$stacktrace = deps.$stacktrace;
-          }
-        }
-      }
+    currentDate(): Date {
+      return new Date(this.$time.now())
+    }
 
-      callstack(): ICallSite[] {
-        return this.$stacktrace.create();
-      }
+    currentTime(): number {
+      return this.$time.now()
+    }
 
-      dump(o: any): string {
-        return this.$inspect.stringify(o)
-      }
+    testEqualsStrict(a: any, b: any): boolean {
+      return (
+        a === 0 && b === 0 ? 1 / a === 1 / b :
+        a === b ? true :
+        __isNaN(a) && __isNaN(b) ? true :
+        false
+      )
+    }
 
-      currentDate(): Date {
-        return new Date(this.$time.now())
-      }
-
-      currentTime(): number {
-        return this.$time.now()
-      }
-
-      testEqualsStrict(a: any, b: any): boolean {
-        return (
-          a === 0 && b === 0 ? 1 / a === 1 / b :
-          a === b ? true :
-          a !== a && b !== b ? true :
-          false
+    testEquals(o1: any, o2: any): boolean {
+      return (
+        this.testEqualsStrict(o1, o2) ||
+        (
+          (o1 != null) && o1.equals ? o1.equals(o2) :
+          (o2 != null) && o2.equals ? o2.equals(o1) :
+          o1 == o2
         )
-      }
+      )
+    }
 
-      testEquals(o1: any, o2: any): boolean {
-        return (
-          this.testEqualsStrict(o1, o2) ||
-          (
-            (o1 != null) && o1.equals ? o1.equals(o2) :
-            (o2 != null) && o2.equals ? o2.equals(o1) :
-            o1 == o2
-          )
-        )
-      }
+    testEqualsNear(o1: any, o2: any, epsilon: number = FLOAT_EPSILON): boolean {
+      var isnum1 = __isNumber(o1)
+      var isnum2 = __isNumber(o2)
+      return (
+        (isnum1 || isnum2) ? (isnum1 === isnum2) && (o1 == o2 || __equalsFloat(o1, o2, epsilon)) :
+        (o1 != null && o1.nearEquals) ? o1.nearEquals(o2) :
+        (o2 != null && o2.nearEquals) ? o2.nearEquals(o1) :
+        false
+      )
+    }
 
-      testEqualsNear(o1: any, o2: any, epsilon: number = FLOAT_EPSILON): boolean {
-        var isnum1 = __isNumber(o1)
-        var isnum2 = __isNumber(o2)
-        return (
-          (isnum1 || isnum2) ? (isnum1 === isnum2) && (o1 == o2 || __equalsFloat(o1, o2, epsilon)) :
-          (o1 != null && o1.nearEquals) ? o1.nearEquals(o2) :
-          (o2 != null && o2.nearEquals) ? o2.nearEquals(o1) :
-          false
-        )
-      }
-
-      testEqualsDeep(o1: any, o2: any): boolean {
-        var self = this
-        function equals(o1, o2) {
-          if (!self.testEqualsStrict(o1, o2)) {
-            switch (__stringTag(o1)) {
-              case 'Undefined':
-              case 'Null':
-              case 'Boolean':
-                return false
-              case 'Number':
-                return (__stringTag(o2) === 'Number') && (isNaN(o1) && isNaN(o2))
-              case 'String':
-                return (__stringTag(o2) === 'String') && (o1 == o2)
-              case 'Array':
-                return (o2 != null) && __equalsArray(o1, o2, equals)
-              case 'Object':
-              case 'Function':
-              default:
-                var keys1 = __keysSorted(o1)
-                var keys2 = __isObject(o2) ? __keysSorted(o2) : null
-                var keyc = keys1.length
-                if (keys2 && __equalsArray(keys1, keys2, __equals)) {
-                  for (var i = 0; i < keyc; ++i) {
-                    var key = keys1[i]
-                    if (!equals(o1[key], o2[key])) {
-                      return false
-                    }
+    testEqualsDeep(o1: any, o2: any): boolean {
+      var self = this
+      function equals(o1, o2) {
+        if (!self.testEqualsStrict(o1, o2)) {
+          switch (__stringTag(o1)) {
+            case 'Undefined':
+            case 'Null':
+            case 'Boolean':
+              return false
+            case 'Number':
+              return (__stringTag(o2) === 'Number') && (isNaN(o1) && isNaN(o2))
+            case 'String':
+              return (__stringTag(o2) === 'String') && (o1 == o2)
+            case 'Array':
+              return (o2 != null) && __equalsArray(o1, o2, equals)
+            case 'Object':
+            case 'Function':
+            default:
+              var keys1 = __keysSorted(o1)
+              var keys2 = __isObject(o2) ? __keysSorted(o2) : null
+              var keyc = keys1.length
+              if (keys2 && __equalsArray(keys1, keys2, __equals)) {
+                for (var i = 0; i < keyc; ++i) {
+                  var key = keys1[i]
+                  if (!equals(o1[key], o2[key])) {
+                    return false
                   }
                 }
-                return true
-            }
-          }
-          return true
-        }
-        return equals(o1, o2)
-      }
-
-      run(testCases: ITest[], onComplete?: (reports: ITestReport[]) => void) {
-        var remaining = testCases.length
-        var reports: ITestReport[] = []
-        var onrun = (testCaseReport: ITestReport) => {
-          reports.push(testCaseReport)
-          if (--remaining === 0 && onComplete) {
-            onComplete(reports)
+              }
+              return true
           }
         }
-
-        for (var i = 0, l = testCases.length; i < l; ++i) {
-          testCases[i].run(this, onrun)
-        }
+        return true
       }
+      return equals(o1, o2)
     }
 
-    /**
-     * Default suite
-     */
-    export var suiteDefault = new TestSuite("")
+    run(testCases: ITest[], onComplete?: (reports: ITestReport[]) => void) {
+      var remaining = testCases.length
+      var reports: ITestReport[] = []
+      var onrun = (testCaseReport: ITestReport) => {
+        reports.push(testCaseReport)
+        if (--remaining === 0 && onComplete) {
+          onComplete(reports)
+        }
+      }
 
-
+      for (var i = 0, l = testCases.length; i < l; ++i) {
+        testCases[i].run(this, onrun)
+      }
+    }
   }
 
-  var suiteCurrent = engine.suiteDefault
+  
+  var $engineDefault = new TestEngine();
+  /**
+   * Default suite
+   */
+  export var suiteDefault = new TestSuite("")
+  var suiteCurrent = suiteDefault;
   
 
   export function suite(
@@ -611,7 +611,7 @@ module unit {
     var suitePrevious = suiteCurrent;
     var suiteNew = new TestSuite(name);
     var testFactory = function (name, f) {
-      return suiteNew.test(name, f, (ng, tc, r) => { return new Assert(ng, tc, r); })
+      return suiteNew.getTest(name).addBlock(f, (ng, tc, r) => { return new Assert(ng, tc, r); })
     }
     
     suiteCurrent = suiteNew;
@@ -624,12 +624,14 @@ module unit {
   }
 
   export function testc<IAssert>(
-    AssertClass: { new(ng: IEngine, tc: Test<IAssert>, r: ITestReport): IAssert }
+    AssertClass: { new(ng: ITestEngine, tc: ITest, r: ITestReport): IAssert }
   ) {
     return (name: string, f: (assert: IAssert, done?: () => void) => void) => {
-      return suiteCurrent.test(name, f, (ng, tc, r) => {
-        return new AssertClass(ng, tc, r);
-      })
+      return suiteCurrent
+        .getTest(name)
+        .addBlock(f, (ng, tc, r) => {
+          return new AssertClass(ng, tc, r);
+        })
     }
   }
 
@@ -643,7 +645,7 @@ module unit {
 
   export class Runner {
     constructor(
-      private _engine: IEngine = engine.get(),
+      private _engine: ITestEngine = $engineDefault,
       private _printers: IPrinter[] = []
     ) { }
 
@@ -656,7 +658,7 @@ module unit {
 
     run(testCases: ITest[], onComplete?: (report: ITestReport[]) => void, noDefault = false): void {
       if (!noDefault) {
-        testCases = testCases.concat(engine.suiteDefault.tests)
+        testCases = testCases.concat(suiteDefault.tests)
       }
       this._engine.run(testCases, onComplete)
     }

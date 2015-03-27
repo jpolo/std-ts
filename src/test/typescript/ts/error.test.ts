@@ -10,7 +10,7 @@ class ChildRangeError extends error.RangeError {}
 class ChildReferenceError extends error.ReferenceError {}
 class ChildTypeError extends error.TypeError {}
 class ChildURIError extends error.URIError {}
-class ChildBaseError extends error.BaseError {}
+class ChildBaseError extends BaseError {}
 
 var ErrorSuite = suite("ts/error.Error", (self) => {
 
