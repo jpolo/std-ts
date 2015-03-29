@@ -644,23 +644,46 @@ module unit {
 
 
   export class Runner {
+    //Service
+    private $engine: ITestEngine = $engineDefault;
+    
     constructor(
-      private _engine: ITestEngine = $engineDefault,
-      private _printers: IPrinter[] = []
-    ) { }
+      private _printers: IPrinter[] = [],
+      deps?: {
+        $engine: ITestEngine  
+      }
+    ) { 
+    
+      if (deps) {
+        if (deps.$engine) {
+          this.$engine = deps.$engine;  
+        }  
+      }
+    }
+    
+    config(options: {
+      testTimeout?: number
+    }) {
+      
+      return this;
+    }
 
+    /*
     printers(printers: IPrinter[]) {
       return new Runner(
-        this._engine,
-        this._printers.concat(printers)
+        this._options,
+        this._printers.concat(printers), {
+          $engine: this.$engine  
+        }
       );
     }
+    */
 
     run(testCases: ITest[], onComplete?: (report: ITestReport[]) => void, noDefault = false): void {
       if (!noDefault) {
         testCases = testCases.concat(suiteDefault.tests)
       }
-      this._engine.run(testCases, onComplete)
+      this.$engine.run(testCases, onComplete)
     }
   }
 

@@ -1,4 +1,5 @@
 import inspect = require("ts/inspect")
+import console = require("ts/console")
 
 module log {
   
@@ -10,7 +11,6 @@ module log {
   //Util
   var __global: Window = (new Function("return this;")).call(null);
   var __void = function () {};
-  var __console: Console = typeof console !== "undefined" ? __global.console : null;
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
   var __isNumber = function (o: any) { return typeof o == 'number'; };
   var __isString = function (o: any) { return typeof o == 'string'; };
@@ -33,7 +33,7 @@ module log {
     info(...a: any[]);
     warn(...a: any[]);
     error(...a: any[]);
-  } = __console || { debug: __void, info: __void, warn: __void, error: __void };
+  } = console;
   
   var $timeDefault: {
     now(): number;  

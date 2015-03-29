@@ -7,13 +7,6 @@ var __void = function () {};
 var __now = Date.now || function () { return new Date().getTime(); }
 var __global: any = (new Function("return this;")).call(null);
 var __console: Console = __global.console ? __global.console : null;
-/*
-var __bind = function bind(f, scope, args, ...fixedArgs: any[]) {
-  return function (...args: any[]) {
-    return f.apply(scope, fixedArgs.concat(args));
-  };
-};
-*/
 var __forEach = function <T>(a: T[], f: (v: T, i?: number, a?: T[]) => void) {
   for (var i = 0, l = a.length; i < l; ++i) {
     f(a[i], i, a);
