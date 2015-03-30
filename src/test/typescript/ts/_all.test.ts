@@ -12,6 +12,7 @@ import mathSuite = require("./math.test")
 import randomSuite = require("./random.test")
 import reflectSuite = require("./reflect.test")
 import semverSuite = require("./semver.test")
+import signalSuite = require("./signal.test")
 import stacktraceSuite = require("./stacktrace.test")
 import unitSuite = require("./unit.test")
 import uriSuite = require("./uri.test")
@@ -32,6 +33,7 @@ var allSuite: unit.ITest[] = [].concat(
   randomSuite,
   reflectSuite,
   semverSuite,
+  signalSuite,
   stacktraceSuite,
   unitSuite,
   uriSuite,
