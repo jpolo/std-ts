@@ -42,7 +42,7 @@ var messageSuite = suite("ts/log.Message", (self, test) => {
     var m = new Message(log.DEBUG, "mygroup", ["mymessage"]);
     assert.strictEqual(m.level, log.DEBUG);
     assert.strictEqual(m.group, "mygroup");
-    assert.equal(m.data, ["mymessage"]);
+    assert.deepEqual(m.data, ["mymessage"]);
   })
   
   test("#equals()", (assert) => {
