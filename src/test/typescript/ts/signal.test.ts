@@ -5,6 +5,14 @@ import signal = require("../../../main/typescript/ts/signal")
 
 var signalSuite = unit.suite("ts/signal", (self) => {
   
+  var receiver = {};
+  var SIG = signal.signal<string>("data");
+  
+  self.setUp = () => {
+    receiver = {};
+  }
+  
+  
   test("signal()", (assert) => {
     
     assert.strictEqual(signal.signal("data"), "data");
@@ -14,13 +22,82 @@ var signalSuite = unit.suite("ts/signal", (self) => {
     
   })
   
+  test("has()", (assert) => {
+    assert.strictEqual(signal.has(receiver, SIG), false);
+    signal.connect(receiver, SIG, function () {});
+    assert.strictEqual(signal.has(receiver, SIG), true);
+  })
+  
+  test("count()", (assert) => {
+    assert.strictEqual(signal.count(receiver, SIG), 0);
+    signal.connect(receiver, SIG, function () {});
+    assert.strictEqual(signal.count(receiver, SIG), 1);
+    signal.connect(receiver, SIG, function () {});
+    assert.strictEqual(signal.count(receiver, SIG), 2);
+    
+    console.warn(receiver);
+  })
+  
   test("connect()", (assert) => {
+    var stream: string[] = [];
     
+    function listener1() {
+      
+    }
     
+    signal.connect(receiver, SIG, listener1);
+    signal.connect(receiver, SIG, listener1);
   })
   
   test("disconnect()", (assert) => {
     
+    
+  })
+  
+  test("emit()", (assert) => {
+    var stream: string[] = [];
+    
+    function listener1(s: string) {
+      stream.push("l1:" + s);
+    }
+    
+    function listener2(s: string) {
+      stream.push("l2:" + s);
+    }
+    
+    function listener3(s: string) {
+      stream.push("l3:" + s);
+    }
+    
+    signal.connect(receiver, SIG, listener1);
+    assert.deepEqual(stream, ["l1:foo"])
+    
+    stream = []
+    signal.connect(receiver, SIG, listener2);
+    signal.emit(receiver, SIG, "bar");
+    assert.deepEqual(stream, ["l1:bar", "l2:bar"])
+    
+    stream = []
+    signal.connect(receiver, SIG, listener3);
+    signal.emit(receiver, SIG, "baz");
+    assert.deepEqual(stream, ["l1:baz", "l2:baz", "l3:baz"])
+    
+    
+    //disconnecting
+    stream = []
+    signal.disconnect(receiver, SIG, listener2);
+    signal.emit(receiver, SIG, "foo");
+    assert.deepEqual(stream, ["l1:foo", "l3:foo"])
+    
+    stream = []
+    signal.disconnect(receiver, SIG, listener1);
+    signal.emit(receiver, SIG, "foo");
+    assert.deepEqual(stream, ["l3:foo"])
+    /*
+    stream = []
+    signal.disconnect(receiver, SIG, listener3);
+    signal.emit(receiver, SIG, "foo");
+    assert.deepEqual(stream, [])*/
     
   })
   
