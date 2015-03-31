@@ -16,9 +16,10 @@ module signal {
     }
     return dispatcher;
   };
-  var __signalBinding = function <T>(f: ISignalHandler<T>, once: boolean): ISignalBinding<T> {
-    return { f: f, once: once, next: null, prev: null };
-  };
+  var __signalBindingsFor = function <T>(o: any, sig: ISignal<T>): ISignalBindingQueue {
+    var dispatcher = __signalDispatcher(o, false);
+    return dispatcher ? dispatcher[__signalKey(sig)] : null;
+  }
   var __signalKey = function <T>(sig: ISignal<T>): string {
     return <string> sig;
   };
@@ -47,11 +48,7 @@ module signal {
     next.prev = prev;
     
     if (head === b) {
-      if (head.next === head) {
-        q.head = null;
-      } else {
-        q.head = next;
-      }
+      q.head = next === head ? null : next;
     }
     q.length--;
   };
@@ -88,23 +85,15 @@ module signal {
   }
   
   export function count<T>(o: any, sig: ISignal<T>): number {
-    var returnValue = 0;
-    var dispatcher = __signalDispatcher(o, false);
-    if (dispatcher) {
-      var key = __signalKey(sig);
-      var bindings = dispatcher[key];
-      if (bindings) {
-        returnValue = bindings.length;
-      }
-    }
-    return returnValue;
+    var bindings = __signalBindingsFor(o, sig);
+    return bindings ? bindings.length : 0;
   }
   
   export function connect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>, once = false) {
     var dispatcher = __signalDispatcher(o, true);
     var key = __signalKey(sig);
     var bindings = dispatcher[key];
-    var binding = __signalBinding(f, once);
+    var binding = { f: f, once: once, next: null, prev: null };
     if (!bindings) {
       dispatcher[key] = {
         head: binding,
@@ -118,42 +107,42 @@ module signal {
   }
   
   export function disconnect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>) {
-    var dispatcher = __signalDispatcher(o, false);
-    if (dispatcher) {
-      var key = __signalKey(sig);
-      var bindings = dispatcher[key];
-      if (bindings) {
-        var head = bindings.head;
-        if (head) {
-          var binding = head;
-          do {
-            if (binding.f === f) {
-              __qRemove(bindings, binding);
+    var bindings = __signalBindingsFor(o, sig);
+    if (bindings) {
+      var head = bindings.head;
+      if (head) {
+        var binding = head;
+        do {
+          if (binding.f === f) {
+            __qRemove(bindings, binding);
+            head = bindings.head;
+            if (!head) {
+              break;
             }
-            binding = binding.next;
-          } while (binding !== head)
-        }
+          }
+          binding = binding.next;
+        } while (binding !== head)
       }
     }
   }
   
   export function emit<T>(o: any, sig: ISignal<T>, v: T) {
-    var dispatcher = __signalDispatcher(o, false);
-    if (dispatcher) {
-      var key = __signalKey(sig);
-      var bindings = dispatcher[key];
-      if (bindings) {
-        var head = bindings.head;
-        if (head) {
-          var binding = head;
-          do {
-            binding.f(v);
-            if (binding.once) {
-              __qRemove(bindings, binding);
+    var bindings = __signalBindingsFor(o, sig);
+    if (bindings) {
+      var head = bindings.head;
+      if (head) {
+        var binding = head;
+        do {
+          binding.f(v);
+          if (binding.once) {
+            __qRemove(bindings, binding);
+            head = bindings.head;
+            if (!head) {
+              break;
             }
-            binding = binding.next;
-          } while (binding !== head)
-        }
+          }
+          binding = binding.next;
+        } while (binding !== head)
       }
     }
   }
