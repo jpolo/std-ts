@@ -11,7 +11,6 @@ module inspect {
     return (<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]);
   };
   var __isString = function (o: any) { return typeof o === 'string'; };
-  var __isFunction = function (o: any) { return typeof o === 'function'; };
   var __isObject = function (o: any) { return o !== null && (typeof o === 'object' || typeof o === 'function'); };
   var __keys = Object.keys;
   var __set:<T>() => { has: (o: T) => boolean; add: (o: T) => void } = typeof Set !== "undefined" ? function () { return new Set(); } : null;
@@ -348,9 +347,7 @@ module inspect {
   export function stringify(o: any): string {
     return $inspectorDefault.stringify(o)
   }
-  
-  
-  
+ 
   
 }
 export = inspect
