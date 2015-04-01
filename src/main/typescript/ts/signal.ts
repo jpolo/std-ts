@@ -1,14 +1,23 @@
 module signal {
   //Constants
-
+  var ES3_COMPAT = true;
+  var ES5_COMPAT = ES3_COMPAT || true;
   
   //Util
   //var __isArray = Array.isArray;
-  //var __isFunction = function (o) { return typeof o === "function"; };
-  var __global: any = (new Function("return this;")).call(null);
-  var __sym: (o: any) => any = typeof __global.Symbol != "undefined" ? __global.Symbol : function (o) { return "@@" + o; };
-  var $$dispatcher = __sym("signal");
+  var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+  var __sym: (o: any) => any = __global.Symbol;
   
+  //Compat
+  //if (ES3_COMPAT) {
+ 
+  //}
+  
+  if (ES5_COMPAT) {
+    __sym = __sym || function (o) { return "@@" + o; };
+  }
+  
+  var $$dispatcher = __sym("signal");
   var __signalDispatcher = function (o: any, create: boolean): { [k: string]: ISignalBindingQueue } {
     var dispatcher = o[$$dispatcher];
     if (!dispatcher && create) {

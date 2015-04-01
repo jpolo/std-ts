@@ -2,8 +2,8 @@ import stacktrace = require("ts/stacktrace")
 
 module error {
 
-  //util
-  var __global: any = (new Function("return this;")).call(null);
+  //Util
+  var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
   var __str = function (o) { return "" + o; };
   var __inspect = __str;
   var __console: Console = typeof console !== "undefined" ? __global.console : null;

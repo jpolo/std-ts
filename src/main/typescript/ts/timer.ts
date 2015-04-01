@@ -1,7 +1,7 @@
 module timer {
   
   //Util
-  var __global: Window = (new Function("return this;")).call(null);
+  var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
   var __setTimeout = __global.setTimeout;
   var __clearTimeout = __global.clearTimeout;
   var __setInterval = __global.setInterval;

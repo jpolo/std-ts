@@ -71,7 +71,7 @@ module hash {
         case 'Date': self.writeDate(o); break;
         case 'RegExp': self.writeRegExp(o); break;
         default:
-          if (__isFunction(o.hash)) {
+          if (typeof o.hash === "function") {
             self.writeIHash(o);
           } else {
             self.writeObject(o);
@@ -317,7 +317,7 @@ module hash {
         case 'RegExp': __writeRegExp(state, o); break;
         default:
           var methodName = "hash" + strTag;
-          if (__isFunction(state[methodName])) {
+          if (typeof state[methodName] === "function") {
             state[methodName](o);
           } else {
             __writeObject(state, o, true);
@@ -534,7 +534,6 @@ module hash {
   //util
   var __ostring = {}.toString;
   var __keys = Object.keys;
-  var __isFunction = function (o: any) { return typeof o === "function"; };
   var __str = function (o) { return "" + o; };
   var __stringTag = function (o: any) {
     var s = '';

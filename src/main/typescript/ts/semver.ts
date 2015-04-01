@@ -8,7 +8,6 @@ module semver {
   
   //Util
   var __isUndefined = function (o: any) { return typeof o === "undefined"; };
-  var __isString = function (o: any) { return typeof o === "string"; };
   var __str = function (o) { return "" + o; };
 
   export interface ISemVer {
@@ -26,7 +25,7 @@ module semver {
       if (o) {
         if (o instanceof SemVer) {
           returnValue = o;
-        } else if (__isString(o)) {
+        } else if (typeof o === "string") {
           returnValue = SemVer.parse(o);
         } else if (SemVer.isSemVer(o)) {
           returnValue = new SemVer(

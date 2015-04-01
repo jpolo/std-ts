@@ -219,11 +219,10 @@ module stacktrace {
   
   //util
   var __ostring = Object.prototype.toString;
-  var __global: any = (new Function("return this;")).call(null);
+  var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
   var __isGlobal = function (o: any) { return o === __global; }
   var __isUndefined = function (o: any) { return typeof o === "undefined"; }
-  var __isFunction = function (o: any) { return typeof o === "function"; }
-  var __isObject = function (o: any) { return o !== null && (typeof o === "object" || __isFunction(o)); }
+  var __isObject = function (o: any) { return o !== null && (typeof o === "object" || typeof o === "function"); }
   var __str = String;
   var __stringTag = function (o: any): string {
     var s = '';

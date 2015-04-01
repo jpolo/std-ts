@@ -1,5 +1,22 @@
 module compare {
   
+  //Util
+  var __ostring = {}.toString;
+  var __isEmpty = function (o) { return o === null  || o === undefined; };
+  var __str = function (o) { return "" + o; };
+  var __stringTag = function (o: any) {
+    var s = '';
+    if (o === undefined) {
+      s = 'Undefined';
+    } else if (o === null) {
+      s = 'Null';
+    } else {
+      var c = o.constructor;
+      s = c && c.name || __ostring.call(o).slice(8, -1);
+    }
+    return s;
+  };
+  
   export enum Ordering {
     Less = -1,
     Equal = 0,
@@ -20,7 +37,7 @@ module compare {
       case 'Number': returnValue = compareNumber(l, r); break;
       case 'String': returnValue = compareString(l, r); break;
       default:
-        if (__isFunction(l.compare)) {
+        if (typeof l.compare === "function") {
           returnValue = compareICompare(l, r);  
         }
     }
@@ -90,22 +107,7 @@ module compare {
     return (result === Ordering.Greater || result === Ordering.Equal);
   }
   
-  var __ostring = {}.toString;
-  var __isEmpty = function (o) { return o === null  || o === undefined; };
-  var __isFunction = function (o) { return typeof o === "function"; };
-  var __str = function (o) { return "" + o; };
-  var __stringTag = function (o: any) {
-    var s = '';
-    if (o === undefined) {
-      s = 'Undefined';
-    } else if (o === null) {
-      s = 'Null';
-    } else {
-      var c = o.constructor;
-      s = c && c.name || __ostring.call(o).slice(8, -1);
-    }
-    return s;
-  };
+  
   
 }
 export = compare;

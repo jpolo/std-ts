@@ -9,7 +9,7 @@ module log {
   var ES5_COMPAT = ES3_COMPAT || true;
   
   //Util
-  var __global: Window = (new Function("return this;")).call(null);
+  var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
   var __void = function () {};
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
   var __isNumber = function (o: any) { return typeof o == 'number'; };

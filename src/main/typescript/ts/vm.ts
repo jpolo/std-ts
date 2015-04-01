@@ -1,7 +1,8 @@
 module vm {
 
+  //Util
   var __empty = {};
-  var __global: Window = (new Function("return this;")).call(null);
+  var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
 
   export interface IOption {
     sourceURL?: string
