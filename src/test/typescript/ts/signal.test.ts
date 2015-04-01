@@ -7,13 +7,27 @@ var signalSuite = unit.suite("ts/signal", (self) => {
   
   var receiver = {};
   var SIG = signal.signal<string>("data");
+  var stream: string[] = [];
+    
+  function listener1(s: string) {
+    stream.push("l1:" + s);
+  }
+  
+  function listener2(s: string) {
+    stream.push("l2:" + s);
+  }
+  
+  function listener3(s: string) {
+    stream.push("l3:" + s);
+  }
   
   self.setUp = () => {
     receiver = {};
+    stream = [];
   }
   
   
-  test("signal()", (assert) => {
+  test(".signal()", (assert) => {
     
     assert.strictEqual(signal.signal("data"), "data");
     assert.throws(() => { signal.signal(undefined) });
@@ -22,13 +36,13 @@ var signalSuite = unit.suite("ts/signal", (self) => {
     
   })
   
-  test("has()", (assert) => {
+  test(".has()", (assert) => {
     assert.strictEqual(signal.has(receiver, SIG), false);
     signal.connect(receiver, SIG, function () {});
     assert.strictEqual(signal.has(receiver, SIG), true);
   })
   
-  test("count()", (assert) => {
+  test(".count()", (assert) => {
     assert.strictEqual(signal.count(receiver, SIG), 0);
     signal.connect(receiver, SIG, function () {});
     assert.strictEqual(signal.count(receiver, SIG), 1);
@@ -38,36 +52,24 @@ var signalSuite = unit.suite("ts/signal", (self) => {
     console.warn(receiver);
   })
   
-  test("connect()", (assert) => {
-    var stream: string[] = [];
-    
-    function listener1() {
-      
-    }
-    
+  test(".connect()", (assert) => {
+    assert.strictEqual(signal.count(receiver, SIG), 0);
     signal.connect(receiver, SIG, listener1);
+    assert.strictEqual(signal.count(receiver, SIG), 1);
     signal.connect(receiver, SIG, listener1);
+    assert.strictEqual(signal.count(receiver, SIG), 2);
   })
   
-  test("disconnect()", (assert) => {
-    
-    
+  test(".disconnect()", (assert) => {
+    assert.strictEqual(signal.count(receiver, SIG), 0);
+    signal.connect(receiver, SIG, listener1);
+    assert.strictEqual(signal.count(receiver, SIG), 1);
+    signal.disconnect(receiver, SIG, listener1);
+    assert.strictEqual(signal.count(receiver, SIG), 0);
   })
   
-  test("emit()", (assert) => {
-    var stream: string[] = [];
+  test(".emit()", (assert) => {
     
-    function listener1(s: string) {
-      stream.push("l1:" + s);
-    }
-    
-    function listener2(s: string) {
-      stream.push("l2:" + s);
-    }
-    
-    function listener3(s: string) {
-      stream.push("l3:" + s);
-    }
     
     signal.connect(receiver, SIG, listener1);
     assert.deepEqual(stream, ["l1:foo"])

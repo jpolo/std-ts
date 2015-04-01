@@ -16,7 +16,7 @@ var reflectSuite = suite("ts/reflect", () => {
   var parentObj = new Parent()
   var childObj = new Child()
   
-  test("apply()", (assert) => {
+  test(".apply()", (assert) => {
     var obj = {}
     function fn() {
       return [this, arguments]
@@ -27,13 +27,13 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.strictEqual(returnValue[1][1], 'bar')  
   })
     
-  test("construct()", (assert) => {
+  test(".construct()", (assert) => {
     var childObj = reflect.construct(Child, [ '$0', '$1' ])
     assert.strictEqual(childObj.foo, '$0')
     assert.strictEqual(childObj.bar, '$1')
   })
   
-  test("defineProperty()", (assert) => {
+  test(".defineProperty()", (assert) => {
     var obj = {
       "foo": true
     }
@@ -41,7 +41,7 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.strictEqual(obj['bar'], 'barval')  
   })
   
-  test("deleteProperty()", (assert) => {
+  test(".deleteProperty()", (assert) => {
     var obj = {
       "foo": true
     }
@@ -52,7 +52,7 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.ok(reflect.deleteProperty(obj, '$nonExistent'))
   })
     
-  test("freeze()/isFrozen()", (assert) => {
+  test(".freeze()/.isFrozen()", (assert) => {
     var obj = {
       "foo": true
     }
@@ -62,7 +62,7 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.ok(reflect.isFrozen(obj))
   })
   
-  test("get()", (assert) => {
+  test(".get()", (assert) => {
     var obj = {}
     obj['_accessorProp'] = 'private'
     obj['valueProp'] = 'value'
@@ -75,19 +75,19 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.strictEqual(reflect.get(obj, 'accessorProp'), 'private')
   })
   
-  test("getPrototypeOf()", (assert) => {
+  test(".getPrototypeOf()", (assert) => {
     assert.strictEqual(reflect.getPrototypeOf(childObj), Child.prototype)
     assert.strictEqual(reflect.getPrototypeOf(parentObj), Parent.prototype)
   })
   
-  test("has()", (assert) => {
+  test(".has()", (assert) => {
     assert.ok(reflect.has(childObj, 'childMethod'))
     assert.ok(reflect.has(childObj, 'parentMethod'))
     assert.ok(reflect.has(childObj, 'toString'))
     assert.ok(!reflect.has(childObj, '$nonExistent'))
   })
     
-  test("hasOwn()", (assert) => {
+  test(".hasOwn()", (assert) => {
     assert.ok(reflect.hasOwn(Child.prototype, 'childMethod'))
     assert.ok(!reflect.hasOwn(childObj, 'childMethod'))
     assert.ok(!reflect.hasOwn(childObj, 'parentMethod'))
@@ -95,12 +95,12 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.ok(!reflect.hasOwn(childObj, '$nonExistent'))
   })
     
-  test("ownKeys()", (assert) => {
+  test(".ownKeys()", (assert) => {
     var keys = reflect.ownKeys(Child.prototype)
     assert.deepEqual(keys.sort(), [ 'childMethod', 'constructor' ].sort())
   })
     
-  test("preventExtensions()/isExtensible()", (assert) => {
+  test(".preventExtensions()/.isExtensible()", (assert) => {
     var obj = {
       "foo": true
     }
@@ -110,7 +110,7 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.ok(!reflect.isExtensible(obj))
   })
   
-  test("seal()/isSealed()", (assert) => {
+  test(".seal()/.isSealed()", (assert) => {
     var obj = {
       "foo": true
     }
@@ -120,7 +120,7 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.ok(reflect.isSealed(obj))
   })
     
-  test("set()", (assert) => {
+  test(".set()", (assert) => {
     var obj = {}
     obj['_accessorProp'] = ''
     obj['valueProp'] = ''
@@ -147,7 +147,7 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.strictEqual(obj['_accessorProp'], 'private')
   })
     
-  test("stringTag(o)", (assert) => {
+  test(".stringTag(o)", (assert) => {
     var stringTag = reflect.stringTag
     assert.strictEqual(stringTag(undefined), "Undefined")
     assert.strictEqual(stringTag(null), "Null")

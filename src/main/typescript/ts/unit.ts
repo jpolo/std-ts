@@ -315,8 +315,6 @@ module unit {
 
   export class Test implements ITest {
 
-    private _separator = '::'
-
     public category: string = ""
     public blocks: ITestBlock<any>[] = []
 
@@ -435,7 +433,7 @@ module unit {
 
     toString() {
       var category = this.category
-      return (category ? category + this._separator : '' ) + this.name
+      return (category ? category : '') + this.name
     }
   }
   
@@ -718,7 +716,7 @@ module unit {
         report.assertions.forEach((assertion) =>  {
 
           var position = assertion.position
-          var category = assertion.test.category + '::' + assertion.test.name
+          var category = assertion.test.category + '' + assertion.test.name
 
           switch (assertion.type) {
             case SUCCESS:

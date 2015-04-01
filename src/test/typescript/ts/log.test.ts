@@ -36,7 +36,7 @@ var logSuite = suite("ts/log", (self) => {
 
 })
 
-var messageSuite = suite("ts/log.Message", (self, test) => {
+var MessageSuite = suite("ts/log.Message", (self, test) => {
   
   test("#constructor()", (assert) => {
     var m = new Message(log.DEBUG, "mygroup", ["mymessage"]);
@@ -65,7 +65,7 @@ var messageSuite = suite("ts/log.Message", (self, test) => {
   
 })
 
-var levelSuite = suite("ts/log.Level", () => {
+var LevelSuite = suite("ts/log.Level", () => {
   var PRIVATE_KEY = log.Level['_constructorKey'];
   var DEBUG = log.DEBUG;
   var INFO = log.INFO;
@@ -119,7 +119,7 @@ var levelSuite = suite("ts/log.Level", () => {
   })
 })
 
-var loggerSuite = suite("ts/log.Logger", (self) => {
+var LoggerSuite = suite("ts/log.Logger", (self) => {
   //mock engine
   var logger: Logger;
   var logs: IMessage[] = [];
@@ -177,6 +177,6 @@ var loggerSuite = suite("ts/log.Logger", (self) => {
   
 })
 
-var exportSuite = logSuite.concat(levelSuite, messageSuite, loggerSuite);
+var exportSuite = logSuite.concat(LevelSuite, MessageSuite, LoggerSuite);
 
 export = exportSuite
