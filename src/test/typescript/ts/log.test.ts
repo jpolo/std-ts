@@ -58,8 +58,9 @@ var MessageSuite = unit.suite("ts/log.Message", (self, test) => {
   })
     
   test("#toString()", (assert) => {
-    var message = new Message(log.DEBUG, "mygroup", ["mymessage"])
-    assert.strictEqual(message.toString(), '[DEBUG|mygroup] mymessage')
+    assert.strictEqual(String(new Message(log.DEBUG, "mygroup", ["foo", "bar"])), '[DEBUG|mygroup] foo bar')
+    assert.strictEqual(String(new Message(log.WARN, "mygroup", ["foo", 1])), '[WARN|mygroup] foo 1')
+    assert.strictEqual(String(new Message(log.ERROR, "mygroup", ["foo", 1])), '[ERROR|mygroup] foo 1')
   })
   
 })

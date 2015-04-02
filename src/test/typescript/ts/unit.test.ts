@@ -59,7 +59,7 @@ var AssertSuite = unit.suite("ts/unit.Assert", (self) => {
     assert.ok(ng instanceof TestEngine)
   })
     
-  test(".ok(cond: boolean)", (assert) => {
+  test(".ok()", (assert) => {
     var assertions = reportMock.assertions
     var i = iter()
     assertMock.ok(true)
@@ -69,7 +69,7 @@ var AssertSuite = unit.suite("ts/unit.Assert", (self) => {
     assert.ok(assertions[i()].type == unit.FAILURE)
   })
 
-  test(".strictEqual(l: any, r: any)", (assert) => {
+  test(".strictEqual()", (assert) => {
     var assertions = reportMock.assertions
     var i = iter()
     assertMock.strictEqual(null, null)
@@ -88,7 +88,7 @@ var AssertSuite = unit.suite("ts/unit.Assert", (self) => {
     assert.ok(assertions[i()].type == unit.SUCCESS)
   })
 
-  test(".equal(l: any, r: any)", (assert) => {
+  test(".equal()", (assert) => {
     var assertions = reportMock.assertions
     var i = iter()
     assertMock.equal(null, null)
@@ -107,7 +107,7 @@ var AssertSuite = unit.suite("ts/unit.Assert", (self) => {
     assert.ok(assertions[i()].type == unit.SUCCESS)
   })
 
-  test(".throws(fn, expected)", (assert) => {
+  test(".throws()", (assert) => {
     var assertions = reportMock.assertions
     var i = iter()
     assertMock.throws(() => {})
