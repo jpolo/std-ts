@@ -1,34 +1,38 @@
 module id {
+  //Constants
+  var ES3_COMPAT = true;
+  var ES5_COMPAT = ES3_COMPAT || true;
+  
+  //Util
+  var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+  var __sym: (o: any) => any = __global.Symbol;
+  var __descriptor = { value: null, enumerable: false, configurable: true, writable: true };
+  var __def = Object.defineProperty;
+  var __set = function (o, k, v) {
+    __descriptor.value = v
+    __def(o, k, __descriptor);
+  };
+  
+  //Compat
+  if (ES3_COMPAT) {
+    __def = __def || function (o, k, d) { o[k] = d.value; };
+  }
+  if (ES5_COMPAT) {
+    __sym = __sym || function (o) { return "@@" + o; };
+  }
+  
+  var $$id = __sym("id");
   var __currentId = 1;
   var __nextId = function () { return __currentId++; };
-  var __get: (o: any) => number;
+  var __getId: (o: any) => number = function (o: any) {
+    var id = o[$$id];
+    if (id === undefined) {
+      id = __nextId();
+      __set(o, $$id, id);
+    }
+    return id;
+  };
   
-  if (typeof WeakMap !== "undefined") {
-    //weakmap implementation
-    var __registry = new WeakMap<any, number>();
-    __get = function (o: any) {
-      var id = __registry.get(o);
-      if (id === undefined) {
-        id = __nextId();
-        __registry.set(o, id);
-      }
-      return id;
-    };
-  } else {
-    var ID_PROPERTY = "@@id";//TODO use Symbol if existing ?
-    var __descriptor: PropertyDescriptor = { value: null, enumerable: false, configurable: true, writable: false };
-    var __def = Object.defineProperty;
-    //default implementation
-    __get = function (o: any) {
-      var id = o[ID_PROPERTY];
-      if (id === undefined) {
-        id = __nextId();
-        __descriptor.value = id;
-        __def(o, ID_PROPERTY, __descriptor);
-      }
-      return id;
-    };
-  }
 
   /**
    * Return new generated id
@@ -49,11 +53,11 @@ module id {
     switch (typeof o) {
       case 'object':
         if (o !== null) {
-          returnValue = __get(o);
+          returnValue = __getId(o);
         }
         break;
       case 'function':
-        returnValue = __get(o);
+        returnValue = __getId(o);
         break;
     }
     return returnValue;
