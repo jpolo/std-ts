@@ -1,10 +1,9 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import stacktrace = require("../../../main/typescript/ts/stacktrace")
 import ICallSite = stacktrace.ICallSite;
 
-var stacktraceSuite = suite("ts/stacktrace", (self) => {
+var stacktraceSuite = unit.suite("ts/stacktrace", (self) => {
   var FILENAME = "stacktrace.test.js";
   var DATA = {
     error: null,
@@ -41,7 +40,7 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
     callstackEval = DATA.callstack;
   }
   
-  test("get()", (assert) => {
+  test(".get()", (assert) => {
   
     //Normal
     var callstack = stacktrace.get(errorLocal);
@@ -76,7 +75,7 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
   })
   
   
-  test("create()", (assert) => {
+  test(".create()", (assert) => {
     
     //Normal
     var callstack = callstackLocal;
@@ -96,9 +95,6 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
     assert.strictEqual(callsite.getColumnNumber(), 32)
     assert.strictEqual(callsite.isNative(), false);
     assert.strictEqual(callsite.isEval(), true);
-
-    
-    
   })
   
 })

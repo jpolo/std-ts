@@ -1,10 +1,8 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import id = require("../../../main/typescript/ts/id")
 
-var idSuite = suite("ts/id", (self) => {
-  
+var idSuite = unit.suite("ts/id", (self) => {
   
   test(".generate()", (assert) => {
     var current = id.generate();

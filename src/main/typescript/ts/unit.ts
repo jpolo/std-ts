@@ -60,7 +60,7 @@ module unit {
     test: ITest
     message: string
     position: ICallSite
-    stack: ICallSite[]
+    stack: string
   }
 
   export interface ITestReport {
@@ -72,13 +72,17 @@ module unit {
   export interface IPrinter {
     print(reports: ITestReport[]): void
   }
+  
+  export interface ITestParams {
+    timeout: number
+  }
 
   export interface ITestEngine {
     callstack(offset?: number): ICallSite[]
     dump(o: any): string
     currentDate(): Date
     currentTime(): number
-    run(testCases: ITest[], onComplete: (reports: ITestReport[]) => void): void
+    run(testCases: ITest[], config: { timeout: number }, onComplete: (reports: ITestReport[]) => void): void
     testEquals(actual: any, expected: any): boolean
     testEqualsStrict(actual: any, expected: any): boolean
     testEqualsNear(actual: any, expected: any, epsilon?: number): boolean
@@ -88,7 +92,7 @@ module unit {
   export interface ITest {
     category: string
     name: string
-    run(engine: ITestEngine, onComplete: (report: ITestReport) => void): void
+    run(engine: ITestEngine, params: ITestParams, onComplete: (report: ITestReport) => void): void
   }
 
   export var SUCCESS = "SUCCESS";
@@ -106,7 +110,7 @@ module unit {
       return new Assertion(FAILURE, testCase, message, position)
     }
 
-    static error(testCase: ITest, message: string, position?: ICallSite, stack = null) {
+    static error(testCase: ITest, message: string, position?: ICallSite, stack: string = null) {
       return new Assertion(ERROR, testCase, message, position, stack)
     }
 
@@ -119,7 +123,7 @@ module unit {
       public test: ITest,
       public message: string,
       public position?: ICallSite,
-      public stack?: ICallSite[]
+      public stack?: string
     ) { }
 
     equals(o: any): boolean {
@@ -347,7 +351,7 @@ module unit {
       });
     }
 
-    run(engine: ITestEngine, onComplete: (report: ITestReport) => void) {
+    run(engine: ITestEngine, params: ITestParams, onComplete: (report: ITestReport) => void) {
       var blocks = this.blocks
       var blockc = blocks.length
       var assertions: IAssertion[] = []
@@ -358,7 +362,7 @@ module unit {
       }
 
       var startTime  = engine.currentTime()
-      var timeoutMs = TEST_TIMEOUT
+      var timeoutMs = params.timeout || TEST_TIMEOUT;
 
 
       //finish test and send to callback
@@ -413,8 +417,8 @@ module unit {
             block(assert)
           }
         } catch (e) {
-          var parsed  = e ? stacktrace.get(e) : null;
-          assertions.push(Assertion.error(this, e.message, parsed && parsed[0], parsed))
+          var parsed = e ? stacktrace.get(e) : null;
+          assertions.push(Assertion.error(this, e.message, parsed && parsed[0], e.stack || e.message || null))
         } finally {
           if (!isAsync) {
             complete()
@@ -475,13 +479,13 @@ module unit {
       }
     ) {
       if (deps) {
-        if (deps.$inspect) {
+        if ("$inspect" in deps) {
           this.$inspect = deps.$inspect;
         }
-        if (deps.$time) {
+        if ("$time" in deps) {
           this.$time = deps.$time;
         }
-        if (deps.$stacktrace) {
+        if ("$stacktrace" in deps) {
           this.$stacktrace = deps.$stacktrace;
         }
       }
@@ -492,7 +496,7 @@ module unit {
     }
 
     dump(o: any): string {
-      return this.$inspect.stringify(o)
+      return this.$inspect.stringify(o);
     }
 
     currentDate(): Date {
@@ -571,7 +575,11 @@ module unit {
       return equals(o1, o2)
     }
 
-    run(testCases: ITest[], onComplete?: (reports: ITestReport[]) => void) {
+    run(
+      testCases: ITest[], 
+      testParams: ITestParams, 
+      onComplete?: (reports: ITestReport[]) => void
+    ) {
       var remaining = testCases.length
       var reports: ITestReport[] = []
       var onrun = (testCaseReport: ITestReport) => {
@@ -582,7 +590,7 @@ module unit {
       }
 
       for (var i = 0, l = testCases.length; i < l; ++i) {
-        testCases[i].run(this, onrun)
+        testCases[i].run(this, testParams, onrun)
       }
     }
   }
@@ -642,6 +650,10 @@ module unit {
 
 
   export class Runner {
+    //Config
+    private _timeout = TEST_TIMEOUT;
+    private _includeDefault = true;
+    
     //Service
     private $engine: ITestEngine = $engineDefault;
     
@@ -651,18 +663,23 @@ module unit {
         $engine: ITestEngine  
       }
     ) { 
-    
       if (deps) {
-        if (deps.$engine) {
+        if ("$engine" in deps) {
           this.$engine = deps.$engine;  
         }  
       }
     }
     
     config(options: {
-      testTimeout?: number
+      includeDefault?: boolean
+      timeout?: number
     }) {
-      
+      if ("timeout" in options) {
+        this._timeout = options.timeout;  
+      }
+      if ("includeDefault" in options) {
+        this._includeDefault = options.includeDefault;  
+      }
       return this;
     }
 
@@ -677,11 +694,11 @@ module unit {
     }
     */
 
-    run(testCases: ITest[], onComplete?: (report: ITestReport[]) => void, noDefault = false): void {
-      if (!noDefault) {
+    run(testCases: ITest[], onComplete?: (report: ITestReport[]) => void): void {
+      if (this._includeDefault) {
         testCases = testCases.concat(suiteDefault.tests)
       }
-      this.$engine.run(testCases, onComplete)
+      this.$engine.run(testCases, { timeout: this._timeout }, onComplete)
     }
   }
 

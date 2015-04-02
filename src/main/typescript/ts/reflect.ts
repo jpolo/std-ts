@@ -7,6 +7,7 @@ module reflect {
   var __fidentity = function f<T>() { return function (o: T) { return o } };
   var __fapply = Function.prototype.apply;
   var __fconst = function f<T>(k: T) { return function () { return k } };
+  var __polyfill = function poly<T>(f: T): T { (<any>f).polyfill = true; return f; };
   var __polyfilled = function (f: Function): boolean { return !!(<any>f).polyfill };
   var __str = function (o) { return "" + o; };
   var __ohasown = {}.hasOwnProperty;
@@ -37,50 +38,47 @@ module reflect {
   var __typeOf = function (o: any): Type { return o === null ? Type.null : Type[typeof o]; };
   
   //Compat
-  if (ES5_COMPAT || ES3_COMPAT) {
-    var __polyfill = function poly<T>(f: T): T { (<any>f).polyfill = true; return f; };
-
-    if (ES3_COMPAT) {
-      __okeys = __okeys || __polyfill(function (o) { var ks = []; for (var k in o) { if (__hasOwn.call(o, k)) { ks.push(k); } } return ks; });
-      __create = __create|| __polyfill(function (proto) { function t() {}; t.prototype = proto.prototype; return new t(); });
-      __proto = __proto || __polyfill(function (o) { return o.__proto__ });
-      __propertyDefine = Object.defineProperty;
-      __propertyDescriptor = Object.getOwnPropertyDescriptor;
-      __propertyNames = __propertyNames || __polyfill(function (o) { return __okeys(o) });
-      __isFrozen = __isFrozen || __polyfill(__fconst(false));
-      __isSealed = __isSealed ||  __polyfill(__fconst(false));
-      __isExtensible = __isExtensible ||  __polyfill(__fconst(true));
-      __freeze = __freeze || __polyfill(__fidentity());
-      __preventExtensions = __preventExtensions || __polyfill(__fidentity());
-      __seal = __seal || __polyfill(__fidentity());
-    }
-    
-    if (ES5_COMPAT) {
-      __apply = __apply || __polyfill(function (f, thisArg, args) { return __fapply.call(f, thisArg, args); });
-      __construct = __construct || __polyfill(function (Constructor: Function, args: any[]) { 
-        var proto = Constructor.prototype
-        var instance = __obj(proto) === proto ? __create(proto) : {}
-        var result = __fapply.call(Constructor, instance, args)
-        return __obj(result) === result ? result : instance
-      });
-      __hasOwn = __hasOwn || __polyfill(function (o, name) { return __ohasown.call(o, name); });
-      __propertySymbols = __propertySymbols || __polyfill(function (o) { return []; });
-      __propertyDelete = __propertyDelete || __polyfill(function (o: any, propertyName: string) {
-        var target = __obj(o);
-        var returnValue = false;
-        if (!__hasOwn(target, propertyName)) {
-          returnValue = true;
-        } else {
-          var descriptor = __propertyDescriptor(target, propertyName);
-          if (descriptor && descriptor.configurable === true) {
-            delete target[propertyName];
-            returnValue = true;
-          }
-        }
-        return returnValue;
-      });
-    }
+  if (ES3_COMPAT) {
+    __okeys = __okeys || __polyfill(function (o) { var ks = []; for (var k in o) { if (__hasOwn.call(o, k)) { ks.push(k); } } return ks; });
+    __create = __create|| __polyfill(function (proto) { function t() {}; t.prototype = proto.prototype; return new t(); });
+    __proto = __proto || __polyfill(function (o) { return o.__proto__ });
+    __propertyDefine = Object.defineProperty;
+    __propertyDescriptor = Object.getOwnPropertyDescriptor;
+    __propertyNames = __propertyNames || __polyfill(function (o) { return __okeys(o) });
+    __isFrozen = __isFrozen || __polyfill(__fconst(false));
+    __isSealed = __isSealed ||  __polyfill(__fconst(false));
+    __isExtensible = __isExtensible ||  __polyfill(__fconst(true));
+    __freeze = __freeze || __polyfill(__fidentity());
+    __preventExtensions = __preventExtensions || __polyfill(__fidentity());
+    __seal = __seal || __polyfill(__fidentity());
   }
+  
+  if (ES5_COMPAT) {
+    __apply = __apply || __polyfill(function (f, thisArg, args) { return __fapply.call(f, thisArg, args); });
+    __construct = __construct || __polyfill(function (Constructor: Function, args: any[]) { 
+      var proto = Constructor.prototype
+      var instance = __obj(proto) === proto ? __create(proto) : {}
+      var result = __fapply.call(Constructor, instance, args)
+      return __obj(result) === result ? result : instance
+    });
+    __hasOwn = __hasOwn || __polyfill(function (o, name) { return __ohasown.call(o, name); });
+    __propertySymbols = __propertySymbols || __polyfill(function (o) { return []; });
+    __propertyDelete = __propertyDelete || __polyfill(function (o: any, propertyName: string) {
+      var target = __obj(o);
+      var returnValue = false;
+      if (!__hasOwn(target, propertyName)) {
+        returnValue = true;
+      } else {
+        var descriptor = __propertyDescriptor(target, propertyName);
+        if (descriptor && descriptor.configurable === true) {
+          delete target[propertyName];
+          returnValue = true;
+        }
+      }
+      return returnValue;
+    });
+  }
+  
   
   export enum Type {
     null, boolean, function, number, string, undefined

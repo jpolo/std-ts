@@ -1,12 +1,11 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import hash = require("../../../main/typescript/ts/hash")
 import int64 = require("../../../main/typescript/ts/int64")
 import Int64 = int64.IInt64;
 import SipState = hash.sip.SipState;
 
-var hashSuite = suite("ts/hash.sip.SipState", (self) => {
+var hashSuite = unit.suite("ts/hash.sip.SipState", (self) => {
   var state: SipState;
 
   self.setUp = () => {

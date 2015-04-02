@@ -1,11 +1,10 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import yaml = require("../../../main/typescript/ts/yaml")
 
-var yamlSuite = suite("ts/yaml", (self) => {
+var yamlSuite = unit.suite("ts/yaml", (self) => {
   
-  test("parse()", (assert) => {
+  test(".parse()", (assert) => {
     //Boolean
     assert.deepEqual(
       yaml.parse(

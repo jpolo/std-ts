@@ -1,9 +1,8 @@
 import unit = require("../../../main/typescript/ts/unit");
-import suite = unit.suite;
 import test = unit.test;
 import timer = require("../../../main/typescript/ts/timer");
 
-var timerSuite = suite("ts/timer", (self) => {
+var timerSuite = unit.suite("ts/timer", (self) => {
 
   function createSpy() {
     var o = {

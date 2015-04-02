@@ -1,14 +1,13 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import uri = require("../../../main/typescript/ts/uri")
 import URI = uri.URI
 
-var uriSuite = suite("ts/uri", (self) => {
+var uriSuite = unit.suite("ts/uri", (self) => {
   var uriDefault = uri.parse('http://localhost:8080/titi/tata?q=blah#id') 
   
   
-  test("parse()", (assert) => {
+  test(".parse()", (assert) => {
     var u = uriDefault
       
     assert.strictEqual(u.scheme, 'http')
@@ -22,7 +21,7 @@ var uriSuite = suite("ts/uri", (self) => {
   
 })
 
-var URISuite = suite("ts/uri.URI", (self) => {
+var URISuite = unit.suite("ts/uri.URI", (self) => {
   
   var uriDefault: URI;
   

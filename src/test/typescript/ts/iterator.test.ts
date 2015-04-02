@@ -1,9 +1,8 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import iterator = require("../../../main/typescript/ts/iterator")
 
-var iteratorSuite = suite("ts/iterator", (self) => {
+var iteratorSuite = unit.suite("ts/iterator", (self) => {
 
   function generate<T>(assert: unit.Assert, iter: iterator.IIterator<T>, a: T[], limit = 30) {
     for (var i = 0; i < limit; ++i) {

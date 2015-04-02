@@ -12,9 +12,6 @@ module log {
   var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
   var __void = function () {};
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
-  var __isNumber = function (o: any) { return typeof o == 'number'; };
-  var __isString = function (o: any) { return typeof o == 'string'; };
-  var __isFunction = function(o: any) { return typeof o == 'function'; };
   var __keys = Object.keys;
   var __str = function (o) { return "" + o; };
   var __strCmp = function(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 };
@@ -70,9 +67,9 @@ module log {
     static cast(o: any): Level {
       if (o instanceof Level) {
         return o
-      } else if (__isNumber(o)) {
+      } else if (typeof o === "number") {
         return Level.fromNumber(o)
-      } else if (__isString(o)) {
+      } else if (typeof o === "string") {
         return Level.fromString(o)
       }
     }
@@ -203,12 +200,12 @@ module log {
     }
     
     toString(): string {
-      return '[' + this.level.name + '|' + this.group + '] ' + this.data
+      return '[' + this.level.name + '|' + this.group + '] ' + this.data.join(" ")
     }
   }
   
   export function logger(group: string) {
-    return $dispatcher.logger(group)
+    return $dispatcher.getLogger(group)
   }
   
   export class Logger {
@@ -278,13 +275,13 @@ module log {
       }
     ) {
       if (deps) {
-        if (deps.$time) {
+        if ("$time" in deps) {
           this.$time = deps.$time;
         }
       }
     }
     
-    logger(name: string): Logger {
+    getLogger(name: string): Logger {
       var loggers = this._loggers
       return loggers[name] || (loggers[name] = new Logger(name, this))
     }
@@ -292,7 +289,7 @@ module log {
     isEnabledFor(level: ILevel, group: string): boolean {
       var returnValue = false
       var reporters = this.reporters
-      var logMessage = this.message(level, group, null)
+      var logMessage = new Message(level, group, null)
       var names = __keys(reporters)
       for (var i = 0, l = names.length; i < l; ++i) {
         var target = reporters[names[i]]
@@ -303,14 +300,10 @@ module log {
       } 
       return returnValue
     }
-    
-    message(level: ILevel, group: string, data: any[]): Message {
-      return new Message(level, group, data, this.$time.now())
-    }
 
     send(level: ILevel, group: string, data: any[]): void {
-      var reporters = this.reporters
-      var logMessage = this.message(level, group, data)
+      var reporters = this.reporters;
+      var logMessage = new Message(level, group, data, this.$time.now());
       var names = __keys(reporters)
       for (var i = 0, l = names.length; i < l; ++i) {
         var target = reporters[names[i]]
@@ -442,10 +435,10 @@ module log {
         }  
       }) {
         if (deps) {
-          if (deps.$formatter) {
+          if ("$formatter" in deps) {
             this.$formatter = deps.$formatter;  
           } 
-          if (deps.$console) {
+          if ("$console" in deps) {
             this.$console = deps.$console;  
           }  
         }

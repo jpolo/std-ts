@@ -48,8 +48,6 @@ var signalSuite = unit.suite("ts/signal", (self) => {
     assert.strictEqual(signal.count(receiver, SIG), 1);
     signal.connect(receiver, SIG, function () {});
     assert.strictEqual(signal.count(receiver, SIG), 2);
-    
-    console.warn(receiver);
   })
   
   test(".connect()", (assert) => {
@@ -69,8 +67,6 @@ var signalSuite = unit.suite("ts/signal", (self) => {
   })
   
   test(".emit()", (assert) => {
-    
-    
     signal.connect(receiver, SIG, listener1);
     assert.deepEqual(stream, ["l1:foo"])
     

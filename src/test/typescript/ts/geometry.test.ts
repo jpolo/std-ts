@@ -1,12 +1,11 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import geometry = require("../../../main/typescript/ts/geometry")
 import quaternion = geometry.quaternion
 import vector = geometry.vector
 import matrix = geometry.matrix
 
-var geometryQuatSuite = suite("ts/geometry.quaternion", (self) => {
+var geometryQuatSuite = unit.suite("ts/geometry.quaternion", (self) => {
   
   var quatZ, quatA, quatB, quatID, quatTmp: geometry.IQuaternion
   var vec3: geometry.IVector3
@@ -71,7 +70,7 @@ var geometryQuatSuite = suite("ts/geometry.quaternion", (self) => {
   
 })
 
-var geometryVectorSuite = suite("ts/geometry.vector", (self) => {
+var geometryVectorSuite = unit.suite("ts/geometry.vector", (self) => {
 
 
   test('add(a, b)', (assert) => {
@@ -203,7 +202,7 @@ var geometryVectorSuite = suite("ts/geometry.vector", (self) => {
     
 })
   
-var geometryMatrixSuite = suite("ts/geometry.matrix", (self) => {
+var geometryMatrixSuite = unit.suite("ts/geometry.matrix", (self) => {
   var mat2A, mat2B: geometry.IMatrix2
   var mat3A, mat3B: geometry.IMatrix3
   var mat4A, mat4B: geometry.IMatrix4

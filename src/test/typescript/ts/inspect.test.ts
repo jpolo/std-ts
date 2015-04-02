@@ -1,5 +1,4 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import inspect = require("../../../main/typescript/ts/inspect")
 
@@ -11,7 +10,7 @@ class TestClass {
   
 }
 
-var inspectSuite = suite("ts/inspect.Inspector", (self) => {
+var inspectSuite = unit.suite("ts/inspect.Inspector", (self) => {
   function inspectResults<T>(...args: Array<{ 0: T; 1: string; }>) {
     return args;
   }

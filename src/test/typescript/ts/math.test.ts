@@ -89,7 +89,7 @@ var mathSuite = suite("ts/math", (self) => {
     })
   })
     
-  test("round()", (assert) => {
+  test(".round()", (assert) => {
     //Number
     [
       [1.2, 1],

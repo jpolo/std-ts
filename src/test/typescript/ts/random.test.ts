@@ -1,5 +1,4 @@
 import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
 import test = unit.test
 import random = require("../../../main/typescript/ts/random")
 
@@ -19,7 +18,7 @@ class Assert extends unit.Assert {
   }
 }
 
-var randomSuite = suite("ts/random", (self) => {
+var randomSuite = unit.suite("ts/random", (self) => {
   var test = unit.testc(Assert)//overload
   var engineTest = random.engine.pseudo
   

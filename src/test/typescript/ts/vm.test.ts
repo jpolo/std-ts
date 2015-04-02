@@ -5,14 +5,14 @@ import vm = require("../../../main/typescript/ts/vm")
 
 var vmSuite = suite("ts/vm", (self) => {
 
-  test("global", (assert) => {
+  test(".global", (assert) => {
     var global = vm.global
     assert.strictEqual(typeof global, "object")
     assert.strictEqual(global.setTimeout, setTimeout)
     assert.strictEqual(global.clearTimeout, clearTimeout)
   })
 
-  test("compile(jscode: string)", (assert) => {
+  test(".compile()", (assert) => {
     // simple
     var fn = vm.compile("return 'abc';")
     assert.strictEqual(typeof fn, "function")
@@ -27,7 +27,7 @@ var vmSuite = suite("ts/vm", (self) => {
     assert.strictEqual(context['d'], 3)
   })
   
-  test("eval(jscode: string, context?)", (assert) => {
+  test(".eval()", (assert) => {
     // simple
     var returnValue = vm.eval("return 'abc';")
     assert.strictEqual(returnValue, "abc")

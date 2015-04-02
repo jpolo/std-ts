@@ -4,14 +4,19 @@ module signal {
   var ES5_COMPAT = ES3_COMPAT || true;
   
   //Util
-  //var __isArray = Array.isArray;
   var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
   var __sym: (o: any) => any = __global.Symbol;
+  var __descriptor = { value: null, enumerable: false, configurable: true, writable: true };
+  var __def = Object.defineProperty;
+  var __set = function (o, k, v) {
+    __descriptor.value = v
+    __def(o, k, __descriptor);
+  };
   
   //Compat
-  //if (ES3_COMPAT) {
- 
-  //}
+  if (ES3_COMPAT) {
+    __def = __def || function (o, k, d) { o[k] = d.value; };
+  }
   
   if (ES5_COMPAT) {
     __sym = __sym || function (o) { return "@@" + o; };
@@ -21,7 +26,8 @@ module signal {
   var __signalDispatcher = function (o: any, create: boolean): { [k: string]: ISignalBindingQueue } {
     var dispatcher = o[$$dispatcher];
     if (!dispatcher && create) {
-      dispatcher = o[$$dispatcher] = {};
+      dispatcher = {};
+      __set(o, $$dispatcher, dispatcher);
     }
     return dispatcher;
   };

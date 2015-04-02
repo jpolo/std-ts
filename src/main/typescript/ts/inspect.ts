@@ -293,7 +293,7 @@ module inspect {
     stringifyIInspect(o: IInspect, maxDepth: number = this.maxDepth) {
       var s = __inspectEmpty(this, o);
       if (s === null) {
-        s = o.inspect(maxDepth);
+        s = o.inspect(maxDepth);//TODO catch errors?
         if (!__isString(s)) {
           s = this.stringify(s, maxDepth);
         }
