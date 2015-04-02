@@ -24,7 +24,7 @@ var logSuite = unit.suite("ts/log", (self) => {
     }
   }
   
-  test("logger()", (assert) => {
+  test(".logger()", (assert) => {
     assert.strictEqual(log.logger('test.foo.bar.baz').name, 'test.foo.bar.baz')
     assert.strictEqual(log.logger('test.foo.bar').name, 'test.foo.bar')
     assert.strictEqual(log.logger('test.foo').name, 'test.foo')

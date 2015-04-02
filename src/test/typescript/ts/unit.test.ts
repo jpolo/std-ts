@@ -141,7 +141,7 @@ var TestEngineSuite = unit.suite("ts/unit.TestEngine", (self) => {
   var engine = new TestEngine()
 
 
-  test("testEquals(l: any, r: any)", (assert) => {
+  test("#testEquals()", (assert) => {
     assert.ok(engine.testEquals(1, 1))
     assert.ok(engine.testEquals(false, 0))
     assert.ok(!engine.testEquals(0, 1))
@@ -149,7 +149,7 @@ var TestEngineSuite = unit.suite("ts/unit.TestEngine", (self) => {
     assert.ok(engine.testEquals("1", 1))
   })
 
-  test("testEqualStrict(l: any, r: any)", (assert) => {
+  test("#testEqualStrict()", (assert) => {
     assert.ok(engine.testEqualsStrict(1, 1))
     assert.ok(engine.testEqualsStrict(NaN, NaN))
     assert.ok(!engine.testEqualsStrict(false, 0))
@@ -158,7 +158,7 @@ var TestEngineSuite = unit.suite("ts/unit.TestEngine", (self) => {
     assert.ok(!engine.testEqualsStrict("1", 1))
   })
 
-  test("testEqualNear(l: any, r: any, epsilon: number)", (assert) => {
+  test("#testEqualNear()", (assert) => {
     assert.ok(engine.testEqualsNear(1, 1))
     assert.ok(engine.testEqualsNear(1, 1.1, 0.11));
     assert.ok(!engine.testEqualsNear(1.1, 1))
@@ -167,14 +167,14 @@ var TestEngineSuite = unit.suite("ts/unit.TestEngine", (self) => {
     assert.ok(!engine.testEqualsNear("1", 1))
   })
     
-  test("testEqualDeep(l: any, r: any)", (assert) => {
+  test("#testEqualDeep()", (assert) => {
     assert.ok(engine.testEqualsDeep([1], [1]))
     assert.ok(engine.testEqualsDeep([NaN], [NaN]))
     assert.ok(!engine.testEqualsDeep([false], [0]))
     assert.ok(!engine.testEqualsDeep(["1"], [1]))
   })
 
-  test("dump(v: any)", (assert) => {
+  test("#dump()", (assert) => {
     //primitives
     assert.ok(engine.dump(null) === 'null')
     assert.ok(engine.dump(undefined) === 'undefined')
