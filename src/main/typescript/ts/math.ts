@@ -43,89 +43,88 @@ module math {
   var math_tanh = Math['tanh'];
   
   //Compat
-  if (ES3_COMPAT || ES5_COMPAT) {
-    if (ES3_COMPAT) {
-      //nothing
-    }
-    if (ES5_COMPAT) {
-      math_cbrt = math_cbrt || function (n) {
-        n = __num(n);
-        return (
-          n === 0 ? n :
-          n < 0 ? -math_pow(-n, ONE_THIRD) :
-          math_pow(n, ONE_THIRD)
-        );
-      };
-      math_clz32 = math_clz32 || function (n) { n = __num(n) >>> 0; return n ? 32 - n.toString(2).length : 32 };
-      math_expm1 = math_expm1 || function (n) {
-        n = __num(n);
-        return (
-          n === -Infinity ? -1 :
-          (__isFinite(n) || n === 0) ? n :
-          math_exp(n) - 1
-        );
-      };
-      math_log2 = math_log2 || function (n) { return math_log(n) * LOG2E };
-      math_log10 = math_log10 || function (n) { return math_log(n) * LOG10E };
-      math_sign = math_sign || function (n) { return __isNaN(n) ? n : n > 0 ? 1 : n < 0 ? -1 : 0 };
-      math_trunc = math_trunc || function (n) { return n > 0 ? math_floor(n) : math_ceil(n); };
-      math_acosh = math_acosh || function (n) {
-        n = __num(n);
-        return (
-          __isNaN(n) || n < 1 ? NaN :
-          n === 1 ? 0 :
-          n === Infinity ? n :
-          math_log(n + math_sqrt(n * n - 1))
-        );
-      };
-      math_asinh = math_asinh || function (n) {
-        n = __num(n);
-        return (
-          n === 0 || !__isFinite(n) ? n :
-          n < 0 ? -math_asinh(-n) : 
-          math_log(n + math_sqrt(n * n + 1))
-        );
-      };
-      math_cosh = math_cosh || function (n) {
-        n = __num(n);
-        return (
-          n === 0 ? 1 :
-          __isNaN(n) ? n :
-          !__isFinite(n) ? Infinity :
-          n < 0 ? math_cosh(n) :
-          n > 21 ? math_exp(n) / 2 :
-          math_exp(n) + math_exp(-n) / 2
-        );
-      };
-      math_atanh = math_atanh || function (n) {
-        n = __num(n);
-        return (
-          __isNaN(n) || n < -1 || n > 1 ? NaN :
-          n === -1 ? -Infinity :
-          n === 1 ? Infinity :
-          n === 0 ? n :
-          0.5 * math_log((1 + n) / (1 - n))
-        );
-      };
-      math_sinh = math_sinh || function (n) {
-        n = __num(n);
-        return (
-          !__isFinite(n) || n === 0 ? n :
-          (math_exp(n) - math_exp(-n)) / 2
-        );
-      };
-      math_tanh = math_tanh || function (n) {
-        n = __num(n);
-        var exp, nexp;
-        return (
-          __isNaN(n) || n === 0 ? n :
-          n === Infinity ? 1 :
-          n === -Infinity ? -1 :
-          ((exp = math_exp(n)) - (nexp = math_exp(-n))) / (exp + nexp)
-        );
-      };
-    }
+  if (ES3_COMPAT) {
+    //nothing
   }
+  if (ES5_COMPAT) {
+    math_cbrt = math_cbrt || function (n) {
+      n = __num(n);
+      return (
+        n === 0 ? n :
+        n < 0 ? -math_pow(-n, ONE_THIRD) :
+        math_pow(n, ONE_THIRD)
+      );
+    };
+    math_clz32 = math_clz32 || function (n) { n = __num(n) >>> 0; return n ? 32 - n.toString(2).length : 32 };
+    math_expm1 = math_expm1 || function (n) {
+      n = __num(n);
+      return (
+        n === -Infinity ? -1 :
+        (__isFinite(n) || n === 0) ? n :
+        math_exp(n) - 1
+      );
+    };
+    math_log2 = math_log2 || function (n) { return math_log(n) * LOG2E };
+    math_log10 = math_log10 || function (n) { return math_log(n) * LOG10E };
+    math_sign = math_sign || function (n) { return __isNaN(n) ? n : n > 0 ? 1 : n < 0 ? -1 : 0 };
+    math_trunc = math_trunc || function (n) { return n > 0 ? math_floor(n) : math_ceil(n); };
+    math_acosh = math_acosh || function (n) {
+      n = __num(n);
+      return (
+        __isNaN(n) || n < 1 ? NaN :
+        n === 1 ? 0 :
+        n === Infinity ? n :
+        math_log(n + math_sqrt(n * n - 1))
+      );
+    };
+    math_asinh = math_asinh || function (n) {
+      n = __num(n);
+      return (
+        n === 0 || !__isFinite(n) ? n :
+        n < 0 ? -math_asinh(-n) : 
+        math_log(n + math_sqrt(n * n + 1))
+      );
+    };
+    math_cosh = math_cosh || function (n) {
+      n = __num(n);
+      return (
+        n === 0 ? 1 :
+        __isNaN(n) ? n :
+        !__isFinite(n) ? Infinity :
+        n < 0 ? math_cosh(n) :
+        n > 21 ? math_exp(n) / 2 :
+        math_exp(n) + math_exp(-n) / 2
+      );
+    };
+    math_atanh = math_atanh || function (n) {
+      n = __num(n);
+      return (
+        __isNaN(n) || n < -1 || n > 1 ? NaN :
+        n === -1 ? -Infinity :
+        n === 1 ? Infinity :
+        n === 0 ? n :
+        0.5 * math_log((1 + n) / (1 - n))
+      );
+    };
+    math_sinh = math_sinh || function (n) {
+      n = __num(n);
+      return (
+        !__isFinite(n) || n === 0 ? n :
+        (math_exp(n) - math_exp(-n)) / 2
+      );
+    };
+    math_tanh = math_tanh || function (n) {
+      n = __num(n);
+      var exp, nexp;
+      return (
+        __isNaN(n) || n === 0 ? n :
+        n === Infinity ? 1 :
+        n === -Infinity ? -1 :
+        ((exp = math_exp(n)) - (nexp = math_exp(-n))) / (exp + nexp)
+      );
+    };
+  }
+  
   
   export var E = Math.E
   export var LN10 = Math.LN10
