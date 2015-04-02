@@ -1,6 +1,6 @@
 //Constant
 var ES3_COMPAT = true;
-var ES5_COMPAT = true;
+var ES5_COMPAT = ES3_COMPAT || true;
 
 //Util
 var __void = function () {};
