@@ -69,41 +69,54 @@ module compare {
     ); 
   }
   
-  function compareArray(l: Array<any>, r: Array<any>) { return null; }
-  function compareDate(l: Date, r: Date): Ordering { return compareNumber(+l, +r); }
-  function compareRegExp(l: RegExp, r: RegExp): Ordering { return compareString(__str(l), __str(r)); }
+  function compareArray(lhs: Array<any>, rhs: Array<any>, compareFn = compare) {
+    var returnValue = Ordering.Equal;
+    var lhslen = lhs.length;
+    var rhslen = rhs.length;
+    
+    for (var i = 0, l = lhslen < rhslen ? lhslen : rhslen; i < l; ++i) {
+      returnValue = compareFn(lhs[i], rhs[i]);
+      if (returnValue !== Ordering.Equal) {
+        break;
+      }
+    }
+
+    return returnValue; 
+  }
+  function compareDate(lhs: Date, rhs: Date): Ordering { return compareNumber(+lhs, +rhs); }
+  function compareRegExp(lhs: RegExp, rhs: RegExp): Ordering { return compareString(__str(lhs), __str(rhs)); }
   
-  function min<T>(l: T, r: T, compareFn = compare): T {
-    return compareFn(l, r) < 0 ? l : r;
+  function min<T>(lhs: T, rhs: T, compareFn = compare): T {
+    return compareFn(lhs, rhs) < 0 ? lhs : rhs;
   }
   
-  function max<T>(l: T, r: T, compareFn = compare): T {
-    return compareFn(l, r) > 0 ? l : r;
+  function max<T>(lhs: T, rhs: T, compareFn = compare): T {
+    return compareFn(lhs, rhs) > 0 ? lhs : rhs;
   }
   
-  function equals<T>(l: T, r: T, compareFn = compare): boolean {
-    return compareFn(l, r) === Ordering.Equal;
+  function equals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+    return compareFn(lhs, rhs) === Ordering.Equal;
   }
   
-  function notEquals<T>(l: T, r: T, compareFn = compare): boolean {
-    return compareFn(l, r) !== Ordering.Equal;
+  function notEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+    return compareFn(lhs, rhs) !== Ordering.Equal;
   }
   
-  function lessThan<T>(l: T, r: T, compareFn = compare): boolean {
-    return (compareFn(l, r) === Ordering.Less);
+  function lessThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+    return (compareFn(lhs, rhs) === Ordering.Less);
   }
   
-  function lessOrEquals<T>(l: T, r: T, compareFn = compare): boolean {
-    var result = compareFn(l, r);
+  function lessOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+    var result = compareFn(lhs, rhs);
     return (result === Ordering.Less || result === Ordering.Equal);
   }
   
-  function greaterThan<T>(l: T, r: T, compareFn = compare): boolean {
-    return (compareFn(l, r) === Ordering.Greater);
+  function greaterThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+    return (compareFn(lhs, rhs) === Ordering.Greater);
   }
   
-  function greaterOrEquals<T>(l: T, r: T, compareFn = compare): boolean {
-    var result = compareFn(l, r);
+  function greaterOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+    var result = compareFn(lhs, rhs);
     return (result === Ordering.Greater || result === Ordering.Equal);
   }
   
