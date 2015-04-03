@@ -27,7 +27,7 @@ module compare {
     compare(o: any): Ordering;
   }
   
-  function compare<T>(lhs: T, rhs: T): Ordering {
+  export function compare<T>(lhs: T, rhs: T): Ordering {
     var returnValue: Ordering = null;
     var l = <any> lhs;
     var r = <any> rhs;
@@ -44,7 +44,7 @@ module compare {
     return returnValue;
   }
   
-  function compareNumber(lhs: number, rhs: number): Ordering {
+  export function compareNumber(lhs: number, rhs: number): Ordering {
     return (
       __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : null) :
       (lhs = +lhs) === (rhs = +rhs) ? Ordering.Equal :
@@ -53,7 +53,7 @@ module compare {
     );
   }
   
-  function compareString(lhs: string, rhs: string): Ordering {
+  export function compareString(lhs: string, rhs: string): Ordering {
     return (
       __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : null) :
       (lhs = __str(lhs)) === (rhs = __str(rhs)) ? Ordering.Equal :
@@ -62,14 +62,14 @@ module compare {
     );
   }
   
-  function compareICompare(lhs: ICompare, rhs: ICompare): Ordering { 
+  export function compareICompare(lhs: ICompare, rhs: ICompare): Ordering { 
     return (
       __isEmpty(lhs) ? (lhs === rhs ? Ordering.Equal : null) :
       lhs.compare(rhs)
     ); 
   }
   
-  function compareArray(lhs: Array<any>, rhs: Array<any>, compareFn = compare) {
+  export function compareArray(lhs: Array<any>, rhs: Array<any>, compareFn = compare) {
     var returnValue = Ordering.Equal;
     var lhslen = lhs.length;
     var rhslen = rhs.length;
@@ -83,39 +83,41 @@ module compare {
 
     return returnValue; 
   }
+  
   function compareDate(lhs: Date, rhs: Date): Ordering { return compareNumber(+lhs, +rhs); }
+  
   function compareRegExp(lhs: RegExp, rhs: RegExp): Ordering { return compareString(__str(lhs), __str(rhs)); }
   
-  function min<T>(lhs: T, rhs: T, compareFn = compare): T {
+  export function min<T>(lhs: T, rhs: T, compareFn = compare): T {
     return compareFn(lhs, rhs) < 0 ? lhs : rhs;
   }
   
-  function max<T>(lhs: T, rhs: T, compareFn = compare): T {
+  export function max<T>(lhs: T, rhs: T, compareFn = compare): T {
     return compareFn(lhs, rhs) > 0 ? lhs : rhs;
   }
   
-  function equals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+  export function equals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
     return compareFn(lhs, rhs) === Ordering.Equal;
   }
   
-  function notEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+  export function notEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
     return compareFn(lhs, rhs) !== Ordering.Equal;
   }
   
-  function lessThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+  export function lessThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
     return (compareFn(lhs, rhs) === Ordering.Less);
   }
   
-  function lessOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+  export function lessOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
     var result = compareFn(lhs, rhs);
     return (result === Ordering.Less || result === Ordering.Equal);
   }
   
-  function greaterThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+  export function greaterThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
     return (compareFn(lhs, rhs) === Ordering.Greater);
   }
   
-  function greaterOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
+  export function greaterOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
     var result = compareFn(lhs, rhs);
     return (result === Ordering.Greater || result === Ordering.Equal);
   }

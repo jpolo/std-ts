@@ -13,9 +13,25 @@ module log {
   var __void = function () {};
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
   var __keys = Object.keys;
+  var __cmp = function(a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1 };
   var __str = function (o) { return "" + o; };
   var __strCmp = function(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 };
   var __throwAsync = function(e) { setTimeout(() => { throw e; }, 0); };
+  var __arrayCmp = function <T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): number {
+    var returnValue = 0
+    var al = a.length
+    var bl = b.length
+    if (al === bl) {
+      for (var i = 0, l = al; i < l; ++i) {
+        var r = cmpFn(a[i], b[i]);
+        if (r !== 0) {
+          returnValue = r
+          break
+        }
+      }
+    }
+    return returnValue
+  };
   
   //Compat
   if (ES3_COMPAT) {
@@ -157,8 +173,8 @@ module log {
     static compare(a: IMessage, b: IMessage): number {
       return (
         Level.compare(a.level, b.level) ||
-        __strCmp(a.group, b.group)// ||
-        //__strCmp(a.data, b.data)
+        __strCmp(a.group, b.group) ||
+        __arrayCmp(a.data, b.data, __cmp)
       )
     }
     
@@ -204,9 +220,18 @@ module log {
     }
   }
   
-  export function logger(group: string) {
+  export function logger(group: string): Logger {
     return $dispatcher.getLogger(group)
   }
+  
+  /*
+  function loggerFor(o: any): Logger {
+    switch (typeof o) {
+      case "object": return logger(o.constructor.name);
+      case "function": return logger(o.name);
+    }
+  }
+  */
   
   export class Logger {
     //static SEPARATOR = '.'
@@ -461,8 +486,6 @@ module log {
           }
         }
       }
-      
-      
     }
   
   }

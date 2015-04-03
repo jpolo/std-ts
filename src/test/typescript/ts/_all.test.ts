@@ -1,5 +1,6 @@
 import unit = require("../../../main/typescript/ts/unit")
 
+import compareSuite = require("./compare.test")
 import dateSuite = require("./date.test")
 import errorSuite = require("./error.test")
 import geometrySuite = require("./geometry.test")
@@ -21,6 +22,7 @@ import vmSuite = require("./vm.test")
 import yamlSuite = require("./yaml.test")
 
 var allSuite: unit.ITest[] = [].concat(
+  compareSuite,
   dateSuite,
   errorSuite,
   geometrySuite,
