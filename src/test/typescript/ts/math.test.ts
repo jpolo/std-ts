@@ -5,6 +5,21 @@ import math = require("../../../main/typescript/ts/math")
 
 var mathSuite = suite("ts/math", (self) => {
   
+  function generate<Input, Return>(
+    assert: unit.Assert, 
+    d: Array<[Input, Return]>,
+    f: (v: Input) => Return,
+    methodName: string
+  ) {
+    for (var i = 0, l = d.length; i < l; ++i) {
+      var pair = d[i];
+      var value = pair[0];
+      var actual = f(pair[0]);
+      var expected = pair[1];
+      assert.strictEqual(actual, expected,  methodName + "(" + value + ") -> " + actual + " must be " + expected)
+    }
+  }
+  
   test(".E", (assert) => {
     assert.strictEqual(math.E, Math.E);
   })
@@ -23,87 +38,91 @@ var mathSuite = suite("ts/math", (self) => {
   
   test(".abs()", (assert) => {
     //Number
-    [
+    generate(assert, [
       [1, 1],
       [-1, 1],
       [0, 0],
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, Infinity]
-    ].forEach((pair) => {
-      var value = pair[0]
-      var actual = math.abs(pair[0])
-      var expected = pair[1]
-      assert.strictEqual(actual, expected, "math.abs(" + value + ") -> " + actual + " must be " + expected)
-    });
-      
+    ], math.abs, "math.abs") 
   })
     
   test(".ceil()", (assert) => {
-    [
+    generate(assert, [
       [1.2, 2],
       [1.7, 2],
       [-1.2, -1],
       [0, 0],
+      [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ].forEach((pair) => {
-      var value = pair[0]
-      var actual = math.ceil(pair[0])
-      var expected = pair[1]
-      assert.strictEqual(actual, expected, "math.ceil(" + value + ") -> " + actual + " must be " + expected)
-    })
-    
+    ], math.ceil, "math.ceil")
   })
     
   test(".exp()", (assert) => {
-    [
+    generate(assert, [
       [1.2, 3.3201169227365472],
       [-1.2, 0.30119421191220213 ],
       [0, 1],
+      [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, 0]
-    ].forEach((pair) => {
-      var value = pair[0]
-      var actual = math.exp(value)
-      var expected = pair[1]
-      assert.strictEqual(actual, expected, "math.exp(" + value + ") -> " + actual + " must be " + expected)
-    })
-    
+    ], math.exp, "math.exp")
   })
     
   test(".floor()", (assert) => {
-    //Number
-    [
+    generate(assert, [
       [1.2, 1],
       [1.7, 1],
       [-1.2, -2],
       [0, 0],
+      [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ].forEach((pair) => {
-      var value = pair[0]
-      var actual = math.floor(pair[0])
-      var expected = pair[1]
-      assert.strictEqual(actual, expected, "math.floor(" + value + ") -> " + actual + " must be " + expected)
-    })
+    ], math.floor, "math.floor")
+  })
+  
+  test(".isEven()", (assert) => {
+    generate(assert, [
+      [0, true],
+      [1.1, false],
+      [1, false],
+      [2, true],
+      [3, false],
+      [-1, false],
+      [-1.1, false],
+      [-2, true],
+      [NaN, false],
+      [Infinity, false],
+      [-Infinity, false]
+    ], math.isEven, "math.isEven")
+  })
+  
+  test(".isOdd()", (assert) => {
+    generate(assert, [
+      [0, false],
+      [1.1, true],
+      [1, true],
+      [-1.1, true],
+      [2, false],
+      [-2, false],
+      [NaN, false],
+      [Infinity, false],
+      [-Infinity, false]
+    ], math.isOdd, "math.isOdd")
   })
     
   test(".round()", (assert) => {
-    //Number
-    [
+    generate(assert, [
       [1.2, 1],
       [1.7, 2],
       [-1.2, -1],
       [0, 0],
+      [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ].forEach((pair) => {
-      var value = pair[0]
-      var actual = math.round(pair[0])
-      var expected = pair[1]
-      assert.strictEqual(actual, expected, "math.round(" + value + ") -> " + actual + " must be " + expected)
-    })
+    ], math.round, "math.round")
   })
     
   

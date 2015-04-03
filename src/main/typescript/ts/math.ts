@@ -55,7 +55,10 @@ module math {
         math_pow(n, ONE_THIRD)
       );
     };
-    math_clz32 = math_clz32 || function (n) { n = __num(n) >>> 0; return n ? 32 - n.toString(2).length : 32 };
+    math_clz32 = math_clz32 || function (n) { 
+      n = __num(n) >>> 0; 
+      return n ? 32 - n.toString(2).length : 32 
+    };
     math_expm1 = math_expm1 || function (n) {
       n = __num(n);
       return (
@@ -200,7 +203,7 @@ module math {
   }
   
   export function isEven(n: number): boolean {
-    return !(n & 1)
+    return (n % 2) === 0;
   }
   
   export function isInteger(n: number): boolean {
@@ -216,7 +219,7 @@ module math {
   }
   
   export function isOdd(n: number): boolean {
-    return !!(n & 1)
+    return !__isNaN(n) && __isFinite(n) && ((n % 2) !== 0);
   }
   
   export function isPrime(n: number): boolean {
