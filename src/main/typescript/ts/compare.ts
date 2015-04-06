@@ -20,7 +20,8 @@ module compare {
   export enum Ordering {
     Less = -1,
     Equal = 0,
-    Greater = 1
+    Greater = 1,
+    None = NaN
   }
   
   export interface ICompare {
@@ -28,11 +29,11 @@ module compare {
   }
   
   export function compare<T>(lhs: T, rhs: T): Ordering {
-    var returnValue: Ordering = null;
+    var returnValue: Ordering = Ordering.None;
     var l = <any> lhs;
     var r = <any> rhs;
     switch (__stringTag(l)) {
-      case 'Undefined': returnValue = r === undefined ? Ordering.Equal : null; break;
+      case 'Undefined': returnValue = r === undefined ? Ordering.Equal : Ordering.None; break;
       case 'Null': returnValue = r === null ? Ordering.Equal : null; break;
       case 'Number': returnValue = compareNumber(l, r); break;
       case 'String': returnValue = compareString(l, r); break;
@@ -46,7 +47,7 @@ module compare {
   
   export function compareNumber(lhs: number, rhs: number): Ordering {
     return (
-      __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : null) :
+      __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
       (lhs = +lhs) === (rhs = +rhs) ? Ordering.Equal :
       lhs < rhs ? Ordering.Less :
       Ordering.Greater
@@ -55,7 +56,7 @@ module compare {
   
   export function compareString(lhs: string, rhs: string): Ordering {
     return (
-      __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : null) :
+      __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
       (lhs = __str(lhs)) === (rhs = __str(rhs)) ? Ordering.Equal :
       lhs < rhs ? Ordering.Less :
       Ordering.Greater
@@ -64,7 +65,7 @@ module compare {
   
   export function compareICompare(lhs: ICompare, rhs: ICompare): Ordering { 
     return (
-      __isEmpty(lhs) ? (lhs === rhs ? Ordering.Equal : null) :
+      __isEmpty(lhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
       lhs.compare(rhs)
     ); 
   }
