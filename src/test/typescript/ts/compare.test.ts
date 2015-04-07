@@ -75,6 +75,11 @@ var compareSuite = unit.suite("ts/compare", (self) => {
     [[new Date(), null], Ordering.None],
     [[null, new Date()], Ordering.None]
   ]);
+  var REGEXPS = data([
+    [[/abc/gi, /abc/gi], Ordering.Equal],
+    [[/bac/gi, /abc/gi], Ordering.Greater],
+    [[/abc/gi, /bac/gi], Ordering.Less]
+  ]);
  
   
   test(".compare()", (assert) => {
@@ -97,6 +102,10 @@ var compareSuite = unit.suite("ts/compare", (self) => {
     generator(assert, compare.compareDate)(DATES.concat(EMPTY))
   })
   
+  test(".compareRegExp()", (assert) => {
+    generator(assert, compare.compareRegExp)(REGEXPS.concat(EMPTY))
+  })
+  
   test(".min()", (assert) => {
     assert.strictEqual(compare.min(0, 0, compare.compareNumber), 0);
     assert.strictEqual(compare.min(0, 1, compare.compareNumber), 0);
@@ -115,6 +124,13 @@ var compareSuite = unit.suite("ts/compare", (self) => {
     assert.strictEqual(compare.equals(-1, 1, compare.compareNumber), false);
     assert.strictEqual(compare.equals("a", "b", compare.compareString), false);
     assert.strictEqual(compare.equals("a", "a", compare.compareString), true);
+  })
+  
+  test(".notEquals()", (assert) => {
+    assert.strictEqual(compare.notEquals(0, 1, compare.compareNumber), true);
+    assert.strictEqual(compare.notEquals(-1, 1, compare.compareNumber), true);
+    assert.strictEqual(compare.notEquals("a", "b", compare.compareString), true);
+    assert.strictEqual(compare.notEquals("a", "a", compare.compareString), false);
   })
 })
   

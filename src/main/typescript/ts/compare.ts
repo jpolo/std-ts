@@ -3,6 +3,7 @@ module compare {
   //Util
   var __ostring = {}.toString;
   var __isEmpty = function (o) { return o === null  || o === undefined; };
+  var __isNaN = function (o) { return o !== o; };
   var __str = function (o) { return "" + o; };
   var __stringTag = function (o: any) {
     var s = '';
@@ -16,6 +17,27 @@ module compare {
     }
     return s;
   };
+  var __comparator = function <T>(o: T): (lhs: T, rhs: T) => Ordering {
+    var returnValue: (lhs: any, rhs: any) => Ordering
+    var tag = __stringTag(o);
+    switch (tag) {
+      case 'Undefined': returnValue = null; break;
+      case 'Null': returnValue = null; break;
+      case 'Boolean': returnValue = <any>compareBoolean; break;
+      case 'Number': returnValue = <any>compareNumber; break;
+      case 'String': returnValue = <any>compareString; break;
+      default:
+        if (isICompare(o)) {
+          returnValue = compareICompare;  
+        } else {
+          switch (tag) {
+            case "Date": returnValue = <any>compareDate; break;
+            case "RegExp": returnValue = <any>compareRegExp; break;
+          }
+        }
+    }
+    return returnValue;
+  }
   
   export enum Ordering {
     Less = -1,
@@ -28,26 +50,36 @@ module compare {
     compare(o: any): Ordering;
   }
   
+  export function isICompare(o: any): boolean {
+    return (o && typeof o.compare === "function");
+  }
+  
   export function compare<T>(lhs: T, rhs: T): Ordering {
     var returnValue: Ordering = Ordering.None;
     var l = <any> lhs;
     var r = <any> rhs;
-    switch (__stringTag(l)) {
-      case 'Undefined': returnValue = r === undefined ? Ordering.Equal : Ordering.None; break;
-      case 'Null': returnValue = r === null ? Ordering.Equal : null; break;
-      case 'Number': returnValue = compareNumber(l, r); break;
-      case 'String': returnValue = compareString(l, r); break;
-      default:
-        if (typeof l.compare === "function") {
-          returnValue = compareICompare(l, r);  
-        }
-    }
-    return returnValue;
+    var cmpFn = __comparator(lhs) || __comparator(rhs);
+    
+    return (
+      cmpFn ? cmpFn(lhs, rhs) : 
+      lhs === rhs && __isEmpty(lhs)  ? Ordering.Equal : 
+      Ordering.None
+    );
+  }
+  
+  export function compareBoolean(lhs: boolean, rhs: boolean): Ordering {
+    return (
+      __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+      lhs === rhs ? Ordering.Equal :
+      +lhs < +rhs ? Ordering.Less :
+      Ordering.Greater
+    );
   }
   
   export function compareNumber(lhs: number, rhs: number): Ordering {
     return (
       __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+      __isNaN(lhs) || __isNaN(rhs) ? Ordering.None :
       (lhs = +lhs) === (rhs = +rhs) ? Ordering.Equal :
       lhs < rhs ? Ordering.Less :
       Ordering.Greater
@@ -85,9 +117,19 @@ module compare {
     return returnValue; 
   }
   
-  function compareDate(lhs: Date, rhs: Date): Ordering { return compareNumber(+lhs, +rhs); }
+  export function compareDate(lhs: Date, rhs: Date): Ordering {
+    return (
+      __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+      compareNumber(+lhs, +rhs)
+    ); 
+  }
   
-  function compareRegExp(lhs: RegExp, rhs: RegExp): Ordering { return compareString(__str(lhs), __str(rhs)); }
+  export function compareRegExp(lhs: RegExp, rhs: RegExp): Ordering { 
+    return (
+      __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+      compareString(__str(lhs), __str(rhs))
+    ); 
+  }
   
   export function min<T>(lhs: T, rhs: T, compareFn = compare): T {
     return compareFn(lhs, rhs) < 0 ? lhs : rhs;
