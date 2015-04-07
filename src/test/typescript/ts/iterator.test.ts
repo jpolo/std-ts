@@ -59,4 +59,5 @@ var iteratorSuite = unit.suite("ts/iterator", (self) => {
 
 });
 
-export = iteratorSuite;
+var exportSuite = iteratorSuite;
+export = exportSuite;

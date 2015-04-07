@@ -35,4 +35,5 @@ var semverSuite = unit.suite("ts/semver.SemVer", (self) => {
   
 })
   
-export = semverSuite
+var exportSuite = semverSuite
+export = exportSuite

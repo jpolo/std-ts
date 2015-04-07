@@ -160,7 +160,7 @@ console.warn(err.stack);
   
 })
 
-var allSuite = ErrorSuite.concat(
+var exportSuite = ErrorSuite.concat(
   EvalErrorSuite, 
   RangeErrorSuite, 
   ReferenceErrorSuite, 
@@ -168,5 +168,4 @@ var allSuite = ErrorSuite.concat(
   URIErrorSuite, 
   BaseErrorSuite
 );
- 
-export = allSuite;
+export = exportSuite;

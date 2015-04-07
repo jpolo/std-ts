@@ -161,4 +161,5 @@ var reflectSuite = unit.suite("ts/reflect", () => {
   })
 })
   
+var exportSuite = reflectSuite
 export = reflectSuite

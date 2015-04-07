@@ -112,4 +112,5 @@ var yamlSuite = unit.suite("ts/yaml", (self) => {
   
 })
   
-export = yamlSuite
+var exportSuite = yamlSuite;
+export = exportSuite;

@@ -99,4 +99,5 @@ var stacktraceSuite = unit.suite("ts/stacktrace", (self) => {
   
 })
   
-export = stacktraceSuite
+var exportSuite = stacktraceSuite;
+export = exportSuite;

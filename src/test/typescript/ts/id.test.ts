@@ -38,4 +38,5 @@ var idSuite = unit.suite("ts/id", (self) => {
 
 })
 
-export = idSuite;
+var exportSuite = idSuite;
+export = exportSuite;

@@ -9,4 +9,5 @@ var dateSuite = unit.suite("ts/date", (self) => {
   
 })
   
-export = dateSuite
+var exportSuite = dateSuite;
+export = exportSuite;

@@ -101,4 +101,5 @@ var signalSuite = unit.suite("ts/signal", (self) => {
   
 });
 
-export = signalSuite;
+var exportSuite = signalSuite;
+export = exportSuite;

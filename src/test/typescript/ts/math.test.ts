@@ -124,8 +124,8 @@ var mathSuite = suite("ts/math", (self) => {
       [-Infinity, -Infinity]
     ], math.round, "math.round")
   })
-    
-  
+
 })
   
-export = mathSuite
+var exportSuite = mathSuite;
+export = exportSuite;

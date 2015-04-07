@@ -39,7 +39,6 @@ module inspect {
       null
     ); 
   };
-  
   var __format = function (constructorName: string, content: string) {
     content = __str(content);
     var sep = content.length ? ' ' : '';
@@ -50,8 +49,7 @@ module inspect {
     );
   };
   
-  
-  
+
   //Compat
   if (ES3_COMPAT) {
     __keys = __keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
@@ -85,7 +83,6 @@ module inspect {
     public ellipsis = "..."
     
     private _refs = __set()
-    private _ignored = __set()
     
     constructor(
       conf?: {
@@ -130,11 +127,7 @@ module inspect {
               case 'RegExp': s = this.stringifyRegExp(o); break;
               default:
                 try {
-                  var method = o.inspect;
-                  if (
-                    method &&
-                    !this._ignored.has(method)
-                  ) {
+                  if (isIInspect(o)) {
                     s = this.stringifyIInspect(o, maxDepth);
                   } else {
                     s = this.stringifyObject(o, maxDepth);
@@ -341,6 +334,10 @@ module inspect {
       }
       return s;
     }
+  }
+  
+  export function isIInspect(o: any): boolean {
+    return (o && typeof o.inspect === "function");  
   }
   
   var $inspectorDefault = new Inspector();

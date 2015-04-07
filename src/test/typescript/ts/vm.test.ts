@@ -42,4 +42,5 @@ var vmSuite = suite("ts/vm", (self) => {
 
 })
 
-export = vmSuite
+var exportSuite = vmSuite;
+export = exportSuite;

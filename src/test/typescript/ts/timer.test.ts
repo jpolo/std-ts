@@ -112,4 +112,5 @@ var timerSuite = unit.suite("ts/timer", (self) => {
   
 })
   
-export = timerSuite
+var exportSuite = timerSuite;
+export = exportSuite;

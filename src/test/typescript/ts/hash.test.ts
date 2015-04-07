@@ -369,4 +369,5 @@ var hashSuite = unit.suite("ts/hash.sip.SipState", (self) => {
   })
 })
   
-export = hashSuite
+var exportSuite = hashSuite;
+export = exportSuite;

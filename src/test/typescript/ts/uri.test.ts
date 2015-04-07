@@ -79,6 +79,5 @@ var URISuite = unit.suite("ts/uri.URI", (self) => {
   })  
 })
 
-var allSuite = uriSuite.concat(URISuite);
-  
-export = allSuite;
+var exportSuite = uriSuite.concat(URISuite);
+export = exportSuite;

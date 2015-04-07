@@ -1,6 +1,7 @@
 import unit = require("../../../main/typescript/ts/unit")
 import test = unit.test
 import inspect = require("../../../main/typescript/ts/inspect")
+import Inspector = inspect.Inspector
 
 class TestClass {
 
@@ -10,7 +11,18 @@ class TestClass {
   
 }
 
-var inspectSuite = unit.suite("ts/inspect.Inspector", (self) => {
+var inspectSuite = unit.suite("ts/inspect", (self) => {
+  
+  test(".isIInspect()", (assert) => {
+    assert.ok(!inspect.isIInspect(undefined))
+    assert.ok(!inspect.isIInspect(null))
+    assert.ok(!inspect.isIInspect({}))
+    assert.ok(inspect.isIInspect({ inspect: () => {  } }))
+  })
+  
+})
+
+var InspectorSuite = unit.suite("ts/inspect.Inspector", (self) => {
   function inspectResults<T>(...args: Array<{ 0: T; 1: string; }>) {
     return args;
   }
@@ -22,7 +34,7 @@ var inspectSuite = unit.suite("ts/inspect.Inspector", (self) => {
     }
   }
   
-  var inspector = new inspect.Inspector({ maxElements: 3, maxString: 15 })
+  var inspector = new Inspector({ maxElements: 3, maxString: 15 })
   var EMPTY = inspectResults(
     [undefined, "undefined"],
     [null, "null"]
@@ -138,5 +150,6 @@ var inspectSuite = unit.suite("ts/inspect.Inspector", (self) => {
   })
   
 })
-  
-export = inspectSuite
+
+var exportSuite = inspectSuite.concat(InspectorSuite);
+export = exportSuite;

@@ -196,6 +196,6 @@ var TestEngineSuite = unit.suite("ts/unit.TestEngine", (self) => {
     
   })
 });
-var exportSuite = AssertSuite.concat(TestEngineSuite)
 
-export = exportSuite
+var exportSuite = AssertSuite.concat(TestEngineSuite);
+export = exportSuite;

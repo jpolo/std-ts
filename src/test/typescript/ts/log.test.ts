@@ -178,5 +178,4 @@ var LoggerSuite = unit.suite("ts/log.Logger", (self) => {
 })
 
 var exportSuite = logSuite.concat(LevelSuite, MessageSuite, LoggerSuite);
-
 export = exportSuite

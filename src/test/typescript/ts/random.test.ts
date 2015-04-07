@@ -195,4 +195,6 @@ var randomSuite = unit.suite("ts/random", (self) => {
   })*/
   
 })
-export = randomSuite
+
+var exportSuite = randomSuite;
+export = exportSuite;
