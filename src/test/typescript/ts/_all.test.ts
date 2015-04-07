@@ -21,7 +21,7 @@ import timerSuite = require("./timer.test")
 import vmSuite = require("./vm.test")
 import yamlSuite = require("./yaml.test")
 
-var allSuite: unit.ITest[] = [].concat(
+var exportSuite: unit.ITest[] = [].concat(
   compareSuite,
   dateSuite,
   errorSuite,
@@ -43,5 +43,4 @@ var allSuite: unit.ITest[] = [].concat(
   vmSuite,
   yamlSuite
 )
-
-export = allSuite
+export = exportSuite

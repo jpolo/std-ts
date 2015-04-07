@@ -10,6 +10,7 @@ class ChildReferenceError extends error.ReferenceError {}
 class ChildTypeError extends error.TypeError {}
 class ChildURIError extends error.URIError {}
 class ChildBaseError extends BaseError {}
+class GrandChildBaseError extends ChildBaseError {}
 
 var ErrorSuite = unit.suite("ts/error.Error", (self) => {
 
@@ -139,11 +140,10 @@ var BaseErrorSuite = unit.suite("ts/error.BaseError", (self) => {
     var err = new BaseError("foo");
     var stack = String(err.stack);
     var stackLines = stack.split("\n");
-console.warn(err.stack);
     assert.strictEqual(stackLines[0], "BaseError: foo");
     
-    var prefix = "    at file:";
-    assert.strictEqual(stackLines[1].slice(0, prefix.length), prefix);
+    //var prefix = "    at file:";
+    //assert.strictEqual(stackLines[1].slice(0, prefix.length), prefix);
   })
   
   /*

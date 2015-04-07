@@ -1,4 +1,4 @@
-import stacktrace = require("ts/stacktrace")
+//import stacktrace = require("ts/stacktrace")
 
 module error {
 
@@ -10,7 +10,12 @@ module error {
   var __name = function (f: Function) {
     return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
   };
-  var __captureStackTrace = stacktrace.capture;
+  var __captureStackTrace = (<any>Error).captureStackTrace || function (error, stripPoint) {
+    var stackString = (<any>new Error()).stack;    
+    //Remove first calls
+    var stack = stackString.split("\n").slice(1);//first is Error string, second is __captureStackTrace
+    error.stack = __str(error) + "\n" + stack.join("\n");
+  };
   var __handleUncaughtError = function (error, prefix) {
     if (__console) {      
       var str = error && (error instanceof Error) ? __str(error.stack || error) : __inspect(error);
@@ -23,23 +28,6 @@ module error {
   //private
   var _isHandling = false;
   
-  /*
-  export function apply(fn: Function, thisArg?, argArray?: any) {
-    var result;
-    try {
-      if (argArray) {
-        result = fn.apply(thisArg, argArray);
-      } else if (thisArg) {
-        result = fn.call(thisArg);
-      } else {
-        result = fn();
-      }
-    } catch (error) {
-      handleError(error);
-    }
-    return result;
-  }
-  */
   
   export interface IErrorHandler {
     (e: any): boolean  
