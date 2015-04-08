@@ -624,8 +624,9 @@ module unit {
       var onrun = (testCaseReport: ITestReport) => {
         var testCase = null;//TODO
         reports.push(testCaseReport)
+        handlers.onTestEnd(testCases, testCase, testCaseReport)
         if (--remaining === 0) {
-          handlers.onTestEnd(testCases, testCase, testCaseReport)
+          handlers.onEnd(testCases/*, reports*/)
           //onComplete(reports)
         }
       }
@@ -636,7 +637,6 @@ module unit {
         handlers.onTestStart(testCases, testCase)
         testCase.run(this, testParams, onrun)
       }
-      handlers.onEnd(testCases);
     }
   }
 
@@ -747,10 +747,23 @@ module unit {
       if (this._includeDefault) {
         testCases = testCases.concat(suiteDefault.tests)
       }
-      this.$engine.run(testCases, { 
+      var config = {
         epsilon: this._epsilon,
         timeout: this._timeout
-      }, onComplete)
+      };
+      var reports: ITestReport[] = [];
+      this.$engine.run(testCases, config, {
+        onStart: (tests) => {},
+        onTestStart: (tests, test) => {},
+        onTestEnd: (tests, test, report) => {
+          reports.push(report);  
+        },
+        onEnd: (tests) => {
+          if (onComplete) {
+            onComplete(reports);  
+          }
+        },
+      })
     }
   }
 
