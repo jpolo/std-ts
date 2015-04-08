@@ -11,7 +11,6 @@ module unit {
   var TEST_TIMEOUT = 2000;//ms
 
   //Util
-  var __equals = function (a: any, b: any) { return a === b };
   var __equalsFloat = function (a: number, b: number, epsilon: number) {
     return (
       __isNaN(b) ? __isNaN(a) :
@@ -19,21 +18,6 @@ module unit {
       !__isFinite(b) && !__isFinite(a) ? (b > 0) == (a > 0) :
       Math.abs(a - b) < epsilon
     )
-  };
-  var __equalsArray = function (a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
-    var returnValue = true
-    var al = a.length
-    var bl = b.length
-
-    if (al === bl) {
-      for (var i = 0, l = al; i < l; ++i) {
-        if (!equalFn(a[i], b[i])) {
-          returnValue = false
-          break
-        }
-      }
-    }
-    return returnValue
   };
   var __fstring = Function.prototype.toString;
   var __fnSource = function (f: Function) { return __fstring.call(f).slice(13, -1).trim(); };
@@ -47,12 +31,104 @@ module unit {
   var __keysSorted = function (o) { return __keys(o).sort(); };
   var __str = function (o) { return "" + o; };
   var __stringTag = reflect.stringTag;
-  var __now = Date.now || function () { return (new Date()).getTime(); };
 
   //Service
-  var $inspectDefault = new inspect.Inspector({ maxString: 70 });
-  var $timeDefault = { now: __now };
-  var $stacktraceDefault = stacktrace;
+  type $Equal = { 
+    is(lhs: any, rhs: any): boolean
+    equals(lhs: any, rhs: any): boolean
+    equalsNear(lhs: any, rhs: any, epsilon: any): boolean
+    equalsDeep(lhs: any, rhs: any): boolean
+  }
+  type $Inspector = inspect.IInspector
+  type $Stacktrace = { create(): ICallSite[] }
+  type $Time = { now(): number }
+  
+  var $equalDefault: $Equal = {
+    is: (a, b) => { 
+      return (
+        a === 0 && b === 0 ? 1 / a === 1 / b :
+        a === b ? true :
+        __isNaN(a) && __isNaN(b) ? true :
+        false
+      )
+    },
+    equals: (a, b) => {
+      return (
+        $equalDefault.is(a, b) ||
+        (
+          (a != null) && a.equals ? a.equals(b) :
+          (b != null) && b.equals ? b.equals(a) :
+          a == b
+        )
+      )
+    },
+    equalsNear: (a: any, b: any, epsilon: number) => {
+      var isnum1 = __isNumber(a)
+      var isnum2 = __isNumber(b)
+      return (
+        (isnum1 || isnum2) ? (isnum1 === isnum2) && (a == b || __equalsFloat(a, b, epsilon)) :
+        (a != null && a.nearEquals) ? a.nearEquals(b) :
+        (b != null && b.nearEquals) ? b.nearEquals(a) :
+        false
+      )
+    },
+    equalsDeep: (a, b) => {
+      function equalsStrict(a: any, b: any) { return a === b };
+      
+      function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
+        var returnValue = true
+        var al = a.length
+        var bl = b.length
+    
+        if (al === bl) {
+          for (var i = 0, l = al; i < l; ++i) {
+            if (!equalFn(a[i], b[i])) {
+              returnValue = false
+              break
+            }
+          }
+        }
+        return returnValue
+      }
+      
+      function equals(o1, o2) {
+        if (!$equalDefault.is(o1, o2)) {
+          switch (__stringTag(o1)) {
+            case 'Undefined':
+            case 'Null':
+            case 'Boolean':
+              return false
+            case 'Number':
+              return (__stringTag(o2) === 'Number') && (__isNaN(o1) && __isNaN(o2))
+            case 'String':
+              return (__stringTag(o2) === 'String') && (o1 == o2)
+            case 'Array':
+              return (o2 != null) && equalsArray(o1, o2, equals)
+            case 'Object':
+            case 'Function':
+            default:
+              var keys1 = __keysSorted(o1)
+              var keys2 = __isObject(o2) ? __keysSorted(o2) : null
+              var keyc = keys1.length
+              if (keys2 && equalsArray(keys1, keys2, equalsStrict)) {
+                for (var i = 0; i < keyc; ++i) {
+                  var key = keys1[i]
+                  if (!equals(o1[key], o2[key])) {
+                    return false
+                  }
+                }
+              }
+              return true
+          }
+        }
+        return true
+      }
+      return equals(a, b)
+    }
+  };
+  var $inspectDefault: $Inspector = new inspect.Inspector({ maxString: 70 });
+  var $timeDefault: $Time = { now: Date.now || function () { return (new Date()).getTime(); } };
+  var $stacktraceDefault: $Stacktrace = stacktrace;
 
 
   export interface IAssertion {
@@ -74,15 +150,23 @@ module unit {
   }
   
   export interface ITestParams {
+    epsilon: number
     timeout: number
   }
 
+  type TestEvents = {
+    onStart: (tests: ITest[]) => void
+    onTestStart: (tests: ITest[], t: ITest) => void
+    onTestEnd: (tests: ITest[], t: ITest, r: ITestReport) => void
+    onEnd: (tests: ITest[]) => void
+  }
+  
   export interface ITestEngine {
     callstack(offset?: number): ICallSite[]
     dump(o: any): string
     currentDate(): Date
     currentTime(): number
-    run(testCases: ITest[], config: { timeout: number }, onComplete: (reports: ITestReport[]) => void): void
+    run(testCases: ITest[], config: ITestParams, evts: TestEvents): void
     testEquals(actual: any, expected: any): boolean
     testEqualsStrict(actual: any, expected: any): boolean
     testEqualsNear(actual: any, expected: any, epsilon?: number): boolean
@@ -278,17 +362,17 @@ module unit {
       return this.__engine__.callstack(3)[0]
     }
 
-    private _strictEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+    protected _strictEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
       message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' be ') + this.__dump__(o2))
       return this.__assert__(this.__engine__.testEqualsStrict(o1, o2) === !not, message, position)
     }
 
-    private _equal(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+    protected _equal(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
       message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' equal ') + this.__dump__(o2))
       return this.__assert__(this.__engine__.testEquals(o1, o2) === !not, message, position)
     }
 
-    private _propEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+    protected _propEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
       var engine = this.__engine__
       message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
       var keys1 = __keysSorted(o1)
@@ -305,7 +389,7 @@ module unit {
       return this.__assert__(isSuccess, message, position)
     }
 
-    private _deepEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
+    protected _deepEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
       message = message || (this.__dump__(o1) + (' must equals ') + this.__dump__(o2))
       return this.__assert__(this.__engine__.testEqualsDeep(o1, o2) === !not, message, position)
     }
@@ -327,14 +411,14 @@ module unit {
       public name: string
     ) { }
 
-    private _beforeRun() {
+    protected _beforeRun() {
       var suite = this.suite
       if (suite.setUp) {
         suite.setUp(this)
       }
     }
 
-    private _afterRun() {
+    protected _afterRun() {
       var suite = this.suite
       if (suite.tearDown) {
         suite.tearDown(this)
@@ -362,7 +446,7 @@ module unit {
       }
 
       var startTime  = engine.currentTime()
-      var timeoutMs = params.timeout || TEST_TIMEOUT;
+      var timeoutMs = params.timeout || Infinity;//no timeout
 
 
       //finish test and send to callback
@@ -411,7 +495,9 @@ module unit {
         try {
           this._beforeRun()
           if (isAsync) {
-            timerId = setTimeout(onTimeout, timeoutMs)
+            if (__isFinite(timeoutMs)) {
+              timerId = setTimeout(onTimeout, timeoutMs)
+            }
             block(assert, complete)
           } else {
             block(assert)
@@ -467,18 +553,23 @@ module unit {
   export class TestEngine implements ITestEngine {
 
     //Services
-    private $inspect: inspect.IInspector = $inspectDefault;
-    private $time: { now(): number } = $timeDefault;
-    private $stacktrace: { create(): ICallSite[] } = $stacktraceDefault;
+    protected $equal: $Equal = $equalDefault;
+    protected $inspect: $Inspector = $inspectDefault;
+    protected $time: $Time = $timeDefault;
+    protected $stacktrace: $Stacktrace = $stacktraceDefault;
 
     constructor(
       deps?: {
-        $inspect?: inspect.IInspector;
-        $time?: { now: () => number };
-        $stacktrace?: { create(): ICallSite[] };
+        $equal?: $Equal;
+        $inspect?: $Inspector;
+        $time?: $Time;
+        $stacktrace?: $Stacktrace;
       }
     ) {
       if (deps) {
+        if ("$equal" in deps) {
+          this.$equal = deps.$equal;
+        }
         if ("$inspect" in deps) {
           this.$inspect = deps.$inspect;
         }
@@ -508,90 +599,44 @@ module unit {
     }
 
     testEqualsStrict(a: any, b: any): boolean {
-      return (
-        a === 0 && b === 0 ? 1 / a === 1 / b :
-        a === b ? true :
-        __isNaN(a) && __isNaN(b) ? true :
-        false
-      )
+      return this.$equal.is(a, b)
     }
 
-    testEquals(o1: any, o2: any): boolean {
-      return (
-        this.testEqualsStrict(o1, o2) ||
-        (
-          (o1 != null) && o1.equals ? o1.equals(o2) :
-          (o2 != null) && o2.equals ? o2.equals(o1) :
-          o1 == o2
-        )
-      )
+    testEquals(a: any, b: any): boolean {
+      return this.$equal.equals(a, b)
     }
 
     testEqualsNear(o1: any, o2: any, epsilon: number = FLOAT_EPSILON): boolean {
-      var isnum1 = __isNumber(o1)
-      var isnum2 = __isNumber(o2)
-      return (
-        (isnum1 || isnum2) ? (isnum1 === isnum2) && (o1 == o2 || __equalsFloat(o1, o2, epsilon)) :
-        (o1 != null && o1.nearEquals) ? o1.nearEquals(o2) :
-        (o2 != null && o2.nearEquals) ? o2.nearEquals(o1) :
-        false
-      )
+      return this.$equal.equalsNear(o1, o2, epsilon);
     }
 
     testEqualsDeep(o1: any, o2: any): boolean {
-      var self = this
-      function equals(o1, o2) {
-        if (!self.testEqualsStrict(o1, o2)) {
-          switch (__stringTag(o1)) {
-            case 'Undefined':
-            case 'Null':
-            case 'Boolean':
-              return false
-            case 'Number':
-              return (__stringTag(o2) === 'Number') && (isNaN(o1) && isNaN(o2))
-            case 'String':
-              return (__stringTag(o2) === 'String') && (o1 == o2)
-            case 'Array':
-              return (o2 != null) && __equalsArray(o1, o2, equals)
-            case 'Object':
-            case 'Function':
-            default:
-              var keys1 = __keysSorted(o1)
-              var keys2 = __isObject(o2) ? __keysSorted(o2) : null
-              var keyc = keys1.length
-              if (keys2 && __equalsArray(keys1, keys2, __equals)) {
-                for (var i = 0; i < keyc; ++i) {
-                  var key = keys1[i]
-                  if (!equals(o1[key], o2[key])) {
-                    return false
-                  }
-                }
-              }
-              return true
-          }
-        }
-        return true
-      }
-      return equals(o1, o2)
+      return this.$equal.equalsDeep(o1, o2)
     }
 
     run(
       testCases: ITest[], 
       testParams: ITestParams, 
-      onComplete?: (reports: ITestReport[]) => void
+      handlers: TestEvents
     ) {
       var remaining = testCases.length
       var reports: ITestReport[] = []
       var onrun = (testCaseReport: ITestReport) => {
+        var testCase = null;//TODO
         reports.push(testCaseReport)
-        if (--remaining === 0 && onComplete) {
-          onComplete(reports)
+        if (--remaining === 0) {
+          handlers.onTestEnd(testCases, testCase, testCaseReport)
+          //onComplete(reports)
         }
       }
 
+      handlers.onStart(testCases);
       for (var i = 0, l = testCases.length; i < l; ++i) {
-        testCases[i].run(this, testParams, onrun)
+        var testCase = testCases[i];
+        handlers.onTestStart(testCases, testCase)
+        testCase.run(this, testParams, onrun)
       }
+      handlers.onEnd(testCases);
     }
   }
 
@@ -651,11 +696,12 @@ module unit {
 
   export class Runner {
     //Config
-    private _timeout = TEST_TIMEOUT;
-    private _includeDefault = true;
+    protected _epsilon = FLOAT_EPSILON;
+    protected _timeout = TEST_TIMEOUT;
+    protected _includeDefault = true;
     
     //Service
-    private $engine: ITestEngine = $engineDefault;
+    protected $engine: ITestEngine = $engineDefault;
     
     constructor(
       private _printers: IPrinter[] = [],
@@ -671,14 +717,18 @@ module unit {
     }
     
     config(options: {
+      epsilon?: number
       includeDefault?: boolean
       timeout?: number
     }) {
-      if ("timeout" in options) {
-        this._timeout = options.timeout;  
+      if ("epsilon" in options) {
+        this._epsilon = options.epsilon;  
       }
       if ("includeDefault" in options) {
         this._includeDefault = options.includeDefault;  
+      }
+      if ("timeout" in options) {
+        this._timeout = options.timeout;  
       }
       return this;
     }
@@ -686,7 +736,6 @@ module unit {
     /*
     printers(printers: IPrinter[]) {
       return new Runner(
-        this._options,
         this._printers.concat(printers), {
           $engine: this.$engine  
         }
@@ -698,7 +747,10 @@ module unit {
       if (this._includeDefault) {
         testCases = testCases.concat(suiteDefault.tests)
       }
-      this.$engine.run(testCases, { timeout: this._timeout }, onComplete)
+      this.$engine.run(testCases, { 
+        epsilon: this._epsilon,
+        timeout: this._timeout
+      }, onComplete)
     }
   }
 

@@ -38,7 +38,7 @@ module signal {
   var __signalKey = function <T>(sig: ISignal<T>): string {
     return <string> sig;
   };
-  var __qPush = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
+  var __queuePush = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
     var head = q.head;
     if (head) {
       var last = head.prev;
@@ -54,7 +54,7 @@ module signal {
     }
     q.length++;
   };
-  var __qRemove = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
+  var __queueRemove = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
     var head = q.head;
     var prev = b.prev;
     var next = b.next;
@@ -117,7 +117,7 @@ module signal {
       binding.prev = binding;
       binding.next = binding;
     } else {
-      __qPush(bindings, binding);
+      __queuePush(bindings, binding);
     }
   }
   
@@ -129,7 +129,7 @@ module signal {
         var binding = head;
         do {
           if (binding.f === f) {
-            __qRemove(bindings, binding);
+            __queueRemove(bindings, binding);
             head = bindings.head;
             if (!head) {
               break;
@@ -150,7 +150,7 @@ module signal {
         do {
           binding.f(v);
           if (binding.once) {
-            __qRemove(bindings, binding);
+            __queueRemove(bindings, binding);
             head = bindings.head;
             if (!head) {
               break;

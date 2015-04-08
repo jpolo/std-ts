@@ -41,16 +41,16 @@ module log {
   }
   
   //Services
-  var $consoleDefault: { 
+  type $Console = { 
     debug(...a: any[]);
     info(...a: any[]);
     warn(...a: any[]);
     error(...a: any[]);
-  } = console;
+  };
+  type $Time = { now: () => number };
   
-  var $timeDefault: {
-    now(): number;  
-  } = { now: Date.now || function () { return (new Date()).getTime(); } };
+  var $consoleDefault: $Console = console;
+  var $timeDefault: $Time = { now: Date.now || function () { return (new Date()).getTime(); } };
   
   export interface IDispatcher {
     isEnabledFor(level: ILevel, group: string): boolean
@@ -91,7 +91,7 @@ module log {
     }
     
     static compare(lhs: ILevel, rhs: ILevel): number {
-      var returnValue = null;
+      var returnValue = NaN;
       if (lhs != null && rhs != null) {
         var lv = lhs.value;
         var rv = rhs.value;
@@ -161,7 +161,7 @@ module log {
       return this.name
     }
   }
-  
+
   export var DEBUG = Level.create('DEBUG', 0)
   export var INFO = Level.create('INFO', 10)
   export var WARN = Level.create('WARN', 20)
@@ -236,10 +236,14 @@ module log {
   export class Logger {
     //static SEPARATOR = '.'
     
+    protected $dispatcher: IDispatcher
+    
     constructor(
       public name: string, 
-      private _dispatcher: IDispatcher
-    ) { }
+      $dispatcher: IDispatcher
+    ) { 
+      this.$dispatcher = $dispatcher
+    }
     
     inspect() {
       return __format('Logger', 'name: "' + this.name + '"')
@@ -273,30 +277,32 @@ module log {
       return this.inspect()
     }
     
-    private _dispatch(level: ILevel, args: any[]): void  {
+    protected _dispatch(level: ILevel, args: any[]): void  {
       var name = this.name
-      var dispatcher = this._dispatcher
+      var dispatcher = this.$dispatcher
       if (!dispatcher) {
         throw new Error("dispatcher is required");  
       }
       
-      if (dispatcher.isEnabledFor(level, name)) {
-        dispatcher.send(level, name, args);
-      } 
+      //if (dispatcher.isEnabledFor(level, name)) {
+      dispatcher.send(level, name, args);
+      //} 
     }
   }
+  
+  
 
   export class Dispatcher implements IDispatcher {
     reporters: { [key: string]: { filter?: IFilter; reporter: IReporter; } } = {}
     
-    private _loggers: { [name: string]: Logger } = {}
+    protected _loggers: { [name: string]: Logger } = {}
     
     //Services
-    private $time: { now: () => number } = $timeDefault
+    protected $time: $Time = $timeDefault
     
     constructor(
       deps?: {
-        $time?: { now: () => number }
+        $time?: $Time
       }
     ) {
       if (deps) {
@@ -431,7 +437,8 @@ module log {
   }*/
   
   export module reporter {
-    var $consoleFormatterDefault = function (logMessage: IMessage): any[] {
+    type $ConsoleFormatter = (logMessage: IMessage) => any[];
+    var $consoleFormatterDefault: $ConsoleFormatter = function (logMessage: IMessage) {
       return ['[' + logMessage.group + ']'].concat(logMessage.data);
     };
   
@@ -442,22 +449,18 @@ module log {
       receive(logMessage: IMessage) {
         this.logs.push(logMessage)
       }
-    
+      
     }
+    
     
     export class Console implements IReporter {
       //Services
-      private $formatter = $consoleFormatterDefault;
-      private $console = $consoleDefault;
+      protected $formatter: $ConsoleFormatter = $consoleFormatterDefault;
+      protected $console: $Console = $consoleDefault;
       
       constructor(deps: {
-        $formatter?: (logMessage: IMessage) => any[];
-        $console?: { 
-          debug(...a: any[]);
-          info(...a: any[]);
-          warn(...a: any[]);
-          error(...a: any[]);
-        }  
+        $formatter?: $ConsoleFormatter;
+        $console?: $Console 
       }) {
         if (deps) {
           if ("$formatter" in deps) {

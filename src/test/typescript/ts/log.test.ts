@@ -153,9 +153,37 @@ var LoggerSuite = unit.suite("ts/log.Logger", (self) => {
     
   test("#debug()", (assert) => {
     assert.strictEqual(logs.length, 0)
-    logger.debug("blah blah")
+    logger.debug("foo", "bar")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.DEBUG, "foobar", ["blah blah"]))
+    assert.equal(logs[0], new log.Message(log.DEBUG, "foobar", ["foo", "bar"]))
+  })
+  
+  test("#info()", (assert) => {
+    assert.strictEqual(logs.length, 0)
+    logger.info("foo", "bar")
+    assert.strictEqual(logs.length, 1)
+    assert.equal(logs[0], new log.Message(log.INFO, "foobar", ["foo", "bar"]))
+  })
+  
+  test("#warn()", (assert) => {
+    assert.strictEqual(logs.length, 0)
+    logger.warn("foo", "bar")
+    assert.strictEqual(logs.length, 1)
+    assert.equal(logs[0], new log.Message(log.WARN, "foobar", ["foo", "bar"]))
+  })
+  
+  test("#error()", (assert) => {
+    assert.strictEqual(logs.length, 0)
+    logger.error("foo", "bar")
+    assert.strictEqual(logs.length, 1)
+    assert.equal(logs[0], new log.Message(log.ERROR, "foobar", ["foo", "bar"]))
+  })
+  
+  test("#fatal()", (assert) => {
+    assert.strictEqual(logs.length, 0)
+    logger.fatal("foo", "bar")
+    assert.strictEqual(logs.length, 1)
+    assert.equal(logs[0], new log.Message(log.FATAL, "foobar", ["foo", "bar"]))
   })
   
   test("#log()", (assert) => {

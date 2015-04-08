@@ -25,7 +25,7 @@ module error {
     }
   };
   
-  //private
+  //isHandling marker to avoid infinite recursion
   var _isHandling = false;
   
   

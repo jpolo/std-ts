@@ -22,7 +22,7 @@ module id {
   }
   
   var $$id = __sym("id");
-  var __currentId = 1;
+  var __currentId = 1;//Start from 1, helps not to have falsy values
   var __nextId = function () { return __currentId++; };
   var __getId: (o: any) => number = function (o: any) {
     var id = o[$$id];
@@ -41,6 +41,16 @@ module id {
    */ 
   export function generate(): number {
     return __nextId();
+  }
+  
+  /**
+   * Return true if o can have and id (object or function)
+   * 
+   * @param o the object
+   */
+  export function hasId(o: any): boolean {
+    var t = typeof o;
+    return t === "function" || (o !== null && t === "object");
   }
   
   /**
