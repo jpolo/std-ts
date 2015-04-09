@@ -75,6 +75,8 @@ module error {
     };
   }(__extends));
   
+  export interface IThrowable extends Error {}
+  
   export declare class Error {
     name: string;
     message: string;
