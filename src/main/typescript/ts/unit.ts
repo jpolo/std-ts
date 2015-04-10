@@ -154,7 +154,7 @@ module unit {
     timeout: number
   }
 
-  type TestEvents = {
+  export interface ITestHandlers {
     onStart: (tests: ITest[]) => void
     onTestStart: (tests: ITest[], t: ITest) => void
     onTestEnd: (tests: ITest[], t: ITest, r: ITestReport) => void
@@ -166,7 +166,7 @@ module unit {
     dump(o: any): string
     currentDate(): Date
     currentTime(): number
-    run(testCases: ITest[], config: ITestParams, evts: TestEvents): void
+    run(testCases: ITest[], config: ITestParams, handlers: ITestHandlers): void
     testEquals(actual: any, expected: any): boolean
     testEqualsStrict(actual: any, expected: any): boolean
     testEqualsNear(actual: any, expected: any, epsilon?: number): boolean
@@ -176,7 +176,7 @@ module unit {
   export interface ITest {
     category: string
     name: string
-    run(engine: ITestEngine, params: ITestParams, onComplete: (report: ITestReport) => void): void
+    run(engine: ITestEngine, params: ITestParams, complete: (report: ITestReport) => void): void
   }
 
   export var SUCCESS = "SUCCESS";
@@ -435,7 +435,7 @@ module unit {
       });
     }
 
-    run(engine: ITestEngine, params: ITestParams, onComplete: (report: ITestReport) => void) {
+    run(engine: ITestEngine, params: ITestParams, complete: (report: ITestReport) => void) {
       var blocks = this.blocks
       var blockc = blocks.length
       var assertions: IAssertion[] = []
@@ -450,18 +450,18 @@ module unit {
 
 
       //finish test and send to callback
-      var blockComplete = () => {
+      var onBlockComplete = () => {
         if (--blockc === 0) {
           //finalize report
           report.elapsedMilliseconds = engine.currentTime() - startTime
           __freeze(report)
           __freeze(assertions)
 
-          onComplete(report)
+          complete(report)
         }
       }
 
-      var runBlock = (testBlock: ITestBlock<any>, onComplete: () => void) => {
+      var runBlock = (testBlock: ITestBlock<any>, complete: () => void) => {
         var block = testBlock.block;
         var assertFactory = testBlock.assertFactory;
         var assert = assertFactory(engine, this, report);
@@ -475,7 +475,7 @@ module unit {
           complete()
         }
 
-        var complete = () => {
+        var onComplete = () => {
           if (!isFinished) {
             isFinished = true
             if (timerId) {
@@ -488,7 +488,7 @@ module unit {
             }
 
             this._afterRun()
-            onComplete()
+            complete()
           }
         }
 
@@ -498,7 +498,7 @@ module unit {
             if (__isFinite(timeoutMs)) {
               timerId = setTimeout(onTimeout, timeoutMs)
             }
-            block(assert, complete)
+            block(assert, onComplete)
           } else {
             block(assert)
           }
@@ -507,13 +507,13 @@ module unit {
           assertions.push(Assertion.error(this, e.message, parsed && parsed[0], e.stack || e.message || null))
         } finally {
           if (!isAsync) {
-            complete()
+            onComplete()
           }
         }
       }
 
       for (var i = 0, l = blocks.length; i < l; ++i) {
-        runBlock(blocks[i], blockComplete)
+        runBlock(blocks[i], onBlockComplete)
       }
     }
 
@@ -615,27 +615,24 @@ module unit {
     }
 
     run(
-      testCases: ITest[], 
-      testParams: ITestParams, 
-      handlers: TestEvents
+      tests: ITest[], 
+      params: ITestParams, 
+      handlers: ITestHandlers
     ) {
-      var remaining = testCases.length
-      var reports: ITestReport[] = []
-      var onrun = (testCaseReport: ITestReport) => {
-        var testCase = null;//TODO
-        reports.push(testCaseReport)
-        handlers.onTestEnd(testCases, testCase, testCaseReport)
-        if (--remaining === 0) {
-          handlers.onEnd(testCases/*, reports*/)
-          //onComplete(reports)
-        }
+      var remaining = tests.length
+      var runTest = (testCase: ITest) => {
+        handlers.onTestStart(tests, testCase)
+        testCase.run(this, params, function (report: ITestReport) {
+          handlers.onTestEnd(tests, testCase, report)
+          if (--remaining === 0) {
+            handlers.onEnd(tests/*, reports*/)
+          }
+        })
       }
 
-      handlers.onStart(testCases);
-      for (var i = 0, l = testCases.length; i < l; ++i) {
-        var testCase = testCases[i];
-        handlers.onTestStart(testCases, testCase)
-        testCase.run(this, testParams, onrun)
+      handlers.onStart(tests);
+      for (var i = 0, l = tests.length; i < l; ++i) {
+        runTest(tests[i])
       }
     }
   }
@@ -751,10 +748,9 @@ module unit {
         epsilon: this._epsilon,
         timeout: this._timeout
       };
-      var reports: ITestReport[] = [];
-      this.$engine.run(testCases, config, {
-        onStart: (tests) => {},
-        onTestStart: (tests, test) => {},
+      var handlers: ITestHandlers = {
+        onStart: (tests) => { },
+        onTestStart: (tests, test) => { },
         onTestEnd: (tests, test, report) => {
           reports.push(report);  
         },
@@ -763,7 +759,9 @@ module unit {
             onComplete(reports);  
           }
         },
-      })
+      };
+      var reports: ITestReport[] = [];
+      this.$engine.run(testCases, config, handlers)
     }
   }
 
