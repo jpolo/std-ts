@@ -19,6 +19,8 @@ class TestIClone implements clone.IClone {
 }
 
 var cloneSuite = unit.suite("ts/clone", (self) => {
+  var now = new Date();
+  
   
   test(".clone()", (assert) => {
     assert.strictEqual(clone.clone(undefined), undefined);
@@ -26,17 +28,21 @@ var cloneSuite = unit.suite("ts/clone", (self) => {
     assert.strictEqual(clone.clone(NaN), NaN);
     assert.strictEqual(clone.clone(1), 1);
     assert.strictEqual(clone.clone("foo"), "foo");
-    var iclone = new TestIClone()
-    var icloned = clone.clone(iclone)
+    
+    var dateCloned = clone.clone(now);
+    assert.strictEqual(+dateCloned, +now);
+    assert.notStrictEqual(dateCloned, now);
+    
+    var iclone = new TestIClone();
+    var icloned = clone.clone(iclone);
     assert.strictEqual(icloned.foo, true);
     
-    var object = new TestObject()
-    var objectcloned = clone.clone(object)
-    assert.instanceOf(objectcloned, TestObject)
-    assert.strictEqual(objectcloned.bool, true)
-    assert.strictEqual(objectcloned.str, "foo")
-    assert.strictEqual(objectcloned.arr, object.arr)
-    
+    var object = new TestObject();
+    var objectCloned = clone.clone(object);
+    assert.instanceOf(objectCloned, TestObject);
+    assert.strictEqual(objectCloned.bool, true);
+    assert.strictEqual(objectCloned.str, "foo");
+    assert.strictEqual(objectCloned.arr, object.arr)
   })
   
 })

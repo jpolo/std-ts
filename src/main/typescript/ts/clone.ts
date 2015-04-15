@@ -13,6 +13,11 @@ module clone {
     }
     return descriptors;
   };
+  var __ostring = {}.toString;
+  var __stringTag = function (o: any) {
+    var c = o.constructor;
+    return c && c.name || __ostring.call(o).slice(8, -1);
+  };
   
   //Compat
   
@@ -25,15 +30,25 @@ module clone {
   }
   
   export function clone<T>(o: T): T {
+    var anyVal = <any> o;
     var returnValue: T = o;
-    switch (typeof o) {
+    switch (typeof anyVal) {
     case "object":
-      if (o !== null) {
-        returnValue = isIClone(o)? (<any> o).clone() : __create(__protoOf(o), __descriptors(o));
+      if (anyVal !== null) {
+        if (isIClone(anyVal)) {
+          returnValue = anyVal.clone();
+        } else {
+          switch (__stringTag(anyVal)) {
+            case "Array": returnValue = <any> cloneArray(anyVal); break;
+            case "Date": returnValue = <any> cloneDate(anyVal); break;
+            case "RegExp": returnValue = <any> cloneRegExp(anyVal); break;
+            default: returnValue = __create(__protoOf(anyVal), __descriptors(anyVal));
+          }
+        }
       }  
       break;
     case "function":
-      var f: any = (<any> returnValue).__cloned__ = (<any>o).__cloned__ || o;
+      var f: any = (<any> returnValue).__cloned__ = anyVal.__cloned__ || o;
       returnValue = <any> function () {
         var r: any;
         var t = this;
@@ -56,7 +71,45 @@ module clone {
     return returnValue;
   }
   
+  function cloneBoolean(b: boolean): boolean {
+    return b;  
+  }
   
+  function cloneNumber(n: number): number {
+    return n;  
+  }
+  
+  function cloneString(s: string): string {
+    return s;  
+  }
+  
+  function cloneArray<T>(a: T[]): T[] {
+    return a.slice();  
+  }
+  
+  function cloneDate(d: Date): Date {
+    return new Date(d.getTime());
+  }
+  
+  function cloneRegExp(re: RegExp): RegExp {
+    var flags = "";
+    if (re.global) {
+      flags += "g";
+    }
+    if (re.ignoreCase) {
+      flags += "i";
+    }
+    if (re.multiline) {
+      flags += "m";
+    }
+    if ((<any> re).sticky) {
+      flags += 'y';
+    }
+    if ((<any> re).unicode) {
+      flags += 'u';
+    }
+    return new RegExp(re.source, flags);
+  }
   
 }
 export = clone
