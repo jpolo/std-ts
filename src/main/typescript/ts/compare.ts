@@ -51,7 +51,7 @@ module compare {
   }
   
   export function isICompare(o: any): boolean {
-    return (o && typeof o.compare === "function");
+    return (!!o && typeof o.compare === "function");
   }
   
   export function compare<T>(lhs: T, rhs: T): Ordering {

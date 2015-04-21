@@ -82,6 +82,12 @@ var compareSuite = unit.suite("ts/compare", (self) => {
   ]);
  
   
+  test(".isICompare()", (assert) => {
+    assert.strictEqual(compare.isICompare(undefined), false);
+    assert.strictEqual(compare.isICompare(null), false);
+    assert.strictEqual(compare.isICompare({ compare: () => { } }), true);
+  })
+  
   test(".compare()", (assert) => {
     generator(assert, compare.compare)(EMPTY.concat(<any>STRINGS, BOOLEANS, NUMBERS, DATES))
   })
