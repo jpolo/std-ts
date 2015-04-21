@@ -30,6 +30,10 @@ module iterator {
   
   var EMPTY = $iteratorFactory(function () { return $iteratorResultFactory(true); });
   
+  export function isIIterator(o: any): boolean {
+    return !!o && typeof o.next === "function";
+  }
+  
   export function empty(): IIterator<any> {
     return EMPTY;
   }

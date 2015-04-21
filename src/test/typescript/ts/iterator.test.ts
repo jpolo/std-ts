@@ -17,6 +17,11 @@ var iteratorSuite = unit.suite("ts/iterator", (self) => {
     }
   }
   
+  test(".isIIterator()", (assert) => {
+    assert.strictEqual(iterator.isIIterator(undefined), false);
+    assert.strictEqual(iterator.isIIterator(null), false);
+    assert.strictEqual(iterator.isIIterator({ next: () => {} }), true);
+  })
   
   test(".empty()", (assert) => {
     generate(assert, iterator.empty(), []);
