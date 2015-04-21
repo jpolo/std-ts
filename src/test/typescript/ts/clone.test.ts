@@ -21,6 +21,11 @@ class TestIClone implements clone.IClone {
 var cloneSuite = unit.suite("ts/clone", (self) => {
   var now = new Date();
   
+  test(".isIClone()", (assert) => {
+    assert.strictEqual(clone.isIClone(undefined), false);
+    assert.strictEqual(clone.isIClone(null), false);
+    assert.strictEqual(clone.isIClone({ clone: () => { } }), true);
+  })
   
   test(".clone()", (assert) => {
     assert.strictEqual(clone.clone(undefined), undefined);

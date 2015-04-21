@@ -13,6 +13,7 @@ module clone {
     }
     return descriptors;
   };
+  var __isDefined = function (o) { return o !== undefined && o !== null; };
   var __ostring = {}.toString;
   var __stringTag = function (o: any) {
     var c = o.constructor;
@@ -26,7 +27,7 @@ module clone {
   }
   
   export function isIClone(o: any): boolean {
-    return o && (typeof o.clone === "function");  
+    return !!o && (typeof o.clone === "function");  
   }
   
   export function clone<T>(o: T): T {
@@ -84,31 +85,53 @@ module clone {
   }
   
   function cloneArray<T>(a: T[]): T[] {
-    return a.slice();  
+    return __isDefined(a) ? a.slice(0) : a;  
   }
   
   function cloneDate(d: Date): Date {
-    return new Date(d.getTime());
+    return __isDefined(d) ? new Date(d.getTime()) : d;
   }
   
   function cloneRegExp(re: RegExp): RegExp {
-    var flags = "";
-    if (re.global) {
-      flags += "g";
+    var returnValue = re;
+    if (__isDefined(re)) {
+      var flags = "";
+      if (re.global) {
+        flags += "g";
+      }
+      if (re.ignoreCase) {
+        flags += "i";
+      }
+      if (re.multiline) {
+        flags += "m";
+      }
+      if ((<any> re).sticky) {
+        flags += 'y';
+      }
+      if ((<any> re).unicode) {
+        flags += 'u';
+      }
+      returnValue = new RegExp(re.source, flags);
     }
-    if (re.ignoreCase) {
-      flags += "i";
+    return returnValue;
+  }
+  
+  function cloneMap<K, V>(m: Map<K, V>): Map<K, V> {
+    var returnValue = m;
+    if (__isDefined(m)) {
+      returnValue = new Map<K, V>();
+      m.forEach((v, k) => returnValue.set(k, v)); 
     }
-    if (re.multiline) {
-      flags += "m";
+    return returnValue;
+  }
+  
+  function cloneSet<T>(s: Set<T>): Set<T> {
+    var returnValue = s;
+    if (__isDefined(s)) {
+      returnValue = new Set<T>();
+      s.forEach((v) => returnValue.add(v)); 
     }
-    if ((<any> re).sticky) {
-      flags += 'y';
-    }
-    if ((<any> re).unicode) {
-      flags += 'u';
-    }
-    return new RegExp(re.source, flags);
+    return returnValue;
   }
   
 }
