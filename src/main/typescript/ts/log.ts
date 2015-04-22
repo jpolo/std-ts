@@ -290,8 +290,6 @@ module log {
     }
   }
   
-  
-
   export class Dispatcher implements IDispatcher {
     reporters: { [key: string]: { filter?: IFilter; reporter: IReporter; } } = {}
     

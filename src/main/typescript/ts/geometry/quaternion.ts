@@ -71,10 +71,7 @@ module quaternion {
   }
   
   export function invert(q: IQuaternion, dest?: IQuaternion): IQuaternion {
-    var q0 = q[0];
-    var q1 = q[1];
-    var q2 = q[2];
-    var q3 = q[3];
+    var q0 = q[0], q1 = q[1], q2 = q[2], q3 = q[3];
     var dot = q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3;
     var invDot = dot ? 1.0 / dot : 0;
     var r = dest || __arrayCreate();
@@ -86,10 +83,7 @@ module quaternion {
   }
   
   export function length(q: IQuaternion): number {
-    var x = q[0];
-    var y = q[1];
-    var z = q[2];
-    var w = q[3];
+    var x = q[0], y = q[1], z = q[2], w = q[3];
     return __sqrt(x * x + y * y + z * z + w * w);
   }
   
@@ -111,10 +105,7 @@ module quaternion {
   
   export function normalize(q: IQuaternion, dest?: IQuaternion): IQuaternion {
     var r = dest || __arrayCreate();
-    var x = q[0];
-    var y = q[1];
-    var z = q[2];
-    var w = q[3];
+    var x = q[0], y = q[1], z = q[2], w = q[3];
     var factor = 1 / __sqrt(x * x + y * y + z * z + w * w);
     r[0] = x * factor;
     r[1] = y * factor;

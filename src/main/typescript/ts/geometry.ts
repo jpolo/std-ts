@@ -32,99 +32,10 @@ module geometry {
   export interface IVector3 extends IVector2 { 2: number }
   export interface IVector4 extends IVector3 { 3: number }
   
-  export interface IQuaternion extends IVector4 { }
-  
   export interface IMatrix { length: number; 0: number; 1: number; 2: number; 3: number; }
   export interface IMatrix2 extends IMatrix { }
   export interface IMatrix3 extends IMatrix2 { 4: number; 5: number; 6: number; 7: number; 8: number; }
   export interface IMatrix4 extends IMatrix3 { 9: number; 10: number; 11: number; 12: number; 13: number; 14: number; 15: number; }
-  
-
-  
-  export module quaternion {
-    var LENGTH = 4
-    var IDENTITY = [0, 0, 0, 1]
-    
-    export function create(x: number, y: number, z: number, w: number): IQuaternion {
-      var v = array_create(LENGTH)
-      v[0] = x
-      v[1] = y
-      v[2] = z
-      v[3] = w
-      return v
-    }
-    
-    export function add(q1: IQuaternion, q2: IQuaternion, dest?: IQuaternion): IQuaternion {
-      return array_add(q1, q2, dest || array_create(LENGTH))
-    }
-    
-    export function conjugate(q: IQuaternion, dest?: IQuaternion): IQuaternion {
-      dest = dest || array_create(LENGTH)
-      dest[0] = -q[0]
-      dest[1] = -q[1]
-      dest[2] = -q[2]
-      dest[3] = q[3]
-      return dest;
-    }
-    
-    export function copy(q: IQuaternion, dest?: IQuaternion): IQuaternion {
-      return array_copy(q, dest || array_create(LENGTH))
-    }
-    
-    export function dot(q1: IQuaternion, q2: IQuaternion): number {
-      return array_dot(q1, q2)
-    }
-    
-    export function identity(dest?: IQuaternion): IQuaternion {
-      return array_copy(IDENTITY, dest || array_create(LENGTH))
-    }
-    
-    export function invert(q: IQuaternion, dest?: IQuaternion): IQuaternion {
-      var q0 = q[0], q1 = q[1], q2 = q[2], q3 = q[3]
-      var dot = q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3
-      var invDot = dot ? 1.0/dot : 0
-      
-      // TODO: Would be faster to return [0,0,0,0] immediately if dot == 0
-      dest = dest || array_create(LENGTH)
-      dest[0] = -q0 * invDot
-      dest[1] = -q1 * invDot
-      dest[2] = -q2 * invDot
-      dest[3] = q3 * invDot
-      return dest
-    }
-    
-    export function length(q: IQuaternion): number {
-      return array_frob(q)
-    }
-    
-    export function lengthSquared(q: IQuaternion): number {
-      return array_frob_squared(q)
-    }
-    
-    export function multiply(a: IQuaternion, b: IQuaternion, dest?: IQuaternion): IQuaternion {
-      var ax = a[0], ay = a[1], az = a[2], aw = a[3]
-      var bx = b[0], by = b[1], bz = b[2], bw = b[3]
-  
-      dest = dest || array_create(LENGTH)
-      dest[0] = ax * bw + aw * bx + ay * bz - az * by
-      dest[1] = ay * bw + aw * by + az * bx - ax * bz
-      dest[2] = az * bw + aw * bz + ax * by - ay * bx
-      dest[3] = aw * bw - ax * bx - ay * by - az * bz
-      return dest
-    }
-    
-    export function normalize(q: IQuaternion, dest?: IQuaternion): IQuaternion {
-      return array_normalize(q, dest || array_create(LENGTH))
-    }
-    
-    export function scale(q: IQuaternion, n: number, dest?: IQuaternion) {
-      return array_scale(q, n, dest || array_create(LENGTH))
-    }
-    
-    export function subtract(q1: IQuaternion, q2: IQuaternion, dest?: IQuaternion): IQuaternion {
-      return array_subtract(q1, q2, dest || array_create(LENGTH))
-    }
-  }
   
   export module vector {
   
