@@ -1,0 +1,4 @@
+module vector {
+  
+}
+export = vector;
