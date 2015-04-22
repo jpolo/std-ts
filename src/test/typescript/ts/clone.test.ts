@@ -50,6 +50,25 @@ var cloneSuite = unit.suite("ts/clone", (self) => {
     assert.strictEqual(objectCloned.arr, object.arr)
   })
   
+  test(".cloneBoolean()", (assert) => {
+    assert.strictEqual(clone.cloneBoolean(undefined), undefined);
+    assert.strictEqual(clone.cloneBoolean(null), null);
+    assert.strictEqual(clone.cloneBoolean(true), true);
+    assert.strictEqual(clone.cloneBoolean(false), false);
+  })
+  
+  test(".cloneString()", (assert) => {
+    assert.strictEqual(clone.cloneString(undefined), undefined);
+    assert.strictEqual(clone.cloneString(null), null);
+    assert.strictEqual(clone.cloneString("foo"), "foo");
+  })
+  
+  test(".cloneNumber()", (assert) => {
+    assert.strictEqual(clone.cloneNumber(undefined), undefined);
+    assert.strictEqual(clone.cloneNumber(null), null);
+    assert.strictEqual(clone.cloneNumber(123), 123);
+  })
+  
 })
 
 var exportSuite = cloneSuite;

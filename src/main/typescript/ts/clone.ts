@@ -42,7 +42,9 @@ module clone {
           switch (__stringTag(anyVal)) {
             case "Array": returnValue = <any> cloneArray(anyVal); break;
             case "Date": returnValue = <any> cloneDate(anyVal); break;
+            case "Map": returnValue = <any> cloneMap(anyVal); break;
             case "RegExp": returnValue = <any> cloneRegExp(anyVal); break;
+            case "Set": returnValue = <any> cloneSet(anyVal); break;
             default: returnValue = __create(__protoOf(anyVal), __descriptors(anyVal));
           }
         }
@@ -72,27 +74,27 @@ module clone {
     return returnValue;
   }
   
-  function cloneBoolean(b: boolean): boolean {
+  export function cloneBoolean(b: boolean): boolean {
     return b;  
   }
   
-  function cloneNumber(n: number): number {
+  export function cloneNumber(n: number): number {
     return n;  
   }
   
-  function cloneString(s: string): string {
+  export function cloneString(s: string): string {
     return s;  
   }
   
-  function cloneArray<T>(a: T[]): T[] {
+  export function cloneArray<T>(a: T[]): T[] {
     return __isDefined(a) ? a.slice(0) : a;  
   }
   
-  function cloneDate(d: Date): Date {
+  export function cloneDate(d: Date): Date {
     return __isDefined(d) ? new Date(d.getTime()) : d;
   }
   
-  function cloneRegExp(re: RegExp): RegExp {
+  export function cloneRegExp(re: RegExp): RegExp {
     var returnValue = re;
     if (__isDefined(re)) {
       var flags = "";
@@ -116,7 +118,7 @@ module clone {
     return returnValue;
   }
   
-  function cloneMap<K, V>(m: Map<K, V>): Map<K, V> {
+  export function cloneMap<K, V>(m: Map<K, V>): Map<K, V> {
     var returnValue = m;
     if (__isDefined(m)) {
       returnValue = new Map<K, V>();
@@ -125,7 +127,7 @@ module clone {
     return returnValue;
   }
   
-  function cloneSet<T>(s: Set<T>): Set<T> {
+  export function cloneSet<T>(s: Set<T>): Set<T> {
     var returnValue = s;
     if (__isDefined(s)) {
       returnValue = new Set<T>();
