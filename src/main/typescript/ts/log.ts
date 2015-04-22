@@ -306,7 +306,7 @@ module log {
       }
     ) {
       if (deps) {
-        if ("$time" in deps) {
+        if (deps.$time !== undefined) {
           this.$time = deps.$time;
         }
       }
@@ -463,10 +463,10 @@ module log {
         $console?: $Console 
       }) {
         if (deps) {
-          if ("$formatter" in deps) {
+          if (deps.$formatter !== undefined) {
             this.$formatter = deps.$formatter;  
           } 
-          if ("$console" in deps) {
+          if (deps.$console !== undefined) {
             this.$console = deps.$console;  
           }  
         }
