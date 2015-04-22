@@ -567,16 +567,16 @@ module unit {
       }
     ) {
       if (deps) {
-        if ("$equal" in deps) {
+        if (deps.$equal !== undefined) {
           this.$equal = deps.$equal;
         }
-        if ("$inspect" in deps) {
+        if (deps.$inspect !== undefined) {
           this.$inspect = deps.$inspect;
         }
-        if ("$time" in deps) {
+        if (deps.$time !== undefined) {
           this.$time = deps.$time;
         }
-        if ("$stacktrace" in deps) {
+        if (deps.$stacktrace !== undefined) {
           this.$stacktrace = deps.$stacktrace;
         }
       }
@@ -649,22 +649,22 @@ module unit {
   export function suite(
     name: string,
     f: (
-      self?: TestSuite, 
-      test?: (
-        name: string,
-        f: (assert: Assert, done?: () => void) => void
-      ) => void 
+      self?: TestSuite//, 
+      //test?: (
+      //  name: string,
+      //  f: (assert: Assert, done?: () => void) => void
+      //) => void
     ) => void
   ): ITest[]  {
     var suitePrevious = suiteCurrent;
     var suiteNew = new TestSuite(name);
-    var testFactory = function (name, f) {
-      return suiteNew.getTest(name).addBlock(f, (ng, tc, r) => { return new Assert(ng, tc, r); })
-    }
+    //var testFactory = function (name, f) {
+    //  return suiteNew.getTest(name).addBlock(f, (ng, tc, r) => { return new Assert(ng, tc, r); })
+    //}
     
     suiteCurrent = suiteNew;
     try {
-      f(suiteNew, testFactory)
+      f(suiteNew)
     } finally {
       suiteCurrent = suitePrevious
     }
@@ -686,8 +686,17 @@ module unit {
   export function test(
     name: string,
     f: (assert: Assert, done?: () => void) => void
-  ) {
+  ): void {
     testc(Assert)(name, f);
+  }
+  
+  export function skip(
+    name: string,
+    f: (assert: Assert, done?: () => void) => void
+  ): void {
+    suiteCurrent
+      .getTest(name)
+      .addBlock(f, (ng, tc, r) => { return null; })
   }
 
 
@@ -707,7 +716,7 @@ module unit {
       }
     ) { 
       if (deps) {
-        if ("$engine" in deps) {
+        if (deps.$engine !== undefined) {
           this.$engine = deps.$engine;  
         }  
       }
@@ -718,13 +727,13 @@ module unit {
       includeDefault?: boolean
       timeout?: number
     }) {
-      if ("epsilon" in options) {
+      if (options.epsilon !== undefined) {
         this._epsilon = options.epsilon;  
       }
-      if ("includeDefault" in options) {
+      if (options.includeDefault !== undefined) {
         this._includeDefault = options.includeDefault;  
       }
-      if ("timeout" in options) {
+      if (options.timeout !== undefined) {
         this._timeout = options.timeout;  
       }
       return this;

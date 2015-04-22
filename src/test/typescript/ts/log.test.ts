@@ -35,7 +35,7 @@ var logSuite = unit.suite("ts/log", (self) => {
 
 })
 
-var MessageSuite = unit.suite("ts/log.Message", (self, test) => {
+var MessageSuite = unit.suite("ts/log.Message", (self) => {
   
   test("#constructor()", (assert) => {
     var m = new Message(log.DEBUG, "mygroup", ["mymessage"]);
@@ -90,7 +90,7 @@ var LevelSuite = unit.suite("ts/log.Level", () => {
   
   test("#compare()", (assert) => {
     var level = new log.Level("BLAH", DEBUG.value, PRIVATE_KEY)
-    assert.strictEqual(level.compare(null), null)
+    assert.strictEqual(level.compare(null), NaN)
     assert.strictEqual(DEBUG.compare(DEBUG), 0)
   })
     
