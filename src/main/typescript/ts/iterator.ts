@@ -9,8 +9,8 @@ module iterator {
     done: boolean;
   }
   
-  function $iteratorFactory<T>(next: () => IIteratorResult<T>): IIterator<T> {
-    return new Iterator(next);  
+  function $iteratorFactory<T>(next: () => IIteratorResult<T>, hint?): IIterator<T> {
+    return new Iterator(next, hint);  
   }
   
   function $iteratorResultFactory<T>(done: boolean, value?: T): IIteratorResult<T> {
@@ -19,7 +19,7 @@ module iterator {
   
   export class Iterator<T> implements IIterator<T> {
     
-    constructor(public next: () => IIteratorResult<T>, public hint = "abstract iterator") { }
+    constructor(public next: () => IIteratorResult<T>, public hint = "abstract") { }
     
     inspect() { return "Iterator { [" + this.hint + "] }";}
     
@@ -28,7 +28,7 @@ module iterator {
     }
   }
   
-  var EMPTY = $iteratorFactory(function () { return $iteratorResultFactory(true); });
+  var EMPTY = $iteratorFactory(function () { return $iteratorResultFactory(true); }, "empty");
   
   export function isIIterator(o: any): boolean {
     return !!o && typeof o.next === "function";
@@ -48,7 +48,7 @@ module iterator {
         value = undefined;
       }
       return result;
-    });
+    }, "single");
   }
   
   export function fill<T>(length: number, v: T): IIterator<T> {
@@ -78,7 +78,7 @@ module iterator {
         acc = f(acc);  
       }
       return $iteratorResultFactory(false, acc);
-    });
+    }, "iterate");
   }
   
   export function range(start: number, end: number, step = 1): IIterator<number> {
@@ -93,13 +93,13 @@ module iterator {
         done = true;
       }
       return $iteratorResultFactory(done, value);
-    });
+    }, "[" + start + "," + end + ")");
   }
   
   export function continually<T>(v: T): IIterator<T> {
     return $iteratorFactory(function () {
       return $iteratorResultFactory(false, v);
-    });
+    }, "continue");
   }
   
   export function concat<T>(...args: IIterator<T>[]): IIterator<T> {
@@ -132,7 +132,7 @@ module iterator {
         r = $iteratorResultFactory(done, undefined);  
       }
       return r;
-    });
+    }, "concatenated");
   }
   
 }
