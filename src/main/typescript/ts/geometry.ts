@@ -1,3 +1,4 @@
+import vector_ = require('ts/geometry/vector')
 import codegen = require('ts/codegen')
 import cc = codegen.compile
 import $if = codegen.$if
@@ -27,10 +28,10 @@ module geometry {
   }
 
 
-  export interface IVector { length: number; 0: number; 1: number; }
-  export interface IVector2 extends IVector {}
-  export interface IVector3 extends IVector2 { 2: number }
-  export interface IVector4 extends IVector3 { 3: number }
+  export interface IVector extends vector_.IVector {}
+  export interface IVector2 extends vector_.IVector2 {}
+  export interface IVector3 extends vector_.IVector3 {}
+  export interface IVector4 extends vector_.IVector4 {}
   
   export interface IMatrix { length: number; 0: number; 1: number; 2: number; 3: number; }
   export interface IMatrix2 extends IMatrix { }
@@ -39,36 +40,7 @@ module geometry {
   
   export module vector {
   
-    export function create(x: number, y: number): IVector2
-    export function create(x: number, y: number, z: number): IVector3
-    export function create(x: number, y: number, z: number, w: number): IVector4
-    export function create(): any {
-      var argc = arguments.length
-      var v = array_create(argc)
-
-      switch(argc) {
-        case 2:
-          v[0] = arguments[0]
-          v[1] = arguments[1]
-          break
-        case 3:
-          v[0] = arguments[0]
-          v[1] = arguments[1]
-          v[2] = arguments[2]
-          break
-        case 4:
-          v[0] = arguments[0]
-          v[1] = arguments[1]
-          v[2] = arguments[2]
-          v[3] = arguments[3]
-          break
-        default:
-          for (var i = 0; i < argc; ++i) {
-            v[i] = arguments[i]
-          }
-      }
-      return v
-    }
+    export var create = vector_.create;
   
     export function add<T extends IVector>(v1: T, v2: T, dest?: T): T {
       return array_add(v1, v2, dest || array_create(v1.length))
