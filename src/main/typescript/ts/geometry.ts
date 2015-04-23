@@ -41,10 +41,7 @@ module geometry {
   export module vector {
   
     export var create = vector_.create;
-  
-    export function add<T extends IVector>(v1: T, v2: T, dest?: T): T {
-      return array_add(v1, v2, dest || array_create(v1.length))
-    }
+    export var add = vector_.add;
     
     export function copy<T extends IVector>(v: T, dest?: T): T {
       return array_copy(v, dest || array_create(v.length))
@@ -74,19 +71,12 @@ module geometry {
       return array_negate(v, dest || array_create(v.length))
     }
   
-    export function normalize<T extends IVector>(v: T, dest?: T): T {
-      return array_normalize(v, dest || array_create(v.length))
-    }
+    export var normalize = vector_.normalize;
     
-    export function scale<T extends IVector>(v: T, scalar: number, dest?: T): T {
-      return array_scale(v, scalar, dest || array_create(v.length))
-    }
-    
-    export function subtract<T extends IVector>(v1: T, v2: T, dest?: T): T {
-      return array_subtract(v1, v2, dest || array_create(v1.length))
-    }
-    
-    
+    export var scale = vector_.scale;
+     
+    export var subtract = vector_.subtract;
+
   }
   
   export module matrix {
