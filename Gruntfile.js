@@ -78,39 +78,11 @@ module.exports = function(grunt) {
           indentStep: INDENT
         }
       }
-    },
-    // ------- Unit tests with code coverage
-    //  See https://github.com/gruntjs/grunt-contrib-jasmine
-    jasmine: {
-      run: {
-        src: ['<%= dir.target_test_js %>/main/**/*.js'],
-        options: {
-          // the tests
-          specs: '<%= dir.target_test_js %>/test/**/*.test.js',
-          keepRunner: true, // useful for debugging
-          template: require('grunt-template-jasmine-requirejs'),
-          templateOptions: {
-            requireConfig: {
-              baseUrl: '.grunt/grunt-contrib-jasmine/<%= target_test_js %>',
-              // HACK: Fix nasty 'wrong uri' problem on windows. The location of the reporter.js
-              //  contains backslashes that can't be resolved by requirejs
-              map: {
-                //'*': {
-        			    //'.gruntgrunt-contrib-jasminegrunt-template-jasmine-istanbul\reporter.js':
-                  //'.grunt/grunt-contrib-jasmine/grunt-template-jasmine-istanbul/reporter.js'
-                //}
-              }
-            }
-          }
-        }
-
-      }
     }
   });
   // ----- Setup tasks
   grunt.loadNpmTasks('grunt-typescript');
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.registerTask('compile', ['typescript:compile']);
   grunt.registerTask('test', ['typescript:compile_test', 'jasmine']);
