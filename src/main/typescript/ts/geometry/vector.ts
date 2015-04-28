@@ -184,20 +184,7 @@ module vector {
   }
   
   export function negate<T extends IVector>(v: T, dest?: T): T {
-    var l = v.length;
-    var r = dest || __arrayCreate(l);
-    switch (l) {
-      case 4: r[3] = -v[3];
-      case 3: r[2] = -v[2];
-      case 2: r[1] = -v[1];
-      case 1: r[0] = -v[0];
-      case 0: break;
-      default:
-        for (var i = 0; i < l; ++i) {
-          r[i] = -v[i];
-        }
-    }
-    return r;
+    return scale(v, -1, dest);
   }
   
   export function normalize<T extends IVector>(v: T, dest?: T): T {

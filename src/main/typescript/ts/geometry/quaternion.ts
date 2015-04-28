@@ -10,6 +10,20 @@ module quaternion {
   var __arrayCreate = function (): any {
     return new Float64Array(LENGTH) 
   };
+  var __arrayCopy = function (src, dest) {
+    if (src !== dest) {
+      dest[0] = src[0];
+      dest[1] = src[1];
+      dest[2] = src[2];
+      dest[3] = src[3];
+    }
+  };
+  var __arrayFill = function (a, v: number) {
+    a[0] = v;
+    a[1] = v;
+    a[2] = v;
+    a[3] = v;
+  };
   
   
   export interface IQuaternion { 
@@ -40,12 +54,7 @@ module quaternion {
   
   export function copy(q: IQuaternion, dest?: IQuaternion): IQuaternion {
     var r = dest || __arrayCreate();
-    if (q !== dest) {
-      r[0] = q[0];
-      r[1] = q[1];
-      r[2] = q[2];
-      r[3] = q[3];
-    }
+    __arrayCopy(q, r);
     return r;
   }
   
@@ -83,13 +92,11 @@ module quaternion {
   }
   
   export function length(q: IQuaternion): number {
-    var x = q[0], y = q[1], z = q[2], w = q[3];
-    return __sqrt(x * x + y * y + z * z + w * w);
+    return __sqrt(dot(q, q));
   }
   
   export function lengthSquared(q: IQuaternion): number {
-    var x = q[0], y = q[1], z = q[2], w = q[3];
-    return x * x + y * y + z * z + w * w;
+    return dot(q, q);
   }
   
   export function multiply(a: IQuaternion, b: IQuaternion, dest?: IQuaternion): IQuaternion {
@@ -104,31 +111,35 @@ module quaternion {
   }
   
   export function normalize(q: IQuaternion, dest?: IQuaternion): IQuaternion {
-    var r = dest || __arrayCreate();
-    var x = q[0], y = q[1], z = q[2], w = q[3];
-    var factor = 1 / __sqrt(x * x + y * y + z * z + w * w);
-    r[0] = x * factor;
-    r[1] = y * factor;
-    r[2] = z * factor;
-    r[3] = w * factor;
-    return r;
+    var factor = 1 / __sqrt(dot(q, q));
+    return scale(q, factor, dest);
   }
   
   export function scale(q: IQuaternion, n: number, dest?: IQuaternion) {
     var r = dest || __arrayCreate();
-    r[0] = q[0] * n;
-    r[1] = q[1] * n;
-    r[2] = q[2] * n;
-    r[3] = q[3] * n;
+    if (n === 0) {
+      __arrayFill(r, 0);
+    } else if (n === 1) {
+      __arrayCopy(q, r);
+    } else {
+      r[0] = q[0] * n;
+      r[1] = q[1] * n;
+      r[2] = q[2] * n;
+      r[3] = q[3] * n;
+    }
     return r;
   }
   
   export function subtract(q1: IQuaternion, q2: IQuaternion, dest?: IQuaternion): IQuaternion {
     var r = dest || __arrayCreate();
-    r[0] = q1[0] - q2[0];
-    r[1] = q1[1] - q2[1];
-    r[2] = q1[2] - q2[2];
-    r[3] = q1[3] - q2[3];
+    if (q1 === q2) {
+      __arrayFill(dest, 0);  
+    } else {
+      r[0] = q1[0] - q2[0];
+      r[1] = q1[1] - q2[1];
+      r[2] = q1[2] - q2[2];
+      r[3] = q1[3] - q2[3];
+    }
     return r;
   }
 
