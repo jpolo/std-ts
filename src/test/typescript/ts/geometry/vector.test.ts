@@ -1,7 +1,6 @@
 import unit = require("../../../../main/typescript/ts/unit")
 import test = unit.test
-import geometry = require("../../../../main/typescript/ts/geometry")
-import vector = geometry.vector
+import vector = require("../../../../main/typescript/ts/geometry/vector")
 
 var vectorSuite = unit.suite("ts/geometry/vector", (self) => {
 

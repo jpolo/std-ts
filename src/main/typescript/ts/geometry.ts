@@ -1,4 +1,4 @@
-import vector_ = require('ts/geometry/vector')
+import vector = require('ts/geometry/vector')
 import codegen = require('ts/codegen')
 import cc = codegen.compile
 import $if = codegen.$if
@@ -26,58 +26,11 @@ module geometry {
     "math_sin": math_sin,
     "math_sqrt": math_sqrt
   }
-
-
-  export interface IVector extends vector_.IVector {}
-  export interface IVector2 extends vector_.IVector2 {}
-  export interface IVector3 extends vector_.IVector3 {}
-  export interface IVector4 extends vector_.IVector4 {}
   
   export interface IMatrix { length: number; 0: number; 1: number; 2: number; 3: number; }
   export interface IMatrix2 extends IMatrix { }
   export interface IMatrix3 extends IMatrix2 { 4: number; 5: number; 6: number; 7: number; 8: number; }
   export interface IMatrix4 extends IMatrix3 { 9: number; 10: number; 11: number; 12: number; 13: number; 14: number; 15: number; }
-  
-  export module vector {
-  
-    export var create = vector_.create;
-    export var add = vector_.add;
-    
-    export function copy<T extends IVector>(v: T, dest?: T): T {
-      return array_copy(v, dest || array_create(v.length))
-    }
-    
-    export function divide<T extends IVector>(v1: T, v2: T, dest?: T): T {
-      return array_divide(v1, v2, dest || array_create(v1.length))
-    }
-    
-    export function dot<T extends IVector>(v1: T, v2: T): number {
-      return array_dot(v1, v2)
-    }
-  
-    export function length<T extends IVector>(v: T): number {
-      return array_frob(v)
-    }
-    
-    export function lengthSquared<T extends IVector>(v: T): number {
-      return array_frob_squared(v)
-    }
-    
-    export function multiply<T extends IVector>(v1: T, v2: T, dest?: T): T {
-      return array_multiply(v1, v2, dest || array_create(v1.length))
-    }
-  
-    export function negate<T extends IVector>(v: T, dest?: T): T {
-      return array_negate(v, dest || array_create(v.length))
-    }
-  
-    export var normalize = vector_.normalize;
-    
-    export var scale = vector_.scale;
-     
-    export var subtract = vector_.subtract;
-
-  }
   
   export module matrix {
     var MATRIX_SIZE = [4, 9, 16]
@@ -212,9 +165,9 @@ module geometry {
       return dest;
     }
 
-    export function scale<IMatrix4>(m: IMatrix4, v: IVector4, dest?: IMatrix4): IMatrix4
-    export function scale<IMatrix3>(m: IMatrix3, v: IVector3, dest?: IMatrix3): IMatrix3
-    export function scale<IMatrix2>(m: IMatrix2, v: IVector2, dest?: IMatrix2): IMatrix2
+    export function scale<IMatrix4>(m: IMatrix4, v: vector.IVector4, dest?: IMatrix4): IMatrix4
+    export function scale<IMatrix3>(m: IMatrix3, v: vector.IVector3, dest?: IMatrix3): IMatrix3
+    export function scale<IMatrix2>(m: IMatrix2, v: vector.IVector2, dest?: IMatrix2): IMatrix2
     export function scale(m: any, v: any, dest?: any): any {
       return mat_scale(m, v, dest || array_create(m.length))
     }
