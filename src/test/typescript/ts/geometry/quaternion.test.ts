@@ -1,11 +1,10 @@
 import unit = require("../../../../main/typescript/ts/unit")
 import test = unit.test
 import quaternion = require("../../../../main/typescript/ts/geometry/quaternion")
-import IQuaternion = quaternion.IQuaternion
 
 var quaternionSuite = unit.suite("ts/geometry/quaternion", (self) => {
   
-  var quatZ, quatA, quatB, quatID, quatTmp: IQuaternion
+  var quatZ, quatA, quatB, quatID, quatTmp: [number, number, number, number]
   //var vec3: geometry.IVector3
   var deg90 = Math.PI / 2
   
@@ -28,6 +27,14 @@ var quaternionSuite = unit.suite("ts/geometry/quaternion", (self) => {
       
     var quatCopy = quaternion.copy(quatA)
     assert.deepEqual(quaternion.conjugate(quatCopy, quatCopy), [-1, -2, -3, 4])
+  })
+  
+  test('.create()', (assert) => {
+    assert.strictEqual(quatA.length, 4);
+    assert.strictEqual(quatA[0], 1);
+    assert.strictEqual(quatA[1], 2);
+    assert.strictEqual(quatA[2], 3);
+    assert.strictEqual(quatA[3], 4);
   })
   
   test('.copy(a)', (assert) => {
@@ -55,6 +62,8 @@ var quaternionSuite = unit.suite("ts/geometry/quaternion", (self) => {
   })
     
   test('.normalize(a)', (assert) => {
+    console.warn(quaternion.normalize(quatZ));
+    
     assert.deepEqual(quaternion.normalize(quatZ), [NaN, NaN, NaN, NaN])
     assert.deepEqual(quaternion.normalize(quatB), [0.37904902178945165, 0.454858826147342, 0.5306686305052324, 0.6064784348631227])
     assert.deepEqual(quaternion.normalize(quatA), [0.18257418583505536, 0.3651483716701107, 0.5477225575051661, 0.7302967433402214])

@@ -1,15 +1,23 @@
-module vector4 {
+module vector3 {
+  
   //Constant
-  var LENGTH = 4
-  var IDENTITY = <IVector4>[0, 0, 0, 1]
   
   //Util
-  var Float64Array: any = (typeof Float64Array !== 'undefined') ? Float64Array : Array
+  type Vector4 = [number, number, number, number]
+  type Vector4Constructor = { new(n: number): Vector4 }
+  
+  //var Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array
+  var Float64Array: any = (typeof Float64Array !== 'undefined') ? Float64Array : Array;
+  var __abs = Math.abs;
   var __sqrt = Math.sqrt;
-  var __arrayCreate = function (): any {
-    return new Float64Array(LENGTH) 
+  var __constructor = function (o: Vector4): Vector4Constructor { return o.constructor || Float64Array; };
+  var __arrayCreate = function (Constructor: Vector4Constructor): Vector4 {
+    return new Constructor(4);
   };
-  var __arrayCopy = function (src, dest) {
+  var __arrayCreateFrom = function (o: Vector4) {
+    return __arrayCreate(__constructor(o));
+  };
+  var __arrayCopy = function (src: Vector4, dest: Vector4) {
     if (src !== dest) {
       dest[0] = src[0];
       dest[1] = src[1];
@@ -17,39 +25,39 @@ module vector4 {
       dest[3] = src[3];
     }
   };
-  var __arrayFill = function (a, v: number) {
+  var __arrayFill = function (a: Vector4, v: number) {
     a[0] = v;
     a[1] = v;
     a[2] = v;
     a[3] = v;
   };
   
-  
-  export interface IVector4 { 
-    length: number; 
-    0: number; 
-    1: number;
-    2: number; 
-    3: number;
+  export function abs(v: Vector4, dest?: Vector4): Vector4 {
+    var r = dest === undefined ? __arrayCreateFrom(v) : dest;
+    r[0] = __abs(v[0]);
+    r[1] = __abs(v[1]);
+    r[2] = __abs(v[2]);
+    r[3] = __abs(v[3]);
+    return r;
   }
   
-  export function add(a: IVector4, b: IVector4, dest?: IVector4): IVector4 {
-    var r = dest === undefined ? __arrayCreate() : dest;
+  export function add(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
+    var r = dest === undefined ? __arrayCreateFrom(a) : dest;
     r[0] = a[0] + b[0];
     r[1] = a[1] + b[1];
     r[2] = a[2] + b[2];
     r[3] = a[3] + b[3];
     return r;
   }
-
-  export function copy(v: IVector4, dest?: IVector4): IVector4 {
-    var r = dest === undefined ? __arrayCreate() : dest;
+  
+  export function copy(v: Vector4, dest?: Vector4): Vector4 {
+    var r = dest === undefined ? __arrayCreateFrom(v) : dest;
     __arrayCopy(v, r);
     return r;
   }
-  
-  export function create(x: number, y: number, z: number, w: number): IVector4 {
-    var v = __arrayCreate();
+
+  export function create(x: number, y: number, z: number, w: number): Vector4 {
+    var v = __arrayCreate(Float64Array);
     v[0] = x;
     v[1] = y;
     v[2] = z;
@@ -57,64 +65,70 @@ module vector4 {
     return v;
   }
   
-  export function dot(a: IVector4, b: IVector4): number {
-    var r: number;
-    if (a === b) {
-      var a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3];
+  export function divide(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
+    var r = dest === undefined ? __arrayCreateFrom(a) : dest;
+    r[0] = a[0] / b[0];
+    r[1] = a[1] / b[1];
+    r[2] = a[2] / b[2];
+    r[3] = a[3] / b[3];
+    return r;
+  }
+  
+  export function dot(a: Vector4, b: Vector4): number {
+    var r = 0;
+    if (a === b) { 
+      var a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3]; 
       r = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
     } else {
-      r = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]
+      r = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
     }
     return r;
   }
   
-  export function identity(dest?: IVector4): IVector4 {
-    return copy(IDENTITY, dest);
+  export function length(v: Vector4): number {
+    return __sqrt(lengthSquared(v));
   }
   
-  export function length(q: IVector4): number {
-    return __sqrt(dot(q, q));
+  export function lengthSquared(v: Vector4): number {
+    return dot(v, v);
   }
   
-  export function lengthSquared(q: IVector4): number {
-    return dot(q, q);
-  }
-  
-  export function multiply(a: IVector4, b: IVector4, dest?: IVector4): IVector4 {
-    var a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3];
-    var b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
-    var r = dest === undefined ? __arrayCreate() : dest;
-    r[0] = a0 * b3 + a3 * b0 + a1 * b2 - a2 * b1;
-    r[1] = a1 * b3 + a3 * b1 + a2 * b0 - a0 * b2;
-    r[2] = a2 * b3 + a3 * b2 + a0 * b1 - a1 * b0;
-    r[3] = a3 * b3 - a0 * b0 - a1 * b1 - a2 * b2;
+  export function multiply(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
+    var r = dest === undefined ? __arrayCreateFrom(a) : dest;
+    r[0] = a[0] * b[0];
+    r[1] = a[1] * b[1];
+    r[2] = a[2] * b[2];
+    r[3] = a[3] * b[3];
     return r;
   }
   
-  export function normalize(v: IVector4, dest?: IVector4): IVector4 {
-    var factor = 1 / __sqrt(dot(v, v));
-    return scale(v, factor, dest);
+  export function negate(v: Vector4, dest?: Vector4): Vector4 {
+    return scale(v, -1, dest);
   }
   
-  export function scale(v: IVector4, n: number, dest?: IVector4) {
-    var r = dest === undefined ? __arrayCreate() : dest;
-    if (n === 0) {
+  export function normalize(v: Vector4, dest?: Vector4): Vector4 {
+    return scale(v, 1 / length(v), dest);
+  }
+  
+  export function scale(v: Vector4, scalar: number, dest?: Vector4): Vector4 {
+    var r = dest === undefined ? __arrayCreateFrom(v) : dest;
+    if (scalar === 0) {
       __arrayFill(r, 0);
-    } else if (n === 1) {
+    } else if (scalar === 1) {
       __arrayCopy(v, r);
     } else {
-      r[0] = v[0] * n;
-      r[1] = v[1] * n;
-      r[2] = v[2] * n;
-      r[3] = v[3] * n;
+      r[0] = v[0] * scalar;
+      r[1] = v[1] * scalar;
+      r[2] = v[2] * scalar;
+      r[2] = v[3] * scalar;
     }
     return r;
   }
   
-  export function subtract(a: IVector4, b: IVector4, dest?: IVector4): IVector4 {
-    var r = dest === undefined ? __arrayCreate() : dest;
+  export function subtract(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
+    var r = dest === undefined ? __arrayCreateFrom(a) : dest;
     if (a === b) {
-      __arrayFill(dest, 0);  
+      __arrayFill(r, 0);
     } else {
       r[0] = a[0] - b[0];
       r[1] = a[1] - b[1];
@@ -123,6 +137,6 @@ module vector4 {
     }
     return r;
   }
-
+  
 }
-export = vector4
+export = vector3;
