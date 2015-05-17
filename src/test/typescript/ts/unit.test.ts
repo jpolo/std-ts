@@ -168,8 +168,11 @@ var TestEngineSuite = unit.suite("ts/unit.TestEngine", (self) => {
   })
     
   test("#testEqualDeep()", (assert) => {
-    assert.ok(engine.testEqualsDeep([1], [1]))
-    assert.ok(engine.testEqualsDeep([NaN], [NaN]))
+    assert.ok(engine.testEqualsDeep([0, 1], [0, 1]))
+    assert.ok(engine.testEqualsDeep([0, ["a", "b"]], [0, ["a", "b"]]))
+    assert.ok(engine.testEqualsDeep([NaN, NaN], [NaN, NaN]))
+    assert.ok(engine.testEqualsDeep({ foo: 1, bar: 2 }, { foo: 1, bar: 2 }))
+    assert.ok(!engine.testEqualsDeep({ foo: 1, bar: 2 }, { foo: 1 }))
     assert.ok(!engine.testEqualsDeep([false], [0]))
     assert.ok(!engine.testEqualsDeep(["1"], [1]))
   })

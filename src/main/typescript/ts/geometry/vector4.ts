@@ -120,7 +120,7 @@ module vector3 {
       r[0] = v[0] * scalar;
       r[1] = v[1] * scalar;
       r[2] = v[2] * scalar;
-      r[2] = v[3] * scalar;
+      r[3] = v[3] * scalar;
     }
     return r;
   }
