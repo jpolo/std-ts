@@ -1,7 +1,6 @@
 module reflect {
   //Constant
-  var ES3_COMPAT = true;
-  var ES5_COMPAT = ES3_COMPAT || true;
+  var ES_COMPAT = 3;
   
   //Util
   var __fidentity = function f<T>() { return function (o: T) { return o } };
@@ -38,7 +37,7 @@ module reflect {
   var __typeOf = function (o: any): Type { return o === null ? Type.null : Type[typeof o]; };
   
   //Compat
-  if (ES3_COMPAT) {
+  if (ES_COMPAT <= 3) {
     __okeys = __okeys || __polyfill(function (o) { var ks = []; for (var k in o) { if (__hasOwn.call(o, k)) { ks.push(k); } } return ks; });
     __create = __create|| __polyfill(function (proto) { function t() {}; t.prototype = proto.prototype; return new t(); });
     __proto = __proto || __polyfill(function (o) { return o.__proto__ });
@@ -53,7 +52,7 @@ module reflect {
     __seal = __seal || __polyfill(__fidentity());
   }
   
-  if (ES5_COMPAT) {
+  if (ES_COMPAT <= 5) {
     __apply = __apply || __polyfill(function (f, thisArg, args) { return __fapply.call(f, thisArg, args); });
     __construct = __construct || __polyfill(function (Constructor: Function, args: any[]) { 
       var proto = Constructor.prototype
