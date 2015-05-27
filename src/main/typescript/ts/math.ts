@@ -1,8 +1,7 @@
 module math {
   
   //Constant
-  var ES3_COMPAT = true;
-  var ES5_COMPAT = ES3_COMPAT || true;
+  var ES_COMPAT = 3;
   
   //Util
   var ONE_THIRD = 1 / 3
@@ -43,10 +42,10 @@ module math {
   var math_tanh = Math['tanh'];
   
   //Compat
-  if (ES3_COMPAT) {
+  if (ES_COMPAT <= 3) {
     //nothing
   }
-  if (ES5_COMPAT) {
+  if (ES_COMPAT <= 5) {
     math_cbrt = math_cbrt || function (n) {
       n = __num(n);
       return (

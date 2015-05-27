@@ -1,10 +1,9 @@
 //Constant
-var ES3_COMPAT = true;
-var ES5_COMPAT = ES3_COMPAT || true;
+var ES_COMPAT = 3;
 
 //Util
 var __void = function () {};
-var __now = Date.now || function () { return new Date().getTime(); }
+var __now = Date.now;
 var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
 var __console: Console = __global.console ? __global.console : null;
 var __forEach = function <T>(a: T[], f: (v: T, i?: number, a?: T[]) => void) {
@@ -14,7 +13,8 @@ var __forEach = function <T>(a: T[], f: (v: T, i?: number, a?: T[]) => void) {
 };
 
 //COMPAT
-if (ES3_COMPAT) {
+if (ES_COMPAT <= 3) {
+  __now = __now || function () { return new Date().getTime(); };
   __console = __console || <any>{};
   
   if (!__console.log) __console.log = __void;

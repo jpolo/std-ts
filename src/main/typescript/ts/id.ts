@@ -1,7 +1,6 @@
 module id {
   //Constants
-  var ES3_COMPAT = true;
-  var ES5_COMPAT = ES3_COMPAT || true;
+  var ES_COMPAT = 3;
   
   //Util
   var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
@@ -14,10 +13,10 @@ module id {
   };
   
   //Compat
-  if (ES3_COMPAT) {
+  if (ES_COMPAT <= 3) {
     __def = __def || function (o, k, d) { o[k] = d.value; };
   }
-  if (ES5_COMPAT) {
+  if (ES_COMPAT <= 5) {
     __sym = __sym || function (o) { return "@@" + o; };
   }
   

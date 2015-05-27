@@ -2,6 +2,7 @@ module reflect {
   //Constant
   var ES_COMPAT = 3;
   
+  
   //Util
   var __fidentity = function f<T>() { return function (o: T) { return o } };
   var __fapply = Function.prototype.apply;

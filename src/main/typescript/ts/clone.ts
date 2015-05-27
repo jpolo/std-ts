@@ -1,5 +1,8 @@
 module clone {
   
+  //Constants
+  var ES_COMPAT = 3;
+  
   //Util
   var __create = Object.create;
   var __protoOf = Object.getPrototypeOf;
@@ -21,6 +24,24 @@ module clone {
   };
   
   //Compat
+  if (ES_COMPAT <= 3) {
+    __create = __create /*|| function () {}*/;//TODO
+    __protoOf = __protoOf || function (o: any) { return o.__proto__; };
+    __descriptors = Object.getOwnPropertyNames ? __descriptors : function (o) {
+      var descriptors: any = {};
+      for (var prop in o) {
+        if (o.hasOwnProperty(prop)) {
+          descriptors[prop] = {
+            value: o[prop],
+            configurable: true,
+            enumerable: true,
+            writable: true
+          };
+        }
+      }
+      return descriptors;
+    };
+  }
   
   export interface IClone {
     clone(): any

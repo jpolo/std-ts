@@ -1,4 +1,4 @@
-module vector3 {
+module vector4 {
   
   //Constant
   
@@ -139,4 +139,4 @@ module vector3 {
   }
   
 }
-export = vector3;
+export = vector4;

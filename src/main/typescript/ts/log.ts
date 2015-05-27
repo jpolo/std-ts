@@ -5,8 +5,7 @@ module log {
   
   
   //Constant
-  var ES3_COMPAT = true;
-  var ES5_COMPAT = ES3_COMPAT || true;
+  var ES_COMPAT = 3;
   
   //Util
   var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
@@ -34,10 +33,10 @@ module log {
   };
   
   //Compat
-  if (ES3_COMPAT) {
+  if (ES_COMPAT <= 3) {
     __keys = __keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
   }
-  if (ES5_COMPAT) {
+  if (ES_COMPAT <= 5) {
   }
   
   //Services
