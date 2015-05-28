@@ -12,6 +12,30 @@ interface VectorModule<T> {
   divide(a: T, b: T, dest?: T): T
   dot(a: T, b: T): number
   lengthSquared(v: T): number
+  length(v: T): number
+  multiply(a: T, b: T, dest?: T): T
+  negate(v: T, dest?: T): T
+  normalize(v: T, dest?: T): T
+  scale(v: T, n: number, dest?: T): T
+}
+
+class Assert extends unit.Assert {
+  
+  equalsVector(a: number[], b: number[], epsilon?: number) {
+    var position = this.__position__();
+    var isSuccess = true;
+    var message = "";
+    
+    if (a.length === b.length) {
+      
+    } else {
+      isSuccess = false;  
+      message = this.__dump__(a) + " and " + this.__dump__(b) + " must have same length";
+    }
+    
+    return this.__assert__(isSuccess, message, position);
+  }
+  
 }
 
 function generateSuite(n: string, vector: VectorModule<number[]>, arity: number) {
@@ -125,6 +149,106 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       })
     })
     
+    test('.length(v)', (assert) => {
+      gen(() => {
+        var v = random()
+        var expected = 0;
+        for (var i = 0; i < arity; i++) {
+          expected += v[i] * v[i];
+        }
+        expected = Math.sqrt(expected)
+        assert.strictEqual(vector.length(v), expected)
+      })
+    })
+    
+    test('.multiply(a, b)', (assert) => {
+      gen(() => {
+   
+        var a = random();
+        var b = random();
+        var dest = create();
+        var expected = create();
+        for (var i = 0; i < arity; i++) {
+          expected[i] = a[i] * b[i];
+        }
+      
+        //alloc
+        assert.deepEqual(vector.multiply(a, b), expected)
+        
+        //dest
+        assert.deepEqual(vector.multiply(a, b, dest), expected)
+        assert.deepEqual(dest, expected)
+        
+      })
+    })
+    
+    test('.negate(a)', (assert) => {
+      gen(() => {
+   
+        var v = random();
+        var dest = create();
+        var expected = create();
+        for (var i = 0; i < arity; i++) {
+          expected[i] = -v[i];
+        }
+      
+        //alloc
+        assert.deepEqual(vector.negate(v), expected)
+        
+        //dest
+        assert.deepEqual(vector.negate(v, dest), expected)
+        assert.deepEqual(dest, expected)
+        
+      })
+
+    })
+    
+    test('.normalize(a)', (assert) => {
+      gen(() => {
+   
+        var v = random();
+        var dest = create();
+        var length = 0;
+        for (var i = 0; i < arity; i++) {
+          length += v[i] * v[i];
+        }
+        length = Math.sqrt(length);
+        
+        var factor = 1 / length;
+        var expected = create();
+        for (var i = 0; i < arity; i++) {
+          expected[i] = v[i] * factor;
+        }
+      
+        //alloc
+        assert.deepEqual(vector.normalize(v), expected)
+        
+        //dest
+        assert.deepEqual(vector.normalize(v, dest), expected)
+        assert.deepEqual(dest, expected)
+        
+      })
+    })
+    
+    test('.scale(a)', (assert) => {
+      gen(() => {
+        var v = random();
+        var factor = Math.random();
+        var dest = create();
+        var expected = create();
+        for (var i = 0; i < arity; i++) {
+          expected[i] = v[i] * factor;
+        }
+        
+        //alloc
+        assert.deepEqual(vector.scale(v, factor), expected)
+        
+        //dest
+        assert.deepEqual(vector.scale(v, factor, dest), expected)
+        assert.deepEqual(dest, expected)
+      })
+    })
+    
   });
 }
 
@@ -133,66 +257,8 @@ var vector3Suite = generateSuite("ts/geometry/vector3", vector3, 3);
 var vector4Suite = generateSuite("ts/geometry/vector4", vector4, 4);
 
 var vectorSuite = unit.suite("ts/geometry/vector", (self) => {
-
-
-  
     
-  
-    
-  test('.length(v)', (assert) => {
-    //vector2
-    assert.strictEqual(vector.length(vector.create(1, 2)), Math.sqrt(5))
-      
-    //vector3
-    assert.strictEqual(vector.length(vector.create(1, 2, 3)), Math.sqrt(14))
-      
-    //vector4
-    assert.strictEqual(vector.length(vector.create(1, 2, 3, 4)), Math.sqrt(30))
-  })
-    
-  test('.multiply(a, b)', (assert) => {
-    //vector2
-    assert.deepEqual(vector.multiply(vector.create(1, 2), vector.create(2, 2)), [2, 4])
-      
-    //vector3
-    assert.deepEqual(vector.multiply(vector.create(1, 2, 3), vector.create(2, 2, 2)), [2, 4, 6])
-      
-    //vector4
-    assert.deepEqual(vector.multiply(vector.create(1, 2, 3, 4), vector.create(2, 2, 2, 2)), [2, 4, 6, 8])
-  })
-    
-  test('.negate(a)', (assert) => {
-    //vector2
-    assert.deepEqual(vector.negate(vector.create(1, 2)), [-1, -2])
-      
-    //vector3
-    assert.deepEqual(vector.negate(vector.create(1, 2, 3)), [-1, -2, -3])
-      
-    //vector4
-    assert.deepEqual(vector.negate(vector.create(1, 2, 3, 4)), [-1, -2, -3, -4])
-  })
-    
-  test('.normalize(a)', (assert) => {
-    //vector2
-    assert.deepEqual(vector.normalize(vector.create(1, 2)), [0.4472135954999579, 0.8944271909999159])
-      
-    //vector3
-    assert.deepEqual(vector.normalize(vector.create(1, 2, 3)), [0.2672612419124244, 0.5345224838248488, 0.8017837257372732])
-      
-    //vector4
-    assert.deepEqual(vector.normalize(vector.create(1, 2, 3, 4)), [0.18257418583505536, 0.3651483716701107, 0.5477225575051661, 0.7302967433402214])
-  })
-    
-  test('.scale(a)', (assert) => {
-    //vector2
-    assert.deepEqual(vector.scale(vector.create(1, 2), 2), [2, 4])
-      
-    //vector3
-    assert.deepEqual(vector.scale(vector.create(1, 2, 3), 2), [2, 4, 6])
-      
-    //vector4
-    assert.deepEqual(vector.scale(vector.create(1, 2, 3, 4), 2), [2, 4, 6, 8])
-  })
+ 
     
   test('.subtract(a, b)', (assert) => {
     //vector2
@@ -207,5 +273,5 @@ var vectorSuite = unit.suite("ts/geometry/vector", (self) => {
     
 })
 
-var exportSuite = vector2Suite.concat(vector3Suite);
+var exportSuite = vector2Suite.concat(vector3Suite, vector4Suite);
 export = exportSuite;

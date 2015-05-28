@@ -8,7 +8,6 @@ module unit {
 
   //Constant
   var FLOAT_EPSILON = 1e-5;
-  var TEST_TIMEOUT = 2000;//ms
 
   //Util
   var __equalsFloat = function (a: number, b: number, epsilon: number) {
@@ -43,26 +42,29 @@ module unit {
   type $Stacktrace = { create(): ICallSite[] }
   type $Time = { now(): number }
   
-  var $equalDefault: $Equal = {
-    is: (a, b) => { 
+  var $equalDefault: $Equal = (function () {
+    
+    function is(a, b) { 
       return (
         a === 0 && b === 0 ? 1 / a === 1 / b :
         a === b ? true :
         __isNaN(a) && __isNaN(b) ? true :
         false
       )
-    },
-    equals: (a, b) => {
+    }
+    
+    function equals(a, b) {
       return (
-        $equalDefault.is(a, b) ||
+        is(a, b) ||
         (
           (a != null) && a.equals ? a.equals(b) :
           (b != null) && b.equals ? b.equals(a) :
           a == b
         )
       )
-    },
-    equalsNear: (a: any, b: any, epsilon: number) => {
+    }
+    
+    function equalsNear(a: any, b: any, epsilon: number) {
       var isnum1 = __isNumber(a)
       var isnum2 = __isNumber(b)
       return (
@@ -71,8 +73,9 @@ module unit {
         (b != null && b.nearEquals) ? b.nearEquals(a) :
         false
       )
-    },
-    equalsDeep: (a, b) => {
+    }
+    
+    (a, b) => {
       function equalsStrict(a: any, b: any) { return a === b };
       
       function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
@@ -125,7 +128,14 @@ module unit {
       }
       return equals(a, b)
     }
-  };
+    
+    return {
+      is: is,
+      equals: equals,
+      equalsNear: equalsNear
+    };
+  }());
+
   var $inspectDefault: $Inspector = new inspect.Inspector({ maxString: 70 });
   var $timeDefault: $Time = { now: Date.now || function () { return (new Date()).getTime(); } };
   var $stacktraceDefault: $Stacktrace = stacktrace;
@@ -162,7 +172,7 @@ module unit {
   }
   
   export interface ITestEngine {
-    callstack(offset?: number): ICallSite[]
+    callstack(): ICallSite[]
     dump(o: any): string
     currentDate(): Date
     currentTime(): number
@@ -359,7 +369,7 @@ module unit {
     }
 
     __position__(): ICallSite {
-      return this.__engine__.callstack(3)[0]
+      return this.__engine__.callstack()[0]
     }
 
     protected _strictEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {
@@ -399,6 +409,7 @@ module unit {
   interface ITestBlock<IAssert> {
     block: (assert: IAssert, complete?: () => void) => void
     assertFactory: (ng: ITestEngine, tc: ITest, r: ITestReport) => IAssert
+    disabled: boolean
   }
 
   export class Test implements ITest {
@@ -427,11 +438,13 @@ module unit {
     
     addBlock<IAssert>(
       block: (assert: IAssert, complete?: () => void) => void,
-      assertFactory: (ng: ITestEngine, tc: ITest, r: ITestReport) => IAssert
+      assertFactory: (ng: ITestEngine, tc: ITest, r: ITestReport) => IAssert,
+      disabled: boolean = false
     ) {
       this.blocks.push({
         block: block,
-        assertFactory: assertFactory
+        assertFactory: assertFactory,
+        disabled: disabled
       });
     }
 
@@ -696,14 +709,14 @@ module unit {
   ): void {
     suiteCurrent
       .getTest(name)
-      .addBlock(f, (ng, tc, r) => { return null; })
+      .addBlock(f, (ng, tc, r) => { return null; }, true)
   }
 
 
   export class Runner {
     //Config
     protected _epsilon = FLOAT_EPSILON;
-    protected _timeout = TEST_TIMEOUT;
+    protected _timeout = 2000;//ms
     protected _includeDefault = true;
     
     //Service
