@@ -134,7 +134,18 @@ module matrix {
   }
    
   export function frob<T extends IMatrix>(m: T): number {
-    return null;//array_frob(m)
+    var l = m.length;
+    var r = 0;
+    switch (l) {
+      case 4:
+          
+      default:
+        for (var i = 0; i < l; ++i) {
+  
+        }
+    }
+    
+    return r;//array_frob(m)
   }
   
   export function identity<T extends IMatrix>(dest: T): T {

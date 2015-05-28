@@ -1,6 +1,5 @@
 import unit = require("../../../../main/typescript/ts/unit")
 import test = unit.test
-import vector = require("../../../../main/typescript/ts/geometry/vector")
 import vector2 = require("../../../../main/typescript/ts/geometry/vector2")
 import vector3 = require("../../../../main/typescript/ts/geometry/vector3")
 import vector4 = require("../../../../main/typescript/ts/geometry/vector4")
@@ -17,6 +16,7 @@ interface VectorModule<T> {
   negate(v: T, dest?: T): T
   normalize(v: T, dest?: T): T
   scale(v: T, n: number, dest?: T): T
+  subtract(a: T, b: T, dest?: T): T
 }
 
 class Assert extends unit.Assert {
@@ -25,8 +25,9 @@ class Assert extends unit.Assert {
     var position = this.__position__();
     var isSuccess = true;
     var message = "";
+    var length = a.length;
     
-    if (a.length === b.length) {
+    if (length === b.length) {
       
     } else {
       isSuccess = false;  
@@ -56,7 +57,7 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
     var __rand = Math.random;
     var r = create();
     for (var i = 0; i < arity; i++) {
-      r[i] = __rand();  
+      r[i] = __rand() * 200 - 100;  
     }
     return <any>r;
   }
@@ -249,6 +250,25 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       })
     })
     
+    test('.subtract(a, b)', (assert) => {
+      gen(() => {
+        var a = random();
+        var b = random();
+        var dest = create();
+        var expected = create();
+        for (var i = 0; i < arity; i++) {
+          expected[i] = a[i] - b[i];
+        }
+      
+        //alloc
+        assert.deepEqual(vector.subtract(a, b), expected)
+        
+        //dest
+        assert.deepEqual(vector.subtract(a, b, dest), expected)
+        assert.deepEqual(dest, expected)  
+      })
+    })
+    
   });
 }
 
@@ -256,22 +276,6 @@ var vector2Suite = generateSuite("ts/geometry/vector2", vector2, 2);
 var vector3Suite = generateSuite("ts/geometry/vector3", vector3, 3);
 var vector4Suite = generateSuite("ts/geometry/vector4", vector4, 4);
 
-var vectorSuite = unit.suite("ts/geometry/vector", (self) => {
-    
- 
-    
-  test('.subtract(a, b)', (assert) => {
-    //vector2
-    assert.deepEqual(vector.subtract(vector.create(1, 2), vector.create(2, 2)), [-1, 0])
-      
-    //vector3
-    assert.deepEqual(vector.subtract(vector.create(1, 2, 3), vector.create(2, 2, 2)), [-1, 0, 1])
-      
-    //vector4
-    assert.deepEqual(vector.subtract(vector.create(1, 2, 3, 4), vector.create(2, 2, 2, 2)), [-1, 0, 1, 2])
-  })
-    
-})
 
 var exportSuite = vector2Suite.concat(vector3Suite, vector4Suite);
 export = exportSuite;

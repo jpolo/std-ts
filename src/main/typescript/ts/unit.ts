@@ -75,7 +75,7 @@ module unit {
       )
     }
     
-    (a, b) => {
+    function equalsDeep(a, b) {
       function equalsStrict(a: any, b: any) { return a === b };
       
       function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
@@ -132,7 +132,8 @@ module unit {
     return {
       is: is,
       equals: equals,
-      equalsNear: equalsNear
+      equalsNear: equalsNear,
+      equalsDeep: equalsDeep
     };
   }());
 
@@ -369,7 +370,7 @@ module unit {
     }
 
     __position__(): ICallSite {
-      return this.__engine__.callstack()[0]
+      return this.__engine__.callstack()[3]
     }
 
     protected _strictEqual(o1: any, o2: any, not: boolean, message: string, position: ICallSite) {

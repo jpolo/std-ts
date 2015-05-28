@@ -71,30 +71,7 @@ module geometry {
       return mat_identity(dest)
     }
 
-    export function invert<T extends IMatrix>(m: T, dest?: T): T {
-      dest = dest || array_create(m.length)
-        
-      switch(dest.length) {
-        case 4:
-          var m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3]
-          var det = m0 * m3 - m2 * m1
-          if (!det) {
-            return null
-          }
-          det = 1.0 / det
-          
-          dest[0] =  m3 * det
-          dest[1] = -m1 * det
-          dest[2] = -m2 * det
-          dest[3] =  m0 * det
-          break
-        case 9:
-          break
-        default:
-          throw new TypeError()
-      }
-      return dest;
-    }
+    export var invert = matrix_.invert
     
     export function multiply<T extends IMatrix>(a: T, b: T, dest?: T): T {
       return mat_multiply(a, b, dest || array_create(a.length))
@@ -120,12 +97,7 @@ module geometry {
       return dest;
     }
 
-    export function scale<IMatrix4>(m: IMatrix4, v: vector.IVector4, dest?: IMatrix4): IMatrix4
-    export function scale<IMatrix3>(m: IMatrix3, v: vector.IVector3, dest?: IMatrix3): IMatrix3
-    export function scale<IMatrix2>(m: IMatrix2, v: vector.IVector2, dest?: IMatrix2): IMatrix2
-    export function scale(m: any, v: any, dest?: any): any {
-      return mat_scale(m, v, dest || array_create(m.length))
-    }
+    export var scale = matrix_.scale;
     
     export function transpose<T extends IMatrix>(m: T, dest?: T): T {
       return mat_transpose(m, dest || array_create(m.length));
