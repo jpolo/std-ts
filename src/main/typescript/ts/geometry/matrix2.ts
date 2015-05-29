@@ -51,8 +51,27 @@ module matrix2 {
   }
   
   export function identity(dest?: Matrix2): Matrix2 {
-    var r = dest === undefined ? __arrayCreateFrom(dest) : dest;
-    //TODO assign
+    var r = dest === undefined ? __arrayCreate(Float64Array) : dest;
+    r[0] = 1;
+    r[1] = 0;
+    r[2] = 0;
+    r[3] = 1;
+    return r;  
+  }
+  
+  export function transpose(m: Matrix2, dest?: Matrix2): Matrix2 {
+    var r = dest === undefined ? __arrayCreateFrom(m) : dest;
+    if (dest === m) {
+      var m1 = m[1];
+      r[1] = m[2];
+      r[2] = m1;
+    } else {
+      r[0] = m[0];
+      r[1] = m[2];
+      r[2] = m[1];
+      r[3] = m[3];
+    }
     return r;
   }
 }
+export = matrix2

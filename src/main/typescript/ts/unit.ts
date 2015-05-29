@@ -10,14 +10,6 @@ module unit {
   var FLOAT_EPSILON = 1e-5;
 
   //Util
-  var __equalsFloat = function (a: number, b: number, epsilon: number) {
-    return (
-      __isNaN(b) ? __isNaN(a) :
-      __isNaN(a) ? false :
-      !__isFinite(b) && !__isFinite(a) ? (b > 0) == (a > 0) :
-      Math.abs(a - b) < epsilon
-    )
-  };
   var __fstring = Function.prototype.toString;
   var __fnSource = function (f: Function) { return __fstring.call(f).slice(13, -1).trim(); };
   var __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
@@ -64,36 +56,37 @@ module unit {
       )
     }
     
+    function equalsStrict(a: any, b: any) { return a === b };
+    
     function equalsNear(a: any, b: any, epsilon: number) {
       var isnum1 = __isNumber(a)
       var isnum2 = __isNumber(b)
       return (
-        (isnum1 || isnum2) ? (isnum1 === isnum2) && (a == b || __equalsFloat(a, b, epsilon)) :
+        (isnum1 || isnum2) ? (isnum1 === isnum2) && (a == b || equalsFloat(a, b, epsilon)) :
         (a != null && a.nearEquals) ? a.nearEquals(b) :
         (b != null && b.nearEquals) ? b.nearEquals(a) :
         false
       )
     }
     
-    function equalsDeep(a, b) {
-      function equalsStrict(a: any, b: any) { return a === b };
-      
-      function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
-        var returnValue = true
-        var al = a.length
-        var bl = b.length
-    
-        if (al === bl) {
-          for (var i = 0, l = al; i < l; ++i) {
-            if (!equalFn(a[i], b[i])) {
-              returnValue = false
-              break
-            }
+    function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
+      var returnValue = true
+      var al = a.length
+      var bl = b.length
+  
+      if (al === bl) {
+        for (var i = 0, l = al; i < l; ++i) {
+          if (!equalFn(a[i], b[i])) {
+            returnValue = false
+            break
           }
         }
-        return returnValue
       }
-      
+      return returnValue
+    }
+    
+    function equalsDeep(a, b) {
+
       function equals(o1, o2) {
         if (!$equalDefault.is(o1, o2)) {
           switch (__stringTag(o1)) {
@@ -128,6 +121,15 @@ module unit {
       }
       return equals(a, b)
     }
+    
+    function equalsFloat(a: number, b: number, epsilon: number) {
+      return (
+        __isNaN(b) ? __isNaN(a) :
+        __isNaN(a) ? false :
+        !__isFinite(b) && !__isFinite(a) ? (b > 0) == (a > 0) :
+        Math.abs(a - b) < epsilon
+      )
+    };
     
     return {
       is: is,

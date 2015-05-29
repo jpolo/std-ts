@@ -1,8 +1,54 @@
 import unit = require("../../../../main/typescript/ts/unit")
 import test = unit.test
-import geometry = require("../../../../main/typescript/ts/geometry")
-import matrix = geometry.matrix
+import matrix2 = require("../../../../main/typescript/ts/geometry/matrix2")
+import matrix3 = require("../../../../main/typescript/ts/geometry/matrix3")
+import matrix4 = require("../../../../main/typescript/ts/geometry/matrix4")
 
+interface MatrixModule<T> {
+  identity(dest?: T): T
+  
+}
+
+function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number) {
+  
+  function create(): number[] {
+    return new Array(arity);
+  }
+  
+  function copy(a: number[]) {
+    var r = new Array(arity);
+    for (var i = 0; i < arity; i++) {
+      r[i] = a[i];  
+    }
+    return r;
+  }
+  
+  function random(): number[] {
+    var __rand = Math.random;
+    var r = create();
+    for (var i = 0; i < arity; i++) {
+      r[i] = __rand() * 200 - 100;  
+    }
+    return <any>r;
+  }
+  
+  function gen(f: () => void, count = 10) {
+    for (var i = 0; i < count; i++) {
+      f();
+    }
+  }
+  
+  return unit.suite(n, (self) => {
+    
+    
+  })
+}
+
+var matrix2Suite = generateSuite("ts/geometry/matrix2", matrix2, 2 * 2)
+var matrix3Suite = generateSuite("ts/geometry/matrix3", matrix3, 3 * 3)
+var matrix4Suite = generateSuite("ts/geometry/matrix4", matrix4, 4 * 4)
+
+/*
 var matrixSuite = unit.suite("ts/geometry/matrix", (self) => {
   var mat2A, mat2B: geometry.IMatrix2
   var mat3A, mat3B: geometry.IMatrix3
@@ -115,6 +161,7 @@ var matrixSuite = unit.suite("ts/geometry/matrix", (self) => {
   })
   
 })
+*/
 
-var exportSuite = matrixSuite;
+var exportSuite = matrix2Suite.concat(matrix3Suite, matrix4Suite);
 export = exportSuite;

@@ -1,4 +1,6 @@
-import vector = require("./vector")
+import vector2 = require("./vector2")
+import vector3 = require("./vector3")
+import vector4 = require("./vector4")
  
 module matrix {
   var MATRIX_SIZE = [4, 9, 16]
@@ -203,9 +205,9 @@ module matrix {
     return null;
   }
 
-  export function scale<IMatrix4>(m: IMatrix4, v: vector.IVector4, dest?: IMatrix4): IMatrix4
-  export function scale<IMatrix3>(m: IMatrix3, v: vector.IVector3, dest?: IMatrix3): IMatrix3
-  export function scale<IMatrix2>(m: IMatrix2, v: vector.IVector2, dest?: IMatrix2): IMatrix2
+  export function scale<IMatrix4>(m: IMatrix4, v: [number, number, number, number], dest?: IMatrix4): IMatrix4
+  export function scale<IMatrix3>(m: IMatrix3, v: [number, number, number], dest?: IMatrix3): IMatrix3
+  export function scale<IMatrix2>(m: IMatrix2, v: [number, number], dest?: IMatrix2): IMatrix2
   export function scale(m: any, v: any, dest?: any): any {
     var l = m.length;
     dest = dest || __arrayCreate(l);

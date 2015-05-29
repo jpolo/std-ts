@@ -1,4 +1,3 @@
-import vector = require('ts/geometry/vector')
 import matrix_ = require('ts/geometry/matrix')
 import codegen = require('ts/codegen')
 import cc = codegen.compile
