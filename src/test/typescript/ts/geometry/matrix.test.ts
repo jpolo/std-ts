@@ -10,6 +10,7 @@ interface MatrixModule<T> {
 }
 
 function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number) {
+  var dimension = Math.sqrt(arity);
   
   function create(): number[] {
     return new Array(arity);
@@ -40,7 +41,23 @@ function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number)
   
   return unit.suite(n, (self) => {
     
-    
+    test(".identity()", (assert) => {
+      gen(() => {
+        var dest = create();
+        var expected = create();
+        for (var i = 0; i < arity; i++) {
+          expected[i] = 0;
+        }
+      
+        //alloc
+        assert.deepEqual(matrix.identity(), expected)
+        
+        //dest
+        assert.deepEqual(matrix.identity(dest), expected)
+        assert.deepEqual(dest, expected)
+      
+      })
+    })
   })
 }
 
