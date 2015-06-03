@@ -14,13 +14,13 @@ module gen {
   var __log2 = function (n: number): number {
     return __log(n) / LN2;
   };
-  var __rand = function (min: number, max: number, randFn: () => number): number {
-    return __floor(randFn() * (max - min + 1) + min);
+  var __paramRand = function (params: Params, min: number, max: number): number {
+    return __floor(params.random() * (max - min + 1) + min);
   };
-  var __logSize = function (size: number): number {
-    var r = __round(__log2(size + 1));
+  var __paramLogSize = function (params: Params) {
+    var r = __round(__log2(params.size + 1));
     return r >= 0 ? r : 0;
-  }
+  };
   
   //helper
   type Params = {
@@ -41,14 +41,14 @@ module gen {
   function oneOf<T>(generators: IGenerator<T>[]): IGenerator<T> {
     var l = generators.length;
     return function (params: Params) {
-      var index = __rand(0, l, params.random);
+      var index = __paramRand(params, 0, l);
       return generators[index](params);
     };
   }
   
   function array<T>(generator: IGenerator<T>): IGenerator<T[]> {
     return function (params: Params) {
-      var length = __rand(0, __logSize(params.size), params.random);
+      var length = __paramRand(params, 0, __paramLogSize(params));
       var returnValue: T[] = new Array(length);
       for (var i = 0; i < length; i++) {
         returnValue[i] = generator(params);
@@ -57,23 +57,21 @@ module gen {
     };
   }
   
-  function recursive<T>(g: IGenerator<T>): IGenerator<T> {
-    /*
-    function rec(n, params: Params) {
-      if (n <= 0 || random(0, 3) === 0) {
-        return genZ(sizep);
-      } else {
-        return genS(generatorBless(function (sizeq) {
-          return rec(n - 1, sizeq);
-        }))(sizep);
-      }
+  function recursive<T>(g: IGenerator<T>, loop: (g: IGenerator<T>) => IGenerator<T>): IGenerator<T> {
+    function rec(n: number, params: Params) {
+      return (
+        //Trivial case
+        n <= 0 || __paramRand(params, 0, 3) === 0 ? g(params) :
+        
+        //Recursion
+        loop(function (paramsq: Params) {
+          return rec(n - 1, paramsq);
+        })(params)
+      );
     }
-
-    return rec(logsize(size), params);*/
     
     return function (params: Params) {
-      var size = __logSize(params.size);
-      
+      return rec(__paramLogSize(params), params);
     };
   }
   
