@@ -1,15 +1,44 @@
 module observe {
+  //ECMA spec is here :
+  // https://arv.github.io/ecmascript-object-observe
   
-  var O = (<any>Object)
+  
+  //Constant
+  var ES_COMPAT = 3;
+  
+  export var ADD = "add";
+  export var UPDATE = "update";
+  export var DELETE = "delete";
+  export var RECONFIGURE = "reconfigure";
+  export var SET_PROTOTYPE = "setPrototype";
+  export var PREVENT_EXTENSIONS = "preventExtensions";
+
+  var ALL = [ADD, UPDATE, DELETE, RECONFIGURE, SET_PROTOTYPE, PREVENT_EXTENSIONS];
+  
+  //Util
+  var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+  var O = (<any>Object);
+  var __deliverChanges = O.deliverChangeRecords;
   var __observe = O.observe;
   var __unobserve = O.unobserve;
   var __notifier: <T>(o: T) => INotifier<T> = O.getNotifier;
+  var __setImmediate = typeof setImmediate !== "undefined" ? setImmediate : setTimeout;
+  var __clearImmediate = typeof clearImmediate !== "undefined" ? clearImmediate : clearTimeout;
+  var __map: <K, V>() => Map<K, V>;
+  var __weakMap: <K, V>() => WeakMap<K, V>;
+  var __isFrozen = Object.isFrozen;
+  var __sym: (o: any) => any = __global.Symbol; 
+  
   
   //Compat
-  if (!__observe) {
-    
-    var __map: <K, V>() => Map<K, V> = typeof Map !== "undefined" ? 
-      function () { return new Map(); } : 
+  if (ES_COMPAT <= 3) {
+    __isFrozen = __isFrozen || function (o) { return false; };
+  }
+  
+  if (ES_COMPAT <= 5) {
+    __sym = __sym || function (o) { return "@@" + o; };
+    __map = typeof Map !== "undefined" ? 
+      function () { return new Map(); } :
       <any> function () {
         var _keys = [];
         var _values = [];
@@ -45,27 +74,109 @@ module observe {
           }
         };
       };
-    var __weakMap: <K, V>() => WeakMap<K, V> = typeof WeakMap !== "undefined" ? 
+    __weakMap = typeof WeakMap !== "undefined" ? 
       function () { return new WeakMap(); } :
       <any>__map;
+  }
+  
+  if (!__observe) {
+    var __option = function (o, name) {
+      return o ? o[name] : undefined;
+    };
+    var __assertObject = function (o: any) {
+      if (typeof o !== "object" || o === null) {
+        throw new TypeError(o + " must be a object");
+      }
+    };
+    var __assertNotFrozen = function (o: any) {
+      if (__isFrozen) {
+        throw new TypeError(o + " must not be frozen");
+      }
+    };
+    var __assertCallable = function (o: any) {
+      if (typeof o !== "function") {
+        throw new TypeError(o + " must be a callable");
+      }
+    };
+    //var $$notifier = __sym("notifier");
+    var $$target = __sym("target");
+    var $$pendingChangeRecords = __sym("pendingChangeRecords");
+    
+    
+    
+    var Notifier: any = (function () {
+      
+      function Notifier(o) {
+        o[$$target] = o;
+        
+      }
+      
+      Notifier.prototype.notify = function (changeRecord) {
+        
+        
+      };
+      
+      
+      Notifier.prototype.performChange = function (changeType, changeFn) {
+        
+      };
+    
+      return Notifier;
+    }());
+    
+
+    __deliverChanges = function (callback) {
+      var changeRecords: IChangeRecord<any>[] = callback[$$pendingChangeRecords];
+      callback[$$pendingChangeRecords] = [];
+      var returnValue = false;
+      
+      var l = changeRecords.length;
+      if (l > 0) {
+        var array = [];
+        var n = 0;
+        var anyRecords = false;
+        for (var i = 0; i < l; i++) {
+          var record = changeRecords[i];
+          if (record !== undefined) {
+            anyRecords = true;
+            array[n] = record;
+            n += 1;
+          }
+        }
+        callback(anyRecords ? array : null);
+      }
+      return returnValue;
+    };
     
     var __notifiers = __weakMap<any, INotifier<any>>();
-    
-    
     __notifier = function <T>(o: T): INotifier<T> {
-      var notifier = __notifiers.get(o);
-      if (notifier === undefined) {
-        __notifiers.set(o, notifier = null/*new Notifier(o)*/);
+      __assertObject(o);
+      var notifier: INotifier<T> = null;
+      if (!__isFrozen(o)) {
+        notifier = __notifiers.get(o);
+        if (notifier === undefined) {
+          __notifiers.set(o, notifier = new Notifier(o));
+        }
       }
       return notifier;
     };
     
-    __observe = function (o, callback, accept) {
-      //__validateArguments(o, callback, accept);
+    __observe = function (o, callback, options?: Options) {
+      __assertObject(o);
+      __assertCallable(callback);
+      __assertNotFrozen(callback);
+      var notifier = __notifier(o);
+      if (notifier) {
+        var acceptTypes = options && options.acceptTypes || ALL;
+        var skipRecords = !!(options && options.skipRecords);
+        
+      }
     };
     
     __unobserve = function (o, callback) {
-      //__validateArguments(o, callback);
+      __assertObject(o);
+      __assertCallable(callback);
+      
       var notifier = __notifiers.get(o);
       if (notifier) {
         notifier.removeListener(callback);
@@ -80,11 +191,11 @@ module observe {
   interface INotifier<T> {
     
     notify(c: IChangeRecord<T>)
-    addListener(callback: (c: IChangeRecord<T>[]) => void, accept?: string[])
-    removeListener(callback: (c: IChangeRecord<T>[]) => void)
-    listeners(): Array<(c: IChangeRecord<T>[]) => void>
+    performChange(changeType, changeFn)
     
   }
+  
+  
   
   
   interface IChangeRecord<T> {
@@ -94,12 +205,18 @@ module observe {
     oldValue: any
   }
   
-  export function add<T>(o: T, callback: (a: IChangeRecord<T>[]) => void, accept?: string[]) {
-    return __observe(o, callback, accept);
+  type Options = { acceptTypes?: string[]; skipRecords?: boolean };
+  
+  export function add<T>(o: T, callback: (a: IChangeRecord<T>[]) => void, options?: Options) {
+    return __observe(o, callback, options);
   }
   
   export function remove<T>(o: T, callback: (a: IChangeRecord<T>[]) => void) {
     return __unobserve(o, callback);
+  }
+  
+  export function deliver(callback: (a: IChangeRecord<any>[]) => void): boolean {
+    return __deliverChanges(callback);  
   }
   
   export function notifier<T>(o: T): INotifier<T> {
