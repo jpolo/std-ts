@@ -18,25 +18,24 @@ module observe {
   //Util
   var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
   var O = (<any>Object);
-  var __deliverChanges = O.deliverChangeRecords;
+  var __observerDeliver = O.deliverChangeRecords;
   var __observe = O.observe;
   var __unobserve = O.unobserve;
   var __notifier: <T>(o: T) => INotifier<T> = O.getNotifier;
   var __setImmediate = typeof setImmediate !== "undefined" ? setImmediate : setTimeout;
   var __clearImmediate = typeof clearImmediate !== "undefined" ? clearImmediate : clearTimeout;
+  var __sym: (o: string) => any = __global.Symbol;
   var __map: <K, V>() => Map<K, V>;
   var __weakMap: <K, V>() => WeakMap<K, V>;
   var __isFrozen = Object.isFrozen;
-  var __sym: (o: any) => any = __global.Symbol; 
-  
-  
+
   //Compat
   if (ES_COMPAT <= 3) {
     __isFrozen = __isFrozen || function (o) { return false; };
   }
   
   if (ES_COMPAT <= 5) {
-    __sym = __sym || function (o) { return "@@" + o; };
+    __sym = __sym || function (s: string) { return "@@" + s; };
     __map = typeof Map !== "undefined" ? 
       function () { return new Map(); } :
       <any> function () {
@@ -98,17 +97,19 @@ module observe {
         throw new TypeError(o + " must be a callable");
       }
     };
-    //var $$notifier = __sym("notifier");
+    var $$notifier = __sym("notifier");
     var $$target = __sym("target");
     var $$pendingChangeRecords = __sym("pendingChangeRecords");
-    
+    var $$changeObservers = __sym("changeObservers");
+    var $$activeChanges = __sym("activeChanges");
     
     
     var Notifier: any = (function () {
       
       function Notifier(o) {
-        o[$$target] = o;
-        
+        this[$$target] = o;
+        this[$$changeObservers] = [];
+        this[$$activeChanges] = {};
       }
       
       Notifier.prototype.notify = function (changeRecord) {
@@ -125,7 +126,7 @@ module observe {
     }());
     
 
-    __deliverChanges = function (callback) {
+    __observerDeliver = function (callback: IObserver<any>) {
       var changeRecords: IChangeRecord<any>[] = callback[$$pendingChangeRecords];
       callback[$$pendingChangeRecords] = [];
       var returnValue = false;
@@ -146,6 +147,19 @@ module observe {
         callback(anyRecords ? array : null);
       }
       return returnValue;
+    };
+    
+    var __beginChange = function (o: any, changeType: string) {
+      var notifier = __notifier(o);
+      var activeChanges = notifier[$$activeChanges];
+    };
+    
+    var __endChange = function (o: any, changeType: string) {
+      
+    };
+    
+    var __observerClean = function (callback: IObserver<any>) {
+      
     };
     
     var __notifiers = __weakMap<any, INotifier<any>>();
@@ -179,10 +193,12 @@ module observe {
       
       var notifier = __notifiers.get(o);
       if (notifier) {
-        notifier.removeListener(callback);
+        /*notifier.removeListener(callback);
         if (notifier.listeners().length === 0) {
           __notifiers.delete(o);
-        }
+        }*/
+        
+        __observerClean(callback);
       }
     };
   }
@@ -195,8 +211,9 @@ module observe {
     
   }
   
-  
-  
+  interface IObserver<T> {
+    (a: IChangeRecord<T>[]): void
+  }
   
   interface IChangeRecord<T> {
     type: string
@@ -205,18 +222,21 @@ module observe {
     oldValue: any
   }
   
-  type Options = { acceptTypes?: string[]; skipRecords?: boolean };
+  type Options = { 
+    acceptTypes?: string[]; 
+    skipRecords?: boolean 
+  };
   
-  export function add<T>(o: T, callback: (a: IChangeRecord<T>[]) => void, options?: Options) {
+  export function add<T>(o: T, callback: IObserver<T>, options?: Options) {
     return __observe(o, callback, options);
   }
   
-  export function remove<T>(o: T, callback: (a: IChangeRecord<T>[]) => void) {
+  export function remove<T>(o: T, callback: IObserver<T>) {
     return __unobserve(o, callback);
   }
   
-  export function deliver(callback: (a: IChangeRecord<any>[]) => void): boolean {
-    return __deliverChanges(callback);  
+  export function deliver(callback: IObserver<any>): boolean {
+    return __observerDeliver(callback);  
   }
   
   export function notifier<T>(o: T): INotifier<T> {

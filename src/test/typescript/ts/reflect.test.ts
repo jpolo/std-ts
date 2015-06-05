@@ -42,13 +42,17 @@ var reflectSuite = unit.suite("ts/reflect", () => {
   
   test(".deleteProperty()", (assert) => {
     var obj = {
-      "foo": true
+      "foo": true,
+      "$notConfigurable": 2
     }
+    
+    Object.defineProperty(obj, "$notConfigurable", { value:2, configurable: false })
     
     assert.ok(reflect.hasOwn(obj, 'foo'))  
     assert.ok(reflect.deleteProperty(obj, 'foo'))
     assert.ok(!reflect.hasOwn(obj, 'foo'))  
     assert.ok(reflect.deleteProperty(obj, '$nonExistent'))
+    assert.ok(!reflect.deleteProperty(obj, '$notConfigurable'))
   })
     
   test(".freeze()/.isFrozen()", (assert) => {
@@ -57,7 +61,7 @@ var reflectSuite = unit.suite("ts/reflect", () => {
     }
     
     assert.ok(!reflect.isFrozen(obj))
-    assert.ok(reflect.freeze(obj))
+    assert.strictEqual(reflect.freeze(obj), obj)
     assert.ok(reflect.isFrozen(obj))
   })
   
@@ -109,6 +113,7 @@ var reflectSuite = unit.suite("ts/reflect", () => {
     assert.ok(!reflect.isExtensible(obj))
   })
   
+  /*
   test(".seal()/.isSealed()", (assert) => {
     var obj = {
       "foo": true
@@ -117,7 +122,7 @@ var reflectSuite = unit.suite("ts/reflect", () => {
     assert.ok(!reflect.isSealed(obj))
     assert.ok(reflect.seal(obj))
     assert.ok(reflect.isSealed(obj))
-  })
+  })*/
     
   test(".set()", (assert) => {
     var obj = {}

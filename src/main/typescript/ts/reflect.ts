@@ -4,6 +4,8 @@ module reflect {
   
   
   //Util
+  var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+  var Reflect = typeof __global.Reflect !== "undefined" ? __global.Reflect : {};
   var __fidentity = function f<T>() { return function (o: T) { return o } };
   var __fapply = Function.prototype.apply;
   var __fconst = function f<T>(k: T) { return function () { return k } };
@@ -14,15 +16,16 @@ module reflect {
   var __ostring = Object.prototype.toString;
   var __okeys = Object.keys;
   var __obj = Object;
-  var __apply;//Reflect API still draft
-  var __construct;//Reflect API still draft
+  var __apply = Reflect.apply;//Reflect API still draft
+  var __construct = Reflect.construct;//Reflect API still draft
   var __create = Object.create;
   var __proto = Object.getPrototypeOf;
   var __propertyDefine = Object.defineProperty;
-  var __propertyDelete;//Reflect API still draft
+  var __propertyDelete = Reflect.deleteProperty;//Reflect API still draft
   var __propertyDescriptor = Object.getOwnPropertyDescriptor;
   var __propertyNames = Object.getOwnPropertyNames;
   var __propertySymbols = Object['getOwnPropertySymbols'];
+  var __has = Reflect.has;//Reflect API still draft
   var __hasOwn;//Reflect API still draft
   var __isDataDescriptor = function (descriptor: IPropertyDescriptor) { return ('value' in descriptor || 'writable' in descriptor); };
   var __isAccessorDescriptor = function (descriptor: IPropertyDescriptor) { return ('get' in descriptor || 'set' in descriptor); };
@@ -42,8 +45,8 @@ module reflect {
     __okeys = __okeys || __polyfill(function (o) { var ks = []; for (var k in o) { if (__hasOwn.call(o, k)) { ks.push(k); } } return ks; });
     __create = __create|| __polyfill(function (proto) { function t() {}; t.prototype = proto.prototype; return new t(); });
     __proto = __proto || __polyfill(function (o) { return o.__proto__ });
-    __propertyDefine = Object.defineProperty;
-    __propertyDescriptor = Object.getOwnPropertyDescriptor;
+    __propertyDefine = Object.defineProperty;//TODO polyfill this
+    __propertyDescriptor = Object.getOwnPropertyDescriptor;//TODO polyfill this
     __propertyNames = __propertyNames || __polyfill(function (o) { return __okeys(o) });
     __isFrozen = __isFrozen || __polyfill(__fconst(false));
     __isSealed = __isSealed ||  __polyfill(__fconst(false));
@@ -61,6 +64,7 @@ module reflect {
       var result = __fapply.call(Constructor, instance, args)
       return __obj(result) === result ? result : instance
     });
+    __has = __has || function (o, propertyName) { return (propertyName in o) };
     __hasOwn = __hasOwn || __polyfill(function (o, name) { return __ohasown.call(o, name); });
     __propertySymbols = __propertySymbols || __polyfill(function (o) { return []; });
     __propertyDelete = __propertyDelete || __polyfill(function (o: any, propertyName: string) {
@@ -116,7 +120,7 @@ module reflect {
     }
   }
 
-  export function freeze(o: any, deep?: boolean): any {
+  export function freeze<T>(o: T, deep?: boolean): T {
     __freeze(o) // First freeze the object.
     if (deep && !__polyfilled(__freeze)) {
       var keys = __okeys(o)
@@ -165,7 +169,7 @@ module reflect {
   }
   
   export function has(o: any, propertyName: string): boolean {
-    return (propertyName in o)
+    return __has(o, propertyName)
   }
   
   export function hasOwn(o: any, propertyName: string) {
@@ -190,13 +194,15 @@ module reflect {
     //return __polyfilled(__propertySymbols) ? names : names.concat(__propertySymbols(o))
   }
   
-  export function preventExtensions(o): any {
-    return __preventExtensions(o)
+  export function preventExtensions<T>(o: T): boolean {
+    __preventExtensions(o);
+    return true;
   }
-  
-  export function seal(o: any): any {
+
+  /*
+  export function seal<T>(o: T): T {
     return __seal(o)
-  }
+  }*/
   
   export function set(o: any, propertyName: string, value: any, receiver?: any): boolean {
     receiver = receiver || o    
@@ -281,10 +287,6 @@ module reflect {
   export function typeOf(o: any): Type {
     return __typeOf(o);  
   }
-  
-  
-  
-  
 
 }
 export = reflect

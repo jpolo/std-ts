@@ -4,8 +4,8 @@ module id {
   
   //Util
   var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-  var __sym: (o: any) => any = __global.Symbol;
-  var __descriptor = { value: null, enumerable: false, configurable: true, writable: true };
+  var __sym: (s: string) => any = __global.Symbol;
+  var __descriptor: PropertyDescriptor = { value: null, enumerable: false, configurable: true, writable: true };
   var __def = Object.defineProperty;
   var __set = function (o, k, v) {
     __descriptor.value = v
@@ -14,19 +14,19 @@ module id {
   
   //Compat
   if (ES_COMPAT <= 3) {
-    __def = __def || function (o, k, d) { o[k] = d.value; };
+    __def = __def || function (o, k, d: PropertyDescriptor) { o[k] = d.value; };
   }
   if (ES_COMPAT <= 5) {
-    __sym = __sym || function (o) { return "@@" + o; };
+    __sym = __sym || function (s: string) { return "@@" + s; };
   }
   
   var $$id = __sym("id");
   var __currentId = 1;//Start from 1, helps not to have falsy values
-  var __nextId = function () { return __currentId++; };
   var __getId: (o: any) => number = function (o: any) {
     var id = o[$$id];
     if (id === undefined) {
-      id = __nextId();
+      id = __currentId;
+      __currentId += 1;
       __set(o, $$id, id);
     }
     return id;
@@ -39,7 +39,9 @@ module id {
    * @return {number}
    */ 
   export function generate(): number {
-    return __nextId();
+    var returnValue = __currentId;
+    __currentId += 1;
+    return returnValue;
   }
   
   /**
