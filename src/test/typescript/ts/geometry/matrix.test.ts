@@ -33,6 +33,14 @@ function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number)
     return <any>r;
   }
   
+  function getCol(i: number) {
+    return i % dimension;
+  }
+  
+  function getRow(i: number) {
+    return Math.floor(i / dimension);
+  }
+  
   function gen(f: () => void, count = 10) {
     for (var i = 0; i < count; i++) {
       f();
@@ -46,7 +54,11 @@ function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number)
         var dest = create();
         var expected = create();
         for (var i = 0; i < arity; i++) {
-          expected[i] = 0;
+          if (getCol(i) === getRow(i)) {
+            expected[i] = 1;
+          } else {
+            expected[i] = 0;
+          }
         }
       
         //alloc

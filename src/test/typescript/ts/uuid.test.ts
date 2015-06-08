@@ -9,6 +9,7 @@ var uuidSuite = unit.suite("ts/uuid", (self) => {
 })
 
 var UUIDSuite = unit.suite("ts/uuid.UUID", (self) => {
+  var ZERO = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
   var DATA = [ 0xb3, 0x72, 0xe0, 0xa1, 0xb3, 0x91, 0x46, 0x10, 0x8e, 0x1a, 0xff, 0x7d, 0x51, 0xdb, 0x4e, 0x80 ];
   
   test(".generate()", (assert) => {
@@ -22,13 +23,36 @@ var UUIDSuite = unit.suite("ts/uuid.UUID", (self) => {
     //zero
     assert.strictEqual(id.length, 16);
     for (var i = 0, l = 16; i < l; i++) {
-      assert.strictEqual(id[i], 0);
+      assert.strictEqual(id[i], ZERO[i]);
     }
     
     //with array
     id = new UUID(DATA);
     for (var i = 0, l = 16; i < l; i++) {
       assert.strictEqual(id[i], DATA[i]);
+    }
+
+  })
+  
+  test("#set()", (assert) => {
+    var id = new UUID();
+    
+    //zero
+    assert.strictEqual(id.length, 16);
+    for (var i = 0, l = 16; i < l; i++) {
+      assert.strictEqual(id[i], 0);
+    }
+    
+    //with array
+    id.set(DATA);
+    for (var i = 0, l = 16; i < l; i++) {
+      assert.strictEqual(id[i], DATA[i]);
+    }
+    
+    //set again to zero
+    id.set(ZERO);
+    for (var i = 0, l = 16; i < l; i++) {
+      assert.strictEqual(id[i], ZERO[i]);
     }
 
   })

@@ -84,22 +84,22 @@ module uuid {
   
   var __array16Copy = function (src: ByteArray, dest: ByteArray, offset: number) {
     if (src !== dest) {
-      dest[0] = src[0 + offset];
-      dest[1] = src[1 + offset];
-      dest[2] = src[2 + offset];
-      dest[3] = src[3 + offset];
-      dest[4] = src[4 + offset];
-      dest[5] = src[5 + offset];
-      dest[6] = src[6 + offset];
-      dest[7] = src[7 + offset];
-      dest[8] = src[8 + offset];
-      dest[9] = src[9 + offset];
-      dest[10] = src[10 + offset];
-      dest[11] = src[11 + offset];
-      dest[12] = src[12 + offset];
-      dest[13] = src[13 + offset];
-      dest[14] = src[14 + offset];
-      dest[15] = src[15 + offset];
+      dest[0] = src[0 + offset] & 0xff;
+      dest[1] = src[1 + offset] & 0xff;
+      dest[2] = src[2 + offset] & 0xff;
+      dest[3] = src[3 + offset] & 0xff;
+      dest[4] = src[4 + offset] & 0xff;
+      dest[5] = src[5 + offset] & 0xff;
+      dest[6] = src[6 + offset] & 0xff;
+      dest[7] = src[7 + offset] & 0xff;
+      dest[8] = src[8 + offset] & 0xff;
+      dest[9] = src[9 + offset] & 0xff;
+      dest[10] = src[10 + offset] & 0xff;
+      dest[11] = src[11 + offset] & 0xff;
+      dest[12] = src[12 + offset] & 0xff;
+      dest[13] = src[13 + offset] & 0xff;
+      dest[14] = src[14 + offset] & 0xff;
+      dest[15] = src[15 + offset] & 0xff;
     }
   };
   
@@ -134,7 +134,6 @@ module uuid {
     }
     
     static generate(): UUID {
-      var id = new UUID();
       var a = __rng();
       a[6] = (a[6] & 0x0f) | 0x40;
       a[8] = (a[8] & 0x3f) | 0x80;
@@ -169,12 +168,11 @@ module uuid {
     }
     
     equal(other: any): boolean {
-      return (other instanceof UUID) && (UUID.compare(this, other) === 0);  
+      return other && (other instanceof UUID) && (UUID.compare(this, other) === 0);  
     }
     
     set(byteArray: ByteArray, offset = 0): void {
       __array16Copy(byteArray, this, offset);
-      //self.__str__ = null;
     }
 
     inspect() {
