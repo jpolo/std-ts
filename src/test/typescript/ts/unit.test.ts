@@ -2,6 +2,7 @@ import unit = require("../../../main/typescript/ts/unit")
 import test = unit.test
 import TestEngine = unit.TestEngine
 import Assert = unit.Assert
+import unitAllTest = require("./unit/_all.test")
 
 var AssertSuite = unit.suite("ts/unit.Assert", (self) => {
   var engine = new TestEngine()
@@ -200,5 +201,5 @@ var TestEngineSuite = unit.suite("ts/unit.TestEngine", (self) => {
   })
 });
 
-var exportSuite = AssertSuite.concat(TestEngineSuite);
+var exportSuite = unitAllTest.concat(AssertSuite, TestEngineSuite);
 export = exportSuite;

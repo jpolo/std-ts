@@ -15,39 +15,53 @@ module generator {
     return __log(n) / LN2;
   };
   var __paramRand = function (params: Params, min: number, max: number): number {
-    return __floor(params.random() * (max - min + 1) + min);
+    return __floor(params.random() * (max - min)) + min;
   };
   var __paramLogSize = function (params: Params) {
     var r = __round(__log2(params.size + 1));
     return r >= 0 ? r : 0;
   };
+  var __paramsDefault = function (p: Params) {
+    var returnValue = { size: 10, random: Math.random };
+    var random = p.random;
+    var size = p.size;
+    if (size !== undefined) {
+      returnValue.size = size;
+    }
+    if (random !== undefined) {
+      returnValue.random = random;
+    }
+    return returnValue;
+  };
   
   //helper
   type Params = {
-    size: number
-    random: () => number
+    size?: number
+    random?: () => number
   }
   
   interface IGenerator<Result> {
     (params: Params): Result 
   }
   
-  function constant<T>(k: T): IGenerator<T> {
+  export function constant<T>(k: T): IGenerator<T> {
     return function () {
       return k;
     };
   }
   
-  function oneOf<T>(generators: IGenerator<T>[]): IGenerator<T> {
+  export function oneOf<T>(generators: IGenerator<T>[]): IGenerator<T> {
     var l = generators.length;
     return function (params: Params) {
+      params = __paramsDefault(params);
       var index = __paramRand(params, 0, l);
       return generators[index](params);
     };
   }
   
-  function array<T>(generator: IGenerator<T>): IGenerator<T[]> {
+  export function array<T>(generator: IGenerator<T>): IGenerator<T[]> {
     return function (params: Params) {
+      params = __paramsDefault(params);
       var length = __paramRand(params, 0, __paramLogSize(params));
       var returnValue: T[] = new Array(length);
       for (var i = 0; i < length; i++) {
@@ -71,6 +85,7 @@ module generator {
     }
     
     return function (params: Params) {
+      params = __paramsDefault(params);
       return rec(__paramLogSize(params), params);
     };
   }
@@ -83,6 +98,7 @@ module generator {
     var length = generators.length;
     
     return function (params: Params) {
+      params = __paramsDefault(params);
       var returnValue: any[] = new Array(length);
       for (var i = 0; i < length; i++) {
         returnValue[i] = generators[i](params);
