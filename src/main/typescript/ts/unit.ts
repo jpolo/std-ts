@@ -237,13 +237,6 @@ module unit {
       return __format(this.type, this.message);
     }
 
-    toJSON() {
-      return {
-        type: this.type,
-        message: this.message
-      };
-    }
-
     toString() {
       return this.inspect()
     }

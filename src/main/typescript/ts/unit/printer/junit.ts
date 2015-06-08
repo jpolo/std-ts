@@ -6,7 +6,7 @@ module junit {
   export class JUnitPrinter implements unit.IPrinter {
     
     print(reports: unit.ITestReport[]) {
-      
+      //TODO
     }
     
   }

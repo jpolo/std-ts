@@ -7,7 +7,6 @@ import IHashState = hash.IHashState
 module semver {
   
   //Util
-  var __isUndefined = function (o: any) { return typeof o === "undefined"; };
   var __str = function (o) { return "" + o; };
 
   export interface ISemVer {
@@ -219,9 +218,9 @@ module semver {
     var i = 0;
     do {
       var av = apre[i];
-      var avundef = __isUndefined(av);
+      var avundef = av === undefined;
       var bv = bpre[i];
-      var bvundef = __isUndefined(bv);
+      var bvundef = bv === undefined;
       
       if (avundef && bvundef) {
         return 0;

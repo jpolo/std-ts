@@ -129,6 +129,20 @@ module uuid {
     length = LENGTH;
     [i: number]: number;
     
+    static cast(o: any): UUID {
+      var id: UUID = null;
+      if (o) {
+        if (o instanceof UUID) {
+          id = o;
+        } else if (typeof o === "string") {
+          id = UUID.parse(o);
+        } else {
+          
+        }
+      }
+      return id;
+    }
+    
     static compare(a: UUID, b: UUID): number {
       return __array16Compare(a, b);
     }
@@ -161,6 +175,10 @@ module uuid {
       } else {
         __array16Fill(this, 0);  
       }
+    }
+    
+    clone(): UUID {
+      return new UUID(this);  
     }
     
     compare(other: UUID): number {

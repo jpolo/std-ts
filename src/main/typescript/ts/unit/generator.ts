@@ -2,7 +2,7 @@ import iterator = require("ts/iterator");
 import IIterator = iterator.IIterator;
 import IIteratorResult = iterator.IIteratorResult;
 
-module gen {
+module generator {
   
   //Constant
   var LN2 = Math.log(2);
@@ -75,7 +75,7 @@ module gen {
     };
   }
   
-  
+  function tuple<A, B, C, D, E>(generators: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>] ): IGenerator<[A, B, C, D, E]>
   function tuple<A, B, C, D>(generators: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>] ): IGenerator<[A, B, C, D]>
   function tuple<A, B, C>(generators: [IGenerator<A>, IGenerator<B>, IGenerator<C>] ): IGenerator<[A, B, C]>
   function tuple<A, B>(generators: [IGenerator<A>, IGenerator<B>] ): IGenerator<[A, B]>
@@ -92,3 +92,4 @@ module gen {
   }
 
 }
+export = generator;
