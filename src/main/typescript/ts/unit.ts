@@ -7,6 +7,7 @@ import Assertion = assertion.Assertion
 
 module unit {
   var __freeze = reflect.freeze;
+  
 
   export interface IAssertion extends assertion.IAssertion {}
 

@@ -1,9 +1,10 @@
 import boot = require("./_boot.test")
 import assertion = require("../../../../main/typescript/ts/unit/assertion")
-import stacktrace = require("../../../../main/typescript/ts/stacktrace")
 
 var assertionSuite = boot.test("ts/unit/assertion", (assert) => {
   
+  var assertionType = "SUCCESS";
+  var message = "my message";
   var position: assertion.IAssertionCallSite = {
     getThis() { return null; },
     getTypeName() { return ""; },
@@ -21,13 +22,12 @@ var assertionSuite = boot.test("ts/unit/assertion", (assert) => {
     getArguments() { return []; }, // {[key: number]: any; length: number}
     toString() { return ""; }
   };
-  var a = new assertion.Assertion("TOTO", null, "my message", position, "my stack");
+  var a = new assertion.Assertion(assertionType, null, message, position, "my stack");
   
-  assert(a.type === "TOTO", "assertion.type error")
-  assert(a.test ===  null, "assertion.test error")
-  assert(a.message === "my message", "assertion.message error")
-  assert(a.position === position, "assertion.position error")  
+  assert(a.type === assertionType, "assertion.type failure")
+  assert(a.test ===  null, "assertion.test failure")
+  assert(a.message === message, "assertion.message failure")
+  assert(a.position === position, "assertion.position failure")  
   
 });
-var exportSuite = assertionSuite;
-export = exportSuite;
+export = assertionSuite;
