@@ -5,15 +5,13 @@ module boot {
   
   export function test(name: string, f: (assert: AssertFn) => void) {
     function assert(condition: boolean, message?: string) {
-      if (message === undefined) {
-        message = name + ": Assertion Failed"
-      }
+      var fullmessage = "[" + name + "] " + (message || " assertion failed");
       
       if (!condition) {
         if (typeof console !== "undefined") {
-          console.error(message);
+          console.error(fullmessage);
         } else {
-          throw new Error(message);
+          throw new Error(fullmessage);
         }
       }
     }

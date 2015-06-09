@@ -2,12 +2,11 @@ import boot = require("./_boot.test")
 import engine = require("../../../../main/typescript/ts/unit/engine")
 import Engine = engine.Engine
 
-var engineSuite = boot.test("ts/unit/engine", (assert) => {
-  var path = "ts/unit/engine.Engine";
+var engineSuite = boot.test("ts/unit/engine.Engine", (assert) => {
   var engine = new Engine()
   
   //#testEquals()
-  var message = path + "#testEquals() failure";
+  var message = "#testEquals() failure";
   assert(engine.testEquals(1, 1), message)
   assert(engine.testEquals(false, 0), message)
   assert(!engine.testEquals(0, 1), message)
@@ -16,7 +15,7 @@ var engineSuite = boot.test("ts/unit/engine", (assert) => {
 
 
   //#testEqualsStrict()
-  message = path + "#testEqualsStrict() failure";
+  message = "#testEqualsStrict() failure";
   assert(engine.testEqualsStrict(1, 1), message)
   assert(engine.testEqualsStrict(NaN, NaN), message)
   assert(!engine.testEqualsStrict(false, 0), message)
@@ -36,7 +35,7 @@ var engineSuite = boot.test("ts/unit/engine", (assert) => {
   */
     
   //#testEqualDeep()
-  message = path + "#testEqualDeep() failure";
+  message = "#testEqualDeep() failure";
   assert(engine.testEqualsDeep([0, 1], [0, 1]), message)
   assert(engine.testEqualsDeep([0, ["a", "b"]], [0, ["a", "b"]]), message)
   assert(engine.testEqualsDeep([NaN, NaN], [NaN, NaN]))
@@ -46,7 +45,7 @@ var engineSuite = boot.test("ts/unit/engine", (assert) => {
   assert(!engine.testEqualsDeep(["1"], [1]), message)
 
   //#dump()
-  message = path + "#testEqualDeep() failure";
+  message = "#testEqualDeep() failure";
   //primitives
   assert(engine.dump(null) === 'null', message)
   assert(engine.dump(undefined) === 'undefined', message)

@@ -1,7 +1,6 @@
 import inspect = require("ts/inspect")
 import reflect = require("ts/reflect")
 import stacktrace = require("ts/stacktrace")
-import Inspector = inspect.Inspector
 import assertion = require("./unit/assertion")
 import IAssertionCallSite = assertion.IAssertionCallSite
 import Assertion = assertion.Assertion
@@ -36,7 +35,7 @@ module unit {
   export interface ITestEngine {
     callstack(): IAssertionCallSite[]
     dump(o: any): string
-    currentTime(): number
+    now(): number
     run(testCases: ITest[], params: ITestParams, handlers: ITestHandlers): void
     testEquals(actual: any, expected: any): boolean
     testEqualsStrict(actual: any, expected: any): boolean
@@ -101,14 +100,14 @@ module unit {
     run(engine: ITestEngine, params: ITestParams, complete: (report: ITestReport) => void) {
       var blocks = this.blocks
       var blockc = blocks.length
+      var startTime  = engine.now()
       var assertions: IAssertion[] = []
       var report: ITestReport = {
-        startDate: new Date(engine.currentTime()),
+        startDate: new Date(startTime),
         elapsedMilliseconds: NaN,
         assertions: assertions
       }
 
-      var startTime  = engine.currentTime()
       var timeoutMs = params.timeout || Infinity;//no timeout
 
 
@@ -116,7 +115,7 @@ module unit {
       var onBlockComplete = () => {
         if (--blockc === 0) {
           //finalize report
-          report.elapsedMilliseconds = engine.currentTime() - startTime
+          report.elapsedMilliseconds = engine.now() - startTime
           __freeze(report)
           __freeze(assertions)
 

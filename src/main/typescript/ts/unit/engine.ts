@@ -182,7 +182,7 @@ module engine {
       return this.$inspect.stringify(o);
     }
 
-    currentTime(): number {
+    now(): number {
       return this.$time.now()
     }
 

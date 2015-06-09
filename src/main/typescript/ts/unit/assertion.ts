@@ -21,20 +21,20 @@ module assertion {
   
   export class Assertion implements IAssertion {
 
-    static success(testCase: ITest, message: string, position?: IAssertionCallSite) {
-      return new Assertion(SUCCESS, testCase, message, position)
+    static success(test: ITest, message: string, position?: IAssertionCallSite) {
+      return new Assertion(SUCCESS, test, message, position)
     }
 
-    static failure(testCase: ITest, message: string, position?: IAssertionCallSite) {
-      return new Assertion(FAILURE, testCase, message, position)
+    static failure(test: ITest, message: string, position?: IAssertionCallSite) {
+      return new Assertion(FAILURE, test, message, position)
     }
 
-    static error(testCase: ITest, message: string, position?: IAssertionCallSite, stack: string = null) {
-      return new Assertion(ERROR, testCase, message, position, stack)
+    static error(test: ITest, message: string, position?: IAssertionCallSite, stack: string = null) {
+      return new Assertion(ERROR, test, message, position, stack)
     }
 
-    static warning(testCase: ITest, message: string, position?: IAssertionCallSite) {
-      return new Assertion(WARNING, testCase, message, position)
+    static warning(test: ITest, message: string, position?: IAssertionCallSite) {
+      return new Assertion(WARNING, test, message, position)
     }
 
     constructor(
