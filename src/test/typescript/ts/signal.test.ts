@@ -1,9 +1,10 @@
-import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test;
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import signal = require("../../../main/typescript/ts/signal")
 
 
-var signalSuite = unit.suite("ts/signal", (self) => {
+var signalSuite = suite("ts/signal", (self) => {
   
   var receiver = {};
   var SIG = signal.signal<string>("data");

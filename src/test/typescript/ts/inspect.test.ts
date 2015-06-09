@@ -1,5 +1,6 @@
-import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import inspect = require("../../../main/typescript/ts/inspect")
 import Inspector = inspect.Inspector
 
@@ -11,7 +12,7 @@ class TestClass {
   
 }
 
-var inspectSuite = unit.suite("ts/inspect", (self) => {
+var inspectSuite = suite("ts/inspect", (self) => {
   
   test(".isIInspect()", (assert) => {
     assert.ok(!inspect.isIInspect(undefined))
@@ -22,7 +23,7 @@ var inspectSuite = unit.suite("ts/inspect", (self) => {
   
 })
 
-var InspectorSuite = unit.suite("ts/inspect.Inspector", (self) => {
+var InspectorSuite = suite("ts/inspect.Inspector", (self) => {
   function inspectResults<T>(...args: Array<{ 0: T; 1: string; }>) {
     return args;
   }

@@ -1,8 +1,9 @@
-import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import yaml = require("../../../main/typescript/ts/yaml")
 
-var yamlSuite = unit.suite("ts/yaml", (self) => {
+var yamlSuite = suite("ts/yaml", (self) => {
   
   test(".parse()", (assert) => {
     //Boolean

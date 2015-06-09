@@ -1,9 +1,10 @@
-import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import stacktrace = require("../../../main/typescript/ts/stacktrace")
 import ICallSite = stacktrace.ICallSite;
 
-var stacktraceSuite = unit.suite("ts/stacktrace", (self) => {
+var stacktraceSuite = suite("ts/stacktrace", (self) => {
   var FILENAME = "stacktrace.test.js";
   var DATA = {
     error: null,

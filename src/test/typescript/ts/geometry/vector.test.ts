@@ -1,5 +1,6 @@
-import unit = require("../../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import vector2 = require("../../../../main/typescript/ts/geometry/vector2")
 import vector3 = require("../../../../main/typescript/ts/geometry/vector3")
 import vector4 = require("../../../../main/typescript/ts/geometry/vector4")
@@ -19,7 +20,7 @@ interface VectorModule<T> {
   subtract(a: T, b: T, dest?: T): T
 }
 
-class Assert extends unit.Assert {
+class Assert extends qunit.Assert {
   
   equalsVector(a: number[], b: number[], epsilon?: number) {
     var position = this.__position__();
@@ -28,7 +29,7 @@ class Assert extends unit.Assert {
     var length = a.length;
     
     if (length === b.length) {
-      
+      //TODO
     } else {
       isSuccess = false;  
       message = this.__dump__(a) + " and " + this.__dump__(b) + " must have same length";
@@ -68,7 +69,7 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
     }
   }
   
-  return unit.suite(n, (self) => {
+  return suite(n, (self) => {
     
     test('.add(a, b)', (assert) => {
       gen(() => {

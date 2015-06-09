@@ -1,10 +1,11 @@
-import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import iterator = require("../../../main/typescript/ts/iterator")
 
-var iteratorSuite = unit.suite("ts/iterator", (self) => {
+var iteratorSuite = suite("ts/iterator", (self) => {
 
-  function generate<T>(assert: unit.Assert, iter: iterator.IIterator<T>, a: T[], limit = 30) {
+  function generate<T>(assert: qunit.Assert, iter: iterator.IIterator<T>, a: T[], limit = 30) {
     for (var i = 0; i < limit; ++i) {
       var r = iter.next();
       if (i < a.length) {

@@ -1,6 +1,6 @@
-import unit = require("../../../../main/typescript/ts/unit")
-import test = unit.test;
-import suite = unit.suite;
+import qunit = require("../../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import generator = require("../../../../main/typescript/ts/unit/generator")
 
 var generatorSuite = suite("ts/unit/generator", (self) => {

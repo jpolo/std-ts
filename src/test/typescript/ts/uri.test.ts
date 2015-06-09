@@ -1,9 +1,10 @@
-import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import uri = require("../../../main/typescript/ts/uri")
 import URI = uri.URI
 
-var uriSuite = unit.suite("ts/uri", (self) => {
+var uriSuite = suite("ts/uri", (self) => {
   var uriDefault = uri.parse('http://localhost:8080/titi/tata?q=blah#id') 
   
   
@@ -21,7 +22,7 @@ var uriSuite = unit.suite("ts/uri", (self) => {
   
 })
 
-var URISuite = unit.suite("ts/uri.URI", (self) => {
+var URISuite = suite("ts/uri.URI", (self) => {
   
   var uriDefault: URI;
   

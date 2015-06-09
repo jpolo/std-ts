@@ -1,5 +1,6 @@
-import unit = require("../../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import matrix2 = require("../../../../main/typescript/ts/geometry/matrix2")
 import matrix3 = require("../../../../main/typescript/ts/geometry/matrix3")
 import matrix4 = require("../../../../main/typescript/ts/geometry/matrix4")
@@ -47,7 +48,7 @@ function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number)
     }
   }
   
-  return unit.suite(n, (self) => {
+  return suite(n, (self) => {
     
     test(".identity()", (assert) => {
       gen(() => {

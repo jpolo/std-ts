@@ -1,10 +1,13 @@
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
+import Assert = qunit.Assert
 import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test
-import TestEngine = unit.TestEngine
-import Assert = unit.Assert
+import engine = require("../../../main/typescript/ts/unit/engine")
+import TestEngine = engine.Engine
 import unitAllTest = require("./unit/_all.test")
 
-var AssertSuite = unit.suite("ts/unit.Assert", (self) => {
+var AssertSuite = suite("ts/unit.Assert", (self) => {
   var engine = new TestEngine()
   var testCaseMock: unit.ITest
   var reportMock: unit.ITestReport
@@ -138,68 +141,7 @@ var AssertSuite = unit.suite("ts/unit.Assert", (self) => {
 
 })
 
-var TestEngineSuite = unit.suite("ts/unit.TestEngine", (self) => {
-  var engine = new TestEngine()
 
 
-  test("#testEquals()", (assert) => {
-    assert.ok(engine.testEquals(1, 1))
-    assert.ok(engine.testEquals(false, 0))
-    assert.ok(!engine.testEquals(0, 1))
-    assert.ok(!engine.testEquals([0], [0]))
-    assert.ok(engine.testEquals("1", 1))
-  })
-
-  test("#testEqualStrict()", (assert) => {
-    assert.ok(engine.testEqualsStrict(1, 1))
-    assert.ok(engine.testEqualsStrict(NaN, NaN))
-    assert.ok(!engine.testEqualsStrict(false, 0))
-    assert.ok(!engine.testEqualsStrict(0, 1))
-    assert.ok(!engine.testEqualsStrict([0], [0]))
-    assert.ok(!engine.testEqualsStrict("1", 1))
-  })
-
-  test("#testEqualNear()", (assert) => {
-    assert.ok(engine.testEqualsNear(1, 1))
-    assert.ok(engine.testEqualsNear(1, 1.1, 0.11));
-    assert.ok(!engine.testEqualsNear(1.1, 1))
-    assert.ok(!engine.testEqualsNear(false, 0))
-    assert.ok(!engine.testEqualsNear(0, 1))
-    assert.ok(!engine.testEqualsNear("1", 1))
-  })
-    
-  test("#testEqualDeep()", (assert) => {
-    assert.ok(engine.testEqualsDeep([0, 1], [0, 1]))
-    assert.ok(engine.testEqualsDeep([0, ["a", "b"]], [0, ["a", "b"]]))
-    assert.ok(engine.testEqualsDeep([NaN, NaN], [NaN, NaN]))
-    assert.ok(engine.testEqualsDeep({ foo: 1, bar: 2 }, { foo: 1, bar: 2 }))
-    assert.ok(!engine.testEqualsDeep({ foo: 1, bar: 2 }, { foo: 1 }))
-    assert.ok(!engine.testEqualsDeep([false], [0]))
-    assert.ok(!engine.testEqualsDeep(["1"], [1]))
-  })
-
-  test("#dump()", (assert) => {
-    //primitives
-    assert.ok(engine.dump(null) === 'null')
-    assert.ok(engine.dump(undefined) === 'undefined')
-    assert.ok(engine.dump(true) === 'true')
-    assert.ok(engine.dump(false) === 'false')
-    assert.ok(engine.dump(1) === '1')
-    assert.ok(engine.dump("abc") === '"abc"')
-    assert.ok(engine.dump('ab"c') === '"ab\\"c"')
-
-    //array
-    assert.ok(engine.dump(['abc', 1, true]) === '["abc", 1, true]')
-    assert.ok(engine.dump([1, 2, 3, 4, 5, 6, 7, 8]) === '[1, 2, 3, 4, 5, 6, 7, ...]')
-
-    //date
-    assert.ok(engine.dump(new Date('1789-07-14T00:00:00.000Z')) === 'Date { 1789-07-14T00:00:00.000Z }')
-
-    //regexp
-    assert.ok(engine.dump(/abc(.*)/gi) === '/abc(.*)/gi')
-    
-  })
-});
-
-var exportSuite = unitAllTest.concat(AssertSuite, TestEngineSuite);
+var exportSuite = unitAllTest.concat(AssertSuite);
 export = exportSuite;

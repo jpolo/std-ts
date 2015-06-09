@@ -1,5 +1,6 @@
-import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import log = require("../../../main/typescript/ts/log")
 import ILevel = log.ILevel
 import IMessage = log.IMessage
@@ -8,7 +9,7 @@ import Dispatcher = log.Dispatcher
 import Message = log.Message
 
 
-var logSuite = unit.suite("ts/log", (self) => {
+var logSuite = suite("ts/log", (self) => {
   var ng: Dispatcher
   var logger: Logger
   var logs: log.IMessage[]
@@ -35,7 +36,7 @@ var logSuite = unit.suite("ts/log", (self) => {
 
 })
 
-var MessageSuite = unit.suite("ts/log.Message", (self) => {
+var MessageSuite = suite("ts/log.Message", (self) => {
   
   test("#constructor()", (assert) => {
     var m = new Message(log.DEBUG, "mygroup", ["mymessage"]);
@@ -65,7 +66,7 @@ var MessageSuite = unit.suite("ts/log.Message", (self) => {
   
 })
 
-var LevelSuite = unit.suite("ts/log.Level", () => {
+var LevelSuite = suite("ts/log.Level", () => {
   var PRIVATE_KEY = log.Level['_constructorKey'];
   var DEBUG = log.DEBUG;
   var INFO = log.INFO;
@@ -119,7 +120,7 @@ var LevelSuite = unit.suite("ts/log.Level", () => {
   })
 })
 
-var LoggerSuite = unit.suite("ts/log.Logger", (self) => {
+var LoggerSuite = suite("ts/log.Logger", (self) => {
   //mock engine
   var logger: Logger;
   var logs: IMessage[] = [];

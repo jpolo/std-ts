@@ -37,7 +37,7 @@ module compare {
         }
     }
     return returnValue;
-  }
+  };
   
   export enum Ordering {
     Less = -1,

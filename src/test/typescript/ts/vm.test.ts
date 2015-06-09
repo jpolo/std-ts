@@ -1,6 +1,6 @@
-import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import vm = require("../../../main/typescript/ts/vm")
 
 var vmSuite = suite("ts/vm", (self) => {

@@ -1,12 +1,12 @@
-import unit = require("../../../main/typescript/ts/unit")
-import suite = unit.suite
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import math = require("../../../main/typescript/ts/math")
 
 var mathSuite = suite("ts/math", (self) => {
   
   function generate<Input, Return>(
-    assert: unit.Assert, 
+    assert: qunit.Assert, 
     d: Array<[Input, Return]>,
     f: (v: Input) => Return,
     methodName: string

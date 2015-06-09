@@ -1,5 +1,6 @@
-import unit = require("../../../main/typescript/ts/unit")
-import test = unit.test
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import reflect = require("../../../main/typescript/ts/reflect")
 
 class Parent {
@@ -11,7 +12,7 @@ class Child extends Parent {
   childMethod() {}
 }
 
-var reflectSuite = unit.suite("ts/reflect", () => {
+var reflectSuite = suite("ts/reflect", () => {
   var parentObj = new Parent()
   var childObj = new Child()
   

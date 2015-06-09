@@ -1,5 +1,6 @@
-import unit = require("../../../main/typescript/ts/unit");
-import test = unit.test;
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import error = require("../../../main/typescript/ts/error");
 import BaseError = error.BaseError;
 
@@ -12,7 +13,7 @@ class ChildURIError extends error.URIError {}
 class ChildBaseError extends BaseError {}
 class GrandChildBaseError extends ChildBaseError {}
 
-var ErrorSuite = unit.suite("ts/error.Error", (self) => {
+var ErrorSuite = suite("ts/error.Error", (self) => {
 
   test("<extends>", (assert) => {
     var err = new ChildError("my message");
@@ -28,7 +29,7 @@ var ErrorSuite = unit.suite("ts/error.Error", (self) => {
   
 })
 
-var EvalErrorSuite = unit.suite("ts/error.EvalError", (self) => {
+var EvalErrorSuite = suite("ts/error.EvalError", (self) => {
 
   test("<extends>", (assert) => {
     var err = new ChildEvalError("my message");
@@ -45,7 +46,7 @@ var EvalErrorSuite = unit.suite("ts/error.EvalError", (self) => {
   
 })
 
-var RangeErrorSuite = unit.suite("ts/error.RangeError", (self) => {
+var RangeErrorSuite = suite("ts/error.RangeError", (self) => {
 
   test("<extends>", (assert) => {
     var err = new ChildRangeError("my message");
@@ -62,7 +63,7 @@ var RangeErrorSuite = unit.suite("ts/error.RangeError", (self) => {
   
 })
 
-var ReferenceErrorSuite = unit.suite("ts/error.ReferenceError", (self) => {
+var ReferenceErrorSuite = suite("ts/error.ReferenceError", (self) => {
 
   test("<extends>", (assert) => {
     var err = new ChildReferenceError("my message");
@@ -79,7 +80,7 @@ var ReferenceErrorSuite = unit.suite("ts/error.ReferenceError", (self) => {
   
 })
 
-var TypeErrorSuite = unit.suite("ts/error.TypeError", (self) => {
+var TypeErrorSuite = suite("ts/error.TypeError", (self) => {
 
   test("<extends>", (assert) => {
     var err = new ChildTypeError("my message");
@@ -96,7 +97,7 @@ var TypeErrorSuite = unit.suite("ts/error.TypeError", (self) => {
   
 })
 
-var URIErrorSuite = unit.suite("ts/error.URIError", (self) => {
+var URIErrorSuite = suite("ts/error.URIError", (self) => {
   
   test("<extends>", (assert) => {
     var err = new ChildURIError("my message");
@@ -113,7 +114,7 @@ var URIErrorSuite = unit.suite("ts/error.URIError", (self) => {
   
 })
 
-var BaseErrorSuite = unit.suite("ts/error.BaseError", (self) => {
+var BaseErrorSuite = suite("ts/error.BaseError", (self) => {
   
   test("<extends>", (assert) => {
     var err = new ChildBaseError("my message");

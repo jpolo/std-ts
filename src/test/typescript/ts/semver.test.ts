@@ -1,10 +1,11 @@
-import unit = require("../../../main/typescript/ts/unit")
+import qunit = require("../../../main/typescript/ts/unit/qunit")
+import suite = qunit.suite
+import test = qunit.test
 import semver = require("../../../main/typescript/ts/semver")
 import ISemVer = semver.ISemVer
 import SemVer = semver.SemVer
 
-var semverSuite = unit.suite("ts/semver.SemVer", (self) => {
-  var test = unit.test;//unit.testc()
+var semverSuite = suite("ts/semver.SemVer", (self) => {
 
   test('.parse()', (assert) => {
     ['1.2.3.4',
