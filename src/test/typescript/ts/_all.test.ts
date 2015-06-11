@@ -16,6 +16,7 @@ import reflectSuite = require("./reflect.test")
 import semverSuite = require("./semver.test")
 import signalSuite = require("./signal.test")
 import stacktraceSuite = require("./stacktrace.test")
+import storageSuite = require("./storage/_all.test")
 import timerSuite = require("./timer.test")
 import unitSuite = require("./unit.test")
 import uriSuite = require("./uri.test")
@@ -40,6 +41,7 @@ var exportSuite: unit.ITest[] = [].concat(
   semverSuite,
   signalSuite,
   stacktraceSuite,
+  storageSuite,
   timerSuite,
   unitSuite,
   uriSuite,
