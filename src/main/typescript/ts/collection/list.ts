@@ -1,10 +1,11 @@
 module list {
-  
+  /*
   export interface IList<T> {
     isEmpty(): boolean
     head: T
     tail: IList<T>
   }
+  */
 
   
   interface INode<T> {
@@ -20,9 +21,42 @@ module list {
       next: null
     };
   };
-  var __nodeConnect = function <T>(l: INode<T>, r: INode<T>) {
+  var __nodeConnect = function <T>(list: List<T>, l: INode<T>, r: INode<T>) {
     l.next = r;
     r.previous = l;
+  };
+  var __nodeDisconnect = function <T>(list: List<T>, node: INode<T>) {
+    if (node === node.next) {
+      (<any>list)._head = null;
+    } else {
+      __nodeConnect(list, node.previous, node.next);
+    }
+  };
+  var __nodeEnqueueValues = function <T>(l: List<T>, values: T[]) {
+    var list = <any>l;
+    var head = list._head;
+    var valuec = values.length;
+    var node: INode<T>;
+    var lastNode: INode<T>;
+    if (valuec >= 1) {
+      node = __node(values[0]);
+      lastNode = node;
+      if (!head) {
+        head = list._head = node.previous = node.next = node;
+      } else {
+        __nodeConnect(list, head.previous, node);
+        //__nodeConnect(list, node, head);
+      }
+    }
+    
+    if (valuec >= 2) {
+      for (var i = 1; i < valuec; i++) {
+        node = __node(values[i]);
+        __nodeConnect(list, lastNode, node);
+      }
+    }
+    __nodeConnect(list, node, head);
+    list._length += valuec;
   };
 
   class List<T> {
@@ -30,29 +64,28 @@ module list {
     //static isList() {}
     
     protected _length: number = 0;
-    protected _head: INode<T>;
+    protected _head: INode<T> = null;
     
     constructor() {
       
     }
     
-    push(v: T): void {
-      var head = this._head;
-      var node = __node(v);
-      
-      if (!head) {
-        head = this._head = node.previous = node.next = node;  
-      } else {
-        __nodeConnect(head.previous, node);
-        __nodeConnect(node, head);
-      }
-      this._length += 1;
+    get length() {
+      return this._length;
+    }
+    
+    push(values: T[]): number {
+      __nodeEnqueueValues(this, values);
+      return this._length;
     }
     
     pop(): T {
       var returnValue: T;
-      if (this._length > 0) {
-        
+      var head = this._head;
+      if (head !== null) {
+        var last = head.previous;
+        returnValue = last.value;
+        __nodeDisconnect(this, last);
         this._length -= 1;
       }
       return returnValue;
@@ -60,30 +93,24 @@ module list {
     
     shift(): T {
       var returnValue: T;
-      if (this._length > 0) {
-        
+      var head = this._head;
+      if (head !== null) {
+        returnValue = head.value;
+        __nodeDisconnect(this, head);
         this._length -= 1;
       }
       return returnValue;
     }
     
-    unshift(v: T) {
+    unshift(values: T[]): number {
       var head = this._head;
-      var node = __node(v);
-      
-      if (!head) {
-        head = this._head = node.previous = node.next = node;  
-      } else {
-        __nodeConnect(node, head.next);
-        __nodeConnect(node, head);
+      var lastNode = head && head.previous;
+      __nodeEnqueueValues(this, values);
+      if (lastNode) {
+        this._head = lastNode.next;
       }
-      this._length += 1;
+      return this._length;
     }
-    
-    
-    
-    
-    
   }
   
 }
