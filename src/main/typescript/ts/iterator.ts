@@ -9,11 +9,11 @@ module iterator {
     done: boolean;
   }
   
-  function $iteratorFactory<T>(next: () => IIteratorResult<T>, hint?): IIterator<T> {
+  function $iteratorFactory<T>(next: () => IIteratorResult<T>, hint?) {
     return new Iterator(next, hint);  
   }
   
-  function $iteratorResultFactory<T>(done: boolean, value?: T): IIteratorResult<T> {
+  function $iteratorResultFactory<T>(done: boolean, value: T) {
     return { done: done, value: value };  
   }
   
@@ -28,17 +28,23 @@ module iterator {
     }
   }
   
-  var EMPTY = $iteratorFactory(function () { return $iteratorResultFactory(true); }, "empty");
+  var EMPTY: Iterator<any> = $iteratorFactory(function () { 
+    return $iteratorResultFactory(true, undefined); 
+  }, "empty");
   
   export function isIIterator(o: any): boolean {
     return !!o && typeof o.next === "function";
   }
   
-  export function empty(): IIterator<any> {
+  export function result<T>(value?: T) {
+    return { done: arguments.length > 0, value: value };  
+  }
+  
+  export function empty(): Iterator<any> {
     return EMPTY;
   }
   
-  export function single<T>(v: T): IIterator<T> {
+  export function single<T>(v: T): Iterator<T> {
     var done = false;
     var value = v;
     return $iteratorFactory(function () {
@@ -51,7 +57,7 @@ module iterator {
     }, "single");
   }
   
-  export function fill<T>(length: number, v: T): IIterator<T> {
+  export function fill<T>(length: number, v: T): Iterator<T> {
     var i = 0;
     var done = false;
     var value = v;
@@ -66,7 +72,7 @@ module iterator {
     });  
   }
   
-  export function iterate<T>(start: T, f: (v: T) => T): IIterator<T> {
+  export function iterate<T>(start: T, f: (v: T) => T): Iterator<T> {
     var first = true;
     var acc: T;
     
@@ -81,7 +87,7 @@ module iterator {
     }, "iterate");
   }
   
-  export function range(start: number, end: number, step = 1): IIterator<number> {
+  export function range(start: number, end: number, step = 1): Iterator<number> {
     var index = start;
     var done = false;
     return $iteratorFactory(function () {
@@ -96,13 +102,13 @@ module iterator {
     }, "[" + start + "," + end + ")");
   }
   
-  export function continually<T>(v: T): IIterator<T> {
+  export function continually<T>(v: T): Iterator<T> {
     return $iteratorFactory(function () {
       return $iteratorResultFactory(false, v);
     }, "continue");
   }
   
-  export function concat<T>(...args: IIterator<T>[]): IIterator<T> {
+  export function concat<T>(...args: IIterator<T>[]): Iterator<T> {
     var argi = 0;
     var argc = args.length;
     var current = args[argi];
