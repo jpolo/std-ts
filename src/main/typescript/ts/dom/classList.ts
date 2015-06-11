@@ -1,9 +1,10 @@
 module classList {
   
+  //Util
   var divElement = document.createElement("div");
   var hasClassList = "classList" in divElement;
 
-  var TokenError: any = DOMException || TypeError;
+  var TokenError: any = /*DOMException || */TypeError;
   var __keys = Object.keys;
   var __indexed = function (a: string[]|DOMTokenList) {
     var returnValue: {[k: string]: boolean} = {};
@@ -20,30 +21,31 @@ module classList {
     }
     return token;
   };
-  var __classListGet = hasClassList ?
-    function (element: HTMLElement): string[] {
-      return <any> element.classList;
-    } :
-    function (element: HTMLElement): string[] {
-      return element.className.split(/\s+/);
-    };
+  var __classListGet = function (element: HTMLElement): string[] {
+    return element.className.split(/\s+/);
+  };
   var __classListSet = function (element: HTMLElement, classNames: string[]) {
     element.className = classNames.join(" ");
   };
-  var __classListContains = hasClassList ?
-    function (element: HTMLElement, className: string): boolean {
-      return typeof className === "string" && element.classList.contains(className);
-    } :
-    function (element: HTMLElement, className: string): boolean {
+  var __classListContains = function (element: HTMLElement, className: string): boolean {
+    return typeof className === "string" && element.classList.contains(className);
+  };
+  var __classListAdd = function (element: HTMLElement, className: string) {
+    element.classList.add(className);
+  };
+  var __classListRemove = function (element: HTMLElement, className: string) {
+    element.classList.remove(className);
+  };
+  
+  //Compat
+  if (!hasClassList) {
+    __classListGet = function (element: HTMLElement): string[] {
+      return element.className.split(/\s+/);
+    };
+    __classListContains = function (element: HTMLElement, className: string): boolean {
       return typeof className === "string" && ((" " + element.className + " ").indexOf(" " + className + " ") !== -1);
     };
-
-  var __classListAdd = 
-    hasClassList ?
-    function (element: HTMLElement, className: string) {
-      element.classList.add(className);
-    } :
-    function (element: HTMLElement, className: string) {
+    __classListAdd = function (element: HTMLElement, className: string) {
       var elementClassName = element.className;
       if (
         typeof className === "string" &&
@@ -52,12 +54,7 @@ module classList {
         element.className += (elementClassName.length ? ' ' : '') + className;
       }
     };
-  
-  var __classListRemove = hasClassList ?
-    function (element: HTMLElement, className: string) {
-      element.classList.remove(className);
-    } :
-    function (element: HTMLElement, className: string) {
+     __classListRemove = function (element: HTMLElement, className: string) {
       var classList = __classListGet(element);
       var i = classList.indexOf(classList[0]);
       if (i !== -1) {
@@ -65,6 +62,7 @@ module classList {
         __classListSet(element, classList);
       }
     };
+  }
   
   export function contains(element: HTMLElement, className: string): boolean {
     return __classListContains(element, className);
@@ -113,9 +111,8 @@ module classList {
   
   export function toggle(element: HTMLElement, className: string, condition?: boolean): boolean {
     __assertToken(className);
-    var contains = __classListContains(element, className);
     if (condition === undefined) {
-      condition = !contains;
+      condition = !__classListContains(element, className);
     }
     (condition ? __classListAdd : __classListRemove)(element, className);
     return condition;
