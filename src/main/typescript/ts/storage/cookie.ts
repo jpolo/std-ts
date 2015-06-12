@@ -16,7 +16,7 @@ var __cookieRead = (function () {
   var __cookiesStr = '';
   var __decode = decodeURIComponent;
   var __read = function () {
-    var cookieArray, cookie, i, index, name;
+    var cookieArray, cookie, index, name;
     var currentCookieString = __document.cookie || '';
 
     if (currentCookieString !== __cookiesStr) {
@@ -24,7 +24,7 @@ var __cookieRead = (function () {
       cookieArray = __cookiesStr.split('; ');
       __cookies = {};
 
-      for (i = 0; i < cookieArray.length; i++) {
+      for (var i = 0, l = cookieArray.length; i < l; i++) {
         cookie = cookieArray[i];
         index = cookie.indexOf('=');
         if (index > 0) { //ignore nameless cookies
@@ -136,8 +136,8 @@ type WriteOptions = {
 
 class CookieStorage implements Storage {
   
-  length = 0;
-  remainingSpace = Infinity;
+  length: number;
+  remainingSpace: number;
   [key: string]: any;
   
   constructor() {

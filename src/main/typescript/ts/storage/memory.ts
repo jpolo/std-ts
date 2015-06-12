@@ -53,7 +53,6 @@ class MemoryStorage implements Storage {
   }
   
   setItem(k: string, v: any): void {
-    
     this[k] = __str(v);
   }
   

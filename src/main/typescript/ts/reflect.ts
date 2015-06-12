@@ -38,7 +38,25 @@ module reflect {
   var __freeze = Object.freeze;
   var __preventExtensions = Object.preventExtensions;
   var __seal = Object.seal;
-  var __typeOf = function (o: any): Type { return o === null ? Type.null : Type[typeof o]; };
+  var __typeOf = function (o: any): string {
+    var t = typeof o;
+    switch (t) {
+    case 'undefined':
+    case 'boolean':
+    case 'number':
+    case 'string': 
+      break;
+    default://object
+      if (o === null)  {
+        t = 'null';
+      } else if (o instanceof __global.Symbol) {
+        t = 'symbol';
+      } else {
+        t = "object";  
+      }
+    }
+    return t;
+  };
   
   //Compat
   if (ES_COMPAT <= 3) {
@@ -85,7 +103,7 @@ module reflect {
   
   
   export enum Type {
-    null, boolean, function, number, string, undefined
+    null, boolean, function, number, string, undefined, symbol
   }
   
   export interface IPropertyDescriptor extends PropertyDescriptor {}
@@ -267,12 +285,12 @@ module reflect {
   export function stringTag(o: any): string {
     var s = '';
     switch(__typeOf(o)) {
-      case Type.null: s = 'Null'; break;
-      case Type.boolean: s = 'Boolean'; break;
-      case Type.function: s = 'Function'; break;
-      case Type.number: s = 'Number'; break;
-      case Type.string: s = 'String'; break;
-      case Type.undefined: s = 'Undefined'; break;
+      case "null": s = 'Null'; break;
+      case "boolean": s = 'Boolean'; break;
+      case "function": s = 'Function'; break;
+      case "number": s = 'Number'; break;
+      case "string": s = 'String'; break;
+      case "undefined": s = 'Undefined'; break;
       default: /*object*/ 
         var c = o.constructor;
         s = c && c.name || __ostring.call(o).slice(8, -1);
@@ -285,7 +303,7 @@ module reflect {
   }
   
   export function typeOf(o: any): Type {
-    return __typeOf(o);  
+    return Type[__typeOf(o)];  
   }
 
 }

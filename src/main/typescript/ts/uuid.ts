@@ -123,7 +123,48 @@ module uuid {
     __hexToUint8[s] = i;
   }
   
+  function isUUID(o: any): boolean {
+    return false;
+  }
+  
+  function getRandomBytes(): number[] {
+    var byteArray = new Array(LENGTH);
+    setRandomBytes(byteArray);
+    return byteArray;
+  }
+  
+  function setRandomBytes(a: ByteArray): void {
+    var randomBytes = __rng();
+    randomBytes[6] = (randomBytes[6] & 0x0f) | 0x40;
+    randomBytes[8] = (randomBytes[8] & 0x3f) | 0x80;
+    //a.length = LENGTH;
+    __array16Copy(randomBytes, a, 0);
+  }
+  
+  function parse(s: string): number[] {
+    var byteArray = new Array(LENGTH);
+    var i = 0;
+    s.toLowerCase().replace(/[0-9a-f]{2}/g, <any>function (oct: string) {
+      if (i < LENGTH) { // Don't overflow!
+        byteArray[i] = __hexToUint8[oct] & 0xff;
+        i += 1;
+      }
+    });
+
+    // Zero out remaining bytes if string was short
+    while (i < LENGTH) {
+      byteArray[i] = 0;
+      i += 1;
+    }
+    return byteArray;
+  }
+  
+  function stringify(a: ByteArray): string {
+    return __array16Stringify(a);
+  }
+  
   export class UUID {
+    BYTES_PER_ELEMENT = 1;
     
     byteLength = LENGTH;
     length = LENGTH;
@@ -155,18 +196,7 @@ module uuid {
     }
     
     static parse(s: string): UUID {
-      var i = 0;
-      s.toLowerCase().replace(/[0-9a-f]{2}/g, <any>function (oct: string) {
-        if (i < LENGTH) { // Don't overflow!
-          __buffer[i++] = __hexToUint8[oct];
-        }
-      });
-
-      // Zero out remaining bytes if string was short
-      while (i < LENGTH) {
-        __buffer[i++] = 0;
-      }
-      return new UUID(__buffer);
+      return new UUID(parse(s));
     }
     
     constructor(byteArray?: ByteArray) {
@@ -187,6 +217,10 @@ module uuid {
     
     equal(other: any): boolean {
       return other && (other instanceof UUID) && (UUID.compare(this, other) === 0);  
+    }
+    
+    get(index: number): number {
+      return this[index];
     }
     
     set(byteArray: ByteArray, offset = 0): void {
