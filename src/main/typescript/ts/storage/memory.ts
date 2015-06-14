@@ -1,3 +1,5 @@
+import storage = require("./storage")
+
 //Constant
 var ES_COMPAT = 3;
 
@@ -6,7 +8,7 @@ var __keys = Object.keys;
 var __str = function (o) { return "" + o; };
 var __defineGetter = Object.defineProperty ?
   function (o, name, getter) {
-    Object.defineProperty(o, name, { get: getter, enumerable: false });
+    Object.defineProperty(o, name, { get: getter, enumerable: false, configurable: true });
   } : null;
 
 //Compat
@@ -28,16 +30,18 @@ if (ES_COMPAT <= 3) {
 
 
 
-class MemoryStorage implements Storage {
+class MemoryStorage implements storage.IStorage {
   
   length: number;
-  remainingSpace: number;
-  [key: string]: any;
-  
+
   constructor() {
     __defineGetter(this, "length", () => {
-      return __keys(this).length;//remove "length" itself
+      return this.size();//remove "length" itself
     });  
+  }
+  
+  isAvailable(): boolean {
+    return true;  
   }
   
   key(i: number): string {
@@ -65,6 +69,10 @@ class MemoryStorage implements Storage {
     for (var i = 0, l = keys.length; i < l; i++) {
       delete this[keys[i]];  
     }
+  }
+  
+  size(): number {
+    return __keys(this).length;//remove "length" itself
   }
 }
 

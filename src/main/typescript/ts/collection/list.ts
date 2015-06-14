@@ -53,13 +53,14 @@ module list {
       for (var i = 1; i < valuec; i++) {
         node = __node(values[i]);
         __nodeConnect(list, lastNode, node);
+        lastNode = node;
       }
     }
-    __nodeConnect(list, node, head);
+    __nodeConnect(list, lastNode, head);
     list._length += valuec;
   };
 
-  class List<T> {
+  export class List<T> {
     
     //static isList() {}
     
@@ -74,7 +75,32 @@ module list {
       return this._length;
     }
     
-    push(values: T[]): number {
+    clear() {
+      this._length = 0;
+      this._head = null;  
+    }
+    
+    item(i: number): T {
+      var returnValue: T;
+      if (i >= 0) {
+        var head = this._head;
+        var current = head;
+        var index = 0;
+        if (current !== null) {
+          do {
+            if (i === index) {
+              returnValue = current.value;
+              break;
+            }
+            index += 1;
+            current = current.next;
+          } while (current !== head) 
+        }
+      }
+      return returnValue;
+    }
+    
+    push(...values: T[]): number {
       __nodeEnqueueValues(this, values);
       return this._length;
     }
@@ -102,7 +128,7 @@ module list {
       return returnValue;
     }
     
-    unshift(values: T[]): number {
+    unshift(...values: T[]): number {
       var head = this._head;
       var lastNode = head && head.previous;
       __nodeEnqueueValues(this, values);
@@ -110,6 +136,21 @@ module list {
         this._head = lastNode.next;
       }
       return this._length;
+    }
+    
+    toString() {
+      var s = "";
+      var head = this._head;
+      var current = head;
+      if (head) {
+        s += " ";
+        s += head.value;
+        while ((current = current.next) !== head) {
+          s += ", " + current.value;
+        }
+        s += " ";
+      }
+      return "List {" + s + "}";
     }
   }
   

@@ -14,36 +14,34 @@ var memorySuite = suite("ts/storage/memory", (self) => {
   
   
   test(".getItem()", (assert) => {
-    assert.strictEqual(memory.getItem("foo"), null);
+    assert.strictEqual(memoryStorage.getItem("foo"), null);
   })
   
   test(".setItem()", (assert) => {
-    assert.strictEqual(memory.getItem("foo"), null);
-    assert.strictEqual(memory.setItem("foo", "bar"), undefined);
-    assert.strictEqual(memory.getItem("foo"), "bar");
-    assert.strictEqual(memory.setItem("foo", "baz"), undefined);
-    assert.strictEqual(memory.getItem("foo"), "baz");
+    assert.strictEqual(memoryStorage.getItem("foo"), null);
+    assert.strictEqual(memoryStorage.setItem("foo", "bar"), undefined);
+    assert.strictEqual(memoryStorage.getItem("foo"), "bar");
+    assert.strictEqual(memoryStorage.setItem("foo", "baz"), undefined);
+    assert.strictEqual(memoryStorage.getItem("foo"), "baz");
      
-    assert.strictEqual(memory.setItem("num", 1), undefined);
-    assert.strictEqual(memory.getItem("num"), "1");
+    assert.strictEqual(memoryStorage.setItem("num", 1), undefined);
+    assert.strictEqual(memoryStorage.getItem("num"), "1");
      
-    assert.strictEqual(memory.setItem("boolean", false), undefined);
-    assert.strictEqual(memory.getItem("boolean"), "false");
+    assert.strictEqual(memoryStorage.setItem("boolean", false), undefined);
+    assert.strictEqual(memoryStorage.getItem("boolean"), "false");
   })
   
   test(".length", (assert) => {
-    
     assert.strictEqual(memoryStorage.length, 0);
-    memory.setItem("foo", "bar");
+    memoryStorage.setItem("foo", "bar");
     assert.strictEqual(memoryStorage.length, 1);
-    memory.setItem("foo", "baz");
+    memoryStorage.setItem("foo", "baz");
     assert.strictEqual(memoryStorage.length, 1);
-    memory.setItem("bar", "bar");
+    memoryStorage.setItem("bar", "bar");
     assert.strictEqual(memoryStorage.length, 2);
     
-    memory.removeItem("bar");
+    memoryStorage.removeItem("bar");
     assert.strictEqual(memoryStorage.length, 1);
-    
   })
 })
 

@@ -2,19 +2,24 @@ type WebStorage = Storage;
 
 module storage {
   
-  interface IStorage {
-    
-  
+  export interface IStorage {
+    clear(): void
+    isAvailable(): boolean
+    key(i: number): string
+    getItem(k: string): string
+    removeItem(k: string): void
+    setItem(k: string, v: string): void
+    size(): number
   }
   
   var TEST_KEY = "__tsStorage" + Math.random();
     
-  class Storage {
+  class Storage implements IStorage {
     
     protected _storage: WebStorage
 
     
-    isAvailable() {
+    isAvailable(): boolean {
       var storage = this._storage;
       var returnValue = false;
       if (storage) {
@@ -32,7 +37,7 @@ module storage {
       return this._storage.key(i);  
     }
     
-    get(k: string): string {
+    getItem(k: string): string {
       var v = this._storage.getItem(k);
       if (typeof v !== "string") {
         throw new Error("InvalidValue");
@@ -40,19 +45,19 @@ module storage {
       return v;
     }
     
-    set(k: string, v: string): void {
+    setItem(k: string, v: string): void {
       this._storage.setItem(k, v);
     }
     
-    remove(k: string) {
+    removeItem(k: string): void {
       this._storage.removeItem(k);  
     }
     
-    size() {
+    size(): number {
       return this._storage.length;  
     }
     
-    clear() {
+    clear(): void {
       this._storage.clear();
     }
   }
@@ -70,11 +75,10 @@ module storage {
       if (index < storage.size()) {
         var key = storage.key(index);
         result.done = false;
-        result.value = storage.get(key);
+        result.value = storage.getItem(key);
       }
       return result;
     }
   }
-    
- 
 }
+export = storage
