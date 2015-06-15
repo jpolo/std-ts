@@ -1,19 +1,22 @@
+import storage = require("./storage")
+import IStorage = storage.IStorage
 import memory = require("./memory")
 
-var __supported = (function () {
+var __storage = typeof sessionStorage !== "undefined" ? sessionStorage : null;
+var __check = function (storage: Storage) {
   var testKey = 'storageTest' + Math.random();
-  var storage;
   var returnValue = false;
   try {
     //Safari in private mode can throw error
-    sessionStorage.setItem(testKey, "1");
-    sessionStorage.removeItem(testKey);
+    storage.setItem(testKey, "1");
+    storage.removeItem(testKey);
     returnValue = true;
   } catch (e) {
   }
   return returnValue;
-}());
+};
+var __supported = __check(__storage);
 
 var MemoryStorage: any = memory.constructor;
-var storage = __supported ? sessionStorage : new MemoryStorage();
-export = storage;
+var __storageImpl: IStorage = __supported ? __storage : new MemoryStorage();
+export = sessionStorage;

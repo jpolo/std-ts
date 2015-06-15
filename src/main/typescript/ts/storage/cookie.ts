@@ -1,3 +1,6 @@
+import storage = require("./storage")
+import IStorage = storage.IStorage
+
 //Constant
 var ES_COMPAT = 3;
 
@@ -134,16 +137,18 @@ type WriteOptions = {
   secure?: boolean
 }
 
-class CookieStorage implements Storage {
+class CookieStorage implements IStorage {
   
   length: number;
-  remainingSpace: number;
-  [key: string]: any;
   
   constructor() {
     __defineGetter(this, "length", () => {
-      return __keys(__cookieRead()).length;
+      return this.size();
     });  
+  }
+  
+  isAvailable(): boolean {
+    return true;  
   }
   
   key(index: number): string {
@@ -172,6 +177,10 @@ class CookieStorage implements Storage {
   
   clear(): void {
     __cookieClear();
+  }
+  
+  size(): number {
+    return __keys(__cookieRead()).length;
   }
   
 }

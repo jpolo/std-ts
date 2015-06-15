@@ -2,6 +2,21 @@ type WebStorage = Storage;
 
 module storage {
   
+  //Util
+  var __check = function (storage: WebStorage) {
+    var testKey = 'storageTest' + Math.random();
+    var returnValue = false;
+    try {
+      //Safari in private mode can throw error
+      storage.setItem(testKey, "1");
+      storage.removeItem(testKey);
+      returnValue = true;
+    } catch (e) {
+    }
+    return returnValue;
+  };
+  
+  
   export interface IStorage {
     clear(): void
     isAvailable(): boolean
@@ -12,25 +27,19 @@ module storage {
     size(): number
   }
   
-  var TEST_KEY = "__tsStorage" + Math.random();
     
   class Storage implements IStorage {
     
     protected _storage: WebStorage
+    protected _isAvailable = true
 
+    constructor(storage: WebStorage) {
+      this._isAvailable = __check(storage);
+      this._storage = storage;
+    }
     
     isAvailable(): boolean {
-      var storage = this._storage;
-      var returnValue = false;
-      if (storage) {
-        try {
-          storage.setItem(TEST_KEY, '1');
-          storage.removeItem(TEST_KEY);
-          returnValue = true;
-        } catch (e) {
-        }
-      }
-      return returnValue;
+      return this._isAvailable;
     }
     
     key(i: number): string {
@@ -66,7 +75,7 @@ module storage {
     
     private _index = 0
     
-    constructor(private _storage: Storage) {}
+    constructor(private _storage: IStorage) {}
     
     next() {
       var index = this._index;

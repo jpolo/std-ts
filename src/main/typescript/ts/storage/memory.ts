@@ -1,4 +1,5 @@
 import storage = require("./storage")
+import IStorage = storage.IStorage
 
 //Constant
 var ES_COMPAT = 3;
@@ -30,7 +31,7 @@ if (ES_COMPAT <= 3) {
 
 
 
-class MemoryStorage implements storage.IStorage {
+class MemoryStorage implements IStorage {
   
   length: number;
 
