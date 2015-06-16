@@ -3,6 +3,8 @@ type WebStorage = Storage;
 module storage {
   
   //Util
+  var __str = function (o) { return "" + o; };
+  var __keys = Object.keys;
   var __check = function (storage: WebStorage) {
     var testKey = 'storageTest' + Math.random();
     var returnValue = false;
@@ -27,6 +29,45 @@ module storage {
     size(): number
   }
   
+  var __memoryStorage = function () {
+    var memoryStorage: WebStorage = <any>{};
+    var _data = {};
+    
+    function _onchange() {
+      memoryStorage.length = __keys(_data).length;
+    }
+    
+    memoryStorage.length = 0;
+    
+    memoryStorage.remainingSpace = Infinity;
+    
+    memoryStorage.getItem = function (k: string): any { 
+      return _data[k]; 
+    };
+    
+    memoryStorage.setItem = function (k: string, v: any) { 
+      _data[k] = __str(v); 
+      _onchange();
+    };
+    
+    memoryStorage.removeItem = function (k: string) {
+      if (_data.hasOwnProperty(k)) {
+        delete _data[k];
+        _onchange();
+      }
+    }
+    
+    memoryStorage.clear = function () { 
+      var keys = __keys(_data);
+      for (var i = 0, l = keys.length; i < l; i++) {
+          delete _data[keys[i]];
+      }
+      _onchange();
+    };
+    return memoryStorage;
+  };
+  
+  
     
   class Storage implements IStorage {
     
@@ -34,8 +75,13 @@ module storage {
     protected _isAvailable = true
 
     constructor(storage: WebStorage) {
-      this._isAvailable = __check(storage);
-      this._storage = storage;
+      if (storage === null) {
+        storage = __memoryStorage();
+      }
+      var isAvailable = __check(storage);
+      
+      this._isAvailable = isAvailable;
+      this._storage = isAvailable ? storage : __memoryStorage();
     }
     
     isAvailable(): boolean {
@@ -47,11 +93,7 @@ module storage {
     }
     
     getItem(k: string): string {
-      var v = this._storage.getItem(k);
-      if (typeof v !== "string") {
-        throw new Error("InvalidValue");
-      }
-      return v;
+      return this._storage.getItem(k);
     }
     
     setItem(k: string, v: string): void {
