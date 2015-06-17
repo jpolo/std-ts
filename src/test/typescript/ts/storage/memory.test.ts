@@ -32,17 +32,17 @@ var memorySuite = suite("ts/storage/memory", (self) => {
   })
   
   
-  test(".length", (assert) => {
-    assert.strictEqual(memoryStorage.length, 0);
+  test(".size()", (assert) => {
+    assert.strictEqual(memoryStorage.size(), 0);
     memoryStorage.setItem("foo", "bar");
-    assert.strictEqual(memoryStorage.length, 1);
+    assert.strictEqual(memoryStorage.size(), 1);
     memoryStorage.setItem("foo", "baz");
-    assert.strictEqual(memoryStorage.length, 1);
+    assert.strictEqual(memoryStorage.size(), 1);
     memoryStorage.setItem("bar", "bar");
-    assert.strictEqual(memoryStorage.length, 2);
+    assert.strictEqual(memoryStorage.size(), 2);
     
     memoryStorage.removeItem("bar");
-    assert.strictEqual(memoryStorage.length, 1);
+    assert.strictEqual(memoryStorage.size(), 1);
   })
   
 })

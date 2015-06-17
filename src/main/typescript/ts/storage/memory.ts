@@ -20,7 +20,7 @@ class MemoryStorage implements IStorage {
   
   getItem(k: string): string {
     var data = __getData(this);
-    return data.hasOwnProperty(k) ? data[k] : undefined;
+    return data.hasOwnProperty(k) ? data[k] : null;
   }
   
   setItem(k: string, v: string): void {
