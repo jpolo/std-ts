@@ -155,10 +155,7 @@ class CookieStorage implements IStorage {
     index = index >>> 0;
     var returnValue = null;
     if (index >= 0) {
-      var keys = __keys(__cookieRead());
-      if (index < keys.length) {
-        returnValue = keys[index];
-      }
+      returnValue = __keys(__cookieRead())[index];
     }
     return returnValue;
   }
@@ -185,5 +182,5 @@ class CookieStorage implements IStorage {
   
 }
 
-var cookieStorage = new CookieStorage();
-export = cookieStorage;
+var storageImpl = new CookieStorage();
+export = storageImpl;

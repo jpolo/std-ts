@@ -2,22 +2,45 @@ type WebStorage = Storage;
 
 module storage {
   
+  //Constant
+  var ES_COMPAT = 3;
+  var TEST_KEY = 'storageTest' + Math.random();
+  
   //Util
   var __str = function (o) { return "" + o; };
   var __keys = Object.keys;
   var __check = function (storage: WebStorage) {
-    var testKey = 'storageTest' + Math.random();
     var returnValue = false;
     try {
       //Safari in private mode can throw error
-      storage.setItem(testKey, "1");
-      storage.removeItem(testKey);
+      storage.setItem(TEST_KEY, "1");
+      storage.removeItem(TEST_KEY);
       returnValue = true;
     } catch (e) {
     }
     return returnValue;
   };
+  var __defineGetter = Object.defineProperty ?
+    function (o, name, getter) {
+      Object.defineProperty(o, name, {get: getter});
+    } : null;
   
+  
+  //Compat
+  if (ES_COMPAT <= 3) {
+    __keys = __keys || function (o) {
+      var keys = [];
+      for (var key in o) {
+        if (o.hasOwnProperty(key)) {
+          keys.push(key);
+        }
+      }
+      return keys;
+    };
+    __defineGetter = __defineGetter || function (o, name, getter) {
+      o.__defineGetter__(name, getter);
+    };
+  }
   
   export interface IStorage {
     clear(): void
@@ -60,7 +83,7 @@ module storage {
     memoryStorage.clear = function () { 
       var keys = __keys(_data);
       for (var i = 0, l = keys.length; i < l; i++) {
-          delete _data[keys[i]];
+        delete _data[keys[i]];
       }
       _onchange();
     };
@@ -69,19 +92,29 @@ module storage {
   
   
     
-  class Storage implements IStorage {
+  export class Storage implements IStorage {
     
-    protected _storage: WebStorage
-    protected _isAvailable = true
+    length: number;
+    
+    private _storage: WebStorage
+    private _isAvailable = true
 
-    constructor(storage: WebStorage) {
-      if (storage === null) {
-        storage = __memoryStorage();
+    constructor() {
+      var isAvailable: boolean;
+      var storage: WebStorage;
+      try {
+        storage = this._getStorage();
+        isAvailable = __check(storage);
+      } catch (e) {
+        isAvailable = false;
       }
-      var isAvailable = __check(storage);
-      
+      storage = isAvailable ? storage : this._getStorageFallback();
+
       this._isAvailable = isAvailable;
-      this._storage = isAvailable ? storage : __memoryStorage();
+      this._storage = storage;
+      __defineGetter(this, "length", () => {
+        return this.size();
+      });
     }
     
     isAvailable(): boolean {
@@ -111,25 +144,15 @@ module storage {
     clear(): void {
       this._storage.clear();
     }
-  }
-  
-  class StorageIterator {
     
-    private _index = 0
+    protected _getStorage(): WebStorage {
+      return null;
+    }
     
-    constructor(private _storage: IStorage) {}
-    
-    next() {
-      var index = this._index;
-      var storage = this._storage;
-      var result = { done: true, value: "" };
-      if (index < storage.size()) {
-        var key = storage.key(index);
-        result.done = false;
-        result.value = storage.getItem(key);
-      }
-      return result;
+    protected _getStorageFallback(): WebStorage {
+      return __memoryStorage();
     }
   }
+  
 }
 export = storage

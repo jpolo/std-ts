@@ -24,12 +24,13 @@ var memorySuite = suite("ts/storage/memory", (self) => {
     assert.strictEqual(memoryStorage.setItem("foo", "baz"), undefined);
     assert.strictEqual(memoryStorage.getItem("foo"), "baz");
      
-    assert.strictEqual(memoryStorage.setItem("num", 1), undefined);
+    assert.strictEqual(memoryStorage.setItem("num", "1"), undefined);
     assert.strictEqual(memoryStorage.getItem("num"), "1");
      
-    assert.strictEqual(memoryStorage.setItem("boolean", false), undefined);
+    assert.strictEqual(memoryStorage.setItem("boolean", "false"), undefined);
     assert.strictEqual(memoryStorage.getItem("boolean"), "false");
   })
+  
   
   test(".length", (assert) => {
     assert.strictEqual(memoryStorage.length, 0);
@@ -43,6 +44,7 @@ var memorySuite = suite("ts/storage/memory", (self) => {
     memoryStorage.removeItem("bar");
     assert.strictEqual(memoryStorage.length, 1);
   })
+  
 })
 
 var exportSuite = memorySuite

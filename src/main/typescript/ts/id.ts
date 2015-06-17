@@ -1,10 +1,11 @@
 module id {
+  declare var Symbol: any;
+  
   //Constants
   var ES_COMPAT = 3;
   
   //Util
-  var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-  var __sym: (s: string) => any = __global.Symbol;
+  var __sym: (s: string) => any = typeof Symbol !== "undefined" ? Symbol : null;
   var __descriptor: PropertyDescriptor = { value: null, enumerable: false, configurable: true, writable: true };
   var __def = Object.defineProperty;
   var __set = function (o, k, v) {

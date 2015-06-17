@@ -1,81 +1,48 @@
 import storage = require("./storage")
 import IStorage = storage.IStorage
 
-//Constant
-var ES_COMPAT = 3;
-
 //Util
+var __str = function (o) { return "" + o };
 var __keys = Object.keys;
-var __str = function (o) { return "" + o; };
-var __defineGetter = Object.defineProperty ?
-  function (o, name, getter) {
-    Object.defineProperty(o, name, { get: getter, enumerable: false, configurable: true });
-  } : null;
-
-//Compat
-if (ES_COMPAT <= 3) {
-  var dontEnum = { length: 1 };
-  __keys = __keys || function (o) {
-    var keys = [];
-    for (var key in o) {
-      if (o.hasOwnProperty(key) && !dontEnum[key]) {
-        keys.push(key);
-      }
-    }
-    return keys;
-  };
-  __defineGetter = __defineGetter || function (o, name, getter) {
-    o.__defineGetter__(name, getter);
-  };
-}
-
-
+var __getData = function (o): { [k: string]: string } { return o.__data__ || (o.__data__ = {}); };
 
 class MemoryStorage implements IStorage {
   
-  length: number;
-
-  constructor() {
-    __defineGetter(this, "length", () => {
-      return this.size();//remove "length" itself
-    });  
-  }
+  constructor() { }
   
   isAvailable(): boolean {
-    return true;  
+    return true;
   }
   
   key(i: number): string {
-    return __keys(this)[i];
+    return __keys(__getData(this))[i];  
   }
   
   getItem(k: string): string {
-    var returnValue = null;
-    if (this.hasOwnProperty(k)) {
-      returnValue = this[k];  
-    }
-    return returnValue;
+    var data = __getData(this);
+    return data.hasOwnProperty(k) ? data[k] : undefined;
   }
   
-  setItem(k: string, v: any): void {
-    this[k] = __str(v);
+  setItem(k: string, v: string): void {
+    var data = __getData(this);
+    data[k] = __str(v);
   }
   
   removeItem(k: string): void {
-    delete this[k];
-  }
-  
-  clear(): void {
-    var keys = __keys(this);
-    for (var i = 0, l = keys.length; i < l; i++) {
-      delete this[keys[i]];  
-    }
+    var data = __getData(this);
+    delete data[k];
   }
   
   size(): number {
-    return __keys(this).length;//remove "length" itself
+    return __keys(__getData(this)).length;  
+  }
+  
+  clear(): void {
+    //this._storage.clear();
+    
+    //TODO
   }
 }
 
-var memoryStorage = new MemoryStorage();
-export = memoryStorage;
+var storageImpl = new MemoryStorage();
+export = storageImpl;

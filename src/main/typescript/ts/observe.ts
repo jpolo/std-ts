@@ -2,6 +2,7 @@ module observe {
   //ECMA spec is here :
   // https://arv.github.io/ecmascript-object-observe
   
+  declare var Symbol: any;
   
   //Constant
   var ES_COMPAT = 3;
@@ -16,7 +17,6 @@ module observe {
   var ALL = [ADD, UPDATE, DELETE, RECONFIGURE, SET_PROTOTYPE, PREVENT_EXTENSIONS];
   
   //Util
-  var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
   var O = (<any>Object);
   var __observerDeliver = O.deliverChangeRecords;
   var __observe = O.observe;
@@ -24,10 +24,10 @@ module observe {
   var __notifier: <T>(o: T) => INotifier<T> = O.getNotifier;
   var __setImmediate = typeof setImmediate !== "undefined" ? setImmediate : setTimeout;
   var __clearImmediate = typeof clearImmediate !== "undefined" ? clearImmediate : clearTimeout;
-  var __sym: (o: string) => any = __global.Symbol;
+  var __sym: (o: string) => any = typeof Symbol !== "undefined" ? Symbol : undefined;
   var __map: <K, V>() => Map<K, V>;
   var __weakMap: <K, V>() => WeakMap<K, V>;
-  var __isFrozen = Object.isFrozen;
+  var __isFrozen = O.isFrozen;
 
   //Compat
   if (ES_COMPAT <= 3) {
@@ -88,7 +88,7 @@ module observe {
       }
     };
     var __assertNotFrozen = function (o: any) {
-      if (__isFrozen) {
+      if (__isFrozen(o)) {
         throw new TypeError(o + " must not be frozen");
       }
     };
