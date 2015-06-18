@@ -152,7 +152,7 @@ var mathSuite = suite("ts/math", (self) => {
     var isOdd = math.isOdd;
     
     //Arity
-    assert.strictEqual(isOdd.length, 2);
+    assert.strictEqual(isOdd.length, 1);
     
     //Data
     generate(assert, [
@@ -172,7 +172,7 @@ var mathSuite = suite("ts/math", (self) => {
     var round = math.round;
     
     //Arity
-    assert.strictEqual(round.length, 2);
+    assert.strictEqual(round.length, 1);
     
     //Data
     generate(assert, [
