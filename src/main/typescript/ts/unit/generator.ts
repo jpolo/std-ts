@@ -5,6 +5,7 @@ import IIteratorResult = iterator.IIteratorResult;
 module generator {
   
   //Constant
+  var SIZE = 10;
   var LN2 = Math.log(2);
   
   var __max = Math.max;
@@ -22,7 +23,7 @@ module generator {
     return r >= 0 ? r : 0;
   };
   var __paramsDefault = function (p: Params) {
-    var returnValue = { size: 10, random: Math.random };
+    var returnValue = { size: SIZE, random: Math.random };
     var random = p.random;
     var size = p.size;
     if (size !== undefined) {
@@ -62,7 +63,9 @@ module generator {
   export function array<T>(generator: IGenerator<T>): IGenerator<T[]> {
     return function (p: Params) {
       var params = __paramsDefault(p);
-      var length = __paramRand(params, 0, __paramLogSize(params));
+      var size =  __paramRand(params, 0, __paramLogSize(params));
+      var length = __paramRand(params, 0, size);
+console.warn(length, size);
       var returnValue: T[] = new Array(length);
       for (var i = 0; i < length; i++) {
         returnValue[i] = generator(params);

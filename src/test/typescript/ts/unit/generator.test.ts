@@ -6,7 +6,7 @@ import generator = require("../../../../main/typescript/ts/unit/generator")
 var generatorSuite = suite("ts/unit/generator", (self) => {
   
   var params = {
-    size: 5,
+    size: 10,
     random: random
   };
   var randomValue = 0;
@@ -49,8 +49,10 @@ var generatorSuite = suite("ts/unit/generator", (self) => {
   
   test(".array()", (assert) => {
     var gen = generator.array(generator.constant("foo"));
+    randomValue = 1;
     
     var arr = gen(params);
+    assert.strictEqual(arr.length, 3);
     for (var i = 0, l = arr.length; i < l; i++) {
       assert.strictEqual(arr[i], "foo")
     }
