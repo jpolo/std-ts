@@ -37,6 +37,10 @@ var mathSuite = suite("ts/math", (self) => {
   })
   
   test(".abs()", (assert) => {
+    var abs = math.abs;
+    //Arity
+    assert.strictEqual(abs.length, 1);
+    
     //Number
     generate(assert, [
       [1, 1],
@@ -45,10 +49,15 @@ var mathSuite = suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, Infinity]
-    ], math.abs, "math.abs") 
+    ], abs, "math.abs") 
   })
     
   test(".ceil()", (assert) => {
+    var ceil = math.ceil;
+    //Arity
+    assert.strictEqual(ceil.length, 1);
+    
+    //Data
     generate(assert, [
       [1.2, 2],
       [1.7, 2],
@@ -57,10 +66,16 @@ var mathSuite = suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ], math.ceil, "math.ceil")
+    ], ceil, "math.ceil")
   })
     
   test(".exp()", (assert) => {
+    var exp = math.exp;
+    
+    //Arity
+    assert.strictEqual(exp.length, 1);
+    
+    //Data
     generate(assert, [
       [1.2, 3.3201169227365472],
       [-1.2, 0.30119421191220213 ],
@@ -68,10 +83,16 @@ var mathSuite = suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, 0]
-    ], math.exp, "math.exp")
+    ], exp, "math.exp")
   })
     
   test(".floor()", (assert) => {
+    var floor = math.floor;
+    
+    //Arity
+    assert.strictEqual(floor.length, 1);
+    
+    //Data
     generate(assert, [
       [1.2, 1],
       [1.7, 1],
@@ -80,10 +101,38 @@ var mathSuite = suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ], math.floor, "math.floor")
+    ], floor, "math.floor")
+  })
+  
+  test(".imul()", (assert) => {
+    var imul = math.imul;
+    
+    //Arity
+    assert.strictEqual(imul.length, 2);
+    
+    //Data
+    /*generate(assert, [
+      [0, true],
+      [1.1, false],
+      [1, false],
+      [2, true],
+      [3, false],
+      [-1, false],
+      [-1.1, false],
+      [-2, true],
+      [NaN, false],
+      [Infinity, false],
+      [-Infinity, false]
+    ], math.imul, "math.imul")*/
   })
   
   test(".isEven()", (assert) => {
+    var isEven = math.isEven;
+    
+    //Arity
+    assert.strictEqual(isEven.length, 1);
+    
+    //Data
     generate(assert, [
       [0, true],
       [1.1, false],
@@ -96,10 +145,16 @@ var mathSuite = suite("ts/math", (self) => {
       [NaN, false],
       [Infinity, false],
       [-Infinity, false]
-    ], math.isEven, "math.isEven")
+    ], isEven, "math.isEven")
   })
   
   test(".isOdd()", (assert) => {
+    var isOdd = math.isOdd;
+    
+    //Arity
+    assert.strictEqual(isOdd.length, 2);
+    
+    //Data
     generate(assert, [
       [0, false],
       [1.1, true],
@@ -110,10 +165,16 @@ var mathSuite = suite("ts/math", (self) => {
       [NaN, false],
       [Infinity, false],
       [-Infinity, false]
-    ], math.isOdd, "math.isOdd")
+    ], isOdd, "math.isOdd")
   })
     
   test(".round()", (assert) => {
+    var round = math.round;
+    
+    //Arity
+    assert.strictEqual(round.length, 2);
+    
+    //Data
     generate(assert, [
       [1.2, 1],
       [1.7, 2],
@@ -122,7 +183,7 @@ var mathSuite = suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ], math.round, "math.round")
+    ], round, "math.round")
   })
 
 })

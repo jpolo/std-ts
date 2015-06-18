@@ -2,6 +2,8 @@ import id = require("ts/id")
 import int64 = require("ts/int64")
 import Int64 = int64.IInt64
 
+//see https://github.com/facebook/immutable-js/blob/master/src/Hash.js
+
 //assertion
 if (
   (typeof ArrayBuffer == "undefined") || 

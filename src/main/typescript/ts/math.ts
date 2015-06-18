@@ -23,6 +23,7 @@ module math {
   var math_exp = Math.exp;
   var math_expm1 = Math['expm1'];
   var math_floor = Math.floor;
+  var math_imul = Math['imul'];
   var math_log = Math.log;
   var math_log2 = Math['log2'];
   var math_log10 = Math['log10'];
@@ -65,6 +66,18 @@ module math {
         (__isFinite(n) || n === 0) ? n :
         math_exp(n) - 1
       );
+    };
+    math_imul = math_imul || function (a, b) {
+      //polyfill from mozilla
+      a = a >>> 0;
+      b = b >>> 0;
+      var ah = (a >>> 16) & 0xffff;
+      var al = a & 0xffff;
+      var bh = (b >>> 16) & 0xffff;
+      var bl = b & 0xffff;
+      // the shift by 0 fixes the sign on the high part
+      // the final |0 converts the unsigned value into a signed value
+      return ((al * bl) + (((ah * bl + al * bh) << 16) >>> 0) | 0);
     };
     math_log2 = math_log2 || function (n) { return math_log(n) * LOG2E };
     math_log10 = math_log10 || function (n) { return math_log(n) * LOG10E };
@@ -207,6 +220,10 @@ module math {
   
   export function isInteger(n: number): boolean {
     return math_round(n) == n
+  }
+  
+  export function imul(a: number, b: number): number {
+    return math_imul(a, b);
   }
 
   export function isNaN(n: number): boolean {
