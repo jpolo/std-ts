@@ -1,6 +1,5 @@
 import hash = require("ts/hash")
 import IHash = hash.IHash
-import IHashState = hash.IHashState
 
 
 //reference: https://github.com/npm/node-semver/blob/master/semver.js
@@ -140,12 +139,15 @@ module semver {
       );
     }
     
-    hash(s: IHashState) {
+    hash() {
+      return hash.hashString(this.toString());
+      /*
       s.writeUint32(this.major);
       s.writeUint32(this.minor); 
       s.writeUint32(this.patch);
       s.writeArray(this.prerelease);
       s.writeArray(this.build);
+      */
     }
     
     inspect() {
