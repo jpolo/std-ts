@@ -69,7 +69,7 @@ var InspectorSuite = suite("ts/inspect.Inspector", (self) => {
     [new String("foobar"), 'String { "foobar" }'],
     [new String('lorem ipsum "sorem" foo bar'), 'String { "lorem ipsum \\"so..." }']
   );
-  var OBJECTS = inspectResults(
+  var OBJECTS = inspectResults<any>(
     [new Boolean(true), 'Boolean { true }'],
     [new Number(123.4545), 'Number { 123.4545 }'],
     [new String("foobar"), 'String { "foobar" }'],

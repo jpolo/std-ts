@@ -38,6 +38,7 @@ var mathSuite = suite("ts/math", (self) => {
   
   test(".abs()", (assert) => {
     var abs = math.abs;
+    
     //Arity
     assert.strictEqual(abs.length, 1);
     
@@ -54,6 +55,7 @@ var mathSuite = suite("ts/math", (self) => {
     
   test(".ceil()", (assert) => {
     var ceil = math.ceil;
+    
     //Arity
     assert.strictEqual(ceil.length, 1);
     

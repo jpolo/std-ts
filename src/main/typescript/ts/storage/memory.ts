@@ -5,6 +5,7 @@ import IStorage = storage.IStorage
 var __str = function (o) { return "" + o };
 var __keys = Object.keys;
 var __getData = function (o): { [k: string]: string } { return o.__data__ || (o.__data__ = {}); };
+var __clearData = function (o): void { o.__data__ = {}; };
 
 class MemoryStorage implements IStorage {
   
@@ -38,9 +39,7 @@ class MemoryStorage implements IStorage {
   }
   
   clear(): void {
-    //this._storage.clear();
-    
-    //TODO
+    __clearData(this);
   }
 }
 

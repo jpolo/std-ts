@@ -1,6 +1,15 @@
 module node {
   
   //Util
+  var __isNode = function (o) {
+    return (
+      typeof Node === "object" ? o instanceof Node :
+      o &&
+      typeof o === "object" &&
+      typeof o.nodeType === "number" &&
+      typeof o.nodeName === "string"
+    );
+  };
   var __isElement = function (o) {
     return o.nodeType === NodeType.ELEMENT_NODE;
   };
@@ -88,17 +97,55 @@ module node {
     BEFORE, AFTER, FIRST, LAST, REPLACE
   }
   
+  /*
+  export class DOMError implements Error {
+    
+    code: number;
+    name: string;
+    message: string;
+    
+    constructor(code: number, message: string) {
+      var name = ErrorCode[code];
+      if (name === undefined) {
+        throw new TypeError("Unknown exception code: " + code);
+      }
+      this.name = name;
+      this.code = code;
+      this.message = message;
+    }
+    
+    toString() {
+      return this.name + ": DOM Exception " + this.code;
+    }
+  }*/
+  
+  export function contains(parentNode: Node, node: Node): boolean {
+    var returnValue = false;
+    if (returnValue !== null && returnValue !== undefined) {
+      if (parentNode === node) {
+        returnValue = true;
+      } else {
+        returnValue = !!(node.compareDocumentPosition(parentNode) & Node.DOCUMENT_POSITION_CONTAINS);
+      }
+    }
+    return returnValue;
+  }
+  
   export function empty(node: Node): void {
     if (node.textContent.length) {
       node.textContent = "";
     }
   }
   
+  export function isNode(o: any): boolean {
+    return __isNode(o);
+  }
+  
   export function nodeType(node: Node): NodeType {
     return node.nodeType;  
   }
 
-  function place(node: Node, position: Position, refNode: Node): boolean {
+  export function place(node: Node, position: Position, refNode: Node): boolean {
     var parentNode: Node;
     var returnValue = false;
     switch (position) {
@@ -130,6 +177,7 @@ module node {
         }
         break;
       default:
+        throw new Error(position + " is not a valid position");
     }
     return returnValue;
   }

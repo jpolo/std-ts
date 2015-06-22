@@ -14,7 +14,7 @@ var idSuite = suite("ts/id", (self) => {
   })
   
   test(".id()", (assert) => {
-    var hasWeakMap = !!WeakMap;
+    //var hasWeakMap = !!WeakMap;
     
     //null, undefined, string, number
     assert.strictEqual(id.id(undefined), NaN);

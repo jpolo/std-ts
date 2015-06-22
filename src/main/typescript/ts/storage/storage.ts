@@ -62,8 +62,6 @@ module storage {
     
     memoryStorage.length = 0;
     
-    memoryStorage.remainingSpace = Infinity;
-    
     memoryStorage.getItem = function (k: string): any { 
       return _data[k]; 
     };

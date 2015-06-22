@@ -65,7 +65,6 @@ module generator {
       var params = __paramsDefault(p);
       var size =  __paramRand(params, 0, __paramLogSize(params));
       var length = __paramRand(params, 0, size);
-console.warn(length, size);
       var returnValue: T[] = new Array(length);
       for (var i = 0; i < length; i++) {
         returnValue[i] = generator(params);
