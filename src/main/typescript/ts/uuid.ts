@@ -7,8 +7,10 @@ module uuid {
   
   //Util
   var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-  var Buffer: any = (__global.Uint8Array ? Uint8Array : Array);
-  var __buffer: ByteArray = new Buffer(LENGTH);
+  var __byteArray = typeof Uint8Array !== "undefined" ? 
+    function (l: number): ByteArray { return new Uint8Array(l); } : 
+    function (l: number): ByteArray { var a = new Array(l); /*v8 optim*/ a[0] = 0; return a; };
+  var __buffer: ByteArray = __byteArray(LENGTH);
   var __rng: () => number[] = (function () {
     var __rng;
 
@@ -26,7 +28,7 @@ module uuid {
     // Allow for MSIE11 msCrypto
     var __crypto = __global.crypto || __global.msCrypto;
     if (!__rng && __crypto && __crypto.getRandomValues) {
-      var _rnds8 = new Buffer(LENGTH);
+      var _rnds8 = __byteArray(LENGTH);
       __rng = function () {
         __crypto.getRandomValues(_rnds8);
         return _rnds8;
@@ -34,7 +36,7 @@ module uuid {
     }
 
     if (!__rng) {
-      var _rnds = new Buffer(LENGTH);
+      var _rnds = __byteArray(LENGTH);
       var __random = Math.random;
       __rng = function () {
         for (var i = 0, r; i < LENGTH; i++) {

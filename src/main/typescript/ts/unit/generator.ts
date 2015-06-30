@@ -124,6 +124,22 @@ module generator {
       return returnValue;
     };
   }
+  
+  function object<V>(k: IGenerator<number>, v: IGenerator<V>): IGenerator<{[key: number]: V}>;
+  function object<V>(k: IGenerator<string>, v: IGenerator<V>): IGenerator<{[key: string]: V}>;
+  function object<V>(k: IGenerator<any>, v: IGenerator<V>): IGenerator<any> {
+    return function (p: Params) {
+      var params = __paramsDefault(p);
+      var size = __paramLogSize(params);
+      var returnValue = {};
+      for (var i = 0; i < size; i++) {
+        var key = k(params);
+        var value = v(params);
+        returnValue[key] = value;
+      }
+      return returnValue;
+    };
+  }
 
 }
 export = generator;
