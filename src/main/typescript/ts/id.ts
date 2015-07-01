@@ -21,9 +21,9 @@ module id {
     __sym = __sym || function (s: string) { return "@@" + s; };
   }
   
-  var $$id = __sym("id");
+  const $$id = __sym("id");
   var __currentId = 1;//Start from 1, helps not to have falsy values
-  var __getId: (o: any) => number = function (o: any) {
+  const __getId: (o: any) => number = function (o: any) {
     var id = o[$$id];
     if (id === undefined) {
       id = __currentId;

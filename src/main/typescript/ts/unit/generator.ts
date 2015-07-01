@@ -51,23 +51,23 @@ module generator {
     };
   }
   
-  export function oneOf<T>(generators: IGenerator<T>[]): IGenerator<T> {
-    var l = generators.length;
+  export function oneOf<T>(gens: IGenerator<T>[]): IGenerator<T> {
+    var l = gens.length;
     return function (p: Params) {
       var params = __paramsDefault(p);
       var index = __paramRand(params, 0, l);
-      return generators[index](params);
+      return gens[index](params);
     };
   }
   
-  export function array<T>(generator: IGenerator<T>): IGenerator<T[]> {
+  export function array<T>(genValue: IGenerator<T>, genSize = size()): IGenerator<T[]> {
     return function (p: Params) {
       var params = __paramsDefault(p);
-      var size =  __paramRand(params, 0, __paramLogSize(params));
+      var size =  __paramRand(params, 0, genSize(params));
       var length = __paramRand(params, 0, size);
       var returnValue: T[] = new Array(length);
       for (var i = 0; i < length; i++) {
-        returnValue[i] = generator(params);
+        returnValue[i] = genValue(params);
       }
       return returnValue;
     };
@@ -86,11 +86,11 @@ module generator {
     };
   }
   
-  function recursive<T>(g: IGenerator<T>, loop: (g: IGenerator<T>) => IGenerator<T>): IGenerator<T> {
+  function recursive<T>(gen: IGenerator<T>, loop: (g: IGenerator<T>) => IGenerator<T>, genSize = size()): IGenerator<T> {
     function rec(n: number, p: Params) {
       return (
         //Trivial case
-        n <= 0 || __paramRand(p, 0, 3) === 0 ? g(p) :
+        n <= 0 || __paramRand(p, 0, 3) === 0 ? gen(p) :
         
         //Recursion
         loop(function (paramsq: Params) {
@@ -101,40 +101,44 @@ module generator {
     
     return function (p: Params) {
       var params = __paramsDefault(p);
-      var size = __paramLogSize(params);
+      var size = genSize(params);
       return rec(size, params);
     };
   }
   
-  function tuple<A, B, C, D, E, F, G>(generators: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>, IGenerator<F>] ): IGenerator<[A, B, C, D, E, F, G]>
-  function tuple<A, B, C, D, E, F>(generators: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>, IGenerator<F>] ): IGenerator<[A, B, C, D, E, F]>
-  function tuple<A, B, C, D, E>(generators: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>] ): IGenerator<[A, B, C, D, E]>
-  function tuple<A, B, C, D>(generators: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>] ): IGenerator<[A, B, C, D]>
-  function tuple<A, B, C>(generators: [IGenerator<A>, IGenerator<B>, IGenerator<C>] ): IGenerator<[A, B, C]>
-  function tuple<A, B>(generators: [IGenerator<A>, IGenerator<B>] ): IGenerator<[A, B]>
-  function tuple(generators: any[]): IGenerator<any> {
-    var length = generators.length;
+  function size(): IGenerator<number> {
+    return __paramLogSize;
+  }
+  
+  function tuple<A, B, C, D, E, F, G>(gens: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>, IGenerator<F>] ): IGenerator<[A, B, C, D, E, F, G]>
+  function tuple<A, B, C, D, E, F>(gens: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>, IGenerator<F>] ): IGenerator<[A, B, C, D, E, F]>
+  function tuple<A, B, C, D, E>(gens: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>] ): IGenerator<[A, B, C, D, E]>
+  function tuple<A, B, C, D>(gens: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>] ): IGenerator<[A, B, C, D]>
+  function tuple<A, B, C>(gens: [IGenerator<A>, IGenerator<B>, IGenerator<C>] ): IGenerator<[A, B, C]>
+  function tuple<A, B>(gens: [IGenerator<A>, IGenerator<B>] ): IGenerator<[A, B]>
+  function tuple(gens: any[]): IGenerator<any> {
+    var length = gens.length;
     
     return function (p: Params) {
       var params = __paramsDefault(p);
       var returnValue: any[] = new Array(length);
       for (var i = 0; i < length; i++) {
-        returnValue[i] = generators[i](params);
+        returnValue[i] = gens[i](params);
       }
       return returnValue;
     };
   }
   
-  function object<V>(k: IGenerator<number>, v: IGenerator<V>): IGenerator<{[key: number]: V}>;
-  function object<V>(k: IGenerator<string>, v: IGenerator<V>): IGenerator<{[key: string]: V}>;
-  function object<V>(k: IGenerator<any>, v: IGenerator<V>): IGenerator<any> {
+  function object<V>(genKey: IGenerator<number>, genValue: IGenerator<V>, genSize?: IGenerator<number>): IGenerator<{[key: number]: V}>;
+  function object<V>(genKey: IGenerator<string>, genValue: IGenerator<V>, genSize?: IGenerator<number>): IGenerator<{[key: string]: V}>;
+  function object<V>(genKey: IGenerator<any>, genValue: IGenerator<V>, genSize = size()): IGenerator<any> {
     return function (p: Params) {
       var params = __paramsDefault(p);
-      var size = __paramLogSize(params);
+      var size = genSize(params);
       var returnValue = {};
       for (var i = 0; i < size; i++) {
-        var key = k(params);
-        var value = v(params);
+        var key = genKey(params);
+        var value = genValue(params);
         returnValue[key] = value;
       }
       return returnValue;

@@ -9,7 +9,7 @@ module vm {
     sourceMappingURL?: string
   }
 
-  export var global = __global;
+  export const global = __global;
 
   export function compile(jscode: string, options?: IOption): (locals?: { [key: string]: any }) => any {
     options = options || __empty;

@@ -1,12 +1,12 @@
 module math {
   
   //Constant
-  var ES_COMPAT = 3;
+  const ES_COMPAT = 3;
   
   //Util
-  var ONE_THIRD = 1 / 3
-  var RADIAN_TO_DEGREE = 180 / Math.PI
-  var DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE
+  const ONE_THIRD = 1 / 3
+  const RADIAN_TO_DEGREE = 180 / Math.PI
+  const DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE
   
   var __num = Number;
   var __isNaN = (n: number) => { return n !== n; };
@@ -23,10 +23,12 @@ module math {
   var math_exp = Math.exp;
   var math_expm1 = Math['expm1'];
   var math_floor = Math.floor;
+  var math_hypot = Math['hypot'];
   var math_imul = Math['imul'];
   var math_log = Math.log;
   var math_log2 = Math['log2'];
   var math_log10 = Math['log10'];
+  var math_log1p = Math['log1p'];
   var math_pow = Math.pow;
   var math_round = Math.round;
   var math_sign = Math['sign'];
@@ -81,6 +83,7 @@ module math {
     };
     math_log2 = math_log2 || function (n) { return math_log(n) * LOG2E };
     math_log10 = math_log10 || function (n) { return math_log(n) * LOG10E };
+    math_log1p = math_log1p || function (n) { return math_log(1 + n); };
     math_sign = math_sign || function (n) { return __isNaN(n) ? n : n > 0 ? 1 : n < 0 ? -1 : 0 };
     math_trunc = math_trunc || function (n) { return n > 0 ? math_floor(n) : math_ceil(n); };
     math_acosh = math_acosh || function (n) {
@@ -141,19 +144,18 @@ module math {
   }
   
   
-  export var E = Math.E
-  export var LN10 = Math.LN10
-  export var LN2 = Math.LN2
-  export var LOG2E = Math.LOG2E
-  export var LOG10E = Math.LOG10E
-  export var PI = Math.PI
-  export var TAU = PI * 2
-  export var PHI = (1 + math_sqrt(5)) /2
-  export var SQRT1_2 = Math.SQRT1_2
-  export var SQRT2 = Math.SQRT2
-  export var Infinity = Infinity
+  export const E = Math.E
+  export const LN10 = Math.LN10
+  export const LN2 = Math.LN2
+  export const LOG2E = Math.LOG2E
+  export const LOG10E = Math.LOG10E
+  export const PI = Math.PI
+  export const TAU = PI * 2
+  export const PHI = (1 + math_sqrt(5)) /2
+  export const SQRT1_2 = Math.SQRT1_2
+  export const SQRT2 = Math.SQRT2
+  export const Infinity = Infinity
 
-  
   export function abs(n: number): number {
     return math_abs(n)
   }
@@ -214,6 +216,18 @@ module math {
     return math_floor(n)
   }
   
+  export function hypot(...args: number[]): number {
+    // See: http://mzl.la/1HDi6xP
+    var n = 0;
+    for (let arg of args) {
+      if (arg === Infinity || arg === -Infinity) {
+        return Infinity;
+      }
+      n += arg * arg;
+    }
+    return math_sqrt(n);
+  }
+  
   export function isEven(n: number): boolean {
     return (n % 2) === 0;
   }
@@ -262,6 +276,10 @@ module math {
   
   export function log10(n: number): number {
     return math_log10(n)
+  }
+  
+  export function log1p(n: number): number {
+    return math_log1p(n);
   }
   
   export function mod(n: number, divisor: number): number {
@@ -316,7 +334,5 @@ module math {
     return math_trunc(n)
   }
  
-  
-
 }
 export = math

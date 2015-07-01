@@ -2,16 +2,16 @@ module option {
   
   //Util
   var __none: Option<any>;
-  var __isNone = function (o) { return o === __none };
+  var __isNone = function (o) { return o === __none; };
   var __get = function (o) { return o[0]; };
   
   //Compat
   
-  
+
   class Option<T> {
     
     static empty(): Option<any> {
-      return __none;  
+      return Option.none;  
     }
     
     static cast<S>(o: Option<S>): Option<S>
@@ -23,13 +23,36 @@ module option {
       } else if (o instanceof Option) {
         returnValue = o;
       } else {
-        returnValue = new Option(o);  
+        returnValue = Option.some(o);  
       }
       return returnValue;
     }
     
+    static isOption(o: any): boolean {
+      return o instanceof Option;
+    }
     
+    static isSome<S>(o: Option<S>): boolean {
+      return o !== __none;
+    }
+    
+    static isNone<S>(o: Option<S>): boolean {
+      return o === __none;
+    }
+    
+    static some<S>(v: S): Option<S> {
+      return new Option(v);
+    }
+    
+    static none = (function () {
+      var none = new Option(undefined);
+      none.length = 0;
+      delete none[0];
+      return none;
+    }());
+      
     length = 1
+    0: T
     
     constructor(value: T) {
       this[0] = value;
@@ -63,7 +86,11 @@ module option {
     }
     
     map<U>(f: (v: T) => U): Option<U> {
-      return __isNone(this) ? __none : new Option(f(__get(this)));
+      return __isNone(this) ? __none : Option.some(f(__get(this)));
+    }
+    
+    flatMap<U>(f: (v: T) => Option<U>): Option<U> {
+      return __isNone(this) ? __none : f(__get(this));
     }
     
     reduce<U>(r: (acc: U, v: T) => U, initialValue?: U): U {
@@ -81,9 +108,7 @@ module option {
     every(p: (v: T) => boolean): boolean {
       return !__isNone(this) && !p(__get(this));
     }
-    
 
-    
     inspect() {
       return __isNone(this) ? "None" : "Some { " + __get(this) + " }";
     }
@@ -93,14 +118,14 @@ module option {
     }
   }
   
-
+  __none = Option.none;
   
-  export function some<T>(v: T) {
+  /*
+  export function Some<T>(v: T) {
     return new Option(v);
   }
   
-  export var none = __none = new Option(undefined);
-  __none.length = 0;
+  export var None = */
   
 }
 export = option;

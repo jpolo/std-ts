@@ -3,6 +3,7 @@ module inspect {
   //Constant
   var ES3_COMPAT = true;
   var ES5_COMPAT = ES3_COMPAT || true;
+  declare var Set: any;//TODO remove
   
   //Util
   var __ostring = Object.prototype.toString;
@@ -92,11 +93,10 @@ module inspect {
       }
     ) {
       if (conf) {
-        var ks = __keys(conf);
-        for (var i = 0, l = ks.length; i < l; i++) {
-          var k = ks[i]
-          if (this.hasOwnProperty(k)) {
-            this[k] = conf[k];
+        var keys = __keys(conf);
+        for (let key of keys) {
+          if (this.hasOwnProperty(key)) {
+            this[key] = conf[key];
           }
         }
       }
@@ -121,8 +121,8 @@ module inspect {
             switch (strTag) {
               //Special
               case 'Array': s = this.stringifyArray(o, maxDepth); break;
-              case 'Map': s = this.stringifyMap(o, maxDepth); break;
-              case 'Set': s = this.stringifySet(o, maxDepth); break;
+              //case 'Map': s = this.stringifyMap(o, maxDepth); break;
+              //case 'Set': s = this.stringifySet(o, maxDepth); break;
               case 'Date': s = this.stringifyDate(o); break;
               case 'RegExp': s = this.stringifyRegExp(o); break;
               default:
@@ -233,6 +233,7 @@ module inspect {
       return s;
     }
     
+    /*
     stringifySet(o: Set<any>, maxDepth: number = this.maxDepth) {
       var s = __inspectEmpty(this, o);
       if (s === null) {
@@ -256,7 +257,9 @@ module inspect {
       }
       return s;
     }
+    */
     
+    /*
     stringifyMap(o: Map<any, any>, maxDepth: number = this.maxDepth) {
       var s = __inspectEmpty(this, o);
       if (s === null) {
@@ -282,6 +285,7 @@ module inspect {
       }
       return s;
     }
+    */
     
     stringifyIInspect(o: IInspect, maxDepth: number = this.maxDepth) {
       var s = __inspectEmpty(this, o);

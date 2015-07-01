@@ -161,11 +161,11 @@ module log {
     }
   }
 
-  export var DEBUG = Level.create('DEBUG', 0)
-  export var INFO = Level.create('INFO', 10)
-  export var WARN = Level.create('WARN', 20)
-  export var ERROR = Level.create('ERROR', 30)
-  export var FATAL = Level.create('FATAL', 40)
+  export const DEBUG = Level.create('DEBUG', 0)
+  export const INFO = Level.create('INFO', 10)
+  export const WARN = Level.create('WARN', 20)
+  export const ERROR = Level.create('ERROR', 30)
+  export const FATAL = Level.create('FATAL', 40)
   
   export class Message implements IMessage {
   
@@ -319,8 +319,8 @@ module log {
       var reporters = this.reporters
       var logMessage = new Message(level, group, null)
       var names = __keys(reporters)
-      for (var i = 0, l = names.length; i < l; ++i) {
-        var target = reporters[names[i]]
+      for (let name of names) {
+        var target = reporters[name]
         if (__filter(target, logMessage)) {
           returnValue = true
           break
@@ -333,8 +333,8 @@ module log {
       var reporters = this.reporters;
       var logMessage = new Message(level, group, data, this.$time.now());
       var names = __keys(reporters)
-      for (var i = 0, l = names.length; i < l; ++i) {
-        var target = reporters[names[i]]
+      for (let name of names) {
+        var target = reporters[name]
         if (__filter(target, logMessage)) {
           __send(target, logMessage)
         }
@@ -487,7 +487,6 @@ module log {
         }
       }
     }
-  
   }
   
   

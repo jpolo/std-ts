@@ -63,9 +63,9 @@ module clone {
           switch (__stringTag(anyVal)) {
             case "Array": returnValue = <any> cloneArray(anyVal); break;
             case "Date": returnValue = <any> cloneDate(anyVal); break;
-            case "Map": returnValue = <any> cloneMap(anyVal); break;
+            //case "Map": returnValue = <any> cloneMap(anyVal); break;
             case "RegExp": returnValue = <any> cloneRegExp(anyVal); break;
-            case "Set": returnValue = <any> cloneSet(anyVal); break;
+            //case "Set": returnValue = <any> cloneSet(anyVal); break;
             default: returnValue = __create(__protoOf(anyVal), __descriptors(anyVal));
           }
         }
@@ -108,7 +108,15 @@ module clone {
   }
   
   export function cloneArray<T>(a: T[]): T[] {
-    return __isDefined(a) ? a.slice(0) : a;  
+    var returnValue = a;
+    if (__isDefined(a)) {
+      var length = a.length;
+      returnValue = new Array(length);
+      for (var i = 0; i < length; i++) {
+        returnValue[i] = a[i];
+      }
+    }
+    return returnValue;
   }
   
   export function cloneDate(d: Date): Date {
@@ -139,6 +147,7 @@ module clone {
     return returnValue;
   }
   
+  /*
   export function cloneMap<K, V>(m: Map<K, V>): Map<K, V> {
     var returnValue = m;
     if (__isDefined(m)) {
@@ -156,6 +165,7 @@ module clone {
     }
     return returnValue;
   }
+  */
   
 }
 export = clone

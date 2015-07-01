@@ -3,21 +3,31 @@ module observe {
   // https://arv.github.io/ecmascript-object-observe
   
   declare var Symbol: any;
+  //TODO remove
+  declare class Map<K, V> {
+    get(k: K): V; 
+    set(k: K, v: V): void;
+  };
+  declare class WeakMap<K, V> { 
+    get(k: K): V; 
+    set(k: K, v: V): void;
+  };
   
   //Constant
-  var ES_COMPAT = 3;
+  const ES_COMPAT = 3;
   
-  export var ADD = "add";
-  export var UPDATE = "update";
-  export var DELETE = "delete";
-  export var RECONFIGURE = "reconfigure";
-  export var SET_PROTOTYPE = "setPrototype";
-  export var PREVENT_EXTENSIONS = "preventExtensions";
+  export const ADD = "add";
+  export const UPDATE = "update";
+  export const DELETE = "delete";
+  export const RECONFIGURE = "reconfigure";
+  export const SET_PROTOTYPE = "setPrototype";
+  export const PREVENT_EXTENSIONS = "preventExtensions";
 
-  var ALL = [ADD, UPDATE, DELETE, RECONFIGURE, SET_PROTOTYPE, PREVENT_EXTENSIONS];
+  const ALL = [ADD, UPDATE, DELETE, RECONFIGURE, SET_PROTOTYPE, PREVENT_EXTENSIONS];
   
   //Util
   var O = (<any>Object);
+  var __keys = Object.keys;
   var __observerDeliver = O.deliverChangeRecords;
   var __observe = O.observe;
   var __unobserve = O.unobserve;
@@ -28,9 +38,11 @@ module observe {
   var __map: <K, V>() => Map<K, V>;
   var __weakMap: <K, V>() => WeakMap<K, V>;
   var __isFrozen = O.isFrozen;
+  var __preventExtensions = Object.preventExtensions || function (o) { };
 
   //Compat
   if (ES_COMPAT <= 3) {
+    __keys = __keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
     __isFrozen = __isFrozen || function (o) { return false; };
   }
   
@@ -78,7 +90,7 @@ module observe {
       <any>__map;
   }
   
-  if (!__observe) {
+  if (!__observe) {    
     var __option = function (o, name) {
       return o ? o[name] : undefined;
     };
@@ -103,6 +115,12 @@ module observe {
     var $$changeObservers = __sym("changeObservers");
     var $$activeChanges = __sym("activeChanges");
     
+    var __enqueueChangeRecord = function (o: any, changeRecord: IChangeRecord<any>) {
+      var notifier = __notifier(o);
+      var changeType = changeRecord.type;
+      var activeChanges = notifier[$$activeChanges];
+      var changeObservers = notifier[$$changeObservers];
+    };
     
     var Notifier: any = (function () {
       
@@ -112,9 +130,18 @@ module observe {
         this[$$activeChanges] = {};
       }
       
-      Notifier.prototype.notify = function (changeRecord) {
-        
-        
+      Notifier.prototype.notify = function (changeRecord: IChangeRecord<any>) {
+        var o = this;
+        var target = o[$$target];
+        var changeType = changeRecord.type;
+        var newRecord: IChangeRecord<any> = {
+          object: target,
+          type: changeRecord.type,
+          name: changeRecord.name,
+          oldValue: changeRecord.oldValue
+        };
+        __preventExtensions(newRecord);
+        __enqueueChangeRecord(target, newRecord);
       };
       
       
