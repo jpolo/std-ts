@@ -1,6 +1,18 @@
 module.exports = function(grunt) {
-  var TARGET = 'es5';
-  var INDENT = 2;
+  function tsConfig(opts) {
+	return {
+	  "rootDir": opts.rootDir,
+      "target": opts.target || 'es5',
+      "module": opts.module || 'umd',
+      "sourceMap": true,
+      "declaration": true,
+      "comments": true,
+      "indentStep": 2,
+      "experimentalDecorators": true,
+	  "inlineSources": true,
+	  "inlineSourceMap": true
+	}
+  }
 	
   grunt.initConfig({
     // ----- Environment

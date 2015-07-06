@@ -1,6 +1,4 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import id = require("../../../main/typescript/ts/id")
 
 var idSuite = suite("ts/id", (self) => {

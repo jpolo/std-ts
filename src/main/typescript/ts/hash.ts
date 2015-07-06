@@ -4,11 +4,16 @@ import id = require("ts/id")
 module hash {
   
   //Constant
-  var INT32_MASK = 0xffffffff;
-  var STRING_HASH_CACHE_MIN_STRLEN = 16;
+  const INT32_MASK = 0xffffffff;
+  const STRING_HASH_CACHE_MIN_STRLEN = 16;
 
   //Util
-  var __create = Object.create;
+  var __create = Object.create || function (proto) {
+    var ctor = proto.constructor;
+    function P() {}
+    P.prototype = proto;
+    return new P();
+  };
   var __getId = id.id;
   var __stringHashCache = (function () {
     var _data = __create(null);
@@ -26,6 +31,7 @@ module hash {
   var __smi = function (i32: number) {
     return ((i32 >>> 1) & 0x40000000) | (i32 & 0xbfffffff);
   };
+  
   
   export interface IHash {
   
@@ -110,6 +116,16 @@ module hash {
       h ^= n;
     }
     return __smi(h);
+  }
+  
+  function hashObject(o: any): number {
+    var returnValue = 0;
+    if (isIHash(o)) {
+      returnValue = +o.hash();  
+    } else if (id.hasId(o)) {
+      returnValue = __getId(o);
+    }
+    return returnValue;
   }
 
   export function isIHash(o: any): boolean {
