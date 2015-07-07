@@ -1,21 +1,31 @@
 module.exports = function(grunt) {
 
-  function tsConfig(opt_options) {
-	var opts = opt_options || {};
-	return {
-	  "rootDir": opts.rootDir,
-      "target": opts.target || 'es5',
-      "module": opts["module"] || 'amd',
-	  "sourceMap": true,
-	  "declaration": false,
-	  "comments": false,
-	  "indentStep": opts.indentStep || 2,
-      "experimentalDecorators": true,
-      "inlineSources": true,
-      "inlineSourceMap": true
-	}
-  }
-	
+
+  var tsConfig = (function () {
+    var filePath = "tsconfig.json";
+    var content;
+
+    function readFile() {
+      return content || (content = grunt.file.readJSON(filePath).compilerOptions);
+    }
+
+    function tsConfig(opt_options) {
+      var optsDefault = readFile();
+      var opts = {};
+      for (var k in optsDefault) {
+        opts[k] = optsDefault[k];
+      }
+      if (opts) {
+        for (var k in opts) {
+          opts[k] = opts[k];
+        }
+      }
+      return opts;
+    }
+
+    return tsConfig;
+  }());
+
   grunt.initConfig({
     // ----- Environment
     // read in some metadata from project descriptor
@@ -65,13 +75,13 @@ module.exports = function(grunt) {
     typescript: {
       // Compiles the code into a single file. Also generates a typescript declaration file
       compile: {
-	    src: ['<%= dir.source_ts %>/**/*.ts'],
+	      src: ['<%= dir.source_ts %>/**/*.ts'],
         dest: '<%= dir.target_js %>',
         options: tsConfig({
           rootDir: '<%= dir.source_ts %>'
         })
       },
-      
+
       // Compiles the tests.
       compile_test: {
         src: ['<%= dir.source_test_ts %>/**/*.ts','<%= dir.source_ts %>/**/*.ts'],
