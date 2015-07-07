@@ -1,16 +1,18 @@
 module.exports = function(grunt) {
-  function tsConfig(opts) {
+
+  function tsConfig(opt_options) {
+	var opts = opt_options || {};
 	return {
 	  "rootDir": opts.rootDir,
       "target": opts.target || 'es5',
-      "module": opts.module || 'umd',
-      "sourceMap": true,
-      "declaration": true,
-      "comments": true,
-      "indentStep": 2,
+      "module": opts["module"] || 'amd',
+	  "sourceMap": true,
+	  "declaration": false,
+	  "comments": false,
+	  "indentStep": opts.indentStep || 2,
       "experimentalDecorators": true,
-	  "inlineSources": true,
-	  "inlineSourceMap": true
+      "inlineSources": true,
+      "inlineSourceMap": true
 	}
   }
 	
@@ -65,30 +67,18 @@ module.exports = function(grunt) {
       compile: {
 	    src: ['<%= dir.source_ts %>/**/*.ts'],
         dest: '<%= dir.target_js %>',
-        options: {
-          rootDir: '<%= dir.source_ts %>',
-          target: TARGET,
-          module: 'amd',
-          sourceMap: true,
-          declaration: true,
-          comments: true,
-          indentStep: INDENT
-        }
+        options: tsConfig({
+          rootDir: '<%= dir.source_ts %>'
+        })
       },
       
       // Compiles the tests.
       compile_test: {
         src: ['<%= dir.source_test_ts %>/**/*.ts','<%= dir.source_ts %>/**/*.ts'],
         dest: '<%= dir.target_test_js %>',
-        options: {
-          rootDir: '<%= dir.source %>',
-          target: TARGET,
-          module: 'amd',
-          sourceMap: true,
-          declaration: false,
-          comments: false,
-          indentStep: INDENT
-        }
+        options: tsConfig({
+          rootDir: '<%= dir.source %>'
+        })
       }
     }
   });
@@ -97,6 +87,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.registerTask('compile', ['typescript:compile']);
-  grunt.registerTask('test', ['typescript:compile_test', 'jasmine']);
+  grunt.registerTask('test', ['typescript:compile_test'/*, 'jasmine'*/]);
   grunt.registerTask('default', ['compile']);
 };
