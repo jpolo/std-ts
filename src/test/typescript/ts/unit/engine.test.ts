@@ -1,8 +1,7 @@
-import boot = require("./_boot.test")
-import engine = require("../../../../main/typescript/ts/unit/engine")
-import Engine = engine.Engine
+import { test } from "./_boot.test"
+import { Engine } from "../../../../main/typescript/ts/unit/engine"
 
-var engineSuite = boot.test("ts/unit/engine.Engine", (assert) => {
+export default test("ts/unit/engine.Engine", (assert) => {
   var engine = new Engine()
   
   //#testEquals()
@@ -66,5 +65,3 @@ var engineSuite = boot.test("ts/unit/engine.Engine", (assert) => {
   assert(engine.dump(/abc(.*)/gi) === '/abc(.*)/gi', message)
   
 });
-var exportSuite = engineSuite;
-export = exportSuite;

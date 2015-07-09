@@ -2,7 +2,7 @@ import { suite, test } from "../../../../main/typescript/ts/unit/qunit"
 import { array, constant, oneOf, IGenerator } from "../../../../main/typescript/ts/unit/generator"
 
 
-var generatorSuite = suite("ts/unit/generator", (self) => {
+export default suite("ts/unit/generator", (self) => {
   
   var params = {
     size: 10,
@@ -66,5 +66,3 @@ var generatorSuite = suite("ts/unit/generator", (self) => {
   })
 
 });
-var exportSuite = generatorSuite;
-export = exportSuite;

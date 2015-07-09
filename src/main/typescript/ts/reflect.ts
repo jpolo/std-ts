@@ -44,7 +44,7 @@ module reflect {
     case 'undefined':
     case 'boolean':
     case 'number':
-    case 'string': 
+    case 'string':
       break;
     default://object
       if (o === null)  {

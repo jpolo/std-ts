@@ -1,9 +1,7 @@
-import qunit = require("../../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
 import quaternion = require("../../../../main/typescript/ts/geometry/quaternion")
 
-var quaternionSuite = suite("ts/geometry/quaternion", (self) => {
+export default suite("ts/geometry/quaternion", (self) => {
   
   var quatZ, quatA, quatB, quatID, quatTmp: [number, number, number, number]
   //var vec3: geometry.IVector3
@@ -77,6 +75,3 @@ var quaternionSuite = suite("ts/geometry/quaternion", (self) => {
   })
   
 })
-
-var exportSuite = quaternionSuite;
-export = exportSuite;

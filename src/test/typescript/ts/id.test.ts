@@ -37,5 +37,5 @@ var idSuite = suite("ts/id", (self) => {
 
 })
 
-var exportSuite = idSuite;
+const exportSuite = idSuite;
 export = exportSuite;

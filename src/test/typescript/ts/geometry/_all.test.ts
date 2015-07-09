@@ -1,6 +1,6 @@
-import quaternionSuite = require("./quaternion.test")
-import matrixSuite = require("./matrix.test")
-import vectorSuite = require("./vector.test")
+import quaternionSuite from "./quaternion.test"
+import matrixSuite from "./matrix.test"
+import vectorSuite from "./vector.test"
 
 var exportSuite = quaternionSuite
   .concat(

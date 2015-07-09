@@ -1,6 +1,4 @@
-import qunit = require("../../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
 import vector2 = require("../../../../main/typescript/ts/geometry/vector2")
 import vector3 = require("../../../../main/typescript/ts/geometry/vector3")
 import vector4 = require("../../../../main/typescript/ts/geometry/vector4")
@@ -18,26 +16,6 @@ interface VectorModule<T> {
   normalize(v: T, dest?: T): T
   scale(v: T, n: number, dest?: T): T
   subtract(a: T, b: T, dest?: T): T
-}
-
-class Assert extends qunit.Assert {
-  
-  equalsVector(a: number[], b: number[], epsilon?: number) {
-    var position = this.__position__();
-    var isSuccess = true;
-    var message = "";
-    var length = a.length;
-    
-    if (length === b.length) {
-      //TODO
-    } else {
-      isSuccess = false;  
-      message = this.__dump__(a) + " and " + this.__dump__(b) + " must have same length";
-    }
-    
-    return this.__assert__(isSuccess, message, position);
-  }
-  
 }
 
 function generateSuite(n: string, vector: VectorModule<number[]>, arity: number) {
@@ -278,5 +256,4 @@ var vector3Suite = generateSuite("ts/geometry/vector3", vector3, 3);
 var vector4Suite = generateSuite("ts/geometry/vector4", vector4, 4);
 
 
-var exportSuite = vector2Suite.concat(vector3Suite, vector4Suite);
-export = exportSuite;
+export default vector2Suite.concat(vector3Suite, vector4Suite);

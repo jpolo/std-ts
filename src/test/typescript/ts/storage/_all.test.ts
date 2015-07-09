@@ -1,7 +1,7 @@
-//import localSuite = require("./local.test")
-//import sessionSuite = require("./session.test")
-import memorySuite = require("./memory.test")
-import cookieSuite = require("./cookie.test")
+//import localSuite from "./local.test"
+//import sessionSuite from "./session.test"
+import memorySuite from "./memory.test"
+import cookieSuite from "./cookie.test"
 
 var exportSuite = memorySuite
   .concat(

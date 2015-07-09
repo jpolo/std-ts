@@ -1,9 +1,7 @@
-import qunit = require("../../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
 import memory = require("../../../../main/typescript/ts/storage/memory")
 
-var memorySuite = suite("ts/storage/memory", (self) => {
+export default suite("ts/storage/memory", (self) => {
   
   var memoryStorage = memory;
   
@@ -46,6 +44,3 @@ var memorySuite = suite("ts/storage/memory", (self) => {
   })
   
 })
-
-var exportSuite = memorySuite
-export = exportSuite

@@ -1,6 +1,4 @@
-import qunit = require("../../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
 import matrix2 = require("../../../../main/typescript/ts/geometry/matrix2")
 import matrix3 = require("../../../../main/typescript/ts/geometry/matrix3")
 import matrix4 = require("../../../../main/typescript/ts/geometry/matrix4")
@@ -193,5 +191,4 @@ var matrixSuite = unit.suite("ts/geometry/matrix", (self) => {
 })
 */
 
-var exportSuite = matrix2Suite.concat(matrix3Suite, matrix4Suite);
-export = exportSuite;
+export default matrix2Suite.concat(matrix3Suite, matrix4Suite);

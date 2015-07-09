@@ -1,12 +1,11 @@
-import generatorSuite = require("./generator.test")
+import generatorSuite from "./generator.test"
 
 //boot
-import assertionSuite = require("./assertion.test")
-import engineSuite = require("./engine.test")
-var bootSuites = [assertionSuite, engineSuite];
+import assertionSuite from "./assertion.test"
+import engineSuite from "./engine.test"
 
-for (var i = 0, l = bootSuites.length; i < l; i++) {
-  bootSuites[i]();
+for (let suite of [assertionSuite, engineSuite]) {
+  suite();
 }
 
 var exportSuite = generatorSuite;

@@ -1,7 +1,7 @@
-import boot = require("./_boot.test")
+import { test } from "./_boot.test"
 import assertion = require("../../../../main/typescript/ts/unit/assertion")
 
-var assertionSuite = boot.test("ts/unit/assertion", (assert) => {
+export default test("ts/unit/assertion", (assert) => {
   
   var assertionType = "SUCCESS";
   var message = "my message";
@@ -30,4 +30,3 @@ var assertionSuite = boot.test("ts/unit/assertion", (assert) => {
   assert(a.position === position, "assertion.position failure")  
   
 });
-export = assertionSuite;
