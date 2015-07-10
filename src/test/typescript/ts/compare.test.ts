@@ -1,6 +1,17 @@
 import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
-import compare = require("../../../main/typescript/ts/compare")
-import Ordering = compare.Ordering
+import { 
+  Ordering, 
+  isICompare, 
+  compare, 
+  compareBoolean, 
+  compareNumber, 
+  compareString, 
+  compareRegExp,
+  compareDate,
+  min, max, 
+  equals, 
+  notEquals
+} from "../../../main/typescript/ts/compare"
 
 
 export default suite("ts/compare", (self) => {
@@ -82,59 +93,59 @@ export default suite("ts/compare", (self) => {
  
   
   test(".isICompare()", (assert) => {
-    assert.strictEqual(compare.isICompare(undefined), false);
-    assert.strictEqual(compare.isICompare(null), false);
-    assert.strictEqual(compare.isICompare({ compare: () => { } }), true);
+    assert.strictEqual(isICompare(undefined), false);
+    assert.strictEqual(isICompare(null), false);
+    assert.strictEqual(isICompare({ compare: () => { } }), true);
   })
   
   test(".compare()", (assert) => {
-    generator(assert, compare.compare)(EMPTY.concat(<any>STRINGS, BOOLEANS, NUMBERS, DATES))
+    generator(assert, compare)(EMPTY.concat(<any>STRINGS, BOOLEANS, NUMBERS, DATES))
   })
   
   test(".compareBoolean()", (assert) => {
-    generator(assert, compare.compareBoolean)(BOOLEANS.concat(EMPTY))
+    generator(assert, compareBoolean)(BOOLEANS.concat(EMPTY))
   })
   
   test(".compareString()", (assert) => {
-    generator(assert, compare.compareString)(STRINGS.concat(EMPTY))
+    generator(assert, compareString)(STRINGS.concat(EMPTY))
   })
   
   test(".compareNumber()", (assert) => {
-    generator(assert, compare.compareNumber)(NUMBERS.concat(EMPTY))
+    generator(assert, compareNumber)(NUMBERS.concat(EMPTY))
   })
   
   test(".compareDate()", (assert) => {
-    generator(assert, compare.compareDate)(DATES.concat(EMPTY))
+    generator(assert, compareDate)(DATES.concat(EMPTY))
   })
   
   test(".compareRegExp()", (assert) => {
-    generator(assert, compare.compareRegExp)(REGEXPS.concat(EMPTY))
+    generator(assert, compareRegExp)(REGEXPS.concat(EMPTY))
   })
   
   test(".min()", (assert) => {
-    assert.strictEqual(compare.min(0, 0, compare.compareNumber), 0);
-    assert.strictEqual(compare.min(0, 1, compare.compareNumber), 0);
-    assert.strictEqual(compare.min(-1, 1, compare.compareNumber), -1);
-    assert.strictEqual(compare.min("a", "b", compare.compareString), "a");
+    assert.strictEqual(min(0, 0, compareNumber), 0);
+    assert.strictEqual(min(0, 1, compareNumber), 0);
+    assert.strictEqual(min(-1, 1, compareNumber), -1);
+    assert.strictEqual(min("a", "b", compareString), "a");
   })
   
   test(".max()", (assert) => {
-    assert.strictEqual(compare.max(0, 1, compare.compareNumber), 1);
-    assert.strictEqual(compare.max(-1, 1, compare.compareNumber), 1);
-    assert.strictEqual(compare.max("a", "b", compare.compareString), "b");
+    assert.strictEqual(max(0, 1, compareNumber), 1);
+    assert.strictEqual(max(-1, 1, compareNumber), 1);
+    assert.strictEqual(max("a", "b", compareString), "b");
   })
   
   test(".equals()", (assert) => {
-    assert.strictEqual(compare.equals(0, 1, compare.compareNumber), false);
-    assert.strictEqual(compare.equals(-1, 1, compare.compareNumber), false);
-    assert.strictEqual(compare.equals("a", "b", compare.compareString), false);
-    assert.strictEqual(compare.equals("a", "a", compare.compareString), true);
+    assert.strictEqual(equals(0, 1, compareNumber), false);
+    assert.strictEqual(equals(-1, 1, compareNumber), false);
+    assert.strictEqual(equals("a", "b", compareString), false);
+    assert.strictEqual(equals("a", "a", compareString), true);
   })
   
   test(".notEquals()", (assert) => {
-    assert.strictEqual(compare.notEquals(0, 1, compare.compareNumber), true);
-    assert.strictEqual(compare.notEquals(-1, 1, compare.compareNumber), true);
-    assert.strictEqual(compare.notEquals("a", "b", compare.compareString), true);
-    assert.strictEqual(compare.notEquals("a", "a", compare.compareString), false);
+    assert.strictEqual(notEquals(0, 1, compareNumber), true);
+    assert.strictEqual(notEquals(-1, 1, compareNumber), true);
+    assert.strictEqual(notEquals("a", "b", compareString), true);
+    assert.strictEqual(notEquals("a", "a", compareString), false);
   })
 })
