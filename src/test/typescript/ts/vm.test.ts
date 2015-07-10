@@ -1,9 +1,7 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import vm = require("../../../main/typescript/ts/vm")
 
-var vmSuite = suite("ts/vm", (self) => {
+export default suite("ts/vm", (self) => {
 
   test(".global", (assert) => {
     var global = vm.global
@@ -41,6 +39,3 @@ var vmSuite = suite("ts/vm", (self) => {
   })
 
 })
-
-var exportSuite = vmSuite;
-export = exportSuite;

@@ -1,12 +1,10 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import math = require("../../../main/typescript/ts/math")
 
-var mathSuite = suite("ts/math", (self) => {
+export default suite("ts/math", (self) => {
   
   function generate<Input, Return>(
-    assert: qunit.Assert, 
+    assert: Assert, 
     d: Array<[Input, Return]>,
     f: (v: Input) => Return,
     methodName: string
@@ -189,6 +187,3 @@ var mathSuite = suite("ts/math", (self) => {
   })
 
 })
-  
-var exportSuite = mathSuite;
-export = exportSuite;

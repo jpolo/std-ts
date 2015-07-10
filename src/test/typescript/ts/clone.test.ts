@@ -1,6 +1,4 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import clone = require("../../../main/typescript/ts/clone")
 
 class TestObject {
@@ -19,7 +17,7 @@ class TestIClone implements clone.IClone {
   }
 }
 
-var cloneSuite = suite("ts/clone", (self) => {
+export default suite("ts/clone", (self) => {
   var now = new Date();
   
   test(".isIClone()", (assert) => {
@@ -71,6 +69,3 @@ var cloneSuite = suite("ts/clone", (self) => {
   })
   
 })
-
-var exportSuite = cloneSuite;
-export = exportSuite;

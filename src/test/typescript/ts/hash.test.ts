@@ -1,25 +1,25 @@
 import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import hash = require("../../../main/typescript/ts/hash")
 
-var hashSuite = suite("ts/hash", (self) => {
+export default suite("ts/hash", (self) => {
  
-  var EMPTY: Array<[any, number]> = [
+  const EMPTY: Array<[any, number]> = [
     [undefined, 0],
     [null, 0]
   ];
   
-  var BOOLEANS: Array<[boolean, number]> = [
+  const BOOLEANS: Array<[boolean, number]> = [
     [false, 0],
     [true, 1]
   ];
   
-  var NUMBERS: Array<[number, number]> = [
+  const NUMBERS: Array<[number, number]> = [
     [NaN, 0],
     [0, 0],
     [1, 1]
   ];
   
-  var STRINGS: Array<[string, number]> = [
+  const STRINGS: Array<[string, number]> = [
     ["", 0]
   ];
   
@@ -50,6 +50,3 @@ var hashSuite = suite("ts/hash", (self) => {
   })
   
 })
-  
-var exportSuite = hashSuite;
-export = exportSuite;

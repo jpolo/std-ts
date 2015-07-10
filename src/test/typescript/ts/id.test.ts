@@ -1,7 +1,7 @@
 import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import id = require("../../../main/typescript/ts/id")
 
-var idSuite = suite("ts/id", (self) => {
+export default suite("ts/id", (self) => {
   
   test(".generate()", (assert) => {
     var current = id.generate();
@@ -36,6 +36,3 @@ var idSuite = suite("ts/id", (self) => {
   })
 
 })
-
-const exportSuite = idSuite;
-export = exportSuite;

@@ -1,6 +1,4 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import error = require("../../../main/typescript/ts/error");
 import BaseError = error.BaseError;
 
@@ -161,7 +159,7 @@ var BaseErrorSuite = suite("ts/error.BaseError", (self) => {
   
 })
 
-var exportSuite = ErrorSuite.concat(
+export default ErrorSuite.concat(
   EvalErrorSuite, 
   RangeErrorSuite, 
   ReferenceErrorSuite, 
@@ -169,4 +167,3 @@ var exportSuite = ErrorSuite.concat(
   URIErrorSuite, 
   BaseErrorSuite
 );
-export = exportSuite;

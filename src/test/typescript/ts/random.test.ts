@@ -1,9 +1,7 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert, testc } from "../../../main/typescript/ts/unit/qunit"
 import random = require("../../../main/typescript/ts/random")
 
-class Assert extends qunit.Assert {
+class AssertCustom extends Assert {
   
   generates<T>(f: () => T, expected: T[]) {
     var isSuccess = true
@@ -19,8 +17,8 @@ class Assert extends qunit.Assert {
   }
 }
 
-var randomSuite = suite("ts/random", (self) => {
-  var test = qunit.testc(Assert)//overload
+export default suite("ts/random", (self) => {
+  var test = testc(AssertCustom)//overload
   var engineTest = random.engine.pseudo
   
   self.setUp = () => {
@@ -196,6 +194,3 @@ var randomSuite = suite("ts/random", (self) => {
   })*/
   
 })
-
-var exportSuite = randomSuite;
-export = exportSuite;

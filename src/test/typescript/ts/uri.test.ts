@@ -1,10 +1,8 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test } from "../../../main/typescript/ts/unit/qunit"
 import uri = require("../../../main/typescript/ts/uri")
 import URI = uri.URI
 
-var uriSuite = suite("ts/uri", (self) => {
+const uriSuite = suite("ts/uri", (self) => {
   var uriDefault = uri.parse('http://localhost:8080/titi/tata?q=blah#id') 
   
   
@@ -22,7 +20,7 @@ var uriSuite = suite("ts/uri", (self) => {
   
 })
 
-var URISuite = suite("ts/uri.URI", (self) => {
+const URISuite = suite("ts/uri.URI", (self) => {
   
   var uriDefault: URI;
   
@@ -80,5 +78,4 @@ var URISuite = suite("ts/uri.URI", (self) => {
   })  
 })
 
-var exportSuite = uriSuite.concat(URISuite);
-export = exportSuite;
+export default uriSuite.concat(URISuite);

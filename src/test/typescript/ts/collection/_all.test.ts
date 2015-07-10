@@ -1,4 +1,3 @@
-import listSuite = require("./list.test")
+import listSuite from "./list.test"
 
-var exportSuite = listSuite
-export = exportSuite;
+export default listSuite;

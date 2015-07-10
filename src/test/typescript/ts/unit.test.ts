@@ -1,13 +1,11 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
-import Assert = qunit.Assert
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import unit = require("../../../main/typescript/ts/unit")
 import engine = require("../../../main/typescript/ts/unit/engine")
 import TestEngine = engine.Engine
-import unitAllTest = require("./unit/_all.test")
+import unitAllTest from "./unit/_all.test"
 
-var AssertSuite = suite("ts/unit.Assert", (self) => {
+//TODO move to qunit test
+const AssertSuite = suite("ts/unit.Assert", (self) => {
   var engine = new TestEngine()
   var testCaseMock: unit.ITest
   var reportMock: unit.ITestReport
@@ -141,7 +139,4 @@ var AssertSuite = suite("ts/unit.Assert", (self) => {
 
 })
 
-
-
-var exportSuite = unitAllTest.concat(AssertSuite);
-export = exportSuite;
+export default unitAllTest.concat(AssertSuite)

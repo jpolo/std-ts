@@ -10,7 +10,7 @@ class TestClass {
   
 }
 
-var inspectSuite = suite("ts/inspect", (self) => {
+const inspectSuite = suite("ts/inspect", (self) => {
   
   test(".isIInspect()", (assert) => {
     assert.ok(!inspect.isIInspect(undefined))
@@ -21,7 +21,7 @@ var inspectSuite = suite("ts/inspect", (self) => {
   
 })
 
-var InspectorSuite = suite("ts/inspect.Inspector", (self) => {
+const InspectorSuite = suite("ts/inspect.Inspector", (self) => {
   function inspectResults<T>(...args: Array<{ 0: T; 1: string; }>) {
     return args;
   }
@@ -34,19 +34,19 @@ var InspectorSuite = suite("ts/inspect.Inspector", (self) => {
   }
   
   var inspector = new Inspector({ maxElements: 3, maxString: 15 })
-  var EMPTY = inspectResults(
+  const EMPTY = inspectResults(
     [undefined, "undefined"],
     [null, "null"]
   );
-  var BOOLEANS = inspectResults<boolean|Boolean>(
+  const BOOLEANS = inspectResults<boolean|Boolean>(
     [true, "true"],
     [false, "false"]
   );
-  var BOOLEANS_OBJ = inspectResults(
+  const BOOLEANS_OBJ = inspectResults(
     [new Boolean(true), "Boolean { true }"],
     [new Boolean(false), "Boolean { false }"]
   );
-  var NUMBERS = inspectResults(
+  const NUMBERS = inspectResults(
     [NaN, "NaN"],
     [0, "0"],
     [1, "1"],
@@ -54,20 +54,20 @@ var InspectorSuite = suite("ts/inspect.Inspector", (self) => {
     [1.234, "1.234"],
     [Math.PI, "3.141592653589793"]
   );
-  var NUMBERS_OBJ = inspectResults(
+  const NUMBERS_OBJ = inspectResults(
     [new Number(0), "Number { 0 }"],
     [new Number(123), "Number { 123 }"]
   );
-  var STRINGS = inspectResults(
+  const STRINGS = inspectResults(
     ['', '""'],
     ['foobar', '"foobar"'],
     ['lorem ipsum "sorem" foo bar', '"lorem ipsum \\"so..."']
   );
-  var STRINGS_OBJ = inspectResults(
+  const STRINGS_OBJ = inspectResults(
     [new String("foobar"), 'String { "foobar" }'],
     [new String('lorem ipsum "sorem" foo bar'), 'String { "lorem ipsum \\"so..." }']
   );
-  var OBJECTS = inspectResults<any>(
+  const OBJECTS = inspectResults<any>(
     [new Boolean(true), 'Boolean { true }'],
     [new Number(123.4545), 'Number { 123.4545 }'],
     [new String("foobar"), 'String { "foobar" }'],
@@ -76,23 +76,23 @@ var InspectorSuite = suite("ts/inspect.Inspector", (self) => {
     [new TestClass(), 'TestClassFoo { foo: true }'],
     [new TypeError("blah"), "TypeError {}" ]
   );
-  var FUNCTIONS = inspectResults(
+  const FUNCTIONS = inspectResults(
     [function (a, b, c) { return 'blah' }, 'function (a, b, c) {...}'],
     [function foo(a, b, c) { return 'blah' }, 'function foo(a, b, c) {...}'],
     [String.prototype.charAt, 'function charAt() {...}']
   );
-  var DATES = inspectResults(
+  const DATES = inspectResults(
     [new Date(0), 'Date { 1970-01-01T00:00:00.000Z }']
   );
-  var REGEXP = inspectResults(
+  const REGEXP = inspectResults(
     [/abc/gi, '/abc/gi']
   );
-  var ARRAYS = inspectResults(
+  const ARRAYS = inspectResults(
     [[ 1, "foobar", true ], '[1, "foobar", true]'],
     [[ 1, 'lorem ipsum "sorem" foo bar', true ], '[1, "lorem ipsum \\"so...", true]'],
     [[ 1, 2, 3, 4, 5 ], '[1, 2, 3, ...]']
   );
-  var ALL = [].concat(
+  const ALL = [].concat(
     NUMBERS, NUMBERS_OBJ, 
     BOOLEANS, BOOLEANS_OBJ, 
     STRINGS, STRINGS_OBJ, 
@@ -150,5 +150,4 @@ var InspectorSuite = suite("ts/inspect.Inspector", (self) => {
   
 })
 
-var exportSuite = inspectSuite.concat(InspectorSuite);
-export = exportSuite;
+export default inspectSuite.concat(InspectorSuite)

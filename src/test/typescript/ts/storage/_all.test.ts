@@ -3,9 +3,8 @@
 import memorySuite from "./memory.test"
 import cookieSuite from "./cookie.test"
 
-var exportSuite = memorySuite
+export default memorySuite
   .concat(
     //sessionSuite,
     cookieSuite
-  )
-export = exportSuite;
+  );

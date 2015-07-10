@@ -1,7 +1,7 @@
 import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import iterator = require("../../../main/typescript/ts/iterator")
 
-var iteratorSuite = suite("ts/iterator", (self) => {
+export default suite("ts/iterator", (self) => {
 
   function generate<T>(assert: Assert, iter: iterator.IIterator<T>, a: T[], limit = 30) {
     for (var i = 0; i < limit; ++i) {
@@ -61,7 +61,4 @@ var iteratorSuite = suite("ts/iterator", (self) => {
     generate(assert, iter, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
   })
 
-});
-
-var exportSuite = iteratorSuite;
-export = exportSuite;
+})

@@ -1,17 +1,15 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test } from "../../../main/typescript/ts/unit/qunit"
 import uuid = require("../../../main/typescript/ts/uuid");
 import UUID = uuid.UUID;
 
-var uuidSuite = suite("ts/uuid", (self) => {
+const uuidSuite = suite("ts/uuid", (self) => {
   
 
 })
 
-var UUIDSuite = suite("ts/uuid.UUID", (self) => {
-  var ZERO = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-  var DATA = [ 0xb3, 0x72, 0xe0, 0xa1, 0xb3, 0x91, 0x46, 0x10, 0x8e, 0x1a, 0xff, 0x7d, 0x51, 0xdb, 0x4e, 0x80 ];
+const UUIDSuite = suite("ts/uuid.UUID", (self) => {
+  const ZERO = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+  const DATA = [ 0xb3, 0x72, 0xe0, 0xa1, 0xb3, 0x91, 0x46, 0x10, 0x8e, 0x1a, 0xff, 0x7d, 0x51, 0xdb, 0x4e, 0x80 ];
   
   test(".generate()", (assert) => {
     
@@ -67,5 +65,4 @@ var UUIDSuite = suite("ts/uuid.UUID", (self) => {
   })
 })
 
-var exportSuite = uuidSuite.concat(UUIDSuite);
-export = exportSuite;
+export default uuidSuite.concat(UUIDSuite);

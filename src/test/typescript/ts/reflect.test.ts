@@ -1,6 +1,4 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test } from "../../../main/typescript/ts/unit/qunit"
 import reflect = require("../../../main/typescript/ts/reflect")
 
 class Parent {
@@ -12,7 +10,7 @@ class Child extends Parent {
   childMethod() {}
 }
 
-var reflectSuite = suite("ts/reflect", () => {
+export default suite("ts/reflect", () => {
   var parentObj = new Parent()
   var childObj = new Child()
   
@@ -166,6 +164,3 @@ var reflectSuite = suite("ts/reflect", () => {
     assert.strictEqual(stringTag([]), "Array")
   })
 })
-  
-var exportSuite = reflectSuite
-export = reflectSuite

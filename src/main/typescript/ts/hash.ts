@@ -8,14 +8,14 @@ module hash {
   const STRING_HASH_CACHE_MIN_STRLEN = 16;
 
   //Util
-  var __create = Object.create || function (proto) {
+  const __create = Object.create || function (proto) {
     var ctor = proto.constructor;
     function P() {}
     P.prototype = proto;
     return new P();
   };
-  var __getId = id.id;
-  var __stringHashCache = (function () {
+  const __getId = id.id;
+  const __stringHashCache = (function () {
     var _data = __create(null);
     function get(k: string) {
       return _data[k];
@@ -28,14 +28,14 @@ module hash {
       set: set
     };
   }());
-  var __smi = function (i32: number) {
+  const __smi = function (i32: number) {
     return ((i32 >>> 1) & 0x40000000) | (i32 & 0xbfffffff);
   };
   
   
   export interface IHash {
   
-    hash(): number
+    hashCode(): number
     
   }
   
@@ -59,11 +59,7 @@ module hash {
           returnValue = __getId(o);
           break;
         default://object
-          if (isIHash(o)) {
-            returnValue = +o.hash();  
-          } else if (id.hasId(o)) {
-            returnValue = __getId(o);
-          }
+          returnValue = hashObject(o);
       }
     }
     return returnValue;
@@ -121,7 +117,7 @@ module hash {
   function hashObject(o: any): number {
     var returnValue = 0;
     if (isIHash(o)) {
-      returnValue = +o.hash();  
+      returnValue = +(<IHash>o).hashCode();  
     } else if (id.hasId(o)) {
       returnValue = __getId(o);
     }
@@ -129,7 +125,7 @@ module hash {
   }
 
   export function isIHash(o: any): boolean {
-    return o && typeof o.hash === "function";  
+    return o && typeof o.hashCode === "function";  
   }
   
 

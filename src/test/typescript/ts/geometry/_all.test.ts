@@ -2,9 +2,8 @@ import quaternionSuite from "./quaternion.test"
 import matrixSuite from "./matrix.test"
 import vectorSuite from "./vector.test"
 
-var exportSuite = quaternionSuite
+export default quaternionSuite
   .concat(
     matrixSuite,
     vectorSuite
   )
-export = exportSuite;

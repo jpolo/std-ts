@@ -2,8 +2,24 @@ module option {
   
   //Util
   var __none: Option<any>;
-  var __isNone = function (o) { return o === __none; };
-  var __get = function (o) { return o[0]; };
+
+ 
+  //ECMA like spec
+  function IsOption(o: any) {
+    return o instanceof Option;  
+  }
+  
+  function OptionIsNone(o: Option<any>) {
+    return o === __none;  
+  }
+  
+  function OptionCreate<T>(v: T): Option<T> {
+    return new Option(v);  
+  }
+  
+  function OptionGet<T>(o: Option<T>): T {
+    return o[0];
+  }
   
   //Compat
   
@@ -29,7 +45,7 @@ module option {
     }
     
     static isOption(o: any): boolean {
-      return o instanceof Option;
+      return IsOption(o);
     }
     
     static isSome<S>(o: Option<S>): boolean {
@@ -59,58 +75,58 @@ module option {
     }
     
     isNone(): boolean {
-      return __isNone(this);
+      return OptionIsNone(this);
     }
     
     isSome(): boolean {
-      return !__isNone(this);
+      return !OptionIsNone(this);
     }
     
     get(): T {
-      return __get(this);  
+      return OptionGet(this);  
     }
     
     getOrElse(alt: () => T): T {
-      return __isNone(this) ? alt() : __get(this);
+      return OptionIsNone(this) ? alt() : OptionGet(this);
     }
     
     orElse(alt: () => Option<T>): Option<T> {
-      return __isNone(this) ? alt() : this;
+      return OptionIsNone(this) ? alt() : this;
     }
     
     //array like
     forEach(f: (v: T) => void): void {
-      if (!__isNone(this)) {
-        f(__get(this));
+      if (!OptionIsNone(this)) {
+        f(OptionGet(this));
       }
     }
     
     map<U>(f: (v: T) => U): Option<U> {
-      return __isNone(this) ? __none : Option.some(f(__get(this)));
+      return OptionIsNone(this) ? __none : Option.some(f(OptionGet(this)));
     }
     
     flatMap<U>(f: (v: T) => Option<U>): Option<U> {
-      return __isNone(this) ? __none : f(__get(this));
+      return OptionIsNone(this) ? __none : f(OptionGet(this));
     }
     
     reduce<U>(r: (acc: U, v: T) => U, initialValue?: U): U {
-      return __isNone(this) ? initialValue : r(initialValue, __get(this));
+      return OptionIsNone(this) ? initialValue : r(initialValue, OptionGet(this));
     }
     
     filter(p: (v: T) => boolean): Option<T> {
-      return __isNone(this) || !p(__get(this)) ? __none : this;
+      return OptionIsNone(this) || !p(OptionGet(this)) ? __none : this;
     }
     
     some(p: (v: T) => boolean): boolean {
-      return !__isNone(this) && !p(__get(this));
+      return !OptionIsNone(this) && !p(OptionGet(this));
     }
     
     every(p: (v: T) => boolean): boolean {
-      return !__isNone(this) && !p(__get(this));
+      return !OptionIsNone(this) && !p(OptionGet(this));
     }
 
     inspect() {
-      return __isNone(this) ? "None" : "Some { " + __get(this) + " }";
+      return OptionIsNone(this) ? "None" : "Some { " + OptionGet(this) + " }";
     }
     
     toString() {

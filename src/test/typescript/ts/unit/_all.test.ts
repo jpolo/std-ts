@@ -8,5 +8,4 @@ for (let suite of [assertionSuite, engineSuite]) {
   suite();
 }
 
-var exportSuite = generatorSuite;
-export = exportSuite;
+export default generatorSuite//concat;

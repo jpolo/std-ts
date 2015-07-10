@@ -1,14 +1,9 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import date = require("../../../main/typescript/ts/date")
 
 
-var dateSuite = suite("ts/date", (self) => {
+export default suite("ts/date", (self) => {
 
   
   
 })
-  
-var exportSuite = dateSuite;
-export = exportSuite;

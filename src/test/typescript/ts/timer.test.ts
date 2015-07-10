@@ -1,9 +1,7 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import timer = require("../../../main/typescript/ts/timer");
 
-var timerSuite = suite("ts/timer", (self) => {
+export default suite("ts/timer", (self) => {
 
   function createSpy() {
     var o = {
@@ -112,6 +110,3 @@ var timerSuite = suite("ts/timer", (self) => {
   })
   
 })
-  
-var exportSuite = timerSuite;
-export = exportSuite;

@@ -1,20 +1,18 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
 import compare = require("../../../main/typescript/ts/compare")
 import Ordering = compare.Ordering
 
 
-var compareSuite = suite("ts/compare", (self) => {
+export default suite("ts/compare", (self) => {
   
   function data<T, R>(d: Array<[[T, T], R]>) {
     return d;
   }
   
-  function generator<A, R>(assert: qunit.Assert, f: (a: A) => R): (d: Array<[[A], R]>) => void
-  function generator<A, B, R>(assert: qunit.Assert, f: (a: A, b: B) => R): (d: Array<[[A, B], R]>) => void
-  function generator<A, B, C, R>(assert: qunit.Assert, f: (a: A, b: B, c: C) => R): (d: Array<[[A, B, C], R]>) => void
-  function generator(assert: qunit.Assert, f: any): any {
+  function generator<A, R>(assert: Assert, f: (a: A) => R): (d: Array<[[A], R]>) => void
+  function generator<A, B, R>(assert: Assert, f: (a: A, b: B) => R): (d: Array<[[A, B], R]>) => void
+  function generator<A, B, C, R>(assert: Assert, f: (a: A, b: B, c: C) => R): (d: Array<[[A, B, C], R]>) => void
+  function generator(assert: Assert, f: any): any {
     return function (d: any[]) {
       function dump(args) {
         return args.map((arg) => assert.__dump__(arg)).join(", ");
@@ -140,6 +138,3 @@ var compareSuite = suite("ts/compare", (self) => {
     assert.strictEqual(compare.notEquals("a", "a", compare.compareString), false);
   })
 })
-  
-var exportSuite = compareSuite
-export = exportSuite

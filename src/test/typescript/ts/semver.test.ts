@@ -1,11 +1,9 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test } from "../../../main/typescript/ts/unit/qunit"
 import semver = require("../../../main/typescript/ts/semver")
 import ISemVer = semver.ISemVer
 import SemVer = semver.SemVer
 
-var semverSuite = suite("ts/semver.SemVer", (self) => {
+export default suite("ts/semver.SemVer", (self) => {
 
   test('.parse()', (assert) => {
     ['1.2.3.4',
@@ -35,6 +33,3 @@ var semverSuite = suite("ts/semver.SemVer", (self) => {
   })
   
 })
-  
-var exportSuite = semverSuite
-export = exportSuite

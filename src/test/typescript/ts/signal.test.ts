@@ -1,10 +1,7 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test } from "../../../main/typescript/ts/unit/qunit"
 import signal = require("../../../main/typescript/ts/signal")
 
-
-var signalSuite = suite("ts/signal", (self) => {
+export default suite("ts/signal", (self) => {
   
   var receiver = {};
   var SIG = signal.signal<string>("data");
@@ -100,7 +97,4 @@ var signalSuite = suite("ts/signal", (self) => {
     
   })
   
-});
-
-var exportSuite = signalSuite;
-export = exportSuite;
+})

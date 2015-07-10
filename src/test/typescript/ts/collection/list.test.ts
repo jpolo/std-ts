@@ -1,15 +1,12 @@
-import qunit = require("../../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
-import list = require("../../../../main/typescript/ts/collection/list")
-import List = list.List
+import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
+import { List } from "../../../../main/typescript/ts/collection/list"
 
-var listSuite = suite("ts/collection/list.List", (self) => {
+export default suite("ts/collection/list.List", (self) => {
   
   var l: List<string>
   
   self.setUp = () => {
-    l = new list.List<string>()
+    l = new List<string>()
   }
   
   
@@ -56,6 +53,3 @@ var listSuite = suite("ts/collection/list.List", (self) => {
     assert.strictEqual(l.toString(), "List { foo, bar, baz }");
   })
 })
-
-var exportSuite = listSuite
-export = exportSuite

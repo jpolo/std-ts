@@ -1,31 +1,31 @@
 import unit = require("../../../main/typescript/ts/unit")
 
-import cloneSuite = require("./clone.test")
-import collectionSuite = require("./collection/_all.test")
-import compareSuite = require("./compare.test")
-import dateSuite = require("./date.test")
-import errorSuite = require("./error.test")
-import geometrySuite = require("./geometry/_all.test")
-import hashSuite = require("./hash.test")
-import idSuite = require("./id.test")
-import inspectSuite = require("./inspect.test")
-import iteratorSuite = require("./iterator.test")
-import logSuite = require("./log.test")
-import mathSuite = require("./math.test")
-import randomSuite = require("./random.test")
-import reflectSuite = require("./reflect.test")
-import semverSuite = require("./semver.test")
-import signalSuite = require("./signal.test")
-import stacktraceSuite = require("./stacktrace.test")
-import storageSuite = require("./storage/_all.test")
-import timerSuite = require("./timer.test")
-import unitSuite = require("./unit.test")
-import uriSuite = require("./uri.test")
-import uuidSuite = require("./uuid.test")
-import vmSuite = require("./vm.test")
-import yamlSuite = require("./yaml.test")
+import cloneSuite from "./clone.test"
+import collectionSuite from "./collection/_all.test"
+import compareSuite from "./compare.test"
+import dateSuite from "./date.test"
+import errorSuite from "./error.test"
+import geometrySuite from "./geometry/_all.test"
+import hashSuite from "./hash.test"
+import idSuite from "./id.test"
+import inspectSuite from "./inspect.test"
+import iteratorSuite from "./iterator.test"
+import logSuite from "./log.test"
+import mathSuite from "./math.test"
+import randomSuite from "./random.test"
+import reflectSuite from "./reflect.test"
+import semverSuite from "./semver.test"
+import signalSuite from "./signal.test"
+import stacktraceSuite from "./stacktrace.test"
+import storageSuite from "./storage/_all.test"
+import timerSuite from "./timer.test"
+import unitSuite from "./unit.test"
+import uriSuite from "./uri.test"
+import uuidSuite from "./uuid.test"
+import vmSuite from "./vm.test"
+import yamlSuite from "./yaml.test"
 
-var exportSuite: unit.ITest[] = [].concat(
+export default <unit.ITest[]>[].concat(
   cloneSuite,
   collectionSuite,
   compareSuite,
@@ -50,5 +50,4 @@ var exportSuite: unit.ITest[] = [].concat(
   uuidSuite,
   vmSuite,
   yamlSuite
-)
-export = exportSuite
+);

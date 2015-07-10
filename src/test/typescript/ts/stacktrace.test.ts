@@ -1,10 +1,8 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test } from "../../../main/typescript/ts/unit/qunit"
 import stacktrace = require("../../../main/typescript/ts/stacktrace")
 import ICallSite = stacktrace.ICallSite;
 
-var stacktraceSuite = suite("ts/stacktrace", (self) => {
+export default suite("ts/stacktrace", (self) => {
   var FILENAME = "stacktrace.test.js";
   var DATA = {
     error: null,
@@ -99,6 +97,3 @@ var stacktraceSuite = suite("ts/stacktrace", (self) => {
   })
   
 })
-  
-var exportSuite = stacktraceSuite;
-export = exportSuite;

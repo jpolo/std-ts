@@ -1,9 +1,7 @@
-import qunit = require("../../../main/typescript/ts/unit/qunit")
-import suite = qunit.suite
-import test = qunit.test
+import { suite, test } from "../../../main/typescript/ts/unit/qunit"
 import yaml = require("../../../main/typescript/ts/yaml")
 
-var yamlSuite = suite("ts/yaml", (self) => {
+export default suite("ts/yaml", (self) => {
   
   test(".parse()", (assert) => {
     //Boolean
@@ -112,6 +110,3 @@ var yamlSuite = suite("ts/yaml", (self) => {
   })
   
 })
-  
-var exportSuite = yamlSuite;
-export = exportSuite;

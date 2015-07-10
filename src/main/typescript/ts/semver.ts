@@ -139,7 +139,7 @@ module semver {
       );
     }
     
-    hash() {
+    hashCode() {
       return hash.hashString(this.toString());
       /*
       s.writeUint32(this.major);
