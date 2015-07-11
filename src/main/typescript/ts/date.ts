@@ -1,5 +1,5 @@
-module date {
 
+
+export class Date {
+  
 }
-
-export = date

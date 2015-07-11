@@ -4,20 +4,20 @@ const __isEmpty = function (o) { return o === null  || o === undefined; };
 const __isNaN = function (o) { return o !== o; };
 const __str = function (o) { return "" + o; };
 const __stringTag = function (o: any) {
-  var s = '';
+  let s = '';
   if (o === undefined) {
     s = 'Undefined';
   } else if (o === null) {
     s = 'Null';
   } else {
-    var c = o.constructor;
+    let c = o.constructor;
     s = c && c.name || __ostring.call(o).slice(8, -1);
   }
   return s;
 };
 const __comparator = function <T>(o: T): (lhs: T, rhs: T) => Ordering {
-  var returnValue: (lhs: any, rhs: any) => Ordering
-  var tag = __stringTag(o);
+  let returnValue: (lhs: any, rhs: any) => Ordering
+  let tag = __stringTag(o);
   switch (tag) {
     case 'Undefined': returnValue = null; break;
     case 'Null': returnValue = null; break;
@@ -53,10 +53,10 @@ export function isICompare(o: any): boolean {
 }
 
 export function compare<T>(lhs: T, rhs: T): Ordering {
-  var returnValue: Ordering = Ordering.None;
-  var l = <any> lhs;
-  var r = <any> rhs;
-  var cmpFn = __comparator(lhs) || __comparator(rhs);
+  let returnValue: Ordering = Ordering.None;
+  let l = <any> lhs;
+  let r = <any> rhs;
+  let cmpFn = __comparator(lhs) || __comparator(rhs);
   
   return (
     cmpFn ? cmpFn(lhs, rhs) : 
@@ -101,11 +101,11 @@ export function compareICompare(lhs: ICompare, rhs: ICompare): Ordering {
 }
 
 export function compareArray(lhs: Array<any>, rhs: Array<any>, compareFn = compare) {
-  var returnValue = Ordering.Equal;
-  var lhslen = lhs.length;
-  var rhslen = rhs.length;
+  let returnValue = Ordering.Equal;
+  let lhslen = lhs.length;
+  let rhslen = rhs.length;
   
-  for (var i = 0, l = lhslen < rhslen ? lhslen : rhslen; i < l; ++i) {
+  for (let i = 0, l = lhslen < rhslen ? lhslen : rhslen; i < l; ++i) {
     returnValue = compareFn(lhs[i], rhs[i]);
     if (returnValue !== Ordering.Equal) {
       break;
@@ -150,7 +150,7 @@ export function lessThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
 }
 
 export function lessOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
-  var result = compareFn(lhs, rhs);
+  let result = compareFn(lhs, rhs);
   return (result === Ordering.Less || result === Ordering.Equal);
 }
 
@@ -159,6 +159,6 @@ export function greaterThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
 }
 
 export function greaterOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
-  var result = compareFn(lhs, rhs);
+  let result = compareFn(lhs, rhs);
   return (result === Ordering.Greater || result === Ordering.Equal);
 }

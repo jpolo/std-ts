@@ -1,5 +1,5 @@
 import { suite, test } from "../../../main/typescript/ts/unit/qunit"
-import reflect = require("../../../main/typescript/ts/reflect")
+import * as reflect from "../../../main/typescript/ts/reflect"
 
 class Parent {
   parentMethod() {}

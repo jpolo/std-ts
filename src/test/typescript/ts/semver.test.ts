@@ -1,7 +1,5 @@
 import { suite, test } from "../../../main/typescript/ts/unit/qunit"
-import semver = require("../../../main/typescript/ts/semver")
-import ISemVer = semver.ISemVer
-import SemVer = semver.SemVer
+import { ISemVer, SemVer } from "../../../main/typescript/ts/semver"
 
 export default suite("ts/semver.SemVer", (self) => {
 

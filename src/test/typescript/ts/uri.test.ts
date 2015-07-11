@@ -1,9 +1,8 @@
 import { suite, test } from "../../../main/typescript/ts/unit/qunit"
-import uri = require("../../../main/typescript/ts/uri")
-import URI = uri.URI
+import { parse, URI } from "../../../main/typescript/ts/uri"
 
 const uriSuite = suite("ts/uri", (self) => {
-  var uriDefault = uri.parse('http://localhost:8080/titi/tata?q=blah#id') 
+  var uriDefault = parse('http://localhost:8080/titi/tata?q=blah#id') 
   
   
   test(".parse()", (assert) => {
@@ -69,7 +68,7 @@ const URISuite = suite("ts/uri.URI", (self) => {
   })
     
   test("#inspect()", (assert) => {
-    assert.strictEqual(uri.parse('').inspect(), 'URI {}')
+    assert.strictEqual(parse('').inspect(), 'URI {}')
     assert.strictEqual(uriDefault.inspect(), 'URI { http://localhost:8080/titi/tata?q=blah#id }')
   })
     

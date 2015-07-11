@@ -1,81 +1,79 @@
 import { suite, test } from "../../../main/typescript/ts/unit/qunit"
-import log = require("../../../main/typescript/ts/log")
-import ILevel = log.ILevel
-import IMessage = log.IMessage
-import Logger = log.Logger
-import Dispatcher = log.Dispatcher
-import Message = log.Message
-
+import {
+  DEBUG, INFO, WARN, ERROR, FATAL,
+  ILevel, IMessage, IDispatcher, Level, Logger, Dispatcher, Message,
+  logger, reporter
+} from "../../../main/typescript/ts/log"
 
 const logSuite = suite("ts/log", (self) => {
   var ng: Dispatcher
-  var logger: Logger
-  var logs: log.IMessage[]
+  var loggerObject: Logger
+  var logs: IMessage[]
   
   self.setUp = () => {
     ng = new Dispatcher()
-    logger = ng.getLogger('test')
+    loggerObject = ng.getLogger('test')
     logs = []
       
     ng.reporters['simple'] = {
       filter: null,
-      reporter: new log.reporter.Array(logs)
+      reporter: new reporter.Array(logs)
     }
   }
   
   test(".logger()", (assert) => {
-    assert.strictEqual(log.logger('test.foo.bar.baz').name, 'test.foo.bar.baz')
-    assert.strictEqual(log.logger('test.foo.bar').name, 'test.foo.bar')
-    assert.strictEqual(log.logger('test.foo').name, 'test.foo')
-    assert.strictEqual(log.logger('test').name, 'test')
+    assert.strictEqual(logger('test.foo.bar.baz').name, 'test.foo.bar.baz')
+    assert.strictEqual(logger('test.foo.bar').name, 'test.foo.bar')
+    assert.strictEqual(logger('test.foo').name, 'test.foo')
+    assert.strictEqual(logger('test').name, 'test')
       
-    assert.strictEqual(log.logger('test.foo.bar'), log.logger('test.foo.bar'))
+    assert.strictEqual(logger('test.foo.bar'), logger('test.foo.bar'))
   })
 
 })
 
-const MessageSuite = suite("ts/log.Message", (self) => {
+const MessageSuite = suite("ts/Message", (self) => {
   
   test("#constructor()", (assert) => {
-    var m = new Message(log.DEBUG, "mygroup", ["mymessage"]);
-    assert.strictEqual(m.level, log.DEBUG);
+    var m = new Message(DEBUG, "mygroup", ["mymessage"]);
+    assert.strictEqual(m.level, DEBUG);
     assert.strictEqual(m.group, "mygroup");
     assert.deepEqual(m.data, ["mymessage"]);
   })
   
   test("#equals()", (assert) => {
-    var message = new Message(log.DEBUG, "mygroup", ["mymessage"])
+    var message = new Message(DEBUG, "mygroup", ["mymessage"])
     assert.strictEqual(message.equals(null), false)
-    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygroup", ["mymessage"])), true)
-    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygrou", ["mymessage"])), false)
-    assert.strictEqual(message.equals(new Message(log.DEBUG, "mygroup", ["mymessag"])), false)
+    assert.strictEqual(message.equals(new Message(DEBUG, "mygroup", ["mymessage"])), true)
+    assert.strictEqual(message.equals(new Message(DEBUG, "mygrou", ["mymessage"])), false)
+    assert.strictEqual(message.equals(new Message(DEBUG, "mygroup", ["mymessag"])), false)
   })
     
   test("#inspect()", (assert) => {
-    var message = new Message(log.DEBUG, "mygroup", ["mymessage"])
+    var message = new Message(DEBUG, "mygroup", ["mymessage"])
     assert.strictEqual(message.inspect(), 'Message { level: DEBUG, group: "mygroup", data: ["mymessage"] }')
   })
     
   test("#toString()", (assert) => {
-    assert.strictEqual(String(new Message(log.DEBUG, "mygroup", ["foo", "bar"])), '[DEBUG|mygroup] foo bar')
-    assert.strictEqual(String(new Message(log.WARN, "mygroup", ["foo", 1])), '[WARN|mygroup] foo 1')
-    assert.strictEqual(String(new Message(log.ERROR, "mygroup", ["foo", 1])), '[ERROR|mygroup] foo 1')
+    assert.strictEqual(String(new Message(DEBUG, "mygroup", ["foo", "bar"])), '[DEBUG|mygroup] foo bar')
+    assert.strictEqual(String(new Message(WARN, "mygroup", ["foo", 1])), '[WARN|mygroup] foo 1')
+    assert.strictEqual(String(new Message(ERROR, "mygroup", ["foo", 1])), '[ERROR|mygroup] foo 1')
   })
   
 })
 
-const LevelSuite = suite("ts/log.Level", () => {
-  var PRIVATE_KEY = log.Level['_constructorKey'];
-  var DEBUG = log.DEBUG;
-  var INFO = log.INFO;
-  var WARN = log.WARN;
-  var ERROR = log.ERROR;
-  var FATAL = log.FATAL;
+const LevelSuite = suite("ts/Level", () => {
+  var PRIVATE_KEY = Level['_constructorKey'];
+  var DEBUG = DEBUG;
+  var INFO = INFO;
+  var WARN = WARN;
+  var ERROR = ERROR;
+  var FATAL = FATAL;
 
   test("#constructor()", (assert) => {
     //private constructor
     assert.throws(() => {
-      var l = new log.Level("blah", 0, {});
+      var l = new Level("blah", 0, {});
     })
   })
 
@@ -88,13 +86,13 @@ const LevelSuite = suite("ts/log.Level", () => {
   })
   
   test("#compare()", (assert) => {
-    var level = new log.Level("BLAH", DEBUG.value, PRIVATE_KEY)
+    var level = new Level("BLAH", DEBUG.value, PRIVATE_KEY)
     assert.strictEqual(level.compare(null), NaN)
     assert.strictEqual(DEBUG.compare(DEBUG), 0)
   })
     
   test("#equals()", (assert) => {
-    var level = new log.Level("BLAH", DEBUG.value, PRIVATE_KEY)
+    var level = new Level("BLAH", DEBUG.value, PRIVATE_KEY)
     assert.strictEqual(level.equals(null), false)
     assert.strictEqual(level.equals(DEBUG), true)
     assert.strictEqual(level.equals(INFO), false)
@@ -118,11 +116,11 @@ const LevelSuite = suite("ts/log.Level", () => {
   })
 })
 
-const LoggerSuite = suite("ts/log.Logger", (self) => {
+const LoggerSuite = suite("ts/Logger", (self) => {
   //mock engine
   var logger: Logger;
   var logs: IMessage[] = [];
-  var ng: log.IDispatcher = {
+  var ng: IDispatcher = {
     isEnabledFor: (level: ILevel, group: string) => { return true; },
     send: (level: ILevel, group: string, data: any[]) => {
       logs.push(createMessage(level, group, data));
@@ -154,47 +152,47 @@ const LoggerSuite = suite("ts/log.Logger", (self) => {
     assert.strictEqual(logs.length, 0)
     logger.debug("foo", "bar")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.DEBUG, "foobar", ["foo", "bar"]))
+    assert.equal(logs[0], new Message(DEBUG, "foobar", ["foo", "bar"]))
   })
   
   test("#info()", (assert) => {
     assert.strictEqual(logs.length, 0)
     logger.info("foo", "bar")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.INFO, "foobar", ["foo", "bar"]))
+    assert.equal(logs[0], new Message(INFO, "foobar", ["foo", "bar"]))
   })
   
   test("#warn()", (assert) => {
     assert.strictEqual(logs.length, 0)
     logger.warn("foo", "bar")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.WARN, "foobar", ["foo", "bar"]))
+    assert.equal(logs[0], new Message(WARN, "foobar", ["foo", "bar"]))
   })
   
   test("#error()", (assert) => {
     assert.strictEqual(logs.length, 0)
     logger.error("foo", "bar")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.ERROR, "foobar", ["foo", "bar"]))
+    assert.equal(logs[0], new Message(ERROR, "foobar", ["foo", "bar"]))
   })
   
   test("#fatal()", (assert) => {
     assert.strictEqual(logs.length, 0)
     logger.fatal("foo", "bar")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.FATAL, "foobar", ["foo", "bar"]))
+    assert.equal(logs[0], new Message(FATAL, "foobar", ["foo", "bar"]))
   })
   
   test("#log()", (assert) => {
     assert.strictEqual(logs.length, 0)
     
-    logger.log(log.DEBUG, "blah blah")
+    logger.log(DEBUG, "blah blah")
     assert.strictEqual(logs.length, 1)
-    assert.equal(logs[0], new log.Message(log.DEBUG, "foobar", ["blah blah"]))
+    assert.equal(logs[0], new Message(DEBUG, "foobar", ["blah blah"]))
     
-    logger.log(log.ERROR, "blah error")
+    logger.log(ERROR, "blah error")
     assert.strictEqual(logs.length, 2)
-    assert.equal(logs[1], new log.Message(log.ERROR, "foobar", ["blah error"]))
+    assert.equal(logs[1], new Message(ERROR, "foobar", ["blah error"]))
   })
   
   test("#toString()", (assert) => {

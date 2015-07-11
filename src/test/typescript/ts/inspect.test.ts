@@ -1,6 +1,5 @@
 import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
-import inspect = require("../../../main/typescript/ts/inspect")
-import Inspector = inspect.Inspector
+import { isIInspect, Inspector } from "../../../main/typescript/ts/inspect"
 
 class TestClass {
 
@@ -13,10 +12,10 @@ class TestClass {
 const inspectSuite = suite("ts/inspect", (self) => {
   
   test(".isIInspect()", (assert) => {
-    assert.ok(!inspect.isIInspect(undefined))
-    assert.ok(!inspect.isIInspect(null))
-    assert.ok(!inspect.isIInspect({}))
-    assert.ok(inspect.isIInspect({ inspect: () => {  } }))
+    assert.ok(!isIInspect(undefined))
+    assert.ok(!isIInspect(null))
+    assert.ok(!isIInspect({}))
+    assert.ok(isIInspect({ inspect: () => {  } }))
   })
   
 })

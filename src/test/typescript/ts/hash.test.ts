@@ -1,5 +1,5 @@
 import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
-import hash = require("../../../main/typescript/ts/hash")
+import { hash, hashBoolean, hashNumber, hashString } from "../../../main/typescript/ts/hash"
 
 export default suite("ts/hash", (self) => {
  
@@ -24,8 +24,7 @@ export default suite("ts/hash", (self) => {
   ];
   
   function assertAll<Input, Output>(assert: Assert, f: (v: Input) => Output, data: Array<[Input, Output]>) {
-    for (var i = 0, l = data.length; i < l; i++) {
-      var pair = data[i];
+    for (let pair of data) {
       assert.strictEqual(f(pair[0]), pair[1]);
     }
   }
@@ -35,18 +34,18 @@ export default suite("ts/hash", (self) => {
   };
   
   test(".hashBoolean()", (assert) => {
-    assertAll(assert, hash.hashBoolean, EMPTY);
-    assertAll(assert, hash.hashBoolean, BOOLEANS);
+    assertAll(assert, hashBoolean, EMPTY);
+    assertAll(assert, hashBoolean, BOOLEANS);
   })
   
   test(".hashNumber()", (assert) => {
-    assertAll(assert, hash.hashNumber, EMPTY);
-    assertAll(assert, hash.hashNumber, NUMBERS);
+    assertAll(assert, hashNumber, EMPTY);
+    assertAll(assert, hashNumber, NUMBERS);
   })
   
   test(".hashString()", (assert) => {
-    assertAll(assert, hash.hashString, EMPTY);
-    assertAll(assert, hash.hashString, STRINGS);
+    assertAll(assert, hashString, EMPTY);
+    assertAll(assert, hashString, STRINGS);
   })
   
 })

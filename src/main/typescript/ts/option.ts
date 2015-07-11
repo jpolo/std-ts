@@ -144,4 +144,4 @@ module option {
   export var None = */
   
 }
-export = option;
+export default option;

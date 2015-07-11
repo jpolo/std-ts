@@ -1,6 +1,6 @@
 //Util
 const __create = Object.create || function (proto) {
-  var ctor = proto.constructor;
+  let ctor = proto.constructor;
   function P() {}
   P.prototype = proto;
   return new P();
@@ -8,18 +8,17 @@ const __create = Object.create || function (proto) {
 const __protoOf = Object.getPrototypeOf || function (o: any) { return o.__proto__; };
 const __descriptors = Object.getOwnPropertyNames ? 
   function (o: any): { [k: string]: PropertyDescriptor } {
-    var descriptors: any = {};
-    var props = Object.getOwnPropertyNames(o);
-    var getDescriptor = Object.getOwnPropertyDescriptor;
-    for (var i = 0, l = props.length; i < l; ++i) {
-      var prop = props[i];
+    let descriptors: any = {};
+    let props = Object.getOwnPropertyNames(o);
+    let getDescriptor = Object.getOwnPropertyDescriptor;
+    for (let prop of props) {
       descriptors[prop] = getDescriptor(o, prop);
     }
     return descriptors;
   } : 
   function (o) {
-    var descriptors: any = {};
-    for (var prop in o) {
+    let descriptors: any = {};
+    for (let prop in o) {
       if (o.hasOwnProperty(prop)) {
         descriptors[prop] = {
           value: o[prop],
@@ -34,7 +33,7 @@ const __descriptors = Object.getOwnPropertyNames ?
 const __isDefined = function (o) { return o !== undefined && o !== null; };
 const __ostring = {}.toString;
 const __stringTag = function (o: any) {
-  var c = o.constructor;
+  let c = o.constructor;
   return c && c.name || __ostring.call(o).slice(8, -1);
 };
 
@@ -47,8 +46,8 @@ export function isIClone(o: any): boolean {
 }
 
 export function clone<T>(o: T): T {
-  var anyVal = <any> o;
-  var returnValue: T = o;
+  let anyVal = <any> o;
+  let returnValue: T = o;
   switch (typeof anyVal) {
   case "object":
     if (anyVal !== null) {
@@ -67,11 +66,11 @@ export function clone<T>(o: T): T {
     }  
     break;
   case "function":
-    var f: any = (<any> returnValue).__cloned__ = anyVal.__cloned__ || o;
+    let f: any = (<any> returnValue).__cloned__ = anyVal.__cloned__ || o;
     returnValue = <any> function () {
-      var r: any;
-      var t = this;
-      var argc = arguments.length;
+      let r: any;
+      let t = this;
+      let argc = arguments.length;
 
       switch (argc) {
         case 0: r = t ? f() : f.call(t); break;
@@ -103,11 +102,11 @@ export function cloneString(s: string): string {
 }
 
 export function cloneArray<T>(a: T[]): T[] {
-  var returnValue = a;
+  let returnValue = a;
   if (__isDefined(a)) {
-    var length = a.length;
+    let length = a.length;
     returnValue = new Array(length);
-    for (var i = 0; i < length; i++) {
+    for (let i = 0; i < length; i++) {
       returnValue[i] = a[i];
     }
   }
@@ -119,9 +118,9 @@ export function cloneDate(d: Date): Date {
 }
 
 export function cloneRegExp(re: RegExp): RegExp {
-  var returnValue = re;
+  let returnValue = re;
   if (__isDefined(re)) {
-    var flags = "";
+    let flags = "";
     if (re.global) {
       flags += "g";
     }
@@ -144,7 +143,7 @@ export function cloneRegExp(re: RegExp): RegExp {
 
 /*
 export function cloneMap<K, V>(m: Map<K, V>): Map<K, V> {
-  var returnValue = m;
+  let returnValue = m;
   if (__isDefined(m)) {
     returnValue = new Map<K, V>();
     m.forEach((v, k) => returnValue.set(k, v)); 
@@ -153,7 +152,7 @@ export function cloneMap<K, V>(m: Map<K, V>): Map<K, V> {
 }
 
 export function cloneSet<T>(s: Set<T>): Set<T> {
-  var returnValue = s;
+  let returnValue = s;
   if (__isDefined(s)) {
     returnValue = new Set<T>();
     s.forEach((v) => returnValue.add(v)); 

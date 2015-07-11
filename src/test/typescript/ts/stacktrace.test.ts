@@ -1,19 +1,18 @@
 import { suite, test } from "../../../main/typescript/ts/unit/qunit"
-import stacktrace = require("../../../main/typescript/ts/stacktrace")
-import ICallSite = stacktrace.ICallSite;
+import * as stacktrace from "../../../main/typescript/ts/stacktrace"
 
 export default suite("ts/stacktrace", (self) => {
-  var FILENAME = "stacktrace.test.js";
-  var DATA = {
+  const FILENAME = "stacktrace.test.js";
+  const DATA = {
     error: null,
     callstack:null
   };
   
   var errorEval: Error;
-  var callstackEval: ICallSite[];
+  var callstackEval: stacktrace.ICallSite[];
   
   var errorLocal: Error;
-  var callstackLocal: ICallSite[];
+  var callstackLocal: stacktrace.ICallSite[];
   
   var errorNative: Error;
 

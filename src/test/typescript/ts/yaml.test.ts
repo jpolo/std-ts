@@ -1,12 +1,12 @@
 import { suite, test } from "../../../main/typescript/ts/unit/qunit"
-import yaml = require("../../../main/typescript/ts/yaml")
+import { parse } from "../../../main/typescript/ts/yaml"
 
 export default suite("ts/yaml", (self) => {
   
   test(".parse()", (assert) => {
     //Boolean
     assert.deepEqual(
-      yaml.parse(
+      parse(
         "valid_true:\n" +
         "  - true\n" +
         "  - True\n" +
@@ -25,7 +25,7 @@ export default suite("ts/yaml", (self) => {
     
     //Null
     assert.deepEqual(
-      yaml.parse(
+      parse(
         "---\n" +
         "  test: A test for null values\n" +
         "  thisis: null\n" +
@@ -48,7 +48,7 @@ export default suite("ts/yaml", (self) => {
       
     //Hash
     assert.deepEqual(
-      yaml.parse(
+      parse(
         "---\n" +
         "  hash_inline: { name: Mail, email: 'mail@corporate.com' }\n" +
         "  hash_default:\n" +
@@ -64,7 +64,7 @@ export default suite("ts/yaml", (self) => {
     
     //List
     assert.deepEqual(
-      yaml.parse(
+      parse(
         "---\n" +
         "  list_inline: ['foo', 'bar', 'baz']\n" +
         "  list_default:\n" +
@@ -81,7 +81,7 @@ export default suite("ts/yaml", (self) => {
       
     //Comment
     assert.deepEqual(
-      yaml.parse(
+      parse(
         "---\n" +
         "  #Name\n" +
         "  name: 'MyName'\n" +
@@ -103,7 +103,7 @@ export default suite("ts/yaml", (self) => {
       "    - 'cookies':\n" +
       "    - 'something'\n"
     assert.throws(() => {
-      yaml.parse(wrong, { sourceURL: "ts/yaml.test.yaml" })
+      parse(wrong, { sourceURL: "ts/yaml.test.yaml" })
     }, 'SyntaxError: hash not properly dedented, near ":\\n    - \'something\'\\n" (ts/yaml.test.yaml:4:0)')
     
     //console.warn(yaml.parse(wrong, { sourceURL: "ts/yaml.test.yaml" }))

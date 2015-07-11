@@ -1,6 +1,5 @@
 import { suite, test } from "../../../main/typescript/ts/unit/qunit"
-import uuid = require("../../../main/typescript/ts/uuid");
-import UUID = uuid.UUID;
+import { UUID } from "../../../main/typescript/ts/uuid"
 
 const uuidSuite = suite("ts/uuid", (self) => {
   

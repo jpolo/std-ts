@@ -1,5 +1,5 @@
 import { suite, test, Assert, testc } from "../../../main/typescript/ts/unit/qunit"
-import random = require("../../../main/typescript/ts/random")
+import * as random from "../../../main/typescript/ts/random"
 
 class AssertCustom extends Assert {
   
