@@ -1,37 +1,42 @@
-import storage = require("./storage")
-import IStorage = storage.IStorage
-
-//Constant
-var ES_COMPAT = 3;
+import { IStorage } from "./storage"
 
 //Util
-var __now = Date.now;
-var __keys = Object.keys;
-var __str = function (o) { return "" + o; };
-var __defineGetter = Object.defineProperty ?
+const __now = Date.now || function () { return (new Date()).getTime(); };
+const __keys = Object.keys || function (o) {
+  let keys = [];
+  for (let key in o) {
+    if (o.hasOwnProperty(key)) {
+      keys.push(key);
+    }
+  }
+  return keys;
+};
+const __str = function (o) { return "" + o; };
+const __defineGetter = Object.defineProperty ?
   function (o, name, getter) {
     Object.defineProperty(o, name, {get: getter});
-  } : null;
+  } :
+  function (o, name, getter) {
+    o.__defineGetter__(name, getter);
+  };;
 
-var __cookieRead = (function () {
-  var __document = typeof document !== "undefined" ? document : null;
-  var __cookies: { [key: string]: string } = {};
-  var __cookiesStr = '';
-  var __decode = decodeURIComponent;
-  var __read = function () {
-    var cookieArray, cookie, index, name;
-    var currentCookieString = __document.cookie || '';
+const __cookieRead = (function () {
+  const __document = typeof document !== "undefined" ? document : null;
+  const __cookies: { [key: string]: string } = {};
+  const __cookiesStr = '';
+  const __decode = decodeURIComponent;
+  const __read = function () {
+    let currentCookieString = __document.cookie || '';
 
     if (currentCookieString !== __cookiesStr) {
       __cookiesStr = currentCookieString;
-      cookieArray = __cookiesStr.split('; ');
+      let cookieArray = __cookiesStr.split('; ');
       __cookies = {};
 
-      for (var i = 0, l = cookieArray.length; i < l; i++) {
-        cookie = cookieArray[i];
-        index = cookie.indexOf('=');
+      for (let cookie of cookieArray) {
+        let index = cookie.indexOf('=');
         if (index > 0) { //ignore nameless cookies
-          name = __decode(cookie.substring(0, index));
+          let name = __decode(cookie.substring(0, index));
           // the first value that is seen for a cookie is the most
           // specific one.  values for the same cookie name that
           // follow are for less specific paths.
@@ -46,10 +51,10 @@ var __cookieRead = (function () {
   return __read;
 }());
 
-var __cookieWrite = (function () {
-  var __document = typeof document !== "undefined" ? document : null;
-  var __encodeKey = function (s: string) {
-    var r = s;
+const __cookieWrite = (function () {
+  const __document = typeof document !== "undefined" ? document : null;
+  const __encodeKey = function (s: string) {
+    let r = s;
     if (r.length) {
       r = encodeURIComponent(r);
       r = r.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
@@ -57,24 +62,24 @@ var __cookieWrite = (function () {
     }
     return r;
   };
-  var __encodeValue = function (s: string) {
-    var r = s;
+  const __encodeValue = function (s: string) {
+    let r = s;
     if (r.length) {
       r = encodeURIComponent(r);
       r = r.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
     }
     return r;
   };
-  var __write = function (key: string, value: string, options: WriteOptions = {}) {
+  const __write = function (key: string, value: string, options: WriteOptions = {}) {
     //options = __extend({ path: '/' }, options);
-    var now = __now();
-    var domain = options.domain;
-    var path = options.path || "/";
-    var maxAge = options.maxAge;
-    var expires = options.expires;
-    var secure = options.secure;
-    var expirationDate = null;
-    var cookieDelete = false;
+    let now = __now();
+    let domain = options.domain;
+    let path = options.path || "/";
+    let maxAge = options.maxAge;
+    let expires = options.expires;
+    let secure = options.secure;
+    let expirationDate = null;
+    let cookieDelete = false;
 
     //Expiration
     if (expires !== undefined) {
@@ -86,7 +91,7 @@ var __cookieWrite = (function () {
     cookieDelete = +now >= +expirationDate;
 
     //Encode
-    var s = "";
+    let s = "";
     s += __encodeKey(__str(key));
     s += '=' + (cookieDelete ? "" : __encodeValue(__str(value)));
     if (expirationDate) {
@@ -101,33 +106,17 @@ var __cookieWrite = (function () {
     if (secure) {
       s += '; secure';
     }
-    
-    var cookieOld = __document.cookie;
+
+    let cookieOld = __document.cookie;
     __document.cookie = s;
     return (cookieOld !== __document.cookie);
   }
   return __write;
 }());
-var __cookieClear = function () {
+const __cookieClear = function () {
   document.cookie = "";
 };
 
-//Compat
-if (ES_COMPAT <= 3) {
-  __now = __now || function () { return (new Date()).getTime(); };
-  __keys = __keys || function (o) {
-    var keys = [];
-    for (var key in o) {
-      if (o.hasOwnProperty(key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
-  };
-  __defineGetter = __defineGetter || function (o, name, getter) {
-    o.__defineGetter__(name, getter);
-  };
-}
 
 type WriteOptions = {
   domain?: string
@@ -138,49 +127,49 @@ type WriteOptions = {
 }
 
 class CookieStorage implements IStorage {
-  
+
   length: number;
-  
+
   constructor() {
     __defineGetter(this, "length", () => {
       return this.size();
-    });  
+    });
   }
-  
+
   isAvailable(): boolean {
-    return true;  
+    return true;
   }
-  
+
   key(index: number): string {
     index = index >>> 0;
-    var returnValue = null;
+    let returnValue = null;
     if (index >= 0) {
       returnValue = __keys(__cookieRead())[index];
     }
     return returnValue;
   }
-  
+
   getItem(k: string): string {
     return __cookieRead()[k];
   }
-  
+
   setItem(k: string, v: any, options?: WriteOptions): void {
     __cookieWrite(k, v, options);
   }
-  
+
   removeItem(k: string): void {
     __cookieWrite(k, null, { maxAge: -1 });
   }
-  
+
   clear(): void {
     __cookieClear();
   }
-  
+
   size(): number {
     return __keys(__cookieRead()).length;
   }
-  
+
 }
 
-var storageImpl = new CookieStorage();
+let storageImpl = new CookieStorage();
 export = storageImpl;

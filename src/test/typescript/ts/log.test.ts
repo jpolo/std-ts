@@ -6,9 +6,9 @@ import {
 } from "../../../main/typescript/ts/log"
 
 const logSuite = suite("ts/log", (self) => {
-  var ng: Dispatcher
-  var loggerObject: Logger
-  var logs: IMessage[]
+  let ng: Dispatcher
+  let loggerObject: Logger
+  let logs: IMessage[]
   
   self.setUp = () => {
     ng = new Dispatcher()
@@ -32,17 +32,17 @@ const logSuite = suite("ts/log", (self) => {
 
 })
 
-const MessageSuite = suite("ts/Message", (self) => {
+const MessageSuite = suite("ts/log.Message", (self) => {
   
   test("#constructor()", (assert) => {
-    var m = new Message(DEBUG, "mygroup", ["mymessage"]);
+    let m = new Message(DEBUG, "mygroup", ["mymessage"]);
     assert.strictEqual(m.level, DEBUG);
     assert.strictEqual(m.group, "mygroup");
     assert.deepEqual(m.data, ["mymessage"]);
   })
   
   test("#equals()", (assert) => {
-    var message = new Message(DEBUG, "mygroup", ["mymessage"])
+    let message = new Message(DEBUG, "mygroup", ["mymessage"])
     assert.strictEqual(message.equals(null), false)
     assert.strictEqual(message.equals(new Message(DEBUG, "mygroup", ["mymessage"])), true)
     assert.strictEqual(message.equals(new Message(DEBUG, "mygrou", ["mymessage"])), false)
@@ -50,7 +50,7 @@ const MessageSuite = suite("ts/Message", (self) => {
   })
     
   test("#inspect()", (assert) => {
-    var message = new Message(DEBUG, "mygroup", ["mymessage"])
+    let message = new Message(DEBUG, "mygroup", ["mymessage"])
     assert.strictEqual(message.inspect(), 'Message { level: DEBUG, group: "mygroup", data: ["mymessage"] }')
   })
     
@@ -62,18 +62,13 @@ const MessageSuite = suite("ts/Message", (self) => {
   
 })
 
-const LevelSuite = suite("ts/Level", () => {
-  var PRIVATE_KEY = Level['_constructorKey'];
-  var DEBUG = DEBUG;
-  var INFO = INFO;
-  var WARN = WARN;
-  var ERROR = ERROR;
-  var FATAL = FATAL;
+const LevelSuite = suite("ts/log.Level", () => {
+  const PRIVATE_KEY = Level['_constructorKey'];
 
   test("#constructor()", (assert) => {
     //private constructor
     assert.throws(() => {
-      var l = new Level("blah", 0, {});
+      let l = new Level("blah", 0, {});
     })
   })
 
@@ -86,13 +81,13 @@ const LevelSuite = suite("ts/Level", () => {
   })
   
   test("#compare()", (assert) => {
-    var level = new Level("BLAH", DEBUG.value, PRIVATE_KEY)
+    let level = new Level("BLAH", DEBUG.value, PRIVATE_KEY)
     assert.strictEqual(level.compare(null), NaN)
     assert.strictEqual(DEBUG.compare(DEBUG), 0)
   })
     
   test("#equals()", (assert) => {
-    var level = new Level("BLAH", DEBUG.value, PRIVATE_KEY)
+    let level = new Level("BLAH", DEBUG.value, PRIVATE_KEY)
     assert.strictEqual(level.equals(null), false)
     assert.strictEqual(level.equals(DEBUG), true)
     assert.strictEqual(level.equals(INFO), false)
@@ -116,11 +111,11 @@ const LevelSuite = suite("ts/Level", () => {
   })
 })
 
-const LoggerSuite = suite("ts/Logger", (self) => {
+const LoggerSuite = suite("ts/log.Logger", (self) => {
   //mock engine
-  var logger: Logger;
-  var logs: IMessage[] = [];
-  var ng: IDispatcher = {
+  let logger: Logger;
+  let logs: IMessage[] = [];
+  let ng: IDispatcher = {
     isEnabledFor: (level: ILevel, group: string) => { return true; },
     send: (level: ILevel, group: string, data: any[]) => {
       logs.push(createMessage(level, group, data));
