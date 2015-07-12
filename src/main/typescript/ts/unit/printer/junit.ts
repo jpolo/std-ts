@@ -1,15 +1,9 @@
-import unit = require("ts/unit");
+import { IPrinter, ITestReport } from "ts/unit"
 
-module junit {
+export class JUnitPrinter implements IPrinter {
   
-
-  export class JUnitPrinter implements unit.IPrinter {
-    
-    print(reports: unit.ITestReport[]) {
-      //TODO
-    }
-    
+  print(reports: ITestReport[]) {
+    //TODO
   }
   
 }
-export = junit;

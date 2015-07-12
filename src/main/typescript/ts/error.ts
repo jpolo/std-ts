@@ -1,5 +1,3 @@
-//import stacktrace = require("ts/stacktrace")
-
 module error {
 
   //Util

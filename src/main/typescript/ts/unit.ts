@@ -1,9 +1,9 @@
-import inspect = require("ts/inspect")
-import reflect = require("ts/reflect")
-import stacktrace = require("ts/stacktrace")
-import assertion = require("./unit/assertion")
-import IAssertionCallSite = assertion.IAssertionCallSite
-import Assertion = assertion.Assertion
+import * as inspect from "./inspect"
+import * as reflect from "./reflect"
+import * as stacktrace from "./stacktrace"
+import * as assertion from "./unit/assertion"
+
+
 
 module unit {
   var __freeze = reflect.freeze;
@@ -34,7 +34,7 @@ module unit {
   }
   
   export interface ITestEngine {
-    callstack(): IAssertionCallSite[]
+    callstack(): assertion.IAssertionCallSite[]
     dump(o: any): string
     now(): number
     run(testCases: ITest[], params: ITestParams, handlers: ITestHandlers): void
@@ -50,10 +50,10 @@ module unit {
     run(engine: ITestEngine, params: ITestParams, complete: (report: ITestReport) => void): void
   }
 
-  export var SUCCESS = assertion.SUCCESS;
-  export var FAILURE = assertion.FAILURE;
-  export var ERROR = assertion.ERROR;
-  export var WARNING = assertion.WARNING;
+  export const SUCCESS = assertion.SUCCESS;
+  export const FAILURE = assertion.FAILURE;
+  export const ERROR = assertion.ERROR;
+  export const WARNING = assertion.WARNING;
 
   
   interface ITestBlock<IAssert> {
@@ -134,7 +134,7 @@ module unit {
 
         var onTimeout = () => {
           timerId = null
-          assertions.push(Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
+          assertions.push(assertion.Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
           complete()
         }
 
@@ -147,7 +147,7 @@ module unit {
             }
 
             if (assertions.length === 0) {
-              assertions.push(Assertion.warning(this, "No assertion found", null))
+              assertions.push(assertion.Assertion.warning(this, "No assertion found", null))
             }
 
             this._afterRun()
@@ -167,7 +167,7 @@ module unit {
           }
         } catch (e) {
           var parsed = e ? stacktrace.get(e) : null;
-          assertions.push(Assertion.error(this, e.message, parsed && parsed[0], e.stack || e.message || null))
+          assertions.push(assertion.Assertion.error(this, e.message, parsed && parsed[0], e.stack || e.message || null))
         } finally {
           if (!isAsync) {
             onComplete()

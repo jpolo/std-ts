@@ -1,4 +1,4 @@
-import unit = require("../../../main/typescript/ts/unit")
+import { ITest } from "../../../main/typescript/ts/unit"
 
 import cloneSuite from "./clone.test"
 import collectionSuite from "./collection/_all.test"
@@ -25,7 +25,7 @@ import uuidSuite from "./uuid.test"
 import vmSuite from "./vm.test"
 import yamlSuite from "./yaml.test"
 
-export default <unit.ITest[]>[].concat(
+export default <ITest[]>[].concat(
   cloneSuite,
   collectionSuite,
   compareSuite,

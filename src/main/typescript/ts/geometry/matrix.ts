@@ -1,6 +1,6 @@
-import vector2 = require("./vector2")
-import vector3 = require("./vector3")
-import vector4 = require("./vector4")
+import * as vector2 from "./vector2"
+import * as vector3 from "./vector3"
+import * as vector4 from "./vector4"
  
 module matrix {
   var MATRIX_SIZE = [4, 9, 16]
