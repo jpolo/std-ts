@@ -1,11 +1,11 @@
 import { test } from "./_boot.test"
-import assertion = require("../../../../main/typescript/ts/unit/assertion")
+import { IAssertionCallSite, Assertion } from "../../../../main/typescript/ts/unit/assertion"
 
 export default test("ts/unit/assertion", (assert) => {
   
-  var assertionType = "SUCCESS";
-  var message = "my message";
-  var position: assertion.IAssertionCallSite = {
+  let assertionType = "SUCCESS";
+  let message = "my message";
+  let position: IAssertionCallSite = {
     getThis() { return null; },
     getTypeName() { return ""; },
     getFunction() { return null; },
@@ -22,7 +22,7 @@ export default test("ts/unit/assertion", (assert) => {
     getArguments() { return []; }, // {[key: number]: any; length: number}
     toString() { return ""; }
   };
-  var a = new assertion.Assertion(assertionType, null, message, position, "my stack");
+  let a = new Assertion(assertionType, null, message, position, "my stack");
   
   assert(a.type === assertionType, "assertion.type failure")
   assert(a.test ===  null, "assertion.test failure")

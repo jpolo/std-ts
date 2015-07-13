@@ -10,6 +10,9 @@ interface IResult<T> {
 }
 
 //ECMA like functions
+function Equals(lhs, rhs) {
+  return lhs === rhs;
+}
 
 function IsResult<T>(r: any) {
   return r instanceof Result;
@@ -138,7 +141,7 @@ export default class Result<T> implements IResult<T> {
   }
   
   equals(o: any) {
-    return IsResult(o) && (ResultIsSuccess(this) ? this.value === o.value : this.error === o.error);
+    return IsResult(o) && (ResultIsSuccess(this) ? Equals(this.value, o.value) : Equals(this.error, o.error));
   }
   
   /*

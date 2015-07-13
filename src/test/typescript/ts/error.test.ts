@@ -1,6 +1,5 @@
 import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
-import error = require("../../../main/typescript/ts/error");
-import BaseError = error.BaseError;
+import * as error from "../../../main/typescript/ts/error"
 
 class ChildError extends error.Error {}
 class ChildEvalError extends error.EvalError {}
@@ -8,13 +7,13 @@ class ChildRangeError extends error.RangeError {}
 class ChildReferenceError extends error.ReferenceError {}
 class ChildTypeError extends error.TypeError {}
 class ChildURIError extends error.URIError {}
-class ChildBaseError extends BaseError {}
+class ChildBaseError extends error.BaseError {}
 class GrandChildBaseError extends ChildBaseError {}
 
-var ErrorSuite = suite("ts/error.Error", (self) => {
+const ErrorSuite = suite("ts/error.Error", (self) => {
 
   test("<extends>", (assert) => {
-    var err = new ChildError("my message");
+    let err = new ChildError("my message");
     assert.instanceOf(err, ChildError);
     assert.instanceOf(err, Error);
     assert.strictEqual(err.name, "ChildError");
@@ -27,10 +26,10 @@ var ErrorSuite = suite("ts/error.Error", (self) => {
   
 })
 
-var EvalErrorSuite = suite("ts/error.EvalError", (self) => {
+const EvalErrorSuite = suite("ts/error.EvalError", (self) => {
 
   test("<extends>", (assert) => {
-    var err = new ChildEvalError("my message");
+    let err = new ChildEvalError("my message");
     assert.instanceOf(err, ChildEvalError);
     assert.instanceOf(err, EvalError);
     assert.instanceOf(err, Error);
@@ -44,10 +43,10 @@ var EvalErrorSuite = suite("ts/error.EvalError", (self) => {
   
 })
 
-var RangeErrorSuite = suite("ts/error.RangeError", (self) => {
+const RangeErrorSuite = suite("ts/error.RangeError", (self) => {
 
   test("<extends>", (assert) => {
-    var err = new ChildRangeError("my message");
+    let err = new ChildRangeError("my message");
     assert.instanceOf(err, ChildRangeError);
     assert.instanceOf(err, RangeError);
     assert.instanceOf(err, Error);
@@ -61,10 +60,10 @@ var RangeErrorSuite = suite("ts/error.RangeError", (self) => {
   
 })
 
-var ReferenceErrorSuite = suite("ts/error.ReferenceError", (self) => {
+const ReferenceErrorSuite = suite("ts/error.ReferenceError", (self) => {
 
   test("<extends>", (assert) => {
-    var err = new ChildReferenceError("my message");
+    let err = new ChildReferenceError("my message");
     assert.instanceOf(err, ChildReferenceError);
     assert.instanceOf(err, ReferenceError);
     assert.instanceOf(err, Error);
@@ -78,10 +77,10 @@ var ReferenceErrorSuite = suite("ts/error.ReferenceError", (self) => {
   
 })
 
-var TypeErrorSuite = suite("ts/error.TypeError", (self) => {
+const TypeErrorSuite = suite("ts/error.TypeError", (self) => {
 
   test("<extends>", (assert) => {
-    var err = new ChildTypeError("my message");
+    let err = new ChildTypeError("my message");
     assert.instanceOf(err, ChildTypeError);
     assert.instanceOf(err, TypeError);
     assert.instanceOf(err, Error);
@@ -95,10 +94,10 @@ var TypeErrorSuite = suite("ts/error.TypeError", (self) => {
   
 })
 
-var URIErrorSuite = suite("ts/error.URIError", (self) => {
+const URIErrorSuite = suite("ts/error.URIError", (self) => {
   
   test("<extends>", (assert) => {
-    var err = new ChildURIError("my message");
+    let err = new ChildURIError("my message");
     assert.instanceOf(err, ChildURIError);
     assert.instanceOf(err, URIError);
     assert.instanceOf(err, Error);
@@ -112,48 +111,48 @@ var URIErrorSuite = suite("ts/error.URIError", (self) => {
   
 })
 
-var BaseErrorSuite = suite("ts/error.BaseError", (self) => {
+const BaseErrorSuite = suite("ts/error.BaseError", (self) => {
   
   test("<extends>", (assert) => {
-    var err = new ChildBaseError("my message");
+    let err = new ChildBaseError("my message");
     assert.instanceOf(err, Error);
-    assert.instanceOf(err, BaseError);
+    assert.instanceOf(err, error.BaseError);
     assert.instanceOf(err, ChildBaseError);
     assert.strictEqual(err.name, "ChildBaseError");
   })
   
 
   test("#constructor()", (assert) => {
-    var err = new BaseError("my message");
+    let err = new error.BaseError("my message");
     assert.instanceOf(err, Error);
-    assert.instanceOf(err, BaseError);
+    assert.instanceOf(err, error.BaseError);
   })
   
   test("#name", (assert) => {
-    var err = new BaseError("foo");
+    let err = new error.BaseError("foo");
     
     assert.strictEqual(err.name, "BaseError");
   })
   
   test("#stack", (assert) => {
-    var err = new BaseError("foo");
-    var stack = String(err.stack);
-    var stackLines = stack.split("\n");
+    let err = new error.BaseError("foo");
+    let stack = String(err.stack);
+    let stackLines = stack.split("\n");
     assert.strictEqual(stackLines[0], "BaseError: foo");
     
-    //var prefix = "    at file:";
+    //let prefix = "    at file:";
     //assert.strictEqual(stackLines[1].slice(0, prefix.length), prefix);
   })
   
   /*
   test("#inspect()", (assert) => {
-    var err = new BaseError("my message");
+    let err = new BaseError("my message");
     assert.strictEqual(err.inspect(), "BaseError { my message }");
   })
   */
   
   test("#toString()", (assert) => {
-    var err = new BaseError("my message");
+    let err = new error.BaseError("my message");
     assert.strictEqual(err.toString(), "BaseError: my message");
   })
   

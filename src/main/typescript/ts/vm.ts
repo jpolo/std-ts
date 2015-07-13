@@ -15,25 +15,26 @@ export function compile(jscode: string, options?: Option): (locals?: Locals) => 
   options = options || __empty;
   let fnWithContext: Function;
   let fnNoContext: Function;
-  let sourceURL = options.sourceURL;
-  let sourceMappingURL = options.sourceMappingURL;
+  let evalCode = jscode;
+  const sourceURL = options.sourceURL;
+  const sourceMappingURL = options.sourceMappingURL;
   
   if (sourceURL) {
     //Firebug and Webkit annotation
-    jscode += "\n//# sourceURL=" + sourceURL;
+    evalCode += "\n//# sourceURL=" + sourceURL;
   }
   
   if (sourceURL) {
-    jscode += "\n//# sourceMappingURL=" + sourceMappingURL;
+    evalCode += "\n//# sourceMappingURL=" + sourceMappingURL;
   }
   
   return function (locals) {
     let returnValue;
     if (locals) {
-      fnWithContext = fnWithContext || new Function("__locals__", "with(__locals__) {" + jscode + "}");
+      fnWithContext = fnWithContext || new Function("__locals__", "with(__locals__) {" + evalCode + "}");
       returnValue = fnWithContext.call(locals, locals);
     } else {
-      fnNoContext = fnNoContext || new Function(jscode);
+      fnNoContext = fnNoContext || new Function(evalCode);
       returnValue = fnNoContext();
     }
     return returnValue;

@@ -27,17 +27,17 @@ class MemoryStorage implements IStorage {
   }
 
   getItem(k: string): string {
-    var data = __getData(this);
+    let data = __getData(this);
     return data.hasOwnProperty(k) ? data[k] : null;
   }
 
   setItem(k: string, v: string): void {
-    var data = __getData(this);
+    let data = __getData(this);
     data[k] = __str(v);
   }
 
   removeItem(k: string): void {
-    var data = __getData(this);
+    let data = __getData(this);
     delete data[k];
   }
 
@@ -50,5 +50,4 @@ class MemoryStorage implements IStorage {
   }
 }
 
-var storageImpl = new MemoryStorage();
-export = storageImpl;
+export default new MemoryStorage();

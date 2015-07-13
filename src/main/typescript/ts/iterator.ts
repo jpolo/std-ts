@@ -7,6 +7,40 @@ function IteratorResultCreate<T>(done: boolean, value: T) {
   return { done: done, value: value };  
 }
 
+function IteratorCreateEmpty(hint?: string): Iterator<any> {
+  return IteratorCreate(function () { 
+    return IteratorResultCreate(true, undefined); 
+  }, hint);  
+}
+
+function IteratorRepeat<T>(length: number, v: T, hint?: string): Iterator<T> {
+  let i = 0;
+  let done = false;
+  let value = v;
+  return (
+    // Empty?
+    length <= 0 ? IteratorCreateEmpty(hint) : 
+    
+    // Continually?
+    length === Infinity ? IteratorCreate(function () {
+      return IteratorResultCreate(false, value);
+    }, hint) :
+        
+    // Repeat
+    IteratorCreate(function () {
+      if (i < length) {
+        i += 1;
+      } else {
+        done = true;
+        value = undefined;
+      }
+      return IteratorResultCreate(done, value); 
+    }, hint)
+  );  
+}
+
+
+
 export interface IIterator<T> {
   next(): IIteratorResult<T>
 }
@@ -19,6 +53,7 @@ export interface IIteratorResult<T> {
 
 export class Iterator<T> implements IIterator<T> {
   
+  
   constructor(public next: () => IIteratorResult<T>, public hint = "abstract") { }
   
   inspect() { return "Iterator { [" + this.hint + "] }";}
@@ -28,53 +63,29 @@ export class Iterator<T> implements IIterator<T> {
   }
 }
 
-var EMPTY: Iterator<any> = IteratorCreate(function () { 
-  return IteratorResultCreate(true, undefined); 
-}, "empty");
-
 export function isIIterator(o: any): boolean {
   return !!o && typeof o.next === "function";
 }
 
 export function result<T>(value?: T) {
-  return { done: arguments.length > 0, value: value };  
+  return IteratorResultCreate(arguments.length > 0, value);
 }
 
 export function empty(): Iterator<any> {
-  return EMPTY;
+  return IteratorCreateEmpty("empty");
 }
 
 export function single<T>(v: T): Iterator<T> {
-  var done = false;
-  var value = v;
-  return IteratorCreate(function () {
-    var result = IteratorResultCreate(done, value);
-    if (!done) {
-      done = true;
-      value = undefined;
-    }
-    return result;
-  }, "single");
+  return IteratorRepeat(1, v, "single");
 }
 
 export function fill<T>(length: number, v: T): Iterator<T> {
-  var i = 0;
-  var done = false;
-  var value = v;
-  return IteratorCreate(function () {
-    if (i < length) {
-      i += 1;
-    } else {
-      done = true;
-      value = undefined;
-    }
-    return IteratorResultCreate(done, value); 
-  });  
+  return IteratorRepeat(length, v, "fill");  
 }
 
 export function iterate<T>(start: T, f: (v: T) => T): Iterator<T> {
-  var first = true;
-  var acc: T;
+  let first = true;
+  let acc: T;
   
   return IteratorCreate(function () { 
     if (first) {
@@ -88,10 +99,10 @@ export function iterate<T>(start: T, f: (v: T) => T): Iterator<T> {
 }
 
 export function range(start: number, end: number, step = 1): Iterator<number> {
-  var index = start;
-  var done = false;
+  let index = start;
+  let done = false;
   return IteratorCreate(function () {
-    var value: number;
+    let value: number;
     if (index < end) {
       value = index;
       index += step;
@@ -103,19 +114,17 @@ export function range(start: number, end: number, step = 1): Iterator<number> {
 }
 
 export function continually<T>(v: T): Iterator<T> {
-  return IteratorCreate(function () {
-    return IteratorResultCreate(false, v);
-  }, "continue");
+  return IteratorRepeat(Infinity, v, "continue");
 }
 
 export function concat<T>(...args: IIterator<T>[]): Iterator<T> {
-  var argi = 0;
-  var argc = args.length;
-  var current = args[argi];
-  var done = false;
+  let argi = 0;
+  let argc = args.length;
+  let current = args[argi];
+  let done = false;
   
   return IteratorCreate(function () {
-    var r: IIteratorResult<T>;
+    let r: IIteratorResult<T>;
     if (!done) {
       while (true) {
         if (current) {

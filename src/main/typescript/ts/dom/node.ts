@@ -1,5 +1,5 @@
 //Util
-var __isNode = function (o) {
+const __isNode = function (o) {
   return (
     typeof Node === "object" ? o instanceof Node :
     o &&
@@ -8,25 +8,25 @@ var __isNode = function (o) {
     typeof o.nodeName === "string"
   );
 };
-var __isElement = function (o) {
+const __isElement = function (o) {
   return o.nodeType === NodeType.ELEMENT_NODE;
 };
-var __isElementOrDocument = function (n: Node) {
-  var nodeType = n.nodeType;
+const __isElementOrDocument = function (n: Node) {
+  let nodeType = n.nodeType;
   return (
     nodeType === NodeType.ELEMENT_NODE ||
     nodeType === NodeType.DOCUMENT_FRAGMENT_NODE ||
     nodeType === NodeType.DOCUMENT_NODE
   );
 };
-var __setText = function (n: Node, text: string) {
+const __setText = function (n: Node, text: string) {
   if (__isElementOrDocument(n)) {
     n.textContent = text;
   }
 };
-var __getText = function (n: Node) {
-  var returnValue = "";
-  var nodeType = n.nodeType;
+const __getText = function (n: Node) {
+  let returnValue = "";
+  let nodeType = n.nodeType;
 
   if (
     nodeType === NodeType.ELEMENT_NODE ||
@@ -103,7 +103,7 @@ export class DOMError implements Error {
   message: string;
 
   constructor(code: number, message: string) {
-    var name = ErrorCode[code];
+    let name = ErrorCode[code];
     if (name === undefined) {
       throw new TypeError("Unknown exception code: " + code);
     }
@@ -118,7 +118,7 @@ export class DOMError implements Error {
 }*/
 
 export function contains(parentNode: Node, node: Node): boolean {
-  var returnValue = false;
+  let returnValue = false;
   if (returnValue !== null && returnValue !== undefined) {
     if (parentNode === node) {
       returnValue = true;
@@ -144,8 +144,8 @@ export function nodeType(node: Node): NodeType {
 }
 
 export function place(node: Node, position: Position, refNode: Node): boolean {
-  var parentNode: Node;
-  var returnValue = false;
+  let parentNode: Node;
+  let returnValue = false;
   switch (position) {
     case Position.BEFORE:
       parentNode = refNode.parentNode;
@@ -181,8 +181,8 @@ export function place(node: Node, position: Position, refNode: Node): boolean {
 }
 
 export function remove(node: Node): boolean {
-  var parentNode = node.parentNode;
-  var returnValue = false;
+  let parentNode = node.parentNode;
+  let returnValue = false;
   if (parentNode) {
     parentNode.removeChild(node);
     returnValue = true;

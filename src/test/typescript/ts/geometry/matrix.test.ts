@@ -1,7 +1,7 @@
 import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
-import matrix2 = require("../../../../main/typescript/ts/geometry/matrix2")
-import matrix3 = require("../../../../main/typescript/ts/geometry/matrix3")
-import matrix4 = require("../../../../main/typescript/ts/geometry/matrix4")
+import * as matrix2 from "../../../../main/typescript/ts/geometry/matrix2"
+import * as matrix3 from "../../../../main/typescript/ts/geometry/matrix3"
+import * as matrix4 from "../../../../main/typescript/ts/geometry/matrix4"
 
 interface MatrixModule<T> {
   identity(dest?: T): T
@@ -72,9 +72,9 @@ function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number)
   })
 }
 
-var matrix2Suite = generateSuite("ts/geometry/matrix2", matrix2, 2 * 2)
-var matrix3Suite = generateSuite("ts/geometry/matrix3", matrix3, 3 * 3)
-var matrix4Suite = generateSuite("ts/geometry/matrix4", matrix4, 4 * 4)
+const matrix2Suite = generateSuite("ts/geometry/matrix2", matrix2, 2 * 2)
+const matrix3Suite = generateSuite("ts/geometry/matrix3", matrix3, 3 * 3)
+const matrix4Suite = generateSuite("ts/geometry/matrix4", matrix4, 4 * 4)
 
 /*
 var matrixSuite = unit.suite("ts/geometry/matrix", (self) => {

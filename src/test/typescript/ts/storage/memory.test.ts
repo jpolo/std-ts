@@ -1,12 +1,12 @@
 import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
-import memory = require("../../../../main/typescript/ts/storage/memory")
+import memory from "../../../../main/typescript/ts/storage/memory"
 
 export default suite("ts/storage/memory", (self) => {
-  
-  var memoryStorage = memory;
+
+  let memoryStorage = memory;
   
   self.setUp = () => {
-    var Constructor: any = memory.constructor;
+    let Constructor: any = memoryStorage.constructor;
     memoryStorage = new Constructor();
   }
   

@@ -1,11 +1,9 @@
-import storage = require("./storage")
-import IStorage = storage.IStorage
+import { IStorage, Storage } from "./storage"
 
-class SessionStorage extends storage.Storage {
+class SessionStorage extends Storage {
   protected _getStorage() {
     return sessionStorage;
   }
 }
 
-var storageImpl = new SessionStorage();
-export = storageImpl;
+export default new SessionStorage();

@@ -21,9 +21,9 @@ const __defineGetter = Object.defineProperty ?
   };;
 
 const __cookieRead = (function () {
+  let __cookiesStr = '';
+  let __cookies: { [key: string]: string } = {};
   const __document = typeof document !== "undefined" ? document : null;
-  const __cookies: { [key: string]: string } = {};
-  const __cookiesStr = '';
   const __decode = decodeURIComponent;
   const __read = function () {
     let currentCookieString = __document.cookie || '';
@@ -171,5 +171,4 @@ class CookieStorage implements IStorage {
 
 }
 
-let storageImpl = new CookieStorage();
-export = storageImpl;
+export default new CookieStorage();

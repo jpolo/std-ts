@@ -1,7 +1,7 @@
 import {
   SUCCESS, FAILURE, ERROR, WARNING,
   IAssertion, IPrinter, ITestReport
-} from "ts/unit"
+} from "../../unit"
 
   
 //Util
@@ -13,16 +13,16 @@ const __str = function (o) { return "" + o; };
 export class HTMLPrinter implements IPrinter {
   
   print(reports: ITestReport[]) {
-    var startTime: number = null
-    var endTime: number = null
-    var statFailed = 0
-    var statSuccess = 0
-    var statError = 0
-    var sections: {[key: string]: IAssertion[]} = {}
-    var uncaughtErrors: IAssertion[] = []
+    let startTime: number = null
+    let endTime: number = null
+    let statFailed = 0
+    let statSuccess = 0
+    let statError = 0
+    let sections: {[key: string]: IAssertion[]} = {}
+    let uncaughtErrors: IAssertion[] = []
 
     function push(sectionName: string, a: IAssertion) {
-      var array = sections[sectionName]
+      let array = sections[sectionName]
       if (array == null) {
         array = []
         sections[sectionName] = array
@@ -40,8 +40,8 @@ export class HTMLPrinter implements IPrinter {
 
       report.assertions.forEach((assertion) =>  {
 
-        var position = assertion.position
-        var category = assertion.test.category + '' + assertion.test.name
+        let position = assertion.position
+        let category = assertion.test.category + '' + assertion.test.name
 
         switch (assertion.type) {
           case SUCCESS:
@@ -70,15 +70,15 @@ export class HTMLPrinter implements IPrinter {
     })
 
     __keysSorted(sections).forEach((sectionName) => {
-      var matrix = ""
-      var messages = ""
-      var section = sections[sectionName]
+      let matrix = ""
+      let messages = ""
+      let section = sections[sectionName]
 
       section.forEach((assertion) => {
-        var message = assertion.message
-        var position = assertion.position
-        var positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : ""
-        var typeName = __str(assertion.type)
+        let message = assertion.message
+        let position = assertion.position
+        let positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : ""
+        let typeName = __str(assertion.type)
 
         switch(assertion.type) {
           case SUCCESS:
@@ -109,8 +109,8 @@ export class HTMLPrinter implements IPrinter {
 
     if (uncaughtErrors.length > 0) {
       this._println("Uncaught errors : ")
-      var uncaughtError: IAssertion
-      for (var i = 0, l = uncaughtErrors.length; i < l; ++i) {
+      let uncaughtError: IAssertion
+      for (let i = 0, l = uncaughtErrors.length; i < l; ++i) {
         uncaughtError = uncaughtErrors[i]
         this._println("  [Error]  " + (uncaughtError.stack || uncaughtError.message))
       }
@@ -124,14 +124,14 @@ export class HTMLPrinter implements IPrinter {
   }
 
   private _print(s: string) {
-    var id = "ts:trace"
-    var element = document.getElementById(id)
+    let id = "ts:trace"
+    let element = document.getElementById(id)
     if (!element) {
       element = document.createElement("div")
       element.id = id
       document.body.appendChild(element)
     }
-    var html = s
+    let html = s
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/\n/g, "<br>")

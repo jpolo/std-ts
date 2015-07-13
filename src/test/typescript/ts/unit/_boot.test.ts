@@ -3,21 +3,38 @@
 
 type AssertFn = (b: boolean, message?: string) => void
 
+const hasConsole = typeof console !== "undefined";
+
 export function test(name: string, f: (assert: AssertFn) => void) {
+  const prefix = "[" + name + "] ";
+  let assertionCount = 0;
+  let errorCount = 0;
+  
   function assert(condition: boolean, message?: string) {
-    var fullmessage = "[" + name + "] " + (message || " assertion failed");
-    
+    assertionCount += 1;
     if (!condition) {
-      if (typeof console !== "undefined") {
-        console.error(fullmessage);
+      errorCount += 1;
+      if (hasConsole) {
+        console.error(prefix + (message || " assertion failed"));
       } else {
-        throw new Error(fullmessage);
+        //TODO throw error  
       }
     }
   }
   
   function run() {
     f(assert)
+    if (errorCount === 0) {
+      if (hasConsole) {
+        console.debug(prefix + "OK!");
+      }
+    } else if (assertionCount === 0) {
+      if (hasConsole) {
+        console.warn(prefix + "no assertion");
+      }
+    } else {
+
+    }
   }
   return run;
 }

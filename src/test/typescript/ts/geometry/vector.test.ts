@@ -1,7 +1,7 @@
 import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
-import vector2 = require("../../../../main/typescript/ts/geometry/vector2")
-import vector3 = require("../../../../main/typescript/ts/geometry/vector3")
-import vector4 = require("../../../../main/typescript/ts/geometry/vector4")
+import * as vector2 from "../../../../main/typescript/ts/geometry/vector2"
+import * as vector3 from "../../../../main/typescript/ts/geometry/vector3"
+import * as vector4 from "../../../../main/typescript/ts/geometry/vector4"
 
 interface VectorModule<T> {
   add(a: T, b: T, dest?: T): T

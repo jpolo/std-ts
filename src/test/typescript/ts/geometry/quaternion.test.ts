@@ -1,5 +1,5 @@
 import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
-import quaternion = require("../../../../main/typescript/ts/geometry/quaternion")
+import * as quaternion from "../../../../main/typescript/ts/geometry/quaternion"
 
 export default suite("ts/geometry/quaternion", (self) => {
   

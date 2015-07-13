@@ -1,11 +1,9 @@
-import storage = require("./storage")
-import IStorage = storage.IStorage
+import { IStorage, Storage } from "./storage"
 
-class LocalStorage extends storage.Storage {
+class LocalStorage extends Storage {
   protected _getStorage() {
     return localStorage;
   }
 }
 
-var storageImpl = new LocalStorage();
-export = storageImpl;
+export default new LocalStorage();
