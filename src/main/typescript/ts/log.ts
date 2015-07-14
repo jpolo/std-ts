@@ -1,4 +1,4 @@
-import * as console from "ts/console"
+import console from "ts/console"
   
 //Constant
 const ES_COMPAT = 3;

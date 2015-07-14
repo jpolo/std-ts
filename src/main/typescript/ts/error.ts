@@ -1,22 +1,22 @@
 module error {
 
   //Util
-  var __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-  var __str = function (o) { return "" + o; };
-  var __inspect = __str;
-  var __console: Console = typeof console !== "undefined" ? __global.console : null;
-  var __name = function (f: Function) {
+  const __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+  const __str = function (o) { return "" + o; };
+  const __inspect = __str;
+  const __console: Console = typeof console !== "undefined" ? __global.console : null;
+  const __name = function (f: Function) {
     return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
   };
-  var __captureStackTrace = (<any>Error).captureStackTrace || function (error, stripPoint) {
-    var stackString = (<any>new Error()).stack;    
+  const __captureStackTrace = (<any>Error).captureStackTrace || function (error, stripPoint) {
+    let stackString = (<any>new Error()).stack;    
     //Remove first calls
-    var stack = stackString.split("\n").slice(1);//first is Error string, second is __captureStackTrace
+    let stack = stackString.split("\n").slice(1);//first is Error string, second is __captureStackTrace
     error.stack = __str(error) + "\n" + stack.join("\n");
   };
-  var __handleUncaughtError = function (error, prefix) {
+  const __handleUncaughtError = function (error, prefix) {
     if (__console) {      
-      var str = error && (error instanceof Error) ? __str(error.stack || error) : __inspect(error);
+      let str = error && (error instanceof Error) ? __str(error.stack || error) : __inspect(error);
       __console.error(prefix + str);
     } else {//rethrow so it is catched by global.onerror
       throw error;
@@ -24,35 +24,35 @@ module error {
   };
   
   //isHandling marker to avoid infinite recursion
-  var _isHandling = false;
+  let _isHandling = false;
   
   
   export interface IErrorHandler {
     (e: any): boolean  
   }
   
-  export var onerror: IErrorHandler = null;
+  export let onerror: IErrorHandler = null;
 
   export function handleError(e): boolean {
-    var handler: IErrorHandler = error.onerror;
-    var uncaught = !handler; 
-    var fatalError;
+    let handler: IErrorHandler = onerror;
+    let uncaught = !handler; 
+    let fatalError;
     if (!_isHandling) {
       _isHandling = true;
       if (!uncaught) {
         try {
-          uncaught = !handler(error);
+          uncaught = !handler(e);
         } catch (e) {
           uncaught = true;
           fatalError = e;
         }
       }
       if (uncaught) {
-        __handleUncaughtError(error, 'Uncaught ');
+        __handleUncaughtError(e, 'Uncaught ');
       }
       _isHandling = false;
     } else {
-      fatalError = error;
+      fatalError = e;
     }
     if (fatalError) {
       __handleUncaughtError(fatalError, 'Fatal ');
@@ -101,7 +101,6 @@ module error {
   export declare class URIError extends Error {}
   error['URIError'] = __global.URIError;
 
-  
   export class BaseError extends Error /*HACK: global reference*/ {
     stack: string;
     
@@ -112,6 +111,5 @@ module error {
     }
   }
 
-  
 }
-export = error;
+export = error

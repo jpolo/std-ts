@@ -9,7 +9,7 @@ export function test(name: string, f: (assert: AssertFn) => void) {
   const prefix = "[" + name + "] ";
   let assertionCount = 0;
   let errorCount = 0;
-  
+
   function assert(condition: boolean, message?: string) {
     assertionCount += 1;
     if (!condition) {
@@ -17,20 +17,20 @@ export function test(name: string, f: (assert: AssertFn) => void) {
       if (hasConsole) {
         console.error(prefix + (message || " assertion failed"));
       } else {
-        //TODO throw error  
+        //TODO throw error
       }
     }
   }
-  
+
   function run() {
     f(assert)
-    if (errorCount === 0) {
-      if (hasConsole) {
-        console.debug(prefix + "OK!");
-      }
-    } else if (assertionCount === 0) {
+    if (assertionCount === 0) {
       if (hasConsole) {
         console.warn(prefix + "no assertion");
+      }
+    } else if (errorCount === 0) {
+      if (hasConsole) {
+        console.debug(prefix + "OK!");
       }
     } else {
 

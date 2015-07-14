@@ -74,4 +74,4 @@ if (ES_COMPAT <= 3) {
     }
   });
 }
-export = __console;
+export default __console;

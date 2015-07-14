@@ -25,7 +25,6 @@
     ],
     "files": [
         "./src/main/typescript/ts/clone.ts",
-        "./src/main/typescript/ts/codegen.ts",
         "./src/main/typescript/ts/collection/list.ts",
         "./src/main/typescript/ts/compare.ts",
         "./src/main/typescript/ts/console.ts",
@@ -33,7 +32,6 @@
         "./src/main/typescript/ts/dom/classList.ts",
         "./src/main/typescript/ts/dom/node.ts",
         "./src/main/typescript/ts/error.ts",
-        "./src/main/typescript/ts/geometry/matrix.ts",
         "./src/main/typescript/ts/geometry/matrix2.ts",
         "./src/main/typescript/ts/geometry/matrix3.ts",
         "./src/main/typescript/ts/geometry/matrix4.ts",
@@ -44,7 +42,6 @@
         "./src/main/typescript/ts/hash.ts",
         "./src/main/typescript/ts/id.ts",
         "./src/main/typescript/ts/inspect.ts",
-        "./src/main/typescript/ts/int64.ts",
         "./src/main/typescript/ts/iterator.ts",
         "./src/main/typescript/ts/log.ts",
         "./src/main/typescript/ts/math.ts",

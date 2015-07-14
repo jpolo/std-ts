@@ -10,17 +10,10 @@ var clean = require('gulp-clean');
 var merge = require('merge2');
 //var path = require('path');
 
-var tsProject = typescript.createProject({
-  target: 'es5',
-  module: 'amd',
-  declarationFiles: true,
-  //noExternalResolve: true
+var tsProject = typescript.createProject('tsconfig.json', {
   removeComments: ENV === 'production'
 });
-var paths = {
-  src: ['src/main/typescript/**/*.ts', 'src/test/typescript/**/*.ts']
-};
- 
+
 gulp.task('default' , ['clean', 'compile']);
 
 gulp.task('clean', [ 'typescript:clean' ]);
@@ -28,11 +21,15 @@ gulp.task('clean', [ 'typescript:clean' ]);
 gulp.task('compile', [ 'typescript:compile' ]);
 
 gulp.task('watch', function () {
-  gulp.watch(paths.src, ['typescript:compile']);
+  gulp.watch([
+    'tsconfig.json',
+    'src/main/typescript/**/*.ts', 
+    'src/test/typescript/**/*.ts'
+  ], ['typescript:compile']);
 });
 
 gulp.task('typescript:compile', function() {
-  var tsResult = gulp.src(paths.src)
+  var tsResult = tsProject.src()
                      .pipe(typescript(tsProject));
 
   return merge([
