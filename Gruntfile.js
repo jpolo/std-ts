@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
 
-
+  var EOL = require('os').EOL;
+  var INDENT = "  ";
   var tsConfig = (function () {
     var filePath = "tsconfig.json";
     var content;
@@ -19,25 +20,24 @@ module.exports = function(grunt) {
       return opts;
     }
     
-    tsConfig.read = function () {
-      return content || (content = grunt.file.read(filePath));
+    tsConfig.read = function (opt_force) {
+      if (!content || opt_force) {
+        content = grunt.file.read(filePath);
+      }
+      return content;
     };
     
-    tsConfig.readJSON = function () {
-      return JSON.parse(tsConfig.read());
+    tsConfig.readJSON = function (opt_force) {
+      return JSON.parse(tsConfig.read(opt_force));
     };
     
     tsConfig.write = function (str) {
-	  //tsconfig.files = grunt.file.expand(tsconfig.filesGlob);
-
-	//var output = JSON.stringify(tsconfig, null, '\t') + require('os').EOL;
-	  //if (output !== tsconfigContent) {
       content = str;
-	  grunt.file.write(filePath, str);
+      grunt.file.write(filePath, str);
     };
     
     tsConfig.writeJSON = function (json) {
-  	  tsConfig.write(JSON.stringify(json, null, '\t') + require('os').EOL)
+      tsConfig.write(JSON.stringify(json, null, INDENT) + EOL);
     };
 
     return tsConfig;
@@ -62,8 +62,7 @@ module.exports = function(grunt) {
 
       // location to place (compiled) javascript files
       "target_js": "target/js",
-      // location to place (compiles) javascript test files
-      "target_test_js": "target/js-test",
+
       // location to place documentation, etc.
       "target_report": "target/report"
     },
@@ -76,13 +75,18 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      test: {
-        files: ['<%= dir.source_ts %>/**/*.ts', '<%= dir.source_test_ts %>/**/*.ts'],
-        tasks: ['typescript:compile_test'],
+      
+      tsconfig: {
+        files: [ '<%= dir.source_ts %>/**/*.ts', '<%= dir.source_test_ts %>/**/*.ts' ],
+        tasks: [ 'tsconfig' ]
+      },
+      
+      compile: {
+        files: [ 'tsconfig.json' ],
+        tasks: [ 'typescript:compile' ],
         options: {
           atBegin: true,
           interrupt: true
-          //spawn: false,
         },
       }
     },
@@ -90,19 +94,11 @@ module.exports = function(grunt) {
     // ----- TypeScript compilation
     //  See https://npmjs.org/package/grunt-typescript
     typescript: {
-      // Compiles the code into a single file. Also generates a typescript declaration file
-      compile: {
-	    src: ['<%= dir.source_ts %>/**/*.ts'],
-        dest: '<%= dir.target_js %>',
-        options: tsConfig({
-          rootDir: '<%= dir.source_ts %>'
-        })
-      },
-
+      
       // Compiles the tests.
-      compile_test: {
+      compile: {
         src: ['<%= dir.source_test_ts %>/**/*.ts','<%= dir.source_ts %>/**/*.ts'],
-        dest: '<%= dir.target_test_js %>',
+        dest: '<%= dir.target_js %>',
         options: tsConfig({
           rootDir: '<%= dir.source %>'
         })
@@ -113,7 +109,13 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-typescript');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.registerTask('compile', ['typescript:compile']);
-  grunt.registerTask('test', ['typescript:compile_test'/*, 'jasmine'*/]);
+  grunt.registerTask('compile', ['tsconfig', 'typescript:compile']);
+  grunt.registerTask('test', ['tsconfig', 'typescript:compile']);
   grunt.registerTask('default', ['compile']);
+  
+  grunt.registerTask('tsconfig', function () {
+    var json = tsConfig.readJSON(true);
+    json.files = grunt.file.expand(json.filesGlob);
+    tsConfig.writeJSON(json);
+  });
 };
