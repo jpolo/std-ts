@@ -5,12 +5,8 @@ module.exports = function(grunt) {
     var filePath = "tsconfig.json";
     var content;
 
-    function readFile() {
-      return content || (content = grunt.file.readJSON(filePath).compilerOptions);
-    }
-
     function tsConfig(opt_options) {
-      var optsDefault = readFile();
+      var optsDefault = tsConfig.readJSON().compilerOptions;
       var opts = {};
       for (var k in optsDefault) {
         opts[k] = optsDefault[k];
@@ -22,6 +18,27 @@ module.exports = function(grunt) {
       }
       return opts;
     }
+    
+    tsConfig.read = function () {
+      return content || (content = grunt.file.read(filePath));
+    };
+    
+    tsConfig.readJSON = function () {
+      return JSON.parse(tsConfig.read());
+    };
+    
+    tsConfig.write = function (str) {
+	  //tsconfig.files = grunt.file.expand(tsconfig.filesGlob);
+
+	//var output = JSON.stringify(tsconfig, null, '\t') + require('os').EOL;
+	  //if (output !== tsconfigContent) {
+      content = str;
+	  grunt.file.write(filePath, str);
+    };
+    
+    tsConfig.writeJSON = function (json) {
+  	  tsConfig.write(JSON.stringify(json, null, '\t') + require('os').EOL)
+    };
 
     return tsConfig;
   }());
@@ -75,7 +92,7 @@ module.exports = function(grunt) {
     typescript: {
       // Compiles the code into a single file. Also generates a typescript declaration file
       compile: {
-	      src: ['<%= dir.source_ts %>/**/*.ts'],
+	    src: ['<%= dir.source_ts %>/**/*.ts'],
         dest: '<%= dir.target_js %>',
         options: tsConfig({
           rootDir: '<%= dir.source_ts %>'

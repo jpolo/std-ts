@@ -62,4 +62,29 @@ export default test("ts/unit/qunit.Assert", (assert) => {
   assertMock.equal(NaN, NaN)
   assertLastSuccess()
   
+  //throws()
+  assertMock.throws(() => {})
+  assertLastFailure()
+
+  assertMock.throws(() => { throw new TypeError() })
+  assertLastSuccess()
+
+  assertMock.throws(() => { throw new TypeError() }, TypeError)
+  assertLastSuccess()
+
+  assertMock.throws(() => { throw new TypeError() }, Error)
+  assertLastSuccess()
+
+  assertMock.throws(() => { throw new Error() }, TypeError)
+  assertLastFailure()
+  
+  assertMock.throws(() => { throw new Error("blah") }, "Error: blah")
+  assertLastSuccess()
+  
+  assertMock.throws(() => { throw new TypeError("blah") }, "TypeError: blah")
+  assertLastSuccess()
+  
+  assertMock.throws(() => { throw new Error("foo") }, "Error: blah")
+  assertLastFailure()
+  
 })

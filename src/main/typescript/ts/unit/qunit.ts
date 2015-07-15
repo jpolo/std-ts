@@ -3,6 +3,7 @@ import { SUCCESS, FAILURE, IAssertionCallSite, Assertion } from "./assertion"
 import { ITestEngine, ITest, ITestReport, TestSuite, suiteDefault } from "../unit"
 
 //Util
+const __isExtensible = reflect.isExtensible;
 const __protoOf = reflect.getPrototypeOf;
 const __str = function (o: any) { return "" + o; };
 const __stringTag = reflect.stringTag;
@@ -11,6 +12,12 @@ const __keysSorted = function (o: any) { return __keys(o).sort(); };
 const __fstring = Function.prototype.toString;
 const __fnSource = function (f: Function) { return __fstring.call(f).slice(13, -1).trim(); };
 
+
+/**
+ * Default suite
+ */
+let _suiteDefault = suiteDefault;
+let _suiteCurrent = _suiteDefault;
 
 export class Assert {
   constructor(
@@ -64,9 +71,9 @@ export class Assert {
   }
 
   throws(block: () => void, expected?: any, message?: string): boolean {
-    var isSuccess = false
-    var position = this.__position__()
-    var actual
+    let isSuccess = false
+    let position = this.__position__()
+    let actual
     message = message || ('`' + __fnSource(block) + '` must throw an error')
     try {
       block()
@@ -82,7 +89,7 @@ export class Assert {
       } else {
         switch (__stringTag(expected)) {
           case 'String':
-            var actualStr = __str(actual)
+            let actualStr = __str(actual)
             isSuccess = actualStr == expected
             message = this.__dump__(actualStr) + ' thrown must be ' + this.__dump__(expected)
             break
@@ -117,8 +124,8 @@ export class Assert {
   }
 
   __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
-    var assertions = this._report.assertions
-    if (!reflect.isExtensible(assertions)) {
+    let assertions = this._report.assertions
+    if (!__isExtensible(assertions)) {
       throw new Error('Assertions were made after report creation in ' + this._testCase)
     }
 
@@ -149,14 +156,14 @@ export class Assert {
   }
 
   protected _propEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
-    var engine = this.__engine__
+    let engine = this.__engine__
     message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
-    var keys1 = __keysSorted(o1)
-    var keys2 = __keysSorted(o2)
-    var isSuccess = true
-    for (var i = 0, l = keys1.length; i < l; ++i) {
-      var key1 = keys1[i]
-      var key2 = keys2[i]
+    let keys1 = __keysSorted(o1)
+    let keys2 = __keysSorted(o2)
+    let isSuccess = true
+    for (let i = 0, l = keys1.length; i < l; ++i) {
+      let key1 = keys1[i]
+      let key2 = keys2[i]
       if (key1 === key2 && !engine.testEqualsStrict(o1[key1], o2[key2])) {
         isSuccess = false
         break
@@ -183,12 +190,6 @@ export function testc<IAssert>(
   }
 }
 
-/**
- * Default suite
- */
-var _suiteDefault = suiteDefault;
-var _suiteCurrent = _suiteDefault;
-
 export function suite(
   name: string,
   f: (
@@ -199,9 +200,9 @@ export function suite(
     //) => void
   ) => void
 ): ITest[]  {
-  var suitePrevious = _suiteCurrent;
-  var suiteNew = new TestSuite(name);
-  //var testFactory = function (name, f) {
+  let suitePrevious = _suiteCurrent;
+  let suiteNew = new TestSuite(name);
+  //let testFactory = function (name, f) {
   //  return suiteNew.getTest(name).addBlock(f, (ng, tc, r) => { return new Assert(ng, tc, r); })
   //}
 
