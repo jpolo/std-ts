@@ -26,10 +26,16 @@ export class Assert {
     private _report: ITestReport
   ) { }
 
+  /**
+   * Assert that `o` is `true`
+   */
   ok(o: boolean, message?: string): boolean {
     return this.__assert__(!!o, message, this.__position__())
   }
 
+  /**
+   * Assert that `actual` is strictly equal to `expected`
+   */
   strictEqual<T>(actual: T, expected: T, message?: string): boolean {
     return this._strictEqual(actual, expected, false, message, this.__position__())
   }
@@ -62,14 +68,23 @@ export class Assert {
     return this._deepEqual(actual, expected, true, message, this.__position__())
   }
 
+  /**
+   * Assert that `typeof o` is `type`
+   */
   typeOf(o: any, type: string, message?: string): boolean {
     return this.__assert__(typeof o === type, message, this.__position__())
   }
 
-  instanceOf(o: any, constructor: Function, message?: string): boolean {
-    return this.__assert__(o instanceof constructor, message, this.__position__())
+  /**
+   * Assert that `o instanceof constructor`
+   */
+  instanceOf(o: any, Class: Function, message?: string): boolean {
+    return this.__assert__(o instanceof Class, message, this.__position__())
   }
 
+  /**
+   * Assert that `block()` throw an `expected` error
+   */
   throws(block: () => void, expected?: any, message?: string): boolean {
     let isSuccess = false
     let position = this.__position__()
@@ -123,7 +138,7 @@ export class Assert {
     return this.__assert__(isSuccess, message, position)
   }
 
-  __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
+  protected __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
     let assertions = this._report.assertions
     if (!__isExtensible(assertions)) {
       throw new Error('Assertions were made after report creation in ' + this._testCase)
@@ -137,11 +152,11 @@ export class Assert {
     return isSuccess
   }
 
-  __dump__(o: any): string {
+  protected __dump__(o: any): string {
     return this.__engine__.dump(o)
   }
 
-  __position__(): IAssertionCallSite {
+  protected __position__(): IAssertionCallSite {
     return this.__engine__.callstack()[3]
   }
 
@@ -193,7 +208,7 @@ export function testc<IAssert>(
 export function suite(
   name: string,
   f: (
-    self?: TestSuite//, 
+    self?: TestSuite//,
     //test?: (
     //  name: string,
     //  f: (assert: Assert, done?: () => void) => void

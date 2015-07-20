@@ -4,7 +4,6 @@ import { IIterator, IIteratorResult, Iterator } from "../iterator"
 const SIZE = 10;
 const LN2 = Math.log(2);
 
-const __max = Math.max;
 const __log = Math.log;
 const __floor = Math.floor;
 const __round = Math.round;
@@ -23,9 +22,9 @@ type Params = {
 }
 
 //ECMA like
-function ParamsCreate(p: { size?: number; random?: () => number }): Params {
-  let random = p.random;
-  let size = p.size;
+function ParamsCreate(p?: { size?: number; random?: () => number }): Params {
+  let random = p && p.random;
+  let size = p && p.size;
   return {
     size: size === undefined ? SIZE : size,
     random: random === undefined ? Math.random : random
@@ -44,8 +43,14 @@ function GeneratorCreate<Result>(f: (params: Params) => Result): IGenerator<Resu
   g.map = function (f) {
     return GeneratorCreate(function (params: Params) {
       return g(f(params));
-    })
+    });
   };
+  
+  g.flatMap = function (f) {
+    return GeneratorCreate(function (params: Params) {
+      return f(g(params))(params);  
+    });
+  }
   
   g.next = function (p: { size?: number; random?: () => number }): Result {
     return f(ParamsCreate(p));
@@ -57,19 +62,18 @@ function GeneratorCreate<Result>(f: (params: Params) => Result): IGenerator<Resu
 
 export interface IGenerator<Result> {
   (p: Params): Result
-  map<U>(f: (v: Result) => U)
+  map<U>(f: (v: Result) => U): IGenerator<U>
+  flatMap<U>(f: (v: Result) => IGenerator<U>): IGenerator<U>
   next(p: { size?: number; random?: () => number }): Result
 }
 
 export function constant<T>(k: T): IGenerator<T> {
-  return GeneratorCreate(function (p: Params) {
-    return k;
-  });
+  return GeneratorCreate((p: Params) => { return k; });
 }
 
 export function oneOf<T>(gens: IGenerator<T>[]): IGenerator<T> {
   const length = gens.length;
-  return GeneratorCreate(function (p: Params) {
+  return GeneratorCreate((p: Params) => {
     let params = p;//ParamsCreate(p);
     let index = ParamsRandom(params, 0, length);
     return gens[index](params);
@@ -77,7 +81,7 @@ export function oneOf<T>(gens: IGenerator<T>[]): IGenerator<T> {
 }
 
 export function array<T>(genValue: IGenerator<T>, genSize = size()): IGenerator<T[]> {
-  return GeneratorCreate(function (p: Params) {
+  return GeneratorCreate((p: Params) => {
     let params = p;//ParamsCreate(p);
     let size =  ParamsRandom(params, 0, genSize(params));
     let length = ParamsRandom(params, 0, size);
@@ -95,10 +99,8 @@ export function bind<A, R>(f: (a: A) => R, args: [IGenerator<A>]): IGenerator<R>
 export function bind<R>(f: () => R, args?: any): IGenerator<R>
 export function bind(f: Function, args: any): any {
   const gentuple = tuple(args);
-  return GeneratorCreate(function (p: Params) {
-    let params = p;//ParamsCreate(p);
-    let t = gentuple(params);
-    return f.apply(this, t);
+  return GeneratorCreate((p: Params) => {
+    return f.apply(this, gentuple(p));
   });
 }
 
@@ -137,7 +139,7 @@ export function tuple<A, B>(gens: [IGenerator<A>, IGenerator<B>] ): IGenerator<[
 export function tuple(gens: any[]): IGenerator<any> {
   const length = gens.length;
   
-  return GeneratorCreate(function (p: Params) {
+  return GeneratorCreate((p: Params) => {
     let params = p;//ParamsCreate(p);
     let returnValue: any[] = new Array(length);
     for (let i = 0; i < length; i++) {
@@ -150,7 +152,7 @@ export function tuple(gens: any[]): IGenerator<any> {
 function object<V>(genKey: IGenerator<number>, genValue: IGenerator<V>, genSize?: IGenerator<number>): IGenerator<{[key: number]: V}>;
 function object<V>(genKey: IGenerator<string>, genValue: IGenerator<V>, genSize?: IGenerator<number>): IGenerator<{[key: string]: V}>;
 function object<V>(genKey: IGenerator<any>, genValue: IGenerator<V>, genSize = size()): IGenerator<any> {
-  return GeneratorCreate(function (p: Params) {
+  return GeneratorCreate((p: Params) => {
     let params = p;//ParamsCreate(p);
     let size = genSize(params);
     let returnValue = {};

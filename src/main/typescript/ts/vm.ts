@@ -18,16 +18,16 @@ export function compile(jscode: string, options?: Option): (locals?: Locals) => 
   let evalCode = jscode;
   const sourceURL = options.sourceURL;
   const sourceMappingURL = options.sourceMappingURL;
-  
+
   if (sourceURL) {
     //Firebug and Webkit annotation
     evalCode += "\n//# sourceURL=" + sourceURL;
   }
-  
+
   if (sourceURL) {
     evalCode += "\n//# sourceMappingURL=" + sourceMappingURL;
   }
-  
+
   return function (locals) {
     let returnValue;
     if (locals) {
@@ -41,7 +41,6 @@ export function compile(jscode: string, options?: Option): (locals?: Locals) => 
   }
 }
 
-export function eval(jscode: string, locals?: Locals, options?: Option): any {
+export function run(jscode: string, locals?: Locals, options?: Option): any {
   return compile(jscode, options)(locals);
 }
-
