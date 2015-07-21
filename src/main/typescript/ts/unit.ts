@@ -1,8 +1,9 @@
 import { freeze } from "./reflect"
 import * as stacktrace from "./stacktrace"
 import * as assertion from "./unit/assertion"
+import { IAssertionCallSite, Assertion } from "./unit/assertion"
 
-  
+
 export interface IAssertion extends assertion.IAssertion {}
 
 export interface ITestReport {
@@ -28,7 +29,7 @@ export interface ITestHandlers {
 }
 
 export interface ITestEngine {
-  callstack(): assertion.IAssertionCallSite[]
+  callstack(): IAssertionCallSite[]
   dump(o: any): string
   now(): number
   run(testCases: ITest[], params: ITestParams, handlers: ITestHandlers): void
@@ -67,19 +68,19 @@ export class Test implements ITest {
   ) { }
 
   protected _beforeRun() {
-    var suite = this.suite
+    let suite = this.suite
     if (suite.setUp) {
       suite.setUp(this)
     }
   }
 
   protected _afterRun() {
-    var suite = this.suite
+    let suite = this.suite
     if (suite.tearDown) {
       suite.tearDown(this)
     }
   }
-  
+
   addBlock<IAssert>(
     block: (assert: IAssert, complete?: () => void) => void,
     assertFactory: (ng: ITestEngine, tc: ITest, r: ITestReport) => IAssert,
@@ -93,46 +94,53 @@ export class Test implements ITest {
   }
 
   run(engine: ITestEngine, params: ITestParams, complete: (report: ITestReport) => void) {
-    var blocks = this.blocks
-    var blockc = blocks.length
-    var startTime  = engine.now()
-    var assertions: IAssertion[] = []
-    var report: ITestReport = {
+    let blocks = this.blocks
+    let blockc = blocks.length
+    let startTime = engine.now()
+    let assertions: IAssertion[] = []
+    let report: ITestReport = {
       startDate: new Date(startTime),
       elapsedMilliseconds: NaN,
       assertions: assertions
     }
-
-    var timeoutMs = params.timeout || Infinity;//no timeout
-
-
-    //finish test and send to callback
-    var onBlockComplete = () => {
-      if (--blockc === 0) {
+    let assertionStream = {
+      write(a: IAssertion) {
+        assertions.push(a);
+      },
+      close() {
         //finalize report
         report.elapsedMilliseconds = engine.now() - startTime
-        freeze(report)
         freeze(assertions)
+      }
+    };
 
+    let timeoutMs = params.timeout || Infinity;//no timeout
+
+    //finish test and send to callback
+    let onBlockComplete = () => {
+      if (--blockc === 0) {
+        //finalize report
+        assertionStream.close()
+        freeze(report)
         complete(report)
       }
     }
 
-    var runBlock = (testBlock: ITestBlock<any>, complete: () => void) => {
-      var block = testBlock.block;
-      var assertFactory = testBlock.assertFactory;
-      var assert = assertFactory(engine, this, report);
-      var isAsync = block.length >= 2//asynchronous
-      var isFinished = false
-      var timerId = null
+    let runBlock = (testBlock: ITestBlock<any>, complete: () => void) => {
+      let block = testBlock.block;
+      let assertFactory = testBlock.assertFactory;
+      let assert = assertFactory(engine, this, report);
+      let isAsync = block.length >= 2//asynchronous
+      let isFinished = false
+      let timerId = null
 
-      var onTimeout = () => {
+      let onTimeout = () => {
         timerId = null
-        assertions.push(assertion.Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
+        assertionStream.write(Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
         complete()
       }
 
-      var onComplete = () => {
+      let onComplete = () => {
         if (!isFinished) {
           isFinished = true
           if (timerId) {
@@ -141,7 +149,7 @@ export class Test implements ITest {
           }
 
           if (assertions.length === 0) {
-            assertions.push(assertion.Assertion.warning(this, "No assertion found", null))
+            assertionStream.write(Assertion.warning(this, "No assertion found", null))
           }
 
           this._afterRun()
@@ -160,8 +168,8 @@ export class Test implements ITest {
           block(assert)
         }
       } catch (e) {
-        var parsed = e ? stacktrace.get(e) : null;
-        assertions.push(assertion.Assertion.error(this, e.message, parsed && parsed[0], e.stack || e.message || null))
+        let parsed = e ? stacktrace.get(e) : null;
+        assertionStream.write(Assertion.error(this, e.message, parsed && parsed[0], e.stack || e.message || null))
       } finally {
         if (!isAsync) {
           onComplete()
@@ -169,7 +177,7 @@ export class Test implements ITest {
       }
     }
 
-    for (var i = 0, l = blocks.length; i < l; ++i) {
+    for (let i = 0, l = blocks.length; i < l; ++i) {
       runBlock(blocks[i], onBlockComplete)
     }
   }
@@ -179,7 +187,7 @@ export class Test implements ITest {
   }
 
   toString() {
-    var category = this.category
+    let category = this.category
     return (category ? category : '') + this.name
   }
 }
@@ -195,8 +203,8 @@ export class TestSuite {
   ) { }
 
   getTest(name: string) {
-    var byNames = this._byNames
-    var test = byNames[name]
+    let byNames = this._byNames
+    let test = byNames[name]
     if (!test) {
       test = byNames[name] = new Test(this, name)
       this.tests.push(test)
@@ -207,4 +215,4 @@ export class TestSuite {
 }
 
 
-export var suiteDefault = new TestSuite("")
+export let suiteDefault = new TestSuite("")
