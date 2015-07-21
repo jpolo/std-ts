@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
 
   var EOL = require('os').EOL;
-  var INDENT = "  ";
+  var INDENT = "\t\t";
   var tsConfig = (function () {
     var filePath = "tsconfig.json";
     var content;
@@ -19,23 +19,27 @@ module.exports = function(grunt) {
       }
       return opts;
     }
-    
+
+    tsConfig.path = function () {
+      return filePath;
+    };
+
     tsConfig.read = function (opt_force) {
       if (!content || opt_force) {
         content = grunt.file.read(filePath);
       }
       return content;
     };
-    
+
     tsConfig.readJSON = function (opt_force) {
       return JSON.parse(tsConfig.read(opt_force));
     };
-    
+
     tsConfig.write = function (str) {
       content = str;
       grunt.file.write(filePath, str);
     };
-    
+
     tsConfig.writeJSON = function (json) {
       tsConfig.write(JSON.stringify(json, null, INDENT) + EOL);
     };
@@ -75,14 +79,14 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      
+
       tsconfig: {
         files: [ '<%= dir.source_ts %>/**/*.ts', '<%= dir.source_test_ts %>/**/*.ts' ],
         tasks: [ 'tsconfig' ]
       },
-      
+
       compile: {
-        files: [ 'tsconfig.json' ],
+        files: [ tsConfig.path() ],
         tasks: [ 'typescript:compile' ],
         options: {
           atBegin: true,
@@ -94,7 +98,7 @@ module.exports = function(grunt) {
     // ----- TypeScript compilation
     //  See https://npmjs.org/package/grunt-typescript
     typescript: {
-      
+
       // Compiles the tests.
       compile: {
         src: ['<%= dir.source_test_ts %>/**/*.ts','<%= dir.source_ts %>/**/*.ts'],
@@ -112,7 +116,7 @@ module.exports = function(grunt) {
   grunt.registerTask('compile', ['tsconfig', 'typescript:compile']);
   grunt.registerTask('test', ['tsconfig', 'typescript:compile']);
   grunt.registerTask('default', ['compile']);
-  
+
   grunt.registerTask('tsconfig', function () {
     var json = tsConfig.readJSON(true);
     json.files = grunt.file.expand(json.filesGlob);

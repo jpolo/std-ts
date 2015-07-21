@@ -12,7 +12,6 @@ const __keysSorted = function (o: any) { return __keys(o).sort(); };
 const __fstring = Function.prototype.toString;
 const __fnSource = function (f: Function) { return __fstring.call(f).slice(13, -1).trim(); };
 
-
 /**
  * Default suite
  */
@@ -40,30 +39,51 @@ export class Assert {
     return this._strictEqual(actual, expected, false, message, this.__position__())
   }
 
+  /**
+   * Assert that `actual` is not strictly equal to `expected`
+   */
   notStrictEqual<T>(actual: T, expected: T, message?: string): boolean {
     return this._strictEqual(actual, expected, true, message, this.__position__())
   }
 
+  /**
+   * Assert that `actual` is equal to `expected`
+   */
   equal<T>(actual: T, expected: T, message?: string): boolean {
     return this._equal(actual, expected, false, message, this.__position__())
   }
 
+  /**
+   * Assert that `actual` is not equal to `expected`
+   */
   notEqual<T>(actual: T, expected: T, message?: string): boolean {
     return this._equal(actual, expected, true, message, this.__position__())
   }
 
+  /**
+   * Assert that `actual` and `expected` has the same properties
+   */
   propEqual(actual: any, expected: any, message?: string): boolean {
     return this._propEqual(actual, expected, false, message, this.__position__())
   }
 
+  /**
+   * Assert that `actual` and `expected` has not the same properties
+   */
   notPropEqual(actual: any, expected: any, message?: string): boolean {
     return this._propEqual(actual, expected, false, message, this.__position__())
   }
 
+  /**
+   * Assert that `actual` and `expected` are deeply equals
+   */
   deepEqual(actual: any, expected: any, message?: string): boolean {
     return this._deepEqual(actual, expected, false, message, this.__position__())
   }
 
+  /**
+   * Assert that `actual` and `expected` are not deeply equals
+   */
   notDeepEqual(actual: any, expected: any, message?: string): boolean {
     return this._deepEqual(actual, expected, true, message, this.__position__())
   }
@@ -138,7 +158,7 @@ export class Assert {
     return this.__assert__(isSuccess, message, position)
   }
 
-  protected __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
+  __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
     let assertions = this._report.assertions
     if (!__isExtensible(assertions)) {
       throw new Error('Assertions were made after report creation in ' + this._testCase)
@@ -152,11 +172,11 @@ export class Assert {
     return isSuccess
   }
 
-  protected __dump__(o: any): string {
+  __dump__(o: any): string {
     return this.__engine__.dump(o)
   }
 
-  protected __position__(): IAssertionCallSite {
+  __position__(): IAssertionCallSite {
     return this.__engine__.callstack()[3]
   }
 
