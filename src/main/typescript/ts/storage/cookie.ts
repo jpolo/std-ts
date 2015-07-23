@@ -116,7 +116,15 @@ const __cookieWrite = (function () {
 const __cookieClear = function () {
   document.cookie = "";
 };
-
+const __extends = function <T>(dest: T, ...exts: T[]) {
+  for (let ext of exts) {
+    let extKeys = __keys(ext);
+    for (let key of extKeys) {
+      dest[key] = ext[key];
+    }
+  }
+  return dest;
+};
 
 type WriteOptions = {
   domain?: string
@@ -157,8 +165,9 @@ class CookieStorage implements IStorage {
     __cookieWrite(k, v, options);
   }
 
-  removeItem(k: string): void {
-    __cookieWrite(k, null, { maxAge: -1 });
+  removeItem(k: string, options?: WriteOptions): void {
+    let optionsRemove = { maxAge: -1 };
+    __cookieWrite(k, null, options ? __extends({}, options, optionsRemove) : optionsRemove);
   }
 
   clear(): void {
