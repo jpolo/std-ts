@@ -10,7 +10,10 @@ const __stringTag = reflect.stringTag;
 const __keys = reflect.ownKeys;
 const __keysSorted = function (o: any) { return __keys(o).sort(); };
 const __fstring = Function.prototype.toString;
-const __fnSource = function (f: Function) { return __fstring.call(f).slice(13, -1).trim(); };
+const __fnSource = function (f: Function) {
+  var src =  __fstring.call(f);
+  return src.slice(src.indexOf("{"), -1).trim();
+};
 
 /**
  * Default suite

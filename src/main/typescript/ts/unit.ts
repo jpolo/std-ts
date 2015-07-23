@@ -50,6 +50,12 @@ export const FAILURE = assertion.FAILURE;
 export const ERROR = assertion.ERROR;
 export const WARNING = assertion.WARNING;
 
+interface IStreamController<T> {
+  desiredSize: number
+  enqueue(chunk: T): void
+  close(): void
+  error(e: any): void
+}
 
 interface ITestBlock<IAssert> {
   block: (assert: IAssert, complete?: () => void) => void
@@ -103,9 +109,13 @@ export class Test implements ITest {
       elapsedMilliseconds: NaN,
       assertions: assertions
     }
-    let assertionStream = {
-      write(a: IAssertion) {
+    let assertionStream: IStreamController<IAssertion> = {
+      desiredSize: 1,
+      enqueue(a: IAssertion) {
         assertions.push(a);
+      },
+      error(e: any) {
+
       },
       close() {
         //finalize report
@@ -136,7 +146,7 @@ export class Test implements ITest {
 
       let onTimeout = () => {
         timerId = null
-        assertionStream.write(Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
+        assertionStream.enqueue(Assertion.error(this, "No test completion after " + timeoutMs + "ms", null, null))
         complete()
       }
 
@@ -149,7 +159,7 @@ export class Test implements ITest {
           }
 
           if (assertions.length === 0) {
-            assertionStream.write(Assertion.warning(this, "No assertion found", null))
+            assertionStream.enqueue(Assertion.warning(this, "No assertion found", null))
           }
 
           this._afterRun()
@@ -169,7 +179,7 @@ export class Test implements ITest {
         }
       } catch (e) {
         let parsed = e ? stacktrace.get(e) : null;
-        assertionStream.write(Assertion.error(this, e.message, parsed && parsed[0], e.stack || e.message || null))
+        assertionStream.enqueue(Assertion.error(this, e.message, parsed && parsed[0], e.stack || e.message || null))
       } finally {
         if (!isAsync) {
           onComplete()
@@ -177,8 +187,8 @@ export class Test implements ITest {
       }
     }
 
-    for (let i = 0, l = blocks.length; i < l; ++i) {
-      runBlock(blocks[i], onBlockComplete)
+    for (let block of blocks) {
+      runBlock(block, onBlockComplete)
     }
   }
 
