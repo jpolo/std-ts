@@ -42,8 +42,7 @@ gulp.task('typescript:clean', function() {
   return gulp
     .src([
       'target/definitions/**/*.d.ts',
-      'target/js/**/*.map',
-      'target/js/**/*.js'
+      'target/js/**/*.*'
     ], { read: false })
     .pipe(clean());
 });
