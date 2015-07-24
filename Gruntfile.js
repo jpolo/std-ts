@@ -74,7 +74,7 @@ module.exports = function(grunt) {
     // ---- clean workspace
     clean: {
       target: {
-        src: "<%= dir.target %>"
+        src: ["<%= dir.target_js %>"]
       }
     },
 
@@ -101,7 +101,7 @@ module.exports = function(grunt) {
 
       // Compiles the tests.
       compile: {
-        src: ['<%= dir.source_test_ts %>/**/*.ts','<%= dir.source_ts %>/**/*.ts'],
+        src: ['<%= dir.source_test_ts %>/**/*.ts', '<%= dir.source_ts %>/**/*.ts'],
         dest: '<%= dir.target_js %>',
         options: tsConfig({
           rootDir: '<%= dir.source %>'

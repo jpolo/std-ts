@@ -9,8 +9,14 @@ type Option = {
   sourceMappingURL?: string
 }
 
+/**
+ * The global object (either ```window``` or ```global```)
+ */
 export const global = __global;
 
+/**
+ * Parse ```jscode``` and return a function
+ */
 export function compile(jscode: string, options?: Option): (locals?: Locals) => any {
   options = options || __empty;
   let fnWithContext: Function;
@@ -41,6 +47,14 @@ export function compile(jscode: string, options?: Option): (locals?: Locals) => 
   }
 }
 
+/**
+ * Evaluate ```jscode``` and return its result
+ *
+ * @param jscode The script code that will be evaluated
+ * @param locals The local scope that will be used
+ * @param options The options of evaluation
+ * @returns The evaluation result
+ */
 export function run(jscode: string, locals?: Locals, options?: Option): any {
   return compile(jscode, options)(locals);
 }

@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var ENV = process.env.NODE_ENV || 'development';
 
 
@@ -23,7 +23,7 @@ gulp.task('compile', [ 'typescript:compile' ]);
 gulp.task('watch', function () {
   gulp.watch([
     'tsconfig.json',
-    'src/main/typescript/**/*.ts', 
+    'src/main/typescript/**/*.ts',
     'src/test/typescript/**/*.ts'
   ], ['typescript:compile']);
 });
@@ -41,7 +41,8 @@ gulp.task('typescript:compile', function() {
 gulp.task('typescript:clean', function() {
   return gulp
     .src([
-      'target/definitions/**/*.d.ts', 
+      'target/definitions/**/*.d.ts',
+      'target/js/**/*.map',
       'target/js/**/*.js'
     ], { read: false })
     .pipe(clean());
