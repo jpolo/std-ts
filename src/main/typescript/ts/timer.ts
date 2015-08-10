@@ -4,8 +4,8 @@ const __setTimeout = __global.setTimeout;
 const __clearTimeout = __global.clearTimeout;
 const __setInterval = __global.setInterval;
 const __clearInterval = __global.clearInterval;
-const __setImmediate = __global.setImmediate || function (f) { return __setTimeout(f, 0); };
-const __clearImmediate = __global.clearImmediate || function (id) { return __clearTimeout(id); };
+const __setImmediate: (f: any) => number = __global.setImmediate || function (f: any): number { return __setTimeout(f, 0); };
+const __clearImmediate = __global.clearImmediate || function (id: number): void { return __clearTimeout(id); };
 
 
 export function setTimeout(f: () => void, milliseconds: number = 0): number {

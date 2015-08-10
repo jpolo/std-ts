@@ -7,22 +7,22 @@ function arbitrary<T>(g: IGenerator<T>) {
 }
 
 //Boolean
-const boolean = arbitrary(oneOf([ true, false ]));
-const truthy = arbitrary(oneOf<any>([ true, {}, [], new Date() ]));
-const falsy = arbitrary(oneOf<any>([ false, null, undefined, "", 0, NaN ]));
+export const boolean = arbitrary(oneOf([ true, false ]));
+export const truthy = arbitrary(oneOf<any>([ true, {}, [], new Date() ]));
+export const falsy = arbitrary(oneOf<any>([ false, null, undefined, "", 0, NaN ]));
 
 //Number
-const int8 = arbitrary(random(-0x80, 0x7f));
-const int16 = arbitrary(random(-0x8000, 0x7fff));
-const int32 = arbitrary(random(-0x80000000, 0x7fffffff));
+export const int8 = arbitrary(random(-0x80, 0x7f));
+export const int16 = arbitrary(random(-0x8000, 0x7fff));
+export const int32 = arbitrary(random(-0x80000000, 0x7fffffff));
 
-const uint8 = arbitrary(random(0, 0xff));
-const uint16 = arbitrary(random(0, 0xffff));
-const uint32 = arbitrary(random(0, 0xffffffff));
+export const uint8 = arbitrary(random(0, 0xff));
+export const uint16 = arbitrary(random(0, 0xffff));
+export const uint32 = arbitrary(random(0, 0xffffffff));
 
 //String
-const char = arbitrary(random(0, 0xff).map(String.fromCharCode));
-const charASCII = arbitrary(random(0x20, 0x7e).map(String.fromCharCode));
+export const char = arbitrary(random(0, 0xff).map(String.fromCharCode));
+export const charASCII = arbitrary(random(0x20, 0x7e).map(String.fromCharCode));
 /*
 const date = arbitrary(random(0, 1000).map(function (v) { return new Date(v); }));
 const datePast = arbitrary(integer(0, 1000).map(function (v) { return new Date(v); }));

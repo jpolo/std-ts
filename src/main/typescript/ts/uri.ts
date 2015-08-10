@@ -3,7 +3,7 @@
 const __ostring = {}.toString;
 const __isArray = Array.isArray || function (o) { return __ostring.call(o) === "[object Array]"; };
 const __isString = function (o: any): boolean { return typeof o === 'string'; }
-const __keys = Object.keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+const __keys = Object.keys || function (o: any): string[] { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
 const __strIsEmpty = function (o: string) { return !o || o.length === 0; };
 
 export function parse(s: string): URI {
@@ -49,7 +49,7 @@ export class URI implements IURI {
     }*/
     return returnValue;
   }
-  
+
   static compare(a: IURI, b: IURI): number {
     var aStr = URI.stringify(a)
     var bStr = URI.stringify(b)
@@ -59,7 +59,7 @@ export class URI implements IURI {
       -1
     )
   }
-  
+
   static fromArray(a: any[]): URI {
     return new URI(a[0], a[1], a[2], a[3] != null ? parseInt(a[3]) : null, a[4], a[5], a[6]);
   }
@@ -94,7 +94,7 @@ export class URI implements IURI {
       o.fragment
     );
   }
-  
+
   static isURI(o: any): boolean {
     return (
       o &&
@@ -107,16 +107,16 @@ export class URI implements IURI {
         ('query' in o) &&
         ('fragment' in o)
       ))
-    );  
+    );
   }
-  
+
   static parse(s: string): URI {
     return URI.fromString(s);
   }
-  
+
   static stringify(uri: IURI): string {
     var s = "";
-    
+
     if (s === undefined || s === null) {
       s += uri;
     } else {
@@ -124,7 +124,7 @@ export class URI implements IURI {
       var reDisallowedInFragment = /#/g;
       var reDisallowedInAbsolutePath = /[\#\?]/g;
       var reDisallowedInRelativePath =/[\#\?:]/g;
-      
+
       var scheme = uri.scheme;
       var userInfo = uri.userInfo;
       var domain = uri.domain;
@@ -132,73 +132,73 @@ export class URI implements IURI {
       var path = uri.path;
       var query = uri.query;
       var fragment = uri.fragment;
-      
+
       var s = '';
-      
+
       if (scheme != null) {
         s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ':';
       }
-  
+
       if (domain != null) {
         s += '//';
-  
+
         if (userInfo != null) {
           s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + '@';
         }
-  
+
         s += encodeComponent(domain);
         if (port != null) {
           s += ':' + port;
         }
       }
-  
+
       if (path != null) {
         if (domain && path.charAt(0) != '/') {
           s += '/';
         }
         s += encodeSpecialChars(
           path,
-          path.charAt(0) == '/' ? 
-            reDisallowedInAbsolutePath : 
+          path.charAt(0) == '/' ?
+            reDisallowedInAbsolutePath :
             reDisallowedInRelativePath
         );
       }
-  
+
       if (query != null) {
         s += '?' + encodeQuery(query);
       }
-  
+
       if (fragment != null) {
         s += '#' + encodeSpecialChars(fragment, reDisallowedInFragment);
       }
     }
     return s;
   }
-  
+
   private _href = null;
 
   constructor(
-    public scheme: string, 
-    public userInfo: string, 
-    public domain: string, 
-    public port: number, 
-    public path: string, 
-    public query: IQueryString, 
+    public scheme: string,
+    public userInfo: string,
+    public domain: string,
+    public port: number,
+    public path: string,
+    public query: IQueryString,
     public fragment: string
   ) {
     //make non mutable
     //Object.freeze(this);
   }
-  
+
   compare(u: IURI): number {
-    return URI.compare(this, u)  
+    return URI.compare(this, u)
   }
 
   equals(o: any): boolean {
     return (
       this === o ||
       (
-        o && 
+        o &&
         (o instanceof this.constructor) &&
         this.scheme === o.scheme &&
         this.domain === o.domain &&
@@ -208,17 +208,17 @@ export class URI implements IURI {
       )
     )
   }
-  
-  //hash(s: IHashState) {
-  //  
+
+  //hashCode() {
+  //
   //}
-    
+
   inspect(): string {
     let s = "" + this;
     let sep = s.length > 0 ? ' ' : ''
     return 'URI {' + sep + s + sep + '}'
   }
-    
+
   isAbsolute(): boolean {
     return (
       !__strIsEmpty(this.scheme) &&
@@ -252,12 +252,12 @@ export class URI implements IURI {
   }
 
   /*unapply<T>(fn: (
-    scheme: string, 
-    userInfo: string, 
-    domain: string, 
-    port: number, 
-    path: string, 
-    query: IQueryString, 
+    scheme: string,
+    userInfo: string,
+    domain: string,
+    port: number,
+    path: string,
+    query: IQueryString,
     fragment: string
     ) => T
   ): T {
@@ -387,19 +387,19 @@ export function decodeQuery(s: string): IQueryString {
 
 
 function _queryEquals(l: any, r: any): boolean {
-  var returnValue = true;
+  let returnValue = true;
   if (l !== r) {
-    var lkeys = __keys(l);
-    var rkeys = __keys(r);
-    var lkeyc: number = lkeys.length;
-    var rkeyc: number = rkeys.length;
-    
+    let lkeys = __keys(l);
+    let rkeys = __keys(r);
+    let lkeyc: number = lkeys.length;
+    let rkeyc: number = rkeys.length;
+
     if (lkeyc !== rkeyc) {
       returnValue = false;
     } else {
       lkeys.sort();
       rkeys.sort();
-      
+
       for (var i = 0, key; i < lkeyc; ++i) {
         key = lkeys[i];
         if (key !== rkeys[i] || l[key] !== r[key]) {

@@ -5,11 +5,11 @@
 declare var Symbol: any;
 //TODO remove
 declare class Map<K, V> {
-  get(k: K): V; 
+  get(k: K): V;
   set(k: K, v: V): void;
 };
-declare class WeakMap<K, V> { 
-  get(k: K): V; 
+declare class WeakMap<K, V> {
+  get(k: K): V;
   set(k: K, v: V): void;
 };
 
@@ -26,34 +26,28 @@ export const PREVENT_EXTENSIONS = "preventExtensions";
 const ALL = [ADD, UPDATE, DELETE, RECONFIGURE, SET_PROTOTYPE, PREVENT_EXTENSIONS];
 
 //Util
-var O = (<any>Object);
-var __keys = Object.keys;
-var __observerDeliver = O.deliverChangeRecords;
-var __observe = O.observe;
-var __unobserve = O.unobserve;
-var __notifier: <T>(o: T) => INotifier<T> = O.getNotifier;
-var __setImmediate = typeof setImmediate !== "undefined" ? setImmediate : setTimeout;
-var __clearImmediate = typeof clearImmediate !== "undefined" ? clearImmediate : clearTimeout;
-var __sym: (o: string) => any = typeof Symbol !== "undefined" ? Symbol : undefined;
-var __map: <K, V>() => Map<K, V>;
-var __weakMap: <K, V>() => WeakMap<K, V>;
-var __isFrozen = O.isFrozen;
-var __preventExtensions = Object.preventExtensions || function (o) { };
+let O = (<any>Object);
+const __keys = Object.keys || function (o: any): string[] { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+let __observerDeliver = O.deliverChangeRecords;
+let __observe = O.observe;
+let __unobserve = O.unobserve;
+let __notifier: <T>(o: T) => INotifier<T> = O.getNotifier;
+const __setImmediate = typeof setImmediate !== "undefined" ? setImmediate : setTimeout;
+const __clearImmediate = typeof clearImmediate !== "undefined" ? clearImmediate : clearTimeout;
+const __sym: (o: string) => any = typeof Symbol !== "undefined" ? Symbol : function (s: string) { return "@@" + s; };
+let __map: <K, V>() => Map<K, V>;
+let __weakMap: <K, V>() => WeakMap<K, V>;
+const __isFrozen = Object.isFrozen || function (o: any): boolean { return false; };
+const __preventExtensions = Object.preventExtensions || function <T>(o: T) { return o; };
 
 //Compat
-if (ES_COMPAT <= 3) {
-  __keys = __keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
-  __isFrozen = __isFrozen || function (o) { return false; };
-}
-
 if (ES_COMPAT <= 5) {
-  __sym = __sym || function (s: string) { return "@@" + s; };
-  __map = typeof Map !== "undefined" ? 
+  __map = typeof Map !== "undefined" ?
     function () { return new Map(); } :
     <any> function () {
       var _keys = [];
       var _values = [];
-      
+
       return {
         has: function (k) {
           return _keys.indexOf(k) !== -1;
@@ -85,12 +79,12 @@ if (ES_COMPAT <= 5) {
         }
       };
     };
-  __weakMap = typeof WeakMap !== "undefined" ? 
+  __weakMap = typeof WeakMap !== "undefined" ?
     function () { return new WeakMap(); } :
     <any>__map;
 }
 
-if (!__observe) {    
+if (!__observe) {
   var __option = function (o, name) {
     return o ? o[name] : undefined;
   };
@@ -114,22 +108,22 @@ if (!__observe) {
   var $$pendingChangeRecords = __sym("pendingChangeRecords");
   var $$changeObservers = __sym("changeObservers");
   var $$activeChanges = __sym("activeChanges");
-  
+
   var __enqueueChangeRecord = function (o: any, changeRecord: IChangeRecord<any>) {
     var notifier = __notifier(o);
     var changeType = changeRecord.type;
     var activeChanges = notifier[$$activeChanges];
     var changeObservers = notifier[$$changeObservers];
   };
-  
+
   var Notifier: any = (function () {
-    
+
     function Notifier(o) {
       this[$$target] = o;
       this[$$changeObservers] = [];
       this[$$activeChanges] = {};
     }
-    
+
     Notifier.prototype.notify = function (changeRecord: IChangeRecord<any>) {
       var o = this;
       var target = o[$$target];
@@ -143,21 +137,21 @@ if (!__observe) {
       __preventExtensions(newRecord);
       __enqueueChangeRecord(target, newRecord);
     };
-    
-    
+
+
     Notifier.prototype.performChange = function (changeType, changeFn) {
-      
+
     };
-  
+
     return Notifier;
   }());
-  
+
 
   __observerDeliver = function (callback: IObserver<any>) {
     var changeRecords: IChangeRecord<any>[] = callback[$$pendingChangeRecords];
     callback[$$pendingChangeRecords] = [];
     var returnValue = false;
-    
+
     var l = changeRecords.length;
     if (l > 0) {
       var array = [];
@@ -175,20 +169,20 @@ if (!__observe) {
     }
     return returnValue;
   };
-  
+
   var __beginChange = function (o: any, changeType: string) {
     var notifier = __notifier(o);
     var activeChanges = notifier[$$activeChanges];
   };
-  
+
   var __endChange = function (o: any, changeType: string) {
-    
+
   };
-  
+
   var __observerClean = function (callback: IObserver<any>) {
-    
+
   };
-  
+
   var __notifiers = __weakMap<any, INotifier<any>>();
   __notifier = function <T>(o: T): INotifier<T> {
     __assertObject(o);
@@ -201,7 +195,7 @@ if (!__observe) {
     }
     return notifier;
   };
-  
+
   __observe = function (o, callback, options?: Options) {
     __assertObject(o);
     __assertCallable(callback);
@@ -210,21 +204,21 @@ if (!__observe) {
     if (notifier) {
       var acceptTypes = options && options.acceptTypes || ALL;
       var skipRecords = !!(options && options.skipRecords);
-      
+
     }
   };
-  
+
   __unobserve = function (o, callback) {
     __assertObject(o);
     __assertCallable(callback);
-    
+
     var notifier = __notifiers.get(o);
     if (notifier) {
       /*notifier.removeListener(callback);
       if (notifier.listeners().length === 0) {
         __notifiers.delete(o);
       }*/
-      
+
       __observerClean(callback);
     }
   };
@@ -232,10 +226,10 @@ if (!__observe) {
 
 
 interface INotifier<T> {
-  
+
   notify(c: IChangeRecord<T>)
   performChange(changeType, changeFn)
-  
+
 }
 
 interface IObserver<T> {
@@ -249,9 +243,9 @@ interface IChangeRecord<T> {
   oldValue: any
 }
 
-type Options = { 
-  acceptTypes?: string[]; 
-  skipRecords?: boolean 
+type Options = {
+  acceptTypes?: string[];
+  skipRecords?: boolean
 };
 
 export function add<T>(o: T, callback: IObserver<T>, options?: Options) {
@@ -263,7 +257,7 @@ export function remove<T>(o: T, callback: IObserver<T>) {
 }
 
 export function deliver(callback: IObserver<any>): boolean {
-  return __observerDeliver(callback);  
+  return __observerDeliver(callback);
 }
 
 export function notifier<T>(o: T): INotifier<T> {

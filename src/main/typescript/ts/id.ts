@@ -1,61 +1,76 @@
 declare var Symbol: any;
 
-//Util
-const __sym: (s: string) => any = typeof Symbol !== "undefined" ? Symbol : function (s: string) { return "@@" + s; };
-const __descriptor: PropertyDescriptor = { value: null, enumerable: false, configurable: true, writable: true };
-const __def = Object.defineProperty || function (o, k, d: PropertyDescriptor) { o[k] = d.value; };
-const __set = function (o, k, v) {
-  __descriptor.value = v
-  __def(o, k, __descriptor);
-};
-
-const $$id = __sym("id");
-let __currentId = 1;//Start from 1, helps not to have falsy values
-const __getId: (o: any) => number = function (o: any) {
-  let id = o[$$id];
-  if (id === undefined) {
-    id = __currentId;
-    __currentId += 1;
-    __set(o, $$id, id);
+//ECMA like
+const SymbolCreate: (s: string) => any = typeof Symbol !== "undefined" ? Symbol : function (s: string) { return "@@" + s; };
+const DefinePropertyOrThrow = Object.defineProperty || function (o: any, k: string, d: PropertyDescriptor): any { o[k] = d.value; };
+const DefineValue = (function () {
+  const __descriptor: PropertyDescriptor = {
+    value: null,
+    enumerable: false,
+    configurable: true,
+    writable: true
   }
-  return id;
-};
+  function DefineValue(o: any, k: string, v: any): void {
+    __descriptor.value = v
+    DefinePropertyOrThrow(o, k, __descriptor)
+  }
+  return DefineValue
+}())
+const GenerateId = (function () {
+  //Start from 1, helps not to have falsy values
+  let __currentId = 1
+  
+  function GenerateId() {
+    let returnValue = __currentId
+    __currentId += 1
+    return returnValue
+  }
+  return GenerateId
+}())
+
+const $$id = SymbolCreate("id")
+const GetOrSetId = function GetOrSetId(o: any): number {
+  let id = o[$$id]
+  if (id === undefined) {
+    id = GenerateId()
+    DefineValue(o, $$id, id)
+  }
+  return id
+}
 
 
 /**
  * Return new generated id
  *
- */ 
+ */
 export function generate(): number {
-  let returnValue = __currentId;
-  __currentId += 1;
-  return returnValue;
+  return GenerateId()
 }
 
 /**
  * Return true if o can have and id (object or function)
- * 
+ *
  */
 export function hasId(o: any): boolean {
-  let t = typeof o;
-  return t === "function" || (o !== null && t === "object");
+  let t = typeof o
+  return t === "function" || (o !== null && t === "object")
 }
 
 /**
  * Return the corresponding id if able
- * 
+ *
  */
 export function getId(o: any): number {
-  let returnValue = NaN;
+  let returnValue = NaN
   switch (typeof o) {
     case 'object':
       if (o !== null) {
-        returnValue = __getId(o);
+        returnValue = GetOrSetId(o)
       }
-      break;
+      break
     case 'function':
-      returnValue = __getId(o);
-      break;
+      returnValue = GetOrSetId(o)
+      break
   }
-  return returnValue;
+  return returnValue
 }

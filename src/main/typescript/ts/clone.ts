@@ -1,12 +1,15 @@
 //Util
-const __create = Object.create || function (proto) {
+const __create: (proto: any, descriptors?: any) => any  = Object.create || function (proto, descs) {
   let ctor = proto.constructor;
   function P() {}
   P.prototype = proto;
-  return new P();
+  let o = new P();
+
+  //TODO defineproperties
+  return o;
 };
 const __protoOf = Object.getPrototypeOf || function (o: any) { return o.__proto__; };
-const __descriptors = Object.getOwnPropertyNames ? 
+const __descriptors = Object.getOwnPropertyNames ?
   function (o: any): { [k: string]: PropertyDescriptor } {
     let descriptors: any = {};
     let props = Object.getOwnPropertyNames(o);
@@ -15,7 +18,7 @@ const __descriptors = Object.getOwnPropertyNames ?
       descriptors[prop] = getDescriptor(o, prop);
     }
     return descriptors;
-  } : 
+  } :
   function (o) {
     let descriptors: any = {};
     for (let prop in o) {
@@ -42,7 +45,7 @@ export interface IClone {
 }
 
 export function isIClone(o: any): boolean {
-  return !!o && (typeof o.clone === "function");  
+  return !!o && (typeof o.clone === "function");
 }
 
 export function clone<T>(o: T): T {
@@ -63,7 +66,7 @@ export function clone<T>(o: T): T {
           default: returnValue = __create(__protoOf(anyVal), __descriptors(anyVal));
         }
       }
-    }  
+    }
     break;
   case "function":
     let f: any = (<any> returnValue).__cloned__ = anyVal.__cloned__ || o;
@@ -82,7 +85,7 @@ export function clone<T>(o: T): T {
       }
       return r;
     };
-      
+
     break;
   default://keep value
   }
@@ -90,15 +93,15 @@ export function clone<T>(o: T): T {
 }
 
 export function cloneBoolean(b: boolean): boolean {
-  return b;  
+  return b;
 }
 
 export function cloneNumber(n: number): number {
-  return n;  
+  return n;
 }
 
 export function cloneString(s: string): string {
-  return s;  
+  return s;
 }
 
 export function cloneArray<T>(a: T[]): T[] {
@@ -146,7 +149,7 @@ export function cloneMap<K, V>(m: Map<K, V>): Map<K, V> {
   let returnValue = m;
   if (__isDefined(m)) {
     returnValue = new Map<K, V>();
-    m.forEach((v, k) => returnValue.set(k, v)); 
+    m.forEach((v, k) => returnValue.set(k, v));
   }
   return returnValue;
 }
@@ -155,7 +158,7 @@ export function cloneSet<T>(s: Set<T>): Set<T> {
   let returnValue = s;
   if (__isDefined(s)) {
     returnValue = new Set<T>();
-    s.forEach((v) => returnValue.add(v)); 
+    s.forEach((v) => returnValue.add(v));
   }
   return returnValue;
 }
