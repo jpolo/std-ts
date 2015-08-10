@@ -112,7 +112,10 @@ export function oneOf<T>(gens: IGenerator<T>[]): IGenerator<T>
 export function oneOf<T>(gens: T[]): IGenerator<T>
 export function oneOf(gens: any[]): IGenerator<any> {
   const length = gens.length
-  const generators: IGenerator<any>[] = gens.map(GeneratorFrom)//TODO array map
+  const generators: IGenerator<any>[] = new Array(length)
+  for (let i = 0; i < length; i++) {
+    generators[i] = GeneratorFrom(gens[i])
+  }
   return GeneratorCreate(function (params: Params) {
     let index = ParamsRandomInt(params, 0, length)
     return GeneratorGet(generators[index], params)
