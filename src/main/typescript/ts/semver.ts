@@ -3,7 +3,7 @@ import { IHash, hashString } from "ts/hash"
 //reference: https://github.com/npm/node-semver/blob/master/semver.js
 
 //Util
-const __str = function (o) { return "" + o; };
+const ToString = function (o: any): string { return "" + o; };
 
 export interface ISemVer {
   major: number;
@@ -14,7 +14,7 @@ export interface ISemVer {
 }
 
 export class SemVer implements ISemVer, IHash {
-  
+
   static cast(o: any): SemVer {
     var returnValue: SemVer = null;
     if (o) {
@@ -32,11 +32,11 @@ export class SemVer implements ISemVer, IHash {
     }
     return returnValue;
   }
-  
+
   static compare(a: ISemVer, b: ISemVer): number {
-    return __cmp(a, b);
+    return SemVerCompare(a, b);
   }
-  
+
   static isSemVer(o: any): boolean {
     return (o && (
       o instanceof SemVer ||
@@ -47,29 +47,29 @@ export class SemVer implements ISemVer, IHash {
       )
     ));
   }
-  
+
   /*static compareMain(a: ISemVer, b: ISemVer): number {
     return __cmpMain(a, b);
   }
-  
+
   static comparePre(a: ISemVer, b: ISemVer): number {
     return __cmpPre(a, b);
   }*/
-  
+
   static parse(s: string, loose = false): SemVer {
     var m = s.trim().match(loose ? re[LOOSE] : re[FULL]);
 
     if (!m) {
       throw new TypeError('Invalid Version: ' + s);
     }
-  
+
     //this.raw = version;
-  
+
     // these are actually numbers
     var major = +m[1];
     var minor = +m[2];
     var patch = +m[3];
-  
+
     // numberify any prerelease numeric ids
     var prerelease = [];
     if (m[4]) {
@@ -77,7 +77,7 @@ export class SemVer implements ISemVer, IHash {
         return (/^[0-9]+$/.test(id)) ? +id : id;
       });
     }
-  
+
     var build = m[5] ? m[5].split('.') : [];
     return new SemVer(
       major,
@@ -87,17 +87,17 @@ export class SemVer implements ISemVer, IHash {
       build
     );
   }
-  
+
   static stringify(v: ISemVer): string {
     return __strSemVer(v);
   }
-  
+
   major: number;
   minor: number;
   patch: number;
   prerelease: Array<number|string>;
   build: Array<string>;
-  
+
   constructor(
     major = 0,
     minor = 0,
@@ -111,7 +111,7 @@ export class SemVer implements ISemVer, IHash {
     this.prerelease = prerelease ? prerelease.slice() : [];//copy
     this.build = build ? build.slice() : [];//copy
   }
-  
+
   clone(): SemVer {
     return new SemVer(
       this.major,
@@ -121,40 +121,40 @@ export class SemVer implements ISemVer, IHash {
       this.build
     );
   }
-  
+
   compare(o: ISemVer): number {
-    return __cmp(this, o);
+    return SemVerCompare(this, o);
   }
-  
+
   equals(o: any): boolean {
     return (
       this === o ||
       (
         o instanceof SemVer &&
-        __cmp(this, o) === 0
+        SemVerCompare(this, o) === 0
       )
     );
   }
-  
+
   hashCode() {
     return hashString(this.toString());
   }
-  
+
   inspect() {
     var s = 'SemVer { "';
-    s += __str(this);
+    s += ToString(this);
     s += '" }';
     return s;
   }
-  
+
   toJSON() {
-    return __str(this);  
+    return ToString(this);
   }
-  
+
   toString(): string {
     return __strSemVer(this);
   }
-  
+
 }
 
 
@@ -166,7 +166,7 @@ function __strSemVer(v: ISemVer) {
   }
   return s;
 }
-function __cmp(a: ISemVer, b: ISemVer) {
+function SemVerCompare(a: ISemVer, b: ISemVer) {
   return __cmpMain(a, b) || __cmpPre(a, b);
 }
 function __cmpIdentifiers(a: number|string, b: number|string): number {
@@ -197,7 +197,7 @@ function __cmpMain(a: ISemVer, b: ISemVer): number {
 function __cmpPre(a: ISemVer, b: ISemVer): number {
   var apre = a.prerelease;
   var bpre = b.prerelease;
-  
+
   // NOT having a prerelease is > having one
   if (apre.length && !bpre.length) {
     return -1;
@@ -213,7 +213,7 @@ function __cmpPre(a: ISemVer, b: ISemVer): number {
     var avundef = av === undefined;
     var bv = bpre[i];
     var bvundef = bv === undefined;
-    
+
     if (avundef && bvundef) {
       return 0;
     } else if (bvundef) {

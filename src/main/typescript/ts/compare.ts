@@ -1,9 +1,8 @@
-//Util
-const __ostring = {}.toString;
-const __isEmpty = function (o) { return o === null  || o === undefined; };
-const __isNaN = function (o) { return o !== o; };
-const __str = function (o) { return "" + o; };
-const __stringTag = function (o: any) {
+//ECMA like
+const IsEmpty = function (o) { return o === null  || o === undefined; };
+const IsNaN = function (o) { return o !== o; };
+const ToString = function (o) { return "" + o; };
+const ToStringTag = function (o: any) {
   let s = '';
   if (o === undefined) {
     s = 'Undefined';
@@ -11,13 +10,13 @@ const __stringTag = function (o: any) {
     s = 'Null';
   } else {
     let c = o.constructor;
-    s = c && c.name || __ostring.call(o).slice(8, -1);
+    s = c && c.name || Object.prototype.toString.call(o).slice(8, -1);
   }
   return s;
 };
 const __comparator = function <T>(o: T): (lhs: T, rhs: T) => Ordering {
   let returnValue: (lhs: any, rhs: any) => Ordering
-  let tag = __stringTag(o);
+  let tag = ToStringTag(o);
   switch (tag) {
     case 'Undefined': returnValue = null; break;
     case 'Null': returnValue = null; break;
@@ -26,7 +25,7 @@ const __comparator = function <T>(o: T): (lhs: T, rhs: T) => Ordering {
     case 'String': returnValue = <any>compareString; break;
     default:
       if (isICompare(o)) {
-        returnValue = compareICompare;  
+        returnValue = compareICompare;
       } else {
         switch (tag) {
           case "Date": returnValue = <any>compareDate; break;
@@ -57,17 +56,17 @@ export function compare<T>(lhs: T, rhs: T): Ordering {
   let l = <any> lhs;
   let r = <any> rhs;
   let cmpFn = __comparator(lhs) || __comparator(rhs);
-  
+
   return (
-    cmpFn ? cmpFn(lhs, rhs) : 
-    lhs === rhs && __isEmpty(lhs)  ? Ordering.Equal : 
+    cmpFn ? cmpFn(lhs, rhs) :
+    lhs === rhs && IsEmpty(lhs)  ? Ordering.Equal :
     Ordering.None
   );
 }
 
 export function compareBoolean(lhs: boolean, rhs: boolean): Ordering {
   return (
-    __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+    IsEmpty(lhs) || IsEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
     lhs === rhs ? Ordering.Equal :
     +lhs < +rhs ? Ordering.Less :
     Ordering.Greater
@@ -76,8 +75,8 @@ export function compareBoolean(lhs: boolean, rhs: boolean): Ordering {
 
 export function compareNumber(lhs: number, rhs: number): Ordering {
   return (
-    __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
-    __isNaN(lhs) || __isNaN(rhs) ? Ordering.None :
+    IsEmpty(lhs) || IsEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+    IsNaN(lhs) || IsNaN(rhs) ? Ordering.None :
     (lhs = +lhs) === (rhs = +rhs) ? Ordering.Equal :
     lhs < rhs ? Ordering.Less :
     Ordering.Greater
@@ -86,25 +85,25 @@ export function compareNumber(lhs: number, rhs: number): Ordering {
 
 export function compareString(lhs: string, rhs: string): Ordering {
   return (
-    __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
-    (lhs = __str(lhs)) === (rhs = __str(rhs)) ? Ordering.Equal :
+    IsEmpty(lhs) || IsEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+    (lhs = ToString(lhs)) === (rhs = ToString(rhs)) ? Ordering.Equal :
     lhs < rhs ? Ordering.Less :
     Ordering.Greater
   );
 }
 
-export function compareICompare(lhs: ICompare, rhs: ICompare): Ordering { 
+export function compareICompare(lhs: ICompare, rhs: ICompare): Ordering {
   return (
-    __isEmpty(lhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+    IsEmpty(lhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
     lhs.compare(rhs)
-  ); 
+  );
 }
 
 export function compareArray(lhs: Array<any>, rhs: Array<any>, compareFn = compare) {
   let returnValue = Ordering.Equal;
   let lhslen = lhs.length;
   let rhslen = rhs.length;
-  
+
   for (let i = 0, l = lhslen < rhslen ? lhslen : rhslen; i < l; ++i) {
     returnValue = compareFn(lhs[i], rhs[i]);
     if (returnValue !== Ordering.Equal) {
@@ -112,21 +111,21 @@ export function compareArray(lhs: Array<any>, rhs: Array<any>, compareFn = compa
     }
   }
 
-  return returnValue; 
+  return returnValue;
 }
 
 export function compareDate(lhs: Date, rhs: Date): Ordering {
   return (
-    __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+    IsEmpty(lhs) || IsEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
     compareNumber(+lhs, +rhs)
-  ); 
+  );
 }
 
-export function compareRegExp(lhs: RegExp, rhs: RegExp): Ordering { 
+export function compareRegExp(lhs: RegExp, rhs: RegExp): Ordering {
   return (
-    __isEmpty(lhs) || __isEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
-    compareString(__str(lhs), __str(rhs))
-  ); 
+    IsEmpty(lhs) || IsEmpty(rhs) ? (lhs === rhs ? Ordering.Equal : Ordering.None) :
+    compareString(ToString(lhs), ToString(rhs))
+  );
 }
 
 export function min<T>(lhs: T, rhs: T, compareFn = compare): T {

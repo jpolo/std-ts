@@ -1,231 +1,9 @@
-
-const PARSED = "@@data";
-
-// https://github.com/mattrobenolt/callsite-shim/blob/master/src/callsite.js
-// https://github.com/stacktracejs/stacktrace.js/
-// https://github.com/tj/callsite
-
-//export interface ICallStack extends Array<ICallSite> {}
-
-export interface ICallSite {
-  getThis(): any
-  getTypeName(): string;
-  getFunction(): Function
-  getFunctionName(): string
-  getMethodName(): string
-  getFileName(): string
-  getLineNumber(): number
-  getColumnNumber(): number
-  getEvalOrigin(): any
-  isTopLevel(): boolean
-  isEval(): boolean
-  isNative(): boolean
-  isConstructor(): boolean
-  getArguments(): any // {[key: number]: any; length: number}
-  toString(): string
-}
-
-class CallSite implements ICallSite {
-  
-  static parse(s: string): CallSite {
-    return new CallSite(s);
-  }
-  
-  static stringify(o: ICallSite): string {
-    var s = "";
-    if (s === undefined) {
-      s = "undefined";
-    } else if (s === null) {
-      s = "null";
-    } else {
-      var functionName = o.getFunctionName();
-      var lineNumber = o.getLineNumber();
-      var columnNumber = o.getColumnNumber();
-      
-      s += o.getFileName();
-      if (lineNumber) {
-        s += ":" + lineNumber;
-        if (columnNumber) {
-          s += ":" + columnNumber;
-        }
-      }
-      
-      s = functionName ? functionName + ' (' + s +  ')' : s;
-    }
-    return s;
-  }
-  
-  "@@data": {
-    _this: any;
-    _typeName: string;
-    _function: any;
-    _functionName: string;
-    _methodName: string;
-    _fileName: string;
-    _lineNumber: number;
-    _columnNumber: number;
-    _isTopLevel: boolean;
-    _isEval: boolean;
-    _isNative: boolean;
-    _isConstructor: boolean;
-  };
-  
-  constructor(private _s: string) {
-  }
-  
-  getThis(): any {
-    return this._parse()._this;
-  }
-  
-  getTypeName(): string {
-    return this._parse()._typeName;
-  }
-
-  getFunction(): Function {
-    return this._parse()._function;
-  }
-
-  getFunctionName(): string {
-    return this._parse()._functionName;
-  }
-
-  getMethodName(): string {
-    return this._parse()._methodName;
-  }
-
-  getFileName(): string {
-    return this._parse()._fileName;
-  }
-
-  getLineNumber(): number {
-    var d = this._parse();
-    return d._lineNumber > 0 ? d._lineNumber : null;
-  }
-
-  getColumnNumber(): number {
-    var d = this._parse();
-    return d._columnNumber > 0 ? d._columnNumber : null;
-  }
-
-  getEvalOrigin(): any {
-    //
-  }
-
-  isTopLevel(): boolean {
-    return this._parse()._isTopLevel;
-  }
-
-  isEval(): boolean {
-    return this._parse()._isEval;
-  }
-
-  isNative(): boolean {
-    return this._parse()._isNative;
-  }
-
-  isConstructor(): boolean {
-    return this._parse()._isConstructor;
-  }
-
-  getArguments() {
-    var d= this._parse();
-    return d._function && d._function['arguments'] || null;
-  }
-
-  toString(): string {
-    return CallSite.stringify(this);
-  }
-  
-  private _parse() {
-    var d = this["@@data"];
-    if (!d) {
-      var parts = this._s.split("@", 2);
-      var receiver = __global;
-      var fun = null;
-      var functionName = parts[0] || "";
-      var fileName = "";
-      var typeName = "";
-      var methodName = "";
-      var lineNumber = NaN;
-      var columnNumber = NaN;
-      var location = parts[1] || "";
-      var isAnonymous = location.indexOf("{anonymous}") !== -1;
-      var isNative = false; //location.indexOf("native") !== -1;
-      if (location.indexOf(':') !== -1) {
-        var locationParts = /(.*):(\d+):(\d+)/.exec(location);
-        fileName = locationParts[1];
-        lineNumber = parseInt(locationParts[2]);
-        columnNumber = parseInt(locationParts[3]);
-      } else {
-        fileName = location;
-      }
-
-      if (!isAnonymous) {
-        var functionParts = functionName.split('.');
-        typeName = functionParts[0];
-        methodName = functionParts[functionParts.length - 1];
-      }
-      
-      //isEval
-      var isEval = false;
-      
-      //isNative
-      var isNative = false;
-      
-      //isConstructor
-      var ctor = __isObject(receiver) ? receiver.constructor : null;
-      var isConstructor = !ctor ? false : fun === ctor;
-      
-      //isTopLevel
-      var isTopLevel = (receiver == null) || __isGlobal(receiver);
-      
-      d = this["@@data"] = {
-        _this: receiver,
-        _typeName: typeName,
-        _function: fun,
-        _functionName: functionName,
-        _methodName: methodName,
-        _fileName: fileName,
-        _lineNumber: lineNumber,
-        _columnNumber: columnNumber,
-        _isTopLevel: isTopLevel,
-        _isEval: isEval,
-        _isNative: isNative,
-        _isConstructor: isConstructor
-      };
-    }
-    return d;
-  }
-}
-
-export function prepare(errorString: string, frames: ICallSite[]): string {
-  return __prepareStackTrace(errorString, frames);
-}
-
-export function capture(e: { stack: any }, stripPoint?: Function): void {
-  __captureStackTrace(e, stripPoint);
-}
-
-export function get(error: any): ICallSite[] {
-  return __errorParse(error);
-}
-
-export function create(): ICallSite[] {
-  return __errorFrames(1);
-}
-
-enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
-
-
-//util
-var __ostring = Object.prototype.toString;
-var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-var __isGlobal = function (o: any) { return o === __global; }
-var __isUndefined = function (o: any) { return typeof o === "undefined"; }
-var __isObject = function (o: any) { return o !== null && (typeof o === "object" || typeof o === "function"); }
-var __str = String;
-var __stringTag = function (o: any): string {
-  var s = '';
+const __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
+const __isGlobal = function (o: any) { return o === __global; }
+const __isObject = function (o: any) { return o !== null && (typeof o === "object" || typeof o === "function"); }
+const __ostring = Object.prototype.toString;
+const __stringTag = function (o: any): string {
+  let s = '';
   if (o === null) {
     s = 'Null';
   } else {
@@ -240,42 +18,38 @@ var __stringTag = function (o: any): string {
   }
   return s;
 };
-
-var __arraySlice = function <T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
-  var returnValue = [];
-  var l = returnValue.length;
+const ArraySlice = function <T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
+  let returnValue = [];
+  let l = returnValue.length;
   start = start || 0;
   end = end == null || l < end ? l : end;
-  for (var i = start; i < end; ++i) {
+  for (let i = start; i < end; ++i) {
     returnValue.push(a[i]);
   }
   return returnValue;
 };
-
-var __errorCreate = function () {
+const ErrorCreate = function () {
   try {
     window['$$undef$$']();
   } catch (e) {
     return e;
   }
 };
-
-var __errorString = function (name: string, message: string) {
-  var returnValue = '';
-  if (!__isUndefined(name)) {
+const ErrorToString = function (name: string, message: string) {
+  let returnValue = '';
+  if (name !== undefined) {
     returnValue += name;
   }
-  if (!__isUndefined(message)) {
+  if (message !== undefined) {
     returnValue += ': ' + message;
   }
   return returnValue;
 };
-
-var __errorParse = (function () {
+const ErrorParse = (function () {
 
   //Sniff browser
-  var browser: Browser = (function (e: any) {
-    var returnValue = Browser.Other
+  let browser: Browser = (function (e: any) {
+    let returnValue = Browser.Other
     if (e['arguments'] && e.stack) {
       returnValue = Browser.Chrome
     } else if (e.stack && e.sourceURL) {
@@ -292,10 +66,10 @@ var __errorParse = (function () {
       returnValue = Browser.Chrome
     }
     return returnValue
-  }(__errorCreate()));
-  
+  }(ErrorCreate()));
+
   //Parse error line
-  var __errorParseLines: (error: Error) => string[] = __errorParseLines_Other;
+  let __errorParseLines: (error: Error) => string[] = __errorParseLines_Other;
   switch (browser) {
     case Browser.IE: __errorParseLines = __errorParseLines_IE; break;
     case Browser.Chrome: __errorParseLines = __errorParseLines_Chrome; break;
@@ -304,7 +78,7 @@ var __errorParse = (function () {
     case Browser.Safari: __errorParseLines = __errorParseLines_Safari; break;
     default: __errorParseLines = __errorParseLines_Other; break;
   }
-  
+
   function __errorParseLines_Chrome(error: any): string[] {
     return (error.stack + '\n')
         .replace(/^[\s\S]+?\s+at\s+/, ' at ') // remove message
@@ -333,16 +107,16 @@ var __errorParse = (function () {
   }
 
   function __errorParseLines_Opera(error: any): string[] {
-    var ANON = '{anonymous}'
-    var lineRE = /^.*line (\d+), column (\d+)(?: in (.+))? in (\S+):$/
-    var lines = error.stacktrace.split('\n')
-    var result = []
+    let ANON = '{anonymous}'
+    let lineRE = /^.*line (\d+), column (\d+)(?: in (.+))? in (\S+):$/
+    let lines = error.stacktrace.split('\n')
+    let result = []
 
-    for (var i = 0, len = lines.length; i < len; i += 2) {
-      var match = lineRE.exec(lines[i])
+    for (let i = 0, len = lines.length; i < len; i += 2) {
+      let match = lineRE.exec(lines[i])
       if (match) {
-        var location = match[4] + ':' + match[1] + ':' + match[2]
-        var fnName = match[3] || "global code"
+        let location = match[4] + ':' + match[1] + ':' + match[2]
+        let fnName = match[3] || "global code"
         fnName = fnName.replace(/<anonymous function: (\S+)>/, "$1").replace(/<anonymous function>/, ANON)
         result.push(fnName + '@' + location + ' -- ' + lines[i + 1].replace(/^\s+/, ''))
       }
@@ -359,15 +133,15 @@ var __errorParse = (function () {
   }
 
   function __errorParseLines_Other(curr): string[] {
-    var ANON = '{anonymous}'
-    var fnRE = /function(?:\s+([\w$]+))?\s*\(/
-    var stack = []
-    var fn, args
-    var maxStackSize = 10
+    let ANON = '{anonymous}'
+    let fnRE = /function(?:\s+([\w$]+))?\s*\(/
+    let stack = []
+    let fn, args
+    let maxStackSize = 10
     while (curr && stack.length < maxStackSize) {
       fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON
       try {
-        args = __arraySlice(curr['arguments'] || [])
+        args = ArraySlice(curr['arguments'] || [])
       } catch (e) {
         args = ['Cannot access arguments: ' + e]
       }
@@ -383,10 +157,10 @@ var __errorParse = (function () {
   }
 
   function _stringifyArguments(args: any[]) {
-    var argc = args.length
-    var result = new Array(argc)
-    for (var i = 0; i < argc; ++i) {
-      var arg = args[i]
+    let argc = args.length
+    let result = new Array(argc)
+    for (let i = 0; i < argc; ++i) {
+      let arg = args[i]
       switch(__stringTag(arg)) {
         case 'Undefined':
           result[i] = 'undefined'
@@ -399,9 +173,9 @@ var __errorParse = (function () {
             result[i] = '[' + _stringifyArguments(arg) + ']'
           } else {
             result[i] = '[' +
-              _stringifyArguments(__arraySlice(arg, 0, 1)) +
+              _stringifyArguments(ArraySlice(arg, 0, 1)) +
               '...' +
-              _stringifyArguments(__arraySlice(arg, -1)) +
+              _stringifyArguments(ArraySlice(arg, -1)) +
               ']'
           }
           break
@@ -424,58 +198,31 @@ var __errorParse = (function () {
     return result.join(',')
   }
 
-  return function __errorParse(error: any, offset = 0): CallSite[] {
-    var items = __errorParseLines(error);
+  return function ErrorParse(error: any, offset = 0): CallSite[] {
+    let items = __errorParseLines(error);
     if (offset > 0) {
       //shift from offset
       items = items.slice(offset);
     }
 
-    var itemc = items.length;
-    var parsed = new Array(itemc);
-    var parseCallSite = CallSite.parse;
-    for (var i = 0; i < itemc; ++i) {
+    let itemc = items.length;
+    let parsed = new Array(itemc);
+    let parseCallSite = CallSite.parse;
+    for (let i = 0; i < itemc; ++i) {
       parsed[i] = parseCallSite(items[i]);
     }
     return parsed;
   };
 }());
-
-var __errorFrames = (function () {
-  var _Error = (<any>Error);
-  var __errorFrames: (offset: number) => ICallSite[];
-  if (_Error.captureStackTrace) {
-    //v8
-    var prepareStackTrace = _Error.prepareStackTrace;
-    var stackSink = function (_, stack) { return stack; };
-    __errorFrames = function (offset) {
-      _Error.prepareStackTrace = stackSink;
-      var stack = (<any>new _Error()).stack.slice(1 + offset);
-      if (prepareStackTrace === undefined) {
-        delete _Error.prepareStackTrace;  
-      } else {
-        _Error.prepareStackTrace = prepareStackTrace;
-      }
-      return stack;
-    };
-  } else {
-    __errorFrames = function (offset) {
-      return __errorParse(__errorCreate(), offset + 2);
-    };
-  }
-  
-  return __errorFrames;
-}());
-
-var __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorString: string, frames: ICallSite[]): string {
+const __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorString: string, frames: ICallSite[]): string {
 
   // Adapted from V8 source:
   // https://github.com/v8/v8/blob/1613b7/src/messages.js#L1051-L1070
-  var lines = [];
-  var frame: ICallSite;
-  var line;
+  let lines = [];
+  let frame: ICallSite;
+  let line;
   lines.push(errorString);
-  for (var i = 0, l = frames.length; i < l; i++) {
+  for (let i = 0, l = frames.length; i < l; i++) {
     frame = frames[i];
     try {
       line = CallSite.stringify(frame);//__str(frame);
@@ -490,15 +237,39 @@ var __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorStrin
     lines.push("    at " + line);
   }
   return lines.join('\n');
-}
+};
+const ErrorFrames = (function () {
+  let _Error = (<any>Error);
+  let __errorFrames: (offset: number) => ICallSite[];
+  if (_Error.captureStackTrace) {
+    //v8
+    let prepareStackTrace = _Error.prepareStackTrace;
+    let stackSink = function (_, stack) { return stack; };
+    __errorFrames = function (offset) {
+      _Error.prepareStackTrace = stackSink;
+      let stack = (<any>new _Error()).stack.slice(1 + offset);
+      if (prepareStackTrace === undefined) {
+        delete _Error.prepareStackTrace;
+      } else {
+        _Error.prepareStackTrace = prepareStackTrace;
+      }
+      return stack;
+    };
+  } else {
+    __errorFrames = function (offset) {
+      return ErrorParse(ErrorCreate(), offset + 2);
+    };
+  }
 
-var __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, topLevel?: Function): void {
-  
+  return __errorFrames;
+}());
+const __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, topLevel?: Function): void {
+
   // Simultaneously traverse the frames in error.stack and the arguments.caller
   // to build a list of CallSite objects
-  //var factory = makeCallSiteFactory(e);
-  var frames = __errorParse(e);
-  var errorString = __errorString(e.name, e.message);
+  //let factory = makeCallSiteFactory(e);
+  let frames = ErrorParse(e);
+  let errorString = ErrorToString(e.name, e.message);
 
   // Explicitly set back the error.name and error.message
   //e.name = frames.name;
@@ -507,3 +278,220 @@ var __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, to
   // Pass the raw callsite objects through and get back a formatted stack trace
   e.stack = __prepareStackTrace(errorString, frames);
 };
+const $$data = "@@data";
+
+// https://github.com/mattrobenolt/callsite-shim/blob/master/src/callsite.js
+// https://github.com/stacktracejs/stacktrace.js/
+// https://github.com/tj/callsite
+
+//export interface ICallStack extends Array<ICallSite> {}
+
+export interface ICallSite {
+  getThis(): any
+  getTypeName(): string;
+  getFunction(): Function
+  getFunctionName(): string
+  getMethodName(): string
+  getFileName(): string
+  getLineNumber(): number
+  getColumnNumber(): number
+  getEvalOrigin(): any
+  isTopLevel(): boolean
+  isEval(): boolean
+  isNative(): boolean
+  isConstructor(): boolean
+  getArguments(): any // {[key: number]: any; length: number}
+  toString(): string
+}
+
+class CallSite implements ICallSite {
+
+  static parse(s: string): CallSite {
+    return new CallSite(s);
+  }
+
+  static stringify(o: ICallSite): string {
+    let s = "";
+    if (s === undefined) {
+      s = "undefined";
+    } else if (s === null) {
+      s = "null";
+    } else {
+      let functionName = o.getFunctionName();
+      let lineNumber = o.getLineNumber();
+      let columnNumber = o.getColumnNumber();
+
+      s += o.getFileName();
+      if (lineNumber) {
+        s += ":" + lineNumber;
+        if (columnNumber) {
+          s += ":" + columnNumber;
+        }
+      }
+
+      s = functionName ? functionName + ' (' + s +  ')' : s;
+    }
+    return s;
+  }
+
+  "@@data": {
+    _this: any;
+    _typeName: string;
+    _function: any;
+    _functionName: string;
+    _methodName: string;
+    _fileName: string;
+    _lineNumber: number;
+    _columnNumber: number;
+    _isTopLevel: boolean;
+    _isEval: boolean;
+    _isNative: boolean;
+    _isConstructor: boolean;
+  };
+
+  constructor(private _s: string) {
+  }
+
+  getThis(): any {
+    return this._parse()._this;
+  }
+
+  getTypeName(): string {
+    return this._parse()._typeName;
+  }
+
+  getFunction(): Function {
+    return this._parse()._function;
+  }
+
+  getFunctionName(): string {
+    return this._parse()._functionName;
+  }
+
+  getMethodName(): string {
+    return this._parse()._methodName;
+  }
+
+  getFileName(): string {
+    return this._parse()._fileName;
+  }
+
+  getLineNumber(): number {
+    let d = this._parse();
+    return d._lineNumber > 0 ? d._lineNumber : null;
+  }
+
+  getColumnNumber(): number {
+    let d = this._parse();
+    return d._columnNumber > 0 ? d._columnNumber : null;
+  }
+
+  getEvalOrigin(): any {
+    //
+  }
+
+  isTopLevel(): boolean {
+    return this._parse()._isTopLevel;
+  }
+
+  isEval(): boolean {
+    return this._parse()._isEval;
+  }
+
+  isNative(): boolean {
+    return this._parse()._isNative;
+  }
+
+  isConstructor(): boolean {
+    return this._parse()._isConstructor;
+  }
+
+  getArguments() {
+    let d= this._parse();
+    return d._function && d._function['arguments'] || null;
+  }
+
+  toString(): string {
+    return CallSite.stringify(this);
+  }
+
+  private _parse() {
+    let d = this[$$data];
+    if (!d) {
+      let parts = this._s.split("@", 2);
+      let receiver = __global;
+      let fun = null;
+      let functionName = parts[0] || "";
+      let fileName = "";
+      let typeName = "";
+      let methodName = "";
+      let lineNumber = NaN;
+      let columnNumber = NaN;
+      let location = parts[1] || "";
+      let isAnonymous = location.indexOf("{anonymous}") !== -1;
+      let isEval = false;
+      let isNative = false; //location.indexOf("native") !== -1;
+      if (location.indexOf(':') !== -1) {
+        let locationParts = /(.*):(\d+):(\d+)/.exec(location);
+        fileName = locationParts[1];
+        lineNumber = parseInt(locationParts[2]);
+        columnNumber = parseInt(locationParts[3]);
+      } else {
+        fileName = location;
+      }
+
+      if (!isAnonymous) {
+        let functionParts = functionName.split('.');
+        typeName = functionParts[0];
+        methodName = functionParts[functionParts.length - 1];
+      }
+
+      //isEval
+      //isEval = false;
+
+      //isNative
+      //isNative = false;
+
+      //isConstructor
+      let ctor = __isObject(receiver) ? receiver.constructor : null;
+      let isConstructor = !ctor ? false : fun === ctor;
+
+      //isTopLevel
+      let isTopLevel = (receiver == null) || __isGlobal(receiver);
+
+      d = this[$$data] = {
+        _this: receiver,
+        _typeName: typeName,
+        _function: fun,
+        _functionName: functionName,
+        _methodName: methodName,
+        _fileName: fileName,
+        _lineNumber: lineNumber,
+        _columnNumber: columnNumber,
+        _isTopLevel: isTopLevel,
+        _isEval: isEval,
+        _isNative: isNative,
+        _isConstructor: isConstructor
+      };
+    }
+    return d;
+  }
+}
+
+export function prepare(errorString: string, frames: ICallSite[]): string {
+  return __prepareStackTrace(errorString, frames);
+}
+
+export function capture(e: { stack: any }, stripPoint?: Function): void {
+  __captureStackTrace(e, stripPoint);
+}
+
+export function get(error: any): ICallSite[] {
+  return ErrorParse(error);
+}
+
+export function create(): ICallSite[] {
+  return ErrorFrames(1);
+}
+
+enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
