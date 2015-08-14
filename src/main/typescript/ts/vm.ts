@@ -16,7 +16,7 @@ export const global = __global;
 
 /**
  * Parse ```jscode``` and return a function
-
+ *
  * @param jscode The script code that will be evaluated
  * @param options The options of evaluation
  * @returns The evaluable function

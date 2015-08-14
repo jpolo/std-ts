@@ -2,16 +2,15 @@ import {
   SUCCESS, FAILURE, ERROR, WARNING,
   IAssertion, IPrinter, ITestReport
 } from "../../unit"
+import * as reflect from "../../reflect"
 
-  
-//Util
-const __keys = Object.keys;
-const __keysSorted = function (o) { return __keys(o).sort(); };
-const __str = function (o) { return "" + o; }; 
-  
+//ECMA like
+const OwnKeys = reflect.ownKeys;
+const OwnKeysSorted = function (o) { return OwnKeys(o).sort(); };
+const ToString = function (o) { return "" + o; };
 
 export class HTMLPrinter implements IPrinter {
-  
+
   print(reports: ITestReport[]) {
     let startTime: number = null
     let endTime: number = null
@@ -69,7 +68,7 @@ export class HTMLPrinter implements IPrinter {
       })
     })
 
-    __keysSorted(sections).forEach((sectionName) => {
+    OwnKeysSorted(sections).forEach((sectionName) => {
       let matrix = ""
       let messages = ""
       let section = sections[sectionName]
@@ -78,7 +77,7 @@ export class HTMLPrinter implements IPrinter {
         let message = assertion.message
         let position = assertion.position
         let positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : ""
-        let typeName = __str(assertion.type)
+        let typeName = ToString(assertion.type)
 
         switch(assertion.type) {
           case SUCCESS:
@@ -143,5 +142,5 @@ export class HTMLPrinter implements IPrinter {
     this._print("\n")
     this._print(v || "")
   }
-  
+
 }
