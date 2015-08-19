@@ -10,6 +10,14 @@ interface INode<T> {
 }
 
 //ECMA like
+const IsArray = Array.isArray || function (o: any): boolean {
+  return Object.prototype.toString.call(o) === "[object Array]"
+}
+
+function IsList(o: any): boolean {
+  return o instanceof List
+}
+
 function NodeCreate<T>(v: T): INode<T> {
   return {
     value: v,
@@ -18,12 +26,13 @@ function NodeCreate<T>(v: T): INode<T> {
   }
 }
 
-function IsList(o: any): boolean {
-  return o instanceof List
-}
-
 function ListData<T>(list: List<T>): IListData<T> {
   return (<any>list)
+}
+
+function ListClear<T>(list: IListData<T>) {
+  list._head = null
+  list._length = 0
 }
 
 function ListEnqueue<T>(list: IListData<T>, values: T[]): void {
@@ -52,6 +61,18 @@ function ListEnqueue<T>(list: IListData<T>, values: T[]): void {
   list._length += valuec
 }
 
+function ListEnqueueMap<T>(list: IListData<T>, values: T[]): void {
+  if (IsList(values)) {
+    let iterator = new ListIterator(values)
+    let iteratorResult
+    while (!(iteratorResult = iterator.next()).done) {
+      this.push(iteratorResult.value)
+    }
+  } else if (IsArray(values)) {
+    ListEnqueue(data, values)
+  }
+}
+
 function ListConnect<T>(list: IListData<T>, l: INode<T>, r: INode<T>): void {
   l.next = r
   r.previous = l
@@ -65,18 +86,18 @@ function ListDisconnect<T>(list: IListData<T>, node: INode<T>): void {
   }
 }
 
+function Identity<T>(o: T): T {
+  return o
+}
+
 export class List<T> {
 
-  static from<S>(list: List<S>): List<S>
-  static from<S>(array: S[]): List<S>
-  static from(o: any): List<any>  {
-    let list = new List<any>()
-    if (IsList(o)) {
-
-    } else if (Array.isArray(o)) {
-      ListEnqueue(ListData(list), o)
-    }
-    return list
+  static from<A>(list: List<A>): List<A>
+  static from<A, B>(list: List<A>, mapFn: (v: A) => B, thisp?: any): List<B>
+  static from<A>(array: A[]): List<A>
+  static from<A, B>(array: A[], mapFn: (v: A) => B, thisp?: any): List<B>
+  static from(o: any, mapFn = Identity, thisp = null): List<any>  {
+    return new List(o)
   }
 
   static isList(o: any): boolean {
@@ -92,9 +113,21 @@ export class List<T> {
   protected _length: number = 0
   protected _head: INode<T> = null
 
-  constructor(a?: T[]) {
+  constructor(a?: List<T>)
+  constructor(a?: T[])
+  constructor(a?: any) {
+    let data = ListData(this)
+    ListClear(data)
     if (a) {
-      ListEnqueue(ListData(this), a)
+      if (IsList(a)) {
+        let iterator = new ListIterator(a)
+        let iteratorResult
+        while (!(iteratorResult = iterator.next()).done) {
+          this.push(iteratorResult.value)
+        }
+      } else if (IsArray(a)) {
+        ListEnqueue(data, a)
+      }
     }
   }
 
@@ -103,9 +136,7 @@ export class List<T> {
   }
 
   clear() {
-    let data = ListData(this)
-    data._length = 0
-    data._head = null
+    ListClear(ListData(this))
   }
 
   item(i: number): T {
@@ -143,7 +174,7 @@ export class List<T> {
       let last = head.previous
       returnValue = last.value
       ListDisconnect(data, last)
-      this._length -= 1
+      data._length -= 1
     }
     return returnValue
   }
