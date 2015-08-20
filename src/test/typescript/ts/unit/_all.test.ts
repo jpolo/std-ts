@@ -1,3 +1,4 @@
+import arbitrarySuite from "./arbitrary.test"
 import generatorSuite from "./generator.test"
 
 //boot
@@ -9,4 +10,4 @@ for (let suite of [assertionSuite, qunitSuite, engineSuite]) {
   suite();
 }
 
-export default generatorSuite//concat;
+export default arbitrarySuite.concat(generatorSuite);
