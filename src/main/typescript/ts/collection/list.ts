@@ -1,3 +1,5 @@
+import { IIterator } from "../iterator"
+
 interface IListData<T> {
   _head: INode<T>
   _length: number
@@ -35,41 +37,46 @@ function ListClear<T>(list: IListData<T>) {
   list._length = 0
 }
 
-function ListEnqueue<T>(list: IListData<T>, values: T[]): void {
+function ListEnqueueMapIterator<A, B>(list: IListData<B>, iter: IIterator<A>, f: (v: A) => B): void {
   let head = list._head
-  let valuec = values.length
-  let node: INode<T>
-  let lastNode: INode<T>
-  if (valuec >= 1) {
-    node = NodeCreate(values[0])
+  let iteratorResult = iter.next()
+  let node: INode<B>
+  let lastNode: INode<B>
+  let length = 0
+
+  //length == 1
+  if (!iteratorResult.done) {
+    node = NodeCreate(f(iteratorResult.value))
     lastNode = node
     if (!head) {
       head = list._head = node.previous = node.next = node
     } else {
       ListConnect(list, head.previous, node)
     }
+
+    iteratorResult = iter.next()
+    length += 1
   }
 
-  if (valuec >= 2) {
-    for (let i = 1; i < valuec; i++) {
-      node = NodeCreate(values[i])
-      ListConnect(list, lastNode, node)
-      lastNode = node
-    }
+  //length == 2
+  while (!(iteratorResult = iter.next()).done) {
+    node = NodeCreate(f(iteratorResult.value))
+    ListConnect(list, lastNode, node)
+    lastNode = node
+    length += 1
   }
+
   ListConnect(list, lastNode, head)
-  list._length += valuec
+  list._length += length
 }
 
-function ListEnqueueMap<T>(list: IListData<T>, values: T[]): void {
+function ListEnqueueMap<A, B>(list: IListData<B>, values: A[], f: (v: A) => B): void
+function ListEnqueueMap<A, B>(list: IListData<B>, values: List<A>, f: (v: A) => B): void
+function ListEnqueueMap<A, B>(list: IListData<B>, values: any, f: (v: A) => B): void  {
   if (IsList(values)) {
-    let iterator = new ListIterator(values)
-    let iteratorResult
-    while (!(iteratorResult = iterator.next()).done) {
-      this.push(iteratorResult.value)
-    }
+    ListEnqueueMapIterator(list, new ListIterator<A>(values), f)
   } else if (IsArray(values)) {
-    ListEnqueue(data, values)
+    ///ListEnqueue(list, values)
   }
 }
 
@@ -106,7 +113,7 @@ export class List<T> {
 
   static of<S>(...values: S[]): List<S> {
     let list = new List<S>()
-    ListEnqueue(ListData(list), values)
+    ///ListEnqueue(ListData(list), values)
     return list
   }
 
@@ -119,15 +126,7 @@ export class List<T> {
     let data = ListData(this)
     ListClear(data)
     if (a) {
-      if (IsList(a)) {
-        let iterator = new ListIterator(a)
-        let iteratorResult
-        while (!(iteratorResult = iterator.next()).done) {
-          this.push(iteratorResult.value)
-        }
-      } else if (IsArray(a)) {
-        ListEnqueue(data, a)
-      }
+      ListEnqueueMap(data, a, Identity)
     }
   }
 
@@ -162,7 +161,7 @@ export class List<T> {
 
   push(...values: T[]): number {
     let data = ListData(this)
-    ListEnqueue(data, values)
+    ///ListEnqueue(data, values)
     return data._length
   }
 
@@ -195,7 +194,7 @@ export class List<T> {
     let data = ListData(this)
     let head = data._head
     let lastNode = head && head.previous
-    ListEnqueue(data, values)
+    //ListEnqueue(data, values)
     if (lastNode) {
       data._head = lastNode.next
     }
