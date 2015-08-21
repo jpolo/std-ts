@@ -151,6 +151,10 @@ export function filter<T>(gen: IGenerator<T>, p: (v: T) => boolean): IGenerator<
   })
 }
 
+export function from<T>(f: (params: Params) => T): IGenerator<T> {
+  return GeneratorCreate(f)
+}
+
 /*
 function recursive<T>(gen: IGenerator<T>, loop: (g: IGenerator<T>) => IGenerator<T>, genSize = size()): IGenerator<T> {
   function rec(n: number, p: Params) {

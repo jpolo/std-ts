@@ -7,7 +7,7 @@ export default suite("ts/unit/arbitrary", (self) => {
     let gen = arbitrary.boolean({
       random: () => { return 0.2 }
     })
-
+    
 
   })
 
