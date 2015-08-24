@@ -9,11 +9,27 @@ const __str = function (o: any) { return "" + o; };
 const __stringTag = reflect.stringTag;
 const __keys = reflect.ownKeys;
 const __keysSorted = function (o: any) { return __keys(o).sort(); };
-const __fstring = Function.prototype.toString;
-const __fnSource = function (f: Function) {
-  var src =  __fstring.call(f);
-  return src.slice(src.indexOf("{"), -1).trim();
-};
+const FunctionToString = (function () {
+  const __fstring = Function.prototype.toString
+  return function (f: Function) {
+    return __fstring.call(f)
+  }
+}())
+const FunctionToSource = function (f: Function) {
+  let src = FunctionToString(f)
+  return src.slice(src.indexOf("{"), -1).trim()
+}
+
+function AssertFactory(ng: ITestEngine, t: ITest, r: ITestReport) {
+
+}
+
+function AssertFactoryExtension<Ext>(f: () => Ext) {
+
+  return function (ng: ITestEngine, t: ITest, r: ITestReport) {
+
+  }
+}
 
 /**
  * Default suite
@@ -29,90 +45,90 @@ export class Assert {
   ) { }
 
   /**
-   * Assert that `o` is `true`
+   * Assert that ```condition``` is ```true```
    */
-  ok(o: boolean, message?: string): boolean {
-    return this.__assert__(!!o, message, this.__position__())
+  ok(condition: boolean, message?: string): boolean {
+    return this.__assert__(!!condition, message, this.__position__())
   }
 
   /**
-   * Assert that `actual` is strictly equal to `expected`
+   * Assert that ```actual``` is strictly equal to ```expected```
    */
   strictEqual<T>(actual: T, expected: T, message?: string): boolean {
     return this._strictEqual(actual, expected, false, message, this.__position__())
   }
 
   /**
-   * Assert that `actual` is not strictly equal to `expected`
+   * Assert that ```actual``` is not strictly equal to ```expected```
    */
   notStrictEqual<T>(actual: T, expected: T, message?: string): boolean {
     return this._strictEqual(actual, expected, true, message, this.__position__())
   }
 
   /**
-   * Assert that `actual` is equal to `expected`
+   * Assert that ```actual``` is equal to ```expected```
    */
   equal<T>(actual: T, expected: T, message?: string): boolean {
     return this._equal(actual, expected, false, message, this.__position__())
   }
 
   /**
-   * Assert that `actual` is not equal to `expected`
+   * Assert that ```actual``` is not equal to ```expected```
    */
   notEqual<T>(actual: T, expected: T, message?: string): boolean {
     return this._equal(actual, expected, true, message, this.__position__())
   }
 
   /**
-   * Assert that `actual` and `expected` has the same properties
+   * Assert that ```actual``` and ```expected``` has the same properties
    */
   propEqual(actual: any, expected: any, message?: string): boolean {
     return this._propEqual(actual, expected, false, message, this.__position__())
   }
 
   /**
-   * Assert that `actual` and `expected` has not the same properties
+   * Assert that ```actual``` and ```expected``` has not the same properties
    */
   notPropEqual(actual: any, expected: any, message?: string): boolean {
     return this._propEqual(actual, expected, false, message, this.__position__())
   }
 
   /**
-   * Assert that `actual` and `expected` are deeply equals
+   * Assert that ```actual``` and ```expected``` are deeply equals
    */
   deepEqual(actual: any, expected: any, message?: string): boolean {
     return this._deepEqual(actual, expected, false, message, this.__position__())
   }
 
   /**
-   * Assert that `actual` and `expected` are not deeply equals
+   * Assert that ```actual``` and ```expected``` are not deeply equals
    */
   notDeepEqual(actual: any, expected: any, message?: string): boolean {
     return this._deepEqual(actual, expected, true, message, this.__position__())
   }
 
   /**
-   * Assert that `typeof o` is `type`
+   * Assert that ```typeof o``` is ```type```
    */
   typeOf(o: any, type: string, message?: string): boolean {
     return this.__assert__(typeof o === type, message, this.__position__())
   }
 
   /**
-   * Assert that `o instanceof constructor`
+   * Assert that ```o instanceof constructor```
    */
   instanceOf(o: any, Class: Function, message?: string): boolean {
     return this.__assert__(o instanceof Class, message, this.__position__())
   }
 
   /**
-   * Assert that `block()` throw an `expected` error
+   * Assert that ```block()``` throw an ```expected``` error
    */
   throws(block: () => void, expected?: any, message?: string): boolean {
     let isSuccess = false
     let position = this.__position__()
     let actual
-    message = message || ('`' + __fnSource(block) + '` must throw an error')
+    message = message || ('`' + FunctionToSource(block) + '` must throw an error')
     try {
       block()
     } catch (e) {
@@ -228,16 +244,13 @@ export function testc<IAssert>(
   }
 }
 
-export function suite(
-  name: string,
-  f: (
-    self?: TestSuite//,
-    //test?: (
-    //  name: string,
-    //  f: (assert: Assert, done?: () => void) => void
-    //) => void
-  ) => void
-): ITest[]  {
+/**
+ * Create a test suite and call ```f(suite)```
+ *
+ * @example
+ * suite("my suite", (self) => { //put test declaration here })
+ */
+export function suite(name: string, f: (self?: TestSuite) => void): ITest[]  {
   let suitePrevious = _suiteCurrent;
   let suiteNew = new TestSuite(name);
   //let testFactory = function (name, f) {
@@ -253,17 +266,31 @@ export function suite(
   return suiteNew.tests
 }
 
-export function test(
-  name: string,
-  f: (assert: Assert, done?: () => void) => void
-): void {
+//internal type
+type TestBlock = (assert: Assert, done?: () => void) => void
+
+/**
+ * Create a test case and call ```f(assert, done?)```
+ *
+ * @example
+ * //Synchronous
+ * test("my test", (assert) => { //put assertion here })
+ *
+ * @example
+ * //Asynchronous
+ * test("my test", (assert, done) => { ...;done();...  })
+ */
+export function test(name: string, f: TestBlock): void {
   testc(Assert)(name, f);
 }
 
-export function skip(
-  name: string,
-  f: (assert: Assert, done?: () => void) => void
-): void {
+/**
+ * Create a test case but mark it as skipped
+ *
+ * @example
+ * skip("my test", (assert) => { //put assertion here })
+ */
+export function skip(name: string, f: TestBlock): void {
   _suiteCurrent
     .getTest(name)
     .addBlock(f, (ng, tc, r) => { return null; }, true)

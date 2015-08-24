@@ -5,8 +5,7 @@ export default suite("ts/vm", (self) => {
 
   test(".global", (assert) => {
     assert.strictEqual(typeof global, "object")
-    assert.strictEqual(global.setTimeout, setTimeout)
-    assert.strictEqual(global.clearTimeout, clearTimeout)
+    assert.strictEqual(global['String'], String)
   })
 
   test(".compile()", (assert) => {

@@ -32,6 +32,6 @@
   },
   "scripts": {
     "build": "grunt --gruntfile Gruntfile.js",
-    "atom": "apm install editorconfig"
+    "atom": "apm install editorconfig atom-typescript"
   }
 }
