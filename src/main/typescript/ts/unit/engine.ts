@@ -1,17 +1,17 @@
 import { ITestEngine, ITest, ITestReport, ITestParams, ITestHandlers } from "../unit"
-import { ownKeys, stringTag } from "../reflect"
 import { IInspector, Inspector } from "../inspect"
+import * as equal from "./equal"
 import * as stacktrace from "../stacktrace"
 import { IAssertion, IAssertionCallSite } from "./assertion"
 
 //Util
-const __isNaN = function (o: any) { return o !== o; };
-const __isFinite = isFinite;
-const __isNumber = function (o) { return typeof o === 'number'; };
-const __isObject = function (o) { return o != null && (typeof o == "object"); };
-const __keys = ownKeys;
-const __keysSorted = function (o: any) { return __keys(o).sort(); };
-const __stringTag = stringTag;
+//const IsNaN = function (o: any) { return o !== o; }
+//const IsFinite = isFinite
+//const IsNumber = function (o: any) { return typeof o === 'number'; }
+//const IsObject = function (o) { return o !== null && (typeof o == "object"); }
+//const ObjectKeys = ownKeys
+//const ObjectKeysSorted = function (o: any) { return ObjectKeys(o).sort(); }
+//const ToStringTag = stringTag
 
 //Service
 type $Equal = {
@@ -24,111 +24,7 @@ type $Inspector = IInspector
 type $Stacktrace = { create(): IAssertionCallSite[] }
 type $Time = { now(): number }
 
-const $equalDefault: $Equal = (function () {
-
-  function is(a, b) {
-    return (
-      a === 0 && b === 0 ? 1 / a === 1 / b :
-      a === b ? true :
-      __isNaN(a) && __isNaN(b) ? true :
-      false
-    )
-  }
-
-  function equals(a, b) {
-    return (
-      is(a, b) ||
-      (
-        (a != null) && a.equals ? a.equals(b) :
-        (b != null) && b.equals ? b.equals(a) :
-        a == b
-      )
-    )
-  }
-
-  function equalsStrict(a: any, b: any) { return a === b };
-
-  function equalsNear(a: any, b: any, epsilon: number) {
-    let isnum1 = __isNumber(a)
-    let isnum2 = __isNumber(b)
-    return (
-      (isnum1 || isnum2) ? (isnum1 === isnum2) && (a == b || equalsFloat(a, b, epsilon)) :
-      (a != null && a.equalsNear) ? a.equalsNear(b) :
-      (b != null && b.equalsNear) ? b.equalsNear(a) :
-      false
-    )
-  }
-
-  function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
-    let returnValue = true
-    let al = a.length
-    let bl = b.length
-
-    if (al === bl) {
-      for (let i = 0, l = al; i < l; ++i) {
-        if (!equalFn(a[i], b[i])) {
-          returnValue = false
-          break
-        }
-      }
-    }
-    return returnValue
-  }
-
-  function equalsDeep(a, b) {
-
-    function equals(o1, o2) {
-      if (!is(o1, o2)) {
-        switch (__stringTag(o1)) {
-          case 'Undefined':
-          case 'Null':
-          case 'Boolean':
-            return false
-          case 'Number':
-            return (__stringTag(o2) === 'Number') && (__isNaN(o1) && __isNaN(o2))
-          case 'String':
-            return (__stringTag(o2) === 'String') && (o1 == o2)
-          case 'Array':
-            return (o2 != null) && equalsArray(o1, o2, equals)
-          case 'Object':
-          case 'Function':
-          default:
-            let keys1 = __keysSorted(o1)
-            let keys2 = __isObject(o2) ? __keysSorted(o2) : null
-            let keyc = keys1.length
-            if (keys2 && equalsArray(keys1, keys2, equalsStrict)) {
-              for (let i = 0; i < keyc; ++i) {
-                let key = keys1[i]
-                if (!equals(o1[key], o2[key])) {
-                  return false
-                }
-              }
-            }
-            return true
-        }
-      }
-      return true
-    }
-    return equals(a, b)
-  }
-
-  function equalsFloat(a: number, b: number, epsilon: number) {
-    return (
-      __isNaN(b) ? __isNaN(a) :
-      __isNaN(a) ? false :
-      !__isFinite(b) && !__isFinite(a) ? (b > 0) == (a > 0) :
-      Math.abs(a - b) < epsilon
-    )
-  };
-
-  return {
-    is: is,
-    equals: equals,
-    equalsNear: equalsNear,
-    equalsDeep: equalsDeep
-  };
-}());
-
+const $equalDefault: $Equal = equal
 const $inspectDefault: $Inspector = new Inspector({ maxString: 70 });
 const $timeDefault: $Time = { now: Date.now || function () { return (new Date()).getTime(); } };
 const $stacktraceDefault: $Stacktrace = stacktrace;
@@ -186,7 +82,7 @@ export class Engine implements ITestEngine {
   }
 
   testEqualsNear(o1: any, o2: any, epsilon: number): boolean {
-    return this.$equal.equalsNear(o1, o2, epsilon);
+    return this.$equal.equalsNear(o1, o2, epsilon)
   }
 
   testEqualsDeep(o1: any, o2: any): boolean {

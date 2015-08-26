@@ -2,13 +2,25 @@ import * as reflect from "../reflect"
 import { SUCCESS, FAILURE, IAssertionCallSite, Assertion } from "./assertion"
 import { ITestEngine, ITest, ITestReport, TestSuite, suiteDefault } from "../unit"
 
+
+//TODO: be more compliant with http://qunitjs.com/upgrade-guide-2.x/
+
 //Util
-const __isExtensible = reflect.isExtensible;
-const __protoOf = reflect.getPrototypeOf;
-const __str = function (o: any) { return "" + o; };
-const __stringTag = reflect.stringTag;
-const __keys = reflect.ownKeys;
-const __keysSorted = function (o: any) { return __keys(o).sort(); };
+const __isExtensible = reflect.isExtensible
+const __protoOf = reflect.getPrototypeOf
+const ToString = function (o: any) { return "" + o; }
+const ToStringTag = reflect.stringTag;
+const ObjectKeys = reflect.ownKeys
+const ObjectKeysSorted = function (o: any) { return ObjectKeys(o).sort() }
+const ObjectExtend = function <A, B>(a: A, b: B): A & B {
+  let returnValue: any = a
+  for (let prop in b) {
+    if (b.hasOwnProperty(prop)) {
+      a[prop] = b[prop]
+    }
+  }
+  return returnValue
+}
 const FunctionToString = (function () {
   const __fstring = Function.prototype.toString
   return function (f: Function) {
@@ -20,14 +32,69 @@ const FunctionToSource = function (f: Function) {
   return src.slice(src.indexOf("{"), -1).trim()
 }
 
-function AssertFactory(ng: ITestEngine, t: ITest, r: ITestReport) {
-
+interface AssertFactory<T> {
+  (ng: ITestEngine, t: ITest, r: ITestReport): T
 }
 
-function AssertFactoryExtension<Ext>(f: () => Ext) {
+const AssertFactoryDefault = function (ng: ITestEngine, t: ITest, r: ITestReport) {
+  let helper = {
+
+    getTest(): ITest {
+      return t
+    },
+
+    getEngine(): ITestEngine {
+      return ng
+    },
+
+    getPosition(offset = 0): IAssertionCallSite {
+      return ng.callstack()[3 + offset]
+    },
+
+    assert(isSuccess: boolean, message: string, position: IAssertionCallSite) {
+      let assertions = r.assertions
+      if (!__isExtensible(assertions)) {
+        throw new Error('Assertions were made after report creation in ' + t)
+      }
+
+      message = message || 'assertion should be true'
+
+      assertions.push(
+        new Assertion(isSuccess ? SUCCESS : FAILURE, t, message, position)
+      )
+      return isSuccess
+    },
+
+    dump(o: any): string {
+      return ng.dump(o)
+    }
+  }
+
+  let { assert } = helper
+
+  let api = {
+
+    /**
+     * Assert that ```condition``` is ```true```
+     */
+    ok(condition: boolean, message?: string): boolean {
+      return assert(!!condition, message, helper.getPosition())
+    },
+
+    /**
+     * Assert that ```actual``` is strictly equal to ```expected```
+     */
+    strictEqual<T>(actual: T, expected: T, message?: string): boolean {
+      return this._strictEqual(actual, expected, false, message, helper.getPosition())
+    }
+  }
+  return api
+}
+
+function AssertFactoryExtend<A, B>(a: AssertFactory<A>, b: AssertFactory<B>): AssertFactory<A & B> {
 
   return function (ng: ITestEngine, t: ITest, r: ITestReport) {
-
+    return ObjectExtend(ObjectExtend({}, a(ng, t, r)), b(ng, t, r))
   }
 }
 
@@ -141,9 +208,9 @@ export class Assert {
       if (!expected) {
         isSuccess = true
       } else {
-        switch (__stringTag(expected)) {
+        switch (ToStringTag(expected)) {
           case 'String':
-            let actualStr = __str(actual)
+            let actualStr = ToString(actual)
             isSuccess = actualStr == expected
             message = this.__dump__(actualStr) + ' thrown must be ' + this.__dump__(expected)
             break
@@ -152,7 +219,7 @@ export class Assert {
             message = this.__dump__(actual) + ' thrown must be instance of ' + this.__dump__(expected)
             break
           case 'RegExp':
-            isSuccess = expected.test(__str(actual))
+            isSuccess = expected.test(ToString(actual))
             message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
             break
           case 'Object':
@@ -175,6 +242,19 @@ export class Assert {
       }
     }
     return this.__assert__(isSuccess, message, position)
+  }
+
+  /**
+   * Return a done() callback for asynchronous tests
+   *
+   * @returns {[type]} [description]
+   */
+  async(): () => void {
+    //mark as asynchronous test
+
+    return function done() {
+
+    }
   }
 
   __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
@@ -212,8 +292,10 @@ export class Assert {
   protected _propEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
     let engine = this.__engine__
     message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
-    let keys1 = __keysSorted(o1)
-    let keys2 = __keysSorted(o2)
+
+    //TODO move to equal module
+    let keys1 = ObjectKeysSorted(o1)
+    let keys2 = ObjectKeysSorted(o2)
     let isSuccess = true
     for (let i = 0, l = keys1.length; i < l; ++i) {
       let key1 = keys1[i]

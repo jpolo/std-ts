@@ -58,6 +58,7 @@
         "./src/main/typescript/ts/unit/arbitrary.ts",
         "./src/main/typescript/ts/unit/assertion.ts",
         "./src/main/typescript/ts/unit/engine.ts",
+        "./src/main/typescript/ts/unit/equal.ts",
         "./src/main/typescript/ts/unit/generator.ts",
         "./src/main/typescript/ts/unit/mocha.ts",
         "./src/main/typescript/ts/unit/printer/html.ts",
