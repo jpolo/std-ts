@@ -12,7 +12,7 @@ const __clearImmediate = __global.clearImmediate || function (id: number): void 
  *
  * @param f the function that will be called
  * @param milliseconds the delay between two calls
- * @returns the id of the task
+ * @return the id of the task
  */
 export function setTimeout<A, B, C, D>(f: (a: A, b: B, c: C, d: D) => void, ms: number, a: A, b: B, c: C, d: D): number
 export function setTimeout<A, B, C>(f: (a: A, b: B, c: C) => void, ms: number, a: A, b: B, c: C): number
@@ -38,7 +38,7 @@ export function clearTimeout(id: number): void {
  *
  * @param f the function that will be called
  * @param milliseconds the delay between two calls
- * @returns the id of the task
+ * @return the id of the task
  */
 export function setInterval(f: () => void, milliseconds: number = 0, ...args: any[]): number {
   return __setInterval(args.length === 0 ? f : () => { f.apply(null, args) }, milliseconds)
@@ -57,7 +57,7 @@ export function clearInterval(id: number): void {
  * Add an immediate task
  *
  * @param f the function that will be called
- * @returns the id of the task
+ * @return the id of the task
  */
 export function setImmediate(f: () => void, ...args: any[]): number {
   //TODO: add more cardinalities

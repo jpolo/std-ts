@@ -37,7 +37,7 @@ function ListClear<T>(list: IListData<T>) {
   list._length = 0
 }
 
-function ListEnqueueMapIterator<A, B>(list: IListData<B>, iter: IIterator<A>, f: (v: A) => B): void {
+function ListEnqueueIterator<A, B>(list: IListData<B>, iter: IIterator<A>, f: (v: A) => B): void {
   let head = list._head
   let iteratorResult = iter.next()
   let node: INode<B>
@@ -70,13 +70,52 @@ function ListEnqueueMapIterator<A, B>(list: IListData<B>, iter: IIterator<A>, f:
   list._length += length
 }
 
-function ListEnqueueMap<A, B>(list: IListData<B>, values: A[], f: (v: A) => B): void
-function ListEnqueueMap<A, B>(list: IListData<B>, values: List<A>, f: (v: A) => B): void
-function ListEnqueueMap<A, B>(list: IListData<B>, values: any, f: (v: A) => B): void  {
+function ListEnqueueArray<A, B>(list: IListData<B>, values: A[], mapFn: (v: A) => B): void {
+  let head = list._head
+  let valuec = values.length
+  let node: INode<B>
+  let lastNode: INode<B>
+  let length = 0
+
+  //length >= 1
+  if (valuec >= 1) {
+    node = NodeCreate(mapFn(values[0]))
+    lastNode = node
+    if (!head) {
+      head = list._head = node.previous = node.next = node
+    } else {
+      ListConnect(list, head.previous, node)
+    }
+    length += 1
+  }
+
+  //length >= 2
+  for (let $index = 1; $index < valuec; $index++) {
+    node = NodeCreate(mapFn(values[$index]))
+    ListConnect(list, lastNode, node)
+    lastNode = node
+    length += 1
+  }
+
+  ListConnect(list, lastNode, head)
+  list._length += length
+}
+
+function ListEnqueue<A, B>(list: IListData<B>, values: A[], f: (v: A) => B): void
+function ListEnqueue<A, B>(list: IListData<B>, values: List<A>, f: (v: A) => B): void
+function ListEnqueue<A, B>(list: IListData<B>, values: any, f: (v: A) => B): void  {
   if (IsList(values)) {
-    ListEnqueueMapIterator(list, new ListIterator<A>(values), f)
+    ListEnqueueIterator(list, new ListIterator<A>(values), f)
   } else if (IsArray(values)) {
-    ///ListEnqueue(list, values)
+    let index = 0
+    let length = values.length
+    ListEnqueueIterator(list, {
+      next() {
+        return (
+          index < length ? { done: false, value: values[index] } : { done: true, value: undefined }
+        )
+      }
+    }, f)
   }
 }
 
@@ -113,7 +152,7 @@ export class List<T> {
 
   static of<S>(...values: S[]): List<S> {
     let list = new List<S>()
-    ///ListEnqueue(ListData(list), values)
+    ListEnqueueArray(ListData(list), values, Identity)
     return list
   }
 
@@ -126,7 +165,7 @@ export class List<T> {
     let data = ListData(this)
     ListClear(data)
     if (a) {
-      ListEnqueueMap(data, a, Identity)
+      ListEnqueue(data, a, Identity)
     }
   }
 
@@ -161,7 +200,7 @@ export class List<T> {
 
   push(...values: T[]): number {
     let data = ListData(this)
-    ///ListEnqueue(data, values)
+    ListEnqueueArray(data, values, Identity)
     return data._length
   }
 

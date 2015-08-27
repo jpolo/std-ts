@@ -101,6 +101,7 @@
         "./src/test/typescript/ts/unit/arbitrary.test.ts",
         "./src/test/typescript/ts/unit/assertion.test.ts",
         "./src/test/typescript/ts/unit/engine.test.ts",
+        "./src/test/typescript/ts/unit/equal.test.ts",
         "./src/test/typescript/ts/unit/generator.test.ts",
         "./src/test/typescript/ts/unit/mocha.test.ts",
         "./src/test/typescript/ts/unit/qunit.test.ts",

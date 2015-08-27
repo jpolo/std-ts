@@ -28,6 +28,9 @@ const ArraySlice = function <T>(a: { [k: number]: T; length: number }, start?: n
   }
   return returnValue;
 };
+
+enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
+
 const ErrorCreate = function () {
   try {
     window['$$undef$$']();
@@ -493,5 +496,3 @@ export function get(error: any): ICallSite[] {
 export function create(): ICallSite[] {
   return ErrorFrames(1);
 }
-
-enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }

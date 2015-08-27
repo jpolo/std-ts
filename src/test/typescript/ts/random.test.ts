@@ -2,13 +2,13 @@ import { suite, test, Assert, testc } from "../../../main/typescript/ts/unit/qun
 import * as random from "../../../main/typescript/ts/random"
 
 class AssertCustom extends Assert {
-  
+
   generates<T>(f: () => T, expected: T[]) {
     var isSuccess = true
     var message = ""
     expected.forEach((expected, index) => {
       var actual = f()
-      if (!this.__engine__.testEqualsStrict(expected, actual)) {
+      if (!this.__engine__().testEqualsStrict(expected, actual)) {
         isSuccess = false
         message += this.__dump__(actual) + ' must be ' + this.__dump__(expected) + '\n'
       }
@@ -20,19 +20,19 @@ class AssertCustom extends Assert {
 export default suite("ts/random", (self) => {
   var test = testc(AssertCustom)//overload
   var engineTest = random.engine.pseudo
-  
+
   self.setUp = () => {
     engineTest.seed("");
   }
-  
+
   self.tearDown = () => {
-  
+
   }
-  
+
   test("engine.RC4", (assert) => {
     var engine = new random.engine.RC4('Example')
     assert.generates(
-      engine.generate.bind(engine), 
+      engine.generate.bind(engine),
       [
         0.23486116157656023,
         0.7972798995050903,
@@ -43,12 +43,12 @@ export default suite("ts/random", (self) => {
       ]
     )
   })
-  
+
   test("engine.Pseudo", (assert) => {
     var engine = new random.engine.Pseudo("")
 
     assert.generates(
-      engine.generate.bind(engine), 
+      engine.generate.bind(engine),
       [
         1,
         0.9235974954684081,
@@ -63,7 +63,7 @@ export default suite("ts/random", (self) => {
   /*test("exponential()", (assert) => {
     var lambda = 1;
     var gen = random.exponential(lambda, engineSeed);
-    
+
     [
       0.000005748605117677314,
       1.0646574798444046,
@@ -77,10 +77,10 @@ export default suite("ts/random", (self) => {
       assert.equal(actual, expected, 'exponential#' + index + ' => ' + expected + ' but had ' + actual);
     })
   })*/
-    
+
   test("nextBoolean()", (assert) => {
     assert.generates(
-      () => { return random.nextBoolean(engineTest); }, 
+      () => { return random.nextBoolean(engineTest); },
       [
         true,
         true,
@@ -91,10 +91,10 @@ export default suite("ts/random", (self) => {
       ]
     )
   })
-    
+
   test("nextChar()", (assert) => {
     assert.generates(
-      () => { return random.nextChar(undefined, engineTest); }, 
+      () => { return random.nextChar(undefined, engineTest); },
       [
         "8",
         "7",
@@ -108,12 +108,12 @@ export default suite("ts/random", (self) => {
     )
 
   })
-    
+
   test("nextInt()", (assert) => {
     var min = 1;
     var max = 10;
     assert.generates(
-      () => { return random.nextInt(min, max, engineTest); }, 
+      () => { return random.nextInt(min, max, engineTest); },
       [
         10,
         9,
@@ -127,17 +127,17 @@ export default suite("ts/random", (self) => {
     )
 
   })
-    
+
   test("nextNumber()", (assert) => {
     var min = 1;
     var max = 10;
 
     assert.generates(
-      () => { return random.nextNumber(min, max, engineTest); }, 
+      () => { return random.nextNumber(min, max, engineTest); },
       [
         9.31218940283594,
         9.059621427339874,
-        3.3701697214330943, 
+        3.3701697214330943,
         3.281689313659207,
         7.250694047177509,
         2.774847985862226
@@ -145,13 +145,13 @@ export default suite("ts/random", (self) => {
     )
 
   })
-    
+
   /*test("normal()", (assert) => {
     var gen = random.normal(1, 10, engineSeed);
     [
       -13.34248820815906,
       10.735053160829807,
-      6.1251454804770695, 
+      6.1251454804770695,
       -8.689450680748767,
       7.5298356818146015,
       4.532261995330767
@@ -160,10 +160,10 @@ export default suite("ts/random", (self) => {
       assert.equal(gen(), expected);
     })
   })*/
-    
+
   /*test("triangular()", (assert) => {
     var gen = random.triangular(0, 10, 5, engineSeed);
-    
+
     [
       0.016953743826203897,
       5.8476154367055075,
@@ -179,7 +179,7 @@ export default suite("ts/random", (self) => {
 
   /*test("weibull()", (assert) => {
     var gen = random.weibull(2, 2, engineSeed);
-    
+
     [
       0.004795249781889287,
       2.063644814249201,
@@ -192,5 +192,5 @@ export default suite("ts/random", (self) => {
       assert.equal(gen(), expected);
     })
   })*/
-  
+
 })

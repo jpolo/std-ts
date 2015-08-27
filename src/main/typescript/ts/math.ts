@@ -6,17 +6,17 @@ const ONE_THIRD = 1 / 3
 const RADIAN_TO_DEGREE = 180 / Math.PI
 const DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE
 
-const __num = Number;
-const __isNaN = (n: number) => { return n !== n; };
-const __isFinite = isFinite;
+const ToNumber = Number
+const IsNaN = (n: number) => { return n !== n }
+const IsFinite = isFinite
 var math_acos = Math.acos;
 var math_asin = Math.asin;
 var math_atan = Math.atan;
 var math_atan2 = Math.atan2;
-var math_eq = (l: number, r: number) => { return __isNaN(l) === __isNaN(r) && l == r }
+var math_eq = (l: number, r: number) => { return IsNaN(l) === IsNaN(r) && l == r }
 var math_abs = Math.abs;
 var math_ceil = Math.ceil;
-var math_cos = Math.cos; 
+var math_cos = Math.cos;
 var math_clz32 = Math['clz32'];
 var math_exp = Math.exp;
 var math_expm1 = Math['expm1'];
@@ -32,7 +32,7 @@ var math_round = Math.round;
 var math_sign = Math['sign'];
 var math_sin = Math.sin;
 var math_sqrt = Math.sqrt;
-var math_cbrt = Math['cbrt'];    
+var math_cbrt = Math['cbrt'];
 var math_tan = Math.tan;
 var math_trunc = Math['trunc'];
 var math_acosh = Math['acosh'];
@@ -48,22 +48,22 @@ if (ES_COMPAT <= 3) {
 }
 if (ES_COMPAT <= 5) {
   math_cbrt = math_cbrt || function (n) {
-    n = __num(n);
+    n = ToNumber(n);
     return (
       n === 0 ? n :
       n < 0 ? -math_pow(-n, ONE_THIRD) :
       math_pow(n, ONE_THIRD)
     );
   };
-  math_clz32 = math_clz32 || function (n) { 
-    n = __num(n) >>> 0; 
-    return n ? 32 - n.toString(2).length : 32 
+  math_clz32 = math_clz32 || function (n) {
+    n = ToNumber(n) >>> 0;
+    return n ? 32 - n.toString(2).length : 32
   };
   math_expm1 = math_expm1 || function (n) {
-    n = __num(n);
+    n = ToNumber(n);
     return (
       n === -Infinity ? -1 :
-      (__isFinite(n) || n === 0) ? n :
+      (IsFinite(n) || n === 0) ? n :
       math_exp(n) - 1
     );
   };
@@ -82,40 +82,40 @@ if (ES_COMPAT <= 5) {
   math_log2 = math_log2 || function (n) { return math_log(n) * LOG2E };
   math_log10 = math_log10 || function (n) { return math_log(n) * LOG10E };
   math_log1p = math_log1p || function (n) { return math_log(1 + n); };
-  math_sign = math_sign || function (n) { return __isNaN(n) ? n : n > 0 ? 1 : n < 0 ? -1 : 0 };
+  math_sign = math_sign || function (n) { return IsNaN(n) ? n : n > 0 ? 1 : n < 0 ? -1 : 0 };
   math_trunc = math_trunc || function (n) { return n > 0 ? math_floor(n) : math_ceil(n); };
   math_acosh = math_acosh || function (n) {
-    n = __num(n);
+    n = ToNumber(n);
     return (
-      __isNaN(n) || n < 1 ? NaN :
+      IsNaN(n) || n < 1 ? NaN :
       n === 1 ? 0 :
       n === Infinity ? n :
       math_log(n + math_sqrt(n * n - 1))
     );
   };
   math_asinh = math_asinh || function (n) {
-    n = __num(n);
+    n = ToNumber(n);
     return (
-      n === 0 || !__isFinite(n) ? n :
-      n < 0 ? -math_asinh(-n) : 
+      n === 0 || !IsFinite(n) ? n :
+      n < 0 ? -math_asinh(-n) :
       math_log(n + math_sqrt(n * n + 1))
     );
   };
   math_cosh = math_cosh || function (n) {
-    n = __num(n);
+    n = ToNumber(n);
     return (
       n === 0 ? 1 :
-      __isNaN(n) ? n :
-      !__isFinite(n) ? Infinity :
+      IsNaN(n) ? n :
+      !IsFinite(n) ? Infinity :
       n < 0 ? math_cosh(n) :
       n > 21 ? math_exp(n) / 2 :
       math_exp(n) + math_exp(-n) / 2
     );
   };
   math_atanh = math_atanh || function (n) {
-    n = __num(n);
+    n = ToNumber(n);
     return (
-      __isNaN(n) || n < -1 || n > 1 ? NaN :
+      IsNaN(n) || n < -1 || n > 1 ? NaN :
       n === -1 ? -Infinity :
       n === 1 ? Infinity :
       n === 0 ? n :
@@ -123,17 +123,17 @@ if (ES_COMPAT <= 5) {
     );
   };
   math_sinh = math_sinh || function (n) {
-    n = __num(n);
+    n = ToNumber(n);
     return (
-      !__isFinite(n) || n === 0 ? n :
+      !IsFinite(n) || n === 0 ? n :
       (math_exp(n) - math_exp(-n)) / 2
     );
   };
   math_tanh = math_tanh || function (n) {
-    n = __num(n);
+    n = ToNumber(n);
     var exp, nexp;
     return (
-      __isNaN(n) || n === 0 ? n :
+      IsNaN(n) || n === 0 ? n :
       n === Infinity ? 1 :
       n === -Infinity ? -1 :
       ((exp = math_exp(n)) - (nexp = math_exp(-n))) / (exp + nexp)
@@ -239,7 +239,7 @@ export function imul(a: number, b: number): number {
 }
 
 export function isNaN(n: number): boolean {
-  return __isNaN(n);  
+  return IsNaN(n);
 }
 
 export function isNatural(n: number): boolean {
@@ -247,12 +247,12 @@ export function isNatural(n: number): boolean {
 }
 
 export function isOdd(n: number): boolean {
-  return !__isNaN(n) && __isFinite(n) && ((n % 2) !== 0);
+  return !IsNaN(n) && IsFinite(n) && ((n % 2) !== 0);
 }
 
 export function isPrime(n: number): boolean {
   var returnValue = false
-  if (!__isNaN(n)) {
+  if (!IsNaN(n)) {
     returnValue = true
     for (var i = 2, l = math_sqrt(n); i <= l; i++) {
       if (n % i === 0) {

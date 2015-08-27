@@ -1,5 +1,7 @@
 import * as reflect from "../reflect"
 
+//Constant
+
 //Util
 const IsFinite = isFinite
 const IsEmpty = function (o: any) { return o === undefined || o === null }
@@ -41,41 +43,12 @@ export function equalsNear(a: any, b: any, epsilon: number): boolean {
   )
 }
 
-export function equalsDeep(a: any, b: any): boolean {
+export function equalsProperties(a: any, b: any): boolean {
+  return equalsObject(a, b, equalsStrict)
+}
 
-  function equals(o1, o2) {
-    if (!is(o1, o2)) {
-      switch (ToStringTag(o1)) {
-        case 'Undefined':
-        case 'Null':
-        case 'Boolean':
-          return false
-        case 'Number':
-          return (ToStringTag(o2) === 'Number') && (IsNaN(o1) && IsNaN(o2))
-        case 'String':
-          return (ToStringTag(o2) === 'String') && (o1 == o2)
-        case 'Array':
-          return (o2 != null) && equalsArray(o1, o2, equals)
-        case 'Object':
-        case 'Function':
-        default:
-          let keys1 = ObjectKeysSorted(o1)
-          let keys2 = IsObject(o2) ? ObjectKeysSorted(o2) : null
-          let keyc = keys1.length
-          if (keys2 && equalsArray(keys1, keys2, equalsStrict)) {
-            for (let i = 0; i < keyc; ++i) {
-              let key = keys1[i]
-              if (!equals(o1[key], o2[key])) {
-                return false
-              }
-            }
-          }
-          return true
-      }
-    }
-    return true
-  }
-  return equals(a, b)
+export function equalsDeep(a: any, b: any): boolean {
+  return equalsAny(a, b, equalsDeep)
 }
 
 function equalsFloat(a: number, b: number, epsilon: number): boolean {
@@ -83,7 +56,26 @@ function equalsFloat(a: number, b: number, epsilon: number): boolean {
     IsNaN(b) ? IsNaN(a) :
     IsNaN(a) ? false :
     !IsFinite(b) && !IsFinite(a) ? (b > 0) == (a > 0) :
-    Math.abs(a - b) < epsilon
+    Math.abs(a - b) <= epsilon
+  )
+}
+
+function equalsDate(a: Date, b: Date) {
+  return a.valueOf() === b.valueOf()
+}
+
+function equalsRegExp(a: RegExp, b: RegExp): boolean {
+  return (
+    // the regex itself
+    a.source === b.source &&
+
+    // and its modifiers
+    a.global === b.global &&
+
+    // (gmi) ...
+    a.ignoreCase === b.ignoreCase &&
+    a.multiline === b.multiline &&
+    a['sticky'] === b['sticky']
   )
 }
 
@@ -101,4 +93,76 @@ function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean)
     }
   }
   return returnValue
+}
+
+function equalsObject(a: any, b: any, equalFn: (av: any, bv: any) => boolean): boolean {
+  let akeys = ObjectKeysSorted(a)
+  let bkeys = ObjectKeysSorted(b)
+  let returnValue = false
+  //Compare keys first to deep value
+  if (equalsArray(akeys, bkeys, equalsStrict)) {
+    returnValue = true
+    for (let i = 0, l = akeys.length; i < l; ++i) {
+      let akey = akeys[i]
+      let bkey = bkeys[i]
+      if (akey !== bkey || !equalFn(a[akey], b[bkey])) {
+        returnValue = false
+        break
+      }
+    }
+  }
+  return returnValue
+}
+
+function equalsMap(a: any, b: any, equalFn: (a: any, b: any) => boolean): boolean {
+  console.warn("equalsMap() not implemented")
+  return true
+}
+
+function equalsSet(a: any, b: any, equalFn: (a: any, b: any) => boolean): boolean {
+  let returnValue = false
+  function SetToArray(o): any[] {
+    let a = []
+    o.forEach((v) => a.push(v))
+    return a
+  }
+
+  if (a.size() === b.size()) {
+    let avalues = SetToArray(a)
+    let bvalues = SetToArray(b)
+    returnValue = equalsArray(avalues, bvalues, equalFn)
+  }
+  return returnValue
+}
+
+function equalsAny(a: any, b: any, equalFn: (a: any, b: any) => boolean) {
+  if (!SameValue(a, b)) {
+    let atag = ToStringTag(a)
+    let btag = ToStringTag(b)
+    switch (atag) {
+      case 'Undefined':
+      case 'Null':
+      case 'Boolean':
+        return false
+      case 'Number':
+        return (btag === atag) && equalsFloat(a, b, 0)
+      case 'String':
+        return (btag === atag) && (a == b)
+      case 'Array':
+        return (btag === atag) && equalsArray(a, b, equalFn)
+      case 'Date':
+        return (btag === atag) && equalsDate(a, b)
+      case 'RegExp':
+        return (btag === atag) && equalsRegExp(a, b)
+      case 'Map':
+        return (btag === atag) && equalsMap(a, b, equalFn)
+      case 'Set':
+        return (btag === atag) && equalsSet(a, b, equalFn)
+      case 'Object':
+      case 'Function':
+      default:
+        return equalsObject(a, b, equalFn)
+    }
+  }
+  return true
 }

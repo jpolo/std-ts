@@ -1,5 +1,5 @@
 import { SUCCESS, FAILURE, IAssertionCallSite, Assertion } from "./assertion"
-import { ITestEngine, ITest, ITestReport, TestSuite, suiteDefault } from "../unit"
+import { ITestEngine, ITest, ITestReport } from "../unit"
 
 
 export function describe(description: string, f: () => void) {

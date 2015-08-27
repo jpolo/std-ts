@@ -1,44 +1,90 @@
 import * as reflect from "../reflect"
-import { SUCCESS, FAILURE, IAssertionCallSite, Assertion } from "./assertion"
-import { ITestEngine, ITest, ITestReport, TestSuite, suiteDefault } from "../unit"
-
+import * as stacktrace from "../stacktrace"
+import { SUCCESS, FAILURE, IAssertionCallSite, IAssertion, Assertion } from "./assertion"
+import { ITestEngine, ITest, ITestReport, ITestParams } from "../unit"
 
 //TODO: be more compliant with http://qunitjs.com/upgrade-guide-2.x/
 
-//Util
-const __isExtensible = reflect.isExtensible
-const __protoOf = reflect.getPrototypeOf
-const ToString = function (o: any) { return "" + o; }
-const ToStringTag = reflect.stringTag;
-const ObjectKeys = reflect.ownKeys
-const ObjectKeysSorted = function (o: any) { return ObjectKeys(o).sort() }
-const ObjectExtend = function <A, B>(a: A, b: B): A & B {
-  let returnValue: any = a
-  for (let prop in b) {
-    if (b.hasOwnProperty(prop)) {
-      a[prop] = b[prop]
-    }
-  }
-  return returnValue
+interface IAssertContext {
+  isAsync(): boolean
+  setAsync(b: boolean): void
+  getTest(): ITest
+  getEngine(): ITestEngine
+  getPosition(offset?: number): IAssertionCallSite
+  //open(): void
+  write(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean
+  close(): void
+  dump(o: any): string
 }
-const FunctionToString = (function () {
-  const __fstring = Function.prototype.toString
-  return function (f: Function) {
-    return __fstring.call(f)
-  }
-}())
-const FunctionToSource = function (f: Function) {
+
+interface IAssertFactory<T> {
+  (context: IAssertContext): T
+}
+
+interface IAssertConstructor<T> {
+  new (context: IAssertContext): T
+}
+
+interface IStreamController<T> {
+  desiredSize: number
+  enqueue(chunk: T): void
+  close(): void
+  error(e: any): void
+}
+
+interface ITestBlock<IAssert> {
+  block(assert: IAssert, complete?: () => void): void
+  assertFactory(ctx: IAssertContext): IAssert
+  disabled: boolean
+}
+
+
+//Util
+const IsFinite = isFinite
+const IsExtensible = reflect.isExtensible
+const GetPrototypeOf = reflect.getPrototypeOf
+const ToString = function (o: any) { return "" + o }
+const ToStringTag = reflect.stringTag
+const ObjectKeys = reflect.ownKeys
+const ObjectFreeze = reflect.freeze
+const ObjectKeysSorted = function (o: any) { return ObjectKeys(o).sort() }
+const FunctionToString = function (f: Function): string {
+  return Function.prototype.toString.call(f)
+}
+const FunctionToSource = function (f: Function): string {
   let src = FunctionToString(f)
   return src.slice(src.indexOf("{"), -1).trim()
 }
 
-interface AssertFactory<T> {
-  (ng: ITestEngine, t: ITest, r: ITestReport): T
-}
+/**
+ * Default suite
+ */
+let _suiteDefault: TestSuite = null;
+let _suiteCurrent = _suiteDefault;
 
-const AssertFactoryDefault = function (ng: ITestEngine, t: ITest, r: ITestReport) {
-  let helper = {
+const AssertContextCreate = function (ng: ITestEngine, t: ITest, r: ITestReport): IAssertContext {
+  let _async = false
+  let _expected: number = null
+  let _closed = false
+  return {
+    /**
+     * Return true if the test is marked as asynchronous
+     *
+     * @return the async state
+     */
+    isAsync(): boolean {
+      return _async
+    },
 
+    setAsync(b: boolean): void {
+      _async = b
+    },
+
+    /**
+     * [getTest description]
+     *
+     * @return the test
+     */
     getTest(): ITest {
       return t
     },
@@ -51,71 +97,51 @@ const AssertFactoryDefault = function (ng: ITestEngine, t: ITest, r: ITestReport
       return ng.callstack()[3 + offset]
     },
 
-    assert(isSuccess: boolean, message: string, position: IAssertionCallSite) {
-      let assertions = r.assertions
-      if (!__isExtensible(assertions)) {
-        throw new Error('Assertions were made after report creation in ' + t)
+    //open(): void {  },
+
+    write(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
+      let test = t
+      if (_closed || !IsExtensible(r.assertions)) {
+        throw new Error('Assertions were made after report creation in ' + test)
       }
 
       message = message || 'assertion should be true'
 
-      assertions.push(
-        new Assertion(isSuccess ? SUCCESS : FAILURE, t, message, position)
+      r.assertions.push(
+        new Assertion(isSuccess ? SUCCESS : FAILURE, test, message, position)
       )
       return isSuccess
+    },
+
+    close(): void {
+      if (!_closed) {
+        _closed = true
+      }
     },
 
     dump(o: any): string {
       return ng.dump(o)
     }
   }
-
-  let { assert } = helper
-
-  let api = {
-
-    /**
-     * Assert that ```condition``` is ```true```
-     */
-    ok(condition: boolean, message?: string): boolean {
-      return assert(!!condition, message, helper.getPosition())
-    },
-
-    /**
-     * Assert that ```actual``` is strictly equal to ```expected```
-     */
-    strictEqual<T>(actual: T, expected: T, message?: string): boolean {
-      return this._strictEqual(actual, expected, false, message, helper.getPosition())
-    }
-  }
-  return api
 }
-
-function AssertFactoryExtend<A, B>(a: AssertFactory<A>, b: AssertFactory<B>): AssertFactory<A & B> {
-
-  return function (ng: ITestEngine, t: ITest, r: ITestReport) {
-    return ObjectExtend(ObjectExtend({}, a(ng, t, r)), b(ng, t, r))
-  }
-}
-
-/**
- * Default suite
- */
-let _suiteDefault = suiteDefault;
-let _suiteCurrent = _suiteDefault;
 
 export class Assert {
-  constructor(
-    public __engine__: ITestEngine,
-    private _testCase: ITest,
-    private _report: ITestReport
-  ) { }
+  protected _asyncCount = 0
+
+  constructor(protected _context: IAssertContext) {}
 
   /**
    * Assert that ```condition``` is ```true```
    */
   ok(condition: boolean, message?: string): boolean {
     return this.__assert__(!!condition, message, this.__position__())
+  }
+
+  /**
+   * Assert that ```condition``` is ```false```
+   */
+  notOk(condition: boolean, message?: string): boolean {
+    return this.__assert__(!condition, message, this.__position__())
   }
 
   /**
@@ -223,19 +249,19 @@ export class Assert {
             message = this.__dump__(actual) + ' thrown must match ' + this.__dump__(expected)
             break
           case 'Object':
-            isSuccess = __protoOf(actual) === __protoOf(expected) &&
+            isSuccess = GetPrototypeOf(actual) === GetPrototypeOf(expected) &&
               actual.name === expected.name &&
               actual.message === expected.message
             message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
             break
           default:
             if (expected instanceof Error) {
-              isSuccess = __protoOf(actual) === __protoOf(expected) &&
+              isSuccess = GetPrototypeOf(actual) === GetPrototypeOf(expected) &&
                 actual.name === expected.name &&
                 actual.message === expected.message
               message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
             } else {
-              isSuccess = actual === this.__engine__.testEqualsStrict(actual, expected)
+              isSuccess = actual === this.__engine__().testEqualsStrict(actual, expected)
               message = this.__dump__(actual) + ' thrown must be ' + this.__dump__(expected)
             }
         }
@@ -245,52 +271,63 @@ export class Assert {
   }
 
   /**
-   * Return a done() callback for asynchronous tests
+   * Instruct to wait for an asynchronous operation.
    *
-   * @returns {[type]} [description]
+   * @return a done() callback
    */
   async(): () => void {
     //mark as asynchronous test
+    let assert = this
+    let context = this._context
+    context.setAsync(true)
+    assert._asyncCount++
 
     return function done() {
-
+      assert._asyncCount--
+      if (assert._asyncCount === 0) {
+        context.close()
+      }
     }
   }
 
+  /**
+   * Specify how many assertions are expected to run within a test
+   *
+   * @param count the expected number of assertions
+   */
+  expect(count: number): void {
+    console.warn("Assert#expect() not implemented")
+  }
+
   __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
-    let assertions = this._report.assertions
-    if (!__isExtensible(assertions)) {
-      throw new Error('Assertions were made after report creation in ' + this._testCase)
-    }
-
-    message = message || 'assertion should be true'
-
-    assertions.push(
-      new Assertion(isSuccess ? SUCCESS : FAILURE, this._testCase, message, position)
-    )
+    this._context.write(isSuccess, message, position)
     return isSuccess
   }
 
   __dump__(o: any): string {
-    return this.__engine__.dump(o)
+    return this._context.dump(o)
   }
 
-  __position__(): IAssertionCallSite {
-    return this.__engine__.callstack()[3]
+  protected __position__(): IAssertionCallSite {
+    return this._context.getPosition(1)
+  }
+
+  protected __engine__() {
+    return this._context.getEngine()
   }
 
   protected _strictEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
     message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' be ') + this.__dump__(o2))
-    return this.__assert__(this.__engine__.testEqualsStrict(o1, o2) === !not, message, position)
+    return this.__assert__(this.__engine__().testEqualsStrict(o1, o2) === !not, message, position)
   }
 
   protected _equal(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
     message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' equal ') + this.__dump__(o2))
-    return this.__assert__(this.__engine__.testEquals(o1, o2) === !not, message, position)
+    return this.__assert__(this.__engine__().testEquals(o1, o2) === !not, message, position)
   }
 
   protected _propEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
-    let engine = this.__engine__
+    let engine = this.__engine__()
     message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
 
     //TODO move to equal module
@@ -310,18 +347,183 @@ export class Assert {
 
   protected _deepEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
     message = message || (this.__dump__(o1) + (' must equals ') + this.__dump__(o2))
-    return this.__assert__(this.__engine__.testEqualsDeep(o1, o2) === !not, message, position)
+    return this.__assert__(this.__engine__().testEqualsDeep(o1, o2) === !not, message, position)
   }
 }
 
-export function testc<IAssert>(
-  AssertClass: { new(ng: ITestEngine, tc: ITest, r: ITestReport): IAssert }
-) {
+export class Test implements ITest {
+
+  public category: string = ""
+  public blocks: ITestBlock<any>[] = []
+
+  constructor(
+    public suite: TestSuite,
+    public name: string
+  ) { }
+
+  protected _beforeRun() {
+    let suite = this.suite
+    if (suite.setUp) {
+      suite.setUp(this)
+    }
+  }
+
+  protected _afterRun() {
+    let suite = this.suite
+    if (suite.tearDown) {
+      suite.tearDown(this)
+    }
+  }
+
+  addBlock<IAssert>(
+    block: (assert: IAssert, done?: () => void) => void,
+    assertFactory: IAssertFactory<IAssert>,
+    disabled: boolean = false
+  ): Test {
+    this.blocks.push({
+      block: block,
+      assertFactory: assertFactory,
+      disabled: disabled
+    });
+    return this
+  }
+
+  run(engine: ITestEngine, params: ITestParams, complete: (report: ITestReport) => void) {
+    let test = this
+    let blocks = this.blocks
+    let blockc = blocks.length
+    let startTime = engine.now()
+    let assertions: IAssertion[] = []
+    let report: ITestReport = {
+      startDate: new Date(startTime),
+      elapsedMilliseconds: NaN,
+      assertions: assertions
+    }
+    let assertionStream: IStreamController<IAssertion> = {
+      desiredSize: 1,
+      enqueue(a: IAssertion) {
+        assertions.push(a);
+      },
+      error(e: any) {
+
+      },
+      close() {
+        //finalize report
+        report.elapsedMilliseconds = engine.now() - startTime
+        ObjectFreeze(assertions)
+      }
+    };
+
+    let timeoutMs = params.timeout || Infinity;//no timeout
+
+    //finish test and send to callback
+    let onBlockComplete = () => {
+      if (--blockc === 0) {
+        //finalize report
+        assertionStream.close()
+        ObjectFreeze(report)
+        complete(report)
+      }
+    }
+
+    let runBlock = (testBlock: ITestBlock<any>, complete: () => void) => {
+      let block = testBlock.block;
+      let assertContext = AssertContextCreate(engine, test, report);
+      let assert = testBlock.assertFactory(assertContext);
+      if (block.length >= 2) {
+        //asynchronous
+        assertContext.setAsync(true)
+      }
+      let isFinished = false
+      let timerId = null
+
+      let onTimeout = () => {
+        timerId = null
+        assertionStream.enqueue(Assertion.error(test, "No test completion after " + timeoutMs + "ms", null, null))
+        complete()
+      }
+
+      let onComplete = () => {
+        if (!isFinished) {
+          isFinished = true
+          if (timerId) {
+            clearTimeout(timerId)
+            timerId = null
+          }
+
+          if (assertions.length === 0) {
+            assertionStream.enqueue(Assertion.warning(test, "No assertion found", null))
+          }
+
+          this._afterRun()
+          complete()
+        }
+      }
+
+      try {
+        this._beforeRun()
+        if (assertContext.isAsync()) {
+          if (IsFinite(timeoutMs)) {
+            timerId = setTimeout(onTimeout, timeoutMs)
+          }
+          block(assert, onComplete)
+        } else {
+          block(assert)
+        }
+      } catch (e) {
+        //TODO get stacktrace from engine
+        let parsed = e ? stacktrace.get(e) : null;
+        assertionStream.enqueue(Assertion.error(test, e.message, parsed && parsed[0], e.stack || e.message || null))
+      } finally {
+        if (!assertContext.isAsync()) {
+          onComplete()
+        }
+      }
+    }
+
+    for (let block of blocks) {
+      runBlock(block, onBlockComplete)
+    }
+  }
+
+  inspect() {
+    return "Test {" + this.toString() + " }"
+  }
+
+  toString() {
+    let category = this.category
+    return (category ? category : '') + this.name
+  }
+}
+
+export class TestSuite {
+  public setUp: (test?: Test) => void
+  public tearDown: (test?: Test) => void
+  public tests: Test[] = []
+  private _byNames: {[name: string]: Test} = {}
+
+  constructor(
+    public name: string
+  ) { }
+
+  getTest(name: string) {
+    let byNames = this._byNames
+    let test = byNames[name]
+    if (!test) {
+      test = byNames[name] = new Test(this, name)
+      this.tests.push(test)
+      test.category = this.name
+    }
+    return test;
+  }
+}
+
+export function testc<IAssert>(AssertClass: IAssertConstructor<IAssert>) {
   return (name: string, f: (assert: IAssert, done?: () => void) => void) => {
     return _suiteCurrent
       .getTest(name)
-      .addBlock(f, (ng, tc, r) => {
-        return new AssertClass(ng, tc, r);
+      .addBlock(f, (ctx: IAssertContext) => {
+        return new AssertClass(ctx);
       })
   }
 }
@@ -348,9 +550,6 @@ export function suite(name: string, f: (self?: TestSuite) => void): ITest[]  {
   return suiteNew.tests
 }
 
-//internal type
-type TestBlock = (assert: Assert, done?: () => void) => void
-
 /**
  * Create a test case and call ```f(assert, done?)```
  *
@@ -362,7 +561,7 @@ type TestBlock = (assert: Assert, done?: () => void) => void
  * //Asynchronous
  * test("my test", (assert, done) => { ...;done();...  })
  */
-export function test(name: string, f: TestBlock): void {
+export function test(name: string, f: (assert: Assert, done?: () => void) => void): void {
   testc(Assert)(name, f);
 }
 
@@ -372,8 +571,8 @@ export function test(name: string, f: TestBlock): void {
  * @example
  * skip("my test", (assert) => { //put assertion here })
  */
-export function skip(name: string, f: TestBlock): void {
+export function skip(name: string, f: (assert: any, done?: () => void) => void): void {
   _suiteCurrent
     .getTest(name)
-    .addBlock(f, (ng, tc, r) => { return null; }, true)
+    .addBlock(f, (ctx) => { return null }, true)
 }

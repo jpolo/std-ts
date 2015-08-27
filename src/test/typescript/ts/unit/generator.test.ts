@@ -62,11 +62,13 @@ export default suite("ts/unit/generator", (self) => {
   })
 
   test(".array()", (assert) => {
-    let gen = array(constant("foo"))
+    let length = 5
+    let genSize = constant(length)
+    let gen = array(constant("foo"), genSize)
     params.randomValue = 1
 
     let arr = gen(params);
-    assert.strictEqual(arr.length, 3);
+    assert.strictEqual(arr.length, length);
     for (let gen of arr) {
       assert.strictEqual(gen, "foo")
     }
