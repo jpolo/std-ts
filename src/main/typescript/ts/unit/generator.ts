@@ -4,12 +4,15 @@ import { IIterator, IIteratorResult, Iterator } from "../iterator"
 const SIZE = 100
 const LN2 = Math.log(2)
 
-const __log = Math.log
-const __floor = Math.floor
-const __round = Math.round
-const __log2 = function (n: number): number {
-  return __log(n) / LN2
+const Floor = Math.floor
+const Round = Math.round
+const Log = Math.log
+const Log2 = function (n: number): number {
+  return Log(n) / LN2
 }
+const genSize = GeneratorCreate(function (params: Params) {
+  return ParamsRandomInt(params, 0, ParamsSize(params))
+})
 
 //helper
 type Params = {
@@ -47,11 +50,11 @@ function ParamsRandom(p: Params, min = 0, max = 1): number {
 }
 
 function ParamsRandomInt(p: Params, min: number, max: number): number {
-  return __floor(ParamsRandom(p) * (max - min)) + min
+  return Floor(ParamsRandom(p) * (max - min + 1)) + min
 }
 
 function ParamsSize(p: Params): number {
-  let r = __round(__log2(p.size + 1))
+  let r = Round(Log2(p.size + 1))
   return r >= 0 ? r : 0
 }
 
@@ -106,17 +109,29 @@ export interface IGenerator<Result> {
   next(p?: { size?: number; random?: () => number }): Result
 }
 
+/**
+ * Create a generator that always generates ```k```
+ *
+ * @param the value
+ * @return the constant generator
+ */
 export function constant<T>(k: T): IGenerator<T> {
   return GeneratorCreate(function (p: Params) { return k })
 }
 
-export function oneOf<T>(gens: IGenerator<T>[]): IGenerator<T>
-export function oneOf<T>(gens: T[]): IGenerator<T>
-export function oneOf(gens: any[]): IGenerator<any> {
-  const length = gens.length
-  const generators: IGenerator<any>[] = new Array(length)
+/**
+ * Create a generator that randomly generates a value in ```gens```
+ *
+ * @param choices the array of possible values or generators
+ * @return the value generator
+ */
+export function oneOf<T>(choices: IGenerator<T>[]): IGenerator<T>
+export function oneOf<T>(choices: T[]): IGenerator<T>
+export function oneOf<T>(choices: any[]): IGenerator<T> {
+  const length = choices.length
+  const generators: IGenerator<T>[] = new Array(length)
   for (let i = 0; i < length; i++) {
-    generators[i] = GeneratorFrom(gens[i])
+    generators[i] = GeneratorFrom(choices[i])
   }
   return GeneratorCreate(function (params: Params) {
     let index = ParamsRandomInt(params, 0, length)
@@ -124,14 +139,21 @@ export function oneOf(gens: any[]): IGenerator<any> {
   })
 }
 
-export function array<T>(genValue: IGenerator<T>, genSize: number|IGenerator<number>)
-export function array<T>(genValue: IGenerator<T>, genSize = size()): IGenerator<T[]> {
-  let _genSize = GeneratorFrom<number>(genSize)
+/**
+ * Create a generator that generates array of ```n * genValue```
+ *
+ * @param value the values of the array
+ * @param size the size value or generator of the array
+ * @return the array generator
+ */
+export function array<T>(value: IGenerator<T>, size: number|IGenerator<number>)
+export function array<T>(value: IGenerator<T>, size = genSize): IGenerator<T[]> {
+  let _genSize = GeneratorFrom<number>(size)
   return GeneratorCreate(function (params: Params) {
     let length = GeneratorGet(_genSize, params)
     let returnValue: T[] = new Array(length)
     for (let i = 0; i < length; i++) {
-      returnValue[i] = GeneratorGet(genValue, params)
+      returnValue[i] = GeneratorGet(value, params)
     }
     return returnValue
   })
@@ -180,7 +202,14 @@ function recursive<T>(gen: IGenerator<T>, loop: (g: IGenerator<T>) => IGenerator
   })
 }*/
 
-export function random(min: number|IGenerator<number>, max: number|IGenerator<number>): IGenerator<number> {
+/**
+ * Create a generator that generates random values between [min, max)
+ *
+ * @param min the mininum value or generator
+ * @param max the maximum value or generator
+ * @return the random generator
+ */
+export function random(min: number|IGenerator<number> = 0, max: number|IGenerator<number> = 1): IGenerator<number> {
   const genMin = GeneratorFrom<number>(<any>min)
   const genMax = GeneratorFrom<number>(<any>max)
   return GeneratorCreate(function (params: Params) {
@@ -190,12 +219,11 @@ export function random(min: number|IGenerator<number>, max: number|IGenerator<nu
   })
 }
 
-function size(): IGenerator<number> {
-  return GeneratorCreate(function (params: Params) {
-    return ParamsRandomInt(params, 0, ParamsSize(params))
-  })
-}
-
+/**
+ * Create a generator of tuple
+ *
+ * @return the tuple generator
+ */
 export function tuple<A, B, C, D, E, F, G, H, I>(gens: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>, IGenerator<F>, IGenerator<G>, IGenerator<H>, IGenerator<I>] ): IGenerator<[A, B, C, D, E, F, G, H, I]>
 export function tuple<A, B, C, D, E, F, G, H>(gens: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>, IGenerator<F>, IGenerator<G>, IGenerator<H>] ): IGenerator<[A, B, C, D, E, F, G, H]>
 export function tuple<A, B, C, D, E, F, G>(gens: [IGenerator<A>, IGenerator<B>, IGenerator<C>, IGenerator<D>, IGenerator<E>, IGenerator<F>, IGenerator<G>] ): IGenerator<[A, B, C, D, E, F, G]>
@@ -216,15 +244,22 @@ export function tuple(gens: any[]): IGenerator<any> {
   })
 }
 
-export function object<V>(genKey: IGenerator<number>, genValue: IGenerator<V>, genSize?: number|IGenerator<number>): IGenerator<{[key: number]: V}>
-export function object<V>(genKey: IGenerator<string>, genValue: IGenerator<V>, genSize?: number|IGenerator<number>): IGenerator<{[key: string]: V}>
-export function object<V>(genKey: IGenerator<any>, genValue: IGenerator<V>, genSize = size()): IGenerator<any> {
-  let _genSize = GeneratorFrom(genSize)
+/**
+ * Create a generator of literal object { [key]: value }
+ *
+ * @param key the key generator
+ * @param value the value generator
+ * @return the object generator
+ */
+export function object<V>(key: IGenerator<number>, value: IGenerator<V>, size?: number|IGenerator<number>): IGenerator<{[key: number]: V}>
+export function object<V>(key: IGenerator<string>, value: IGenerator<V>, size?: number|IGenerator<number>): IGenerator<{[key: string]: V}>
+export function object<V>(key: IGenerator<any>, value: IGenerator<V>, size = genSize): IGenerator<any> {
+  let _genSize = GeneratorFrom(size)
   return GeneratorCreate(function (params: Params) {
     let keyCount = GeneratorGet(_genSize, params)
     let returnValue = {}
     for (let i = 0; i < keyCount; i++) {
-      returnValue[GeneratorGet(genKey, params)] = GeneratorGet(genValue, params)
+      returnValue[GeneratorGet(key, params)] = GeneratorGet(value, params)
     }
     return returnValue
   })

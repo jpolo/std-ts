@@ -2,6 +2,24 @@ import * as reflect from "../reflect"
 import * as stacktrace from "../stacktrace"
 import { SUCCESS, FAILURE, IAssertionCallSite, IAssertion, Assertion } from "./assertion"
 import { ITestEngine, ITest, ITestReport, ITestParams } from "../unit"
+import {
+  IsExtensible,
+  IsFinite,
+  IsEmpty,
+  IsNaN,
+  IsNumber,
+  IsObject,
+  GetPrototypeOf,
+  SameValue,
+  ObjectKeys,
+  ObjectKeysSorted,
+  ObjectFreeze,
+  ToString,
+  ToStringTag,
+  Type,
+  FunctionToString,
+  FunctionToSource
+} from "./util"
 
 //TODO: be more compliant with http://qunitjs.com/upgrade-guide-2.x/
 
@@ -38,24 +56,6 @@ interface ITestBlock<IAssert> {
   disabled: boolean
 }
 
-
-//Util
-const IsFinite = isFinite
-const IsExtensible = reflect.isExtensible
-const GetPrototypeOf = reflect.getPrototypeOf
-const ToString = function (o: any) { return "" + o }
-const ToStringTag = reflect.stringTag
-const ObjectKeys = reflect.ownKeys
-const ObjectFreeze = reflect.freeze
-const ObjectKeysSorted = function (o: any) { return ObjectKeys(o).sort() }
-const FunctionToString = function (f: Function): string {
-  return Function.prototype.toString.call(f)
-}
-const FunctionToSource = function (f: Function): string {
-  let src = FunctionToString(f)
-  return src.slice(src.indexOf("{"), -1).trim()
-}
-
 /**
  * Default suite
  */
@@ -81,7 +81,7 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, r: ITestReport)
     },
 
     /**
-     * [getTest description]
+     * Return the current test
      *
      * @return the test
      */
@@ -89,16 +89,35 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, r: ITestReport)
       return t
     },
 
+    /**
+     * Return the current Engine
+     *
+     * @return the engine
+     */
     getEngine(): ITestEngine {
       return ng
     },
 
+    /**
+     * Return the current callsite
+     *
+     * @param offset optional offset from stacktrace
+     * @return the callsite
+     */
     getPosition(offset = 0): IAssertionCallSite {
       return ng.callstack()[3 + offset]
     },
 
     //open(): void {  },
 
+    /**
+     * Write a new assertion is the assertion stream
+     *
+     * @param isSuccess true for success, false for failure
+     * @param message optional assertion message
+     * @param position code position hint
+     * @return the isSuccess
+     */
     write(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
       let test = t
       if (_closed || !IsExtensible(r.assertions)) {
@@ -113,12 +132,21 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, r: ITestReport)
       return isSuccess
     },
 
+    /**
+     * Close the assertion stream
+     */
     close(): void {
       if (!_closed) {
         _closed = true
       }
     },
 
+    /**
+     * Return a human readable string representation
+     *
+     * @param o the object
+     * @return the object representation
+     */
     dump(o: any): string {
       return ng.dump(o)
     }
@@ -204,7 +232,7 @@ export class Assert {
    * Assert that ```typeof o``` is ```type```
    */
   typeOf(o: any, type: string, message?: string): boolean {
-    return this.__assert__(typeof o === type, message, this.__position__())
+    return this.__assert__(Type(o) === type, message, this.__position__())
   }
 
   /**

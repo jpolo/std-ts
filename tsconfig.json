@@ -65,6 +65,7 @@
         "./src/main/typescript/ts/unit/printer/junit.ts",
         "./src/main/typescript/ts/unit/qunit.ts",
         "./src/main/typescript/ts/unit/runner.ts",
+        "./src/main/typescript/ts/unit/util.ts",
         "./src/main/typescript/ts/uri.ts",
         "./src/main/typescript/ts/uuid.ts",
         "./src/main/typescript/ts/vm.ts",

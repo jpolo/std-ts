@@ -49,7 +49,7 @@ export class Assertion implements IAssertion {
       this.type === o.type &&
       this.test === o.test &&
       this.message === o.message
-    );
+    )
   }
 
   inspect() {

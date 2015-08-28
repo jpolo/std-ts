@@ -3,7 +3,6 @@ import * as stacktrace from "./stacktrace"
 import * as assertion from "./unit/assertion"
 import { IAssertionCallSite, Assertion } from "./unit/assertion"
 
-
 export interface IAssertion extends assertion.IAssertion {}
 
 export interface ITestReport {

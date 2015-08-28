@@ -1,17 +1,11 @@
 import { ITestEngine, ITest, ITestReport, ITestParams, ITestHandlers } from "../unit"
 import { IInspector, Inspector } from "../inspect"
 import * as equal from "./equal"
+import { Now } from "./util"
 import * as stacktrace from "../stacktrace"
 import { IAssertion, IAssertionCallSite } from "./assertion"
 
 //Util
-//const IsNaN = function (o: any) { return o !== o; }
-//const IsFinite = isFinite
-//const IsNumber = function (o: any) { return typeof o === 'number'; }
-//const IsObject = function (o) { return o !== null && (typeof o == "object"); }
-//const ObjectKeys = ownKeys
-//const ObjectKeysSorted = function (o: any) { return ObjectKeys(o).sort(); }
-//const ToStringTag = stringTag
 
 //Service
 type $Equal = {
@@ -26,7 +20,7 @@ type $Time = { now(): number }
 
 const $equalDefault: $Equal = equal
 const $inspectDefault: $Inspector = new Inspector({ maxString: 70 });
-const $timeDefault: $Time = { now: Date.now || function () { return (new Date()).getTime(); } };
+const $timeDefault: $Time = { now: Now };
 const $stacktraceDefault: $Stacktrace = stacktrace;
 
 export class Engine implements ITestEngine {

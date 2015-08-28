@@ -1,22 +1,33 @@
-import * as reflect from "../reflect"
+import {
+  IsFinite,
+  IsEmpty,
+  IsNaN,
+  IsNumber,
+  IsObject,
+  SameValue,
+  ObjectKeys,
+  ObjectKeysSorted,
+  ToStringTag
+} from "./util"
 
-//Constant
-
-//Util
-const IsFinite = isFinite
-const IsEmpty = function (o: any) { return o === undefined || o === null }
-const IsNaN = function (o: any) { return o !== o }
-const IsNumber = function (o: any) { return typeof o === 'number' }
-const IsObject = function (o: any) { return o !== null && (typeof o == "object") }
-const SameValue = Object['is'] || function (a: any, b: any) { return a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b) }
-const ObjectKeys = reflect.ownKeys
-const ObjectKeysSorted = function (o: any) { return ObjectKeys(o).sort(); }
-const ToStringTag = reflect.stringTag
-
+/**
+ * Return ```true``` if ```a``` is same value as ```b```
+ *
+ * @param a left side parameter
+ * @param b right side parameter
+ * @return the equality result
+ */
 export function is(a: any, b: any): boolean {
   return SameValue(a, b)
 }
 
+/**
+ * Return ```true``` if ```a``` is equals to ```b```
+ *
+ * @param a left side parameter
+ * @param b right side parameter
+ * @return the non-strict equality result
+ */
 export function equals(a: any, b: any): boolean {
   return (
     SameValue(a, b) ||
@@ -28,10 +39,25 @@ export function equals(a: any, b: any): boolean {
   )
 }
 
+/**
+ * Return ```true``` if ```a``` is strictly equal to ```b```
+ *
+ * @param a left side parameter
+ * @param b right side parameter
+ * @return the strict equality result
+ */
 export function equalsStrict(a: any, b: any): boolean {
   return a === b
 }
 
+/**
+ * Return ```true``` if ```a``` is ```b```
+ *
+ * @param a left side parameter
+ * @param b right side parameter
+ * @param epsilon the maximum distance between a and b
+ * @return the equal near difference
+ */
 export function equalsNear(a: any, b: any, epsilon: number): boolean {
   let isnum1 = IsNumber(a)
   let isnum2 = IsNumber(b)
@@ -43,10 +69,24 @@ export function equalsNear(a: any, b: any, epsilon: number): boolean {
   )
 }
 
+/**
+ * Return ```true``` if all properties of ```a``` are strictly equal to ```b```
+ *
+ * @param a left side parameter
+ * @param b right side parameter
+ * @return the property equality test
+ */
 export function equalsProperties(a: any, b: any): boolean {
   return equalsObject(a, b, equalsStrict)
 }
 
+/**
+ * Return ```true``` if ```a``` is deeply equal to ```b```
+ *
+ * @param a left side parameter
+ * @param b right side parameter
+ * @return the deep equality result
+ */
 export function equalsDeep(a: any, b: any): boolean {
   return equalsAny(a, b, equalsDeep)
 }
