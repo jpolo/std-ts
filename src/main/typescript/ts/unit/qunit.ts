@@ -327,7 +327,7 @@ export class Assert {
     console.warn("Assert#expect() not implemented")
   }
 
-  __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
+  protected __assert__(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
     this._context.write(isSuccess, message, position)
     return isSuccess
   }

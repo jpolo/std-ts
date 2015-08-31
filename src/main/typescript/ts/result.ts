@@ -102,6 +102,8 @@ export default class Result<T> implements IResult<T> {
     return ResultCreateFailure(e)
   }
 
+  static fcall<A, B, C, D, E, F, G, H, I, R>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I) => R, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I): Result<R>
+  static fcall<A, B, C, D, E, F, G, H, R>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H) => R, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H): Result<R>
   static fcall<A, B, C, D, E, F, G, R>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G) => R, a: A, b: B, c: C, d: D, e: E, f: F, g: G): Result<R>
   static fcall<A, B, C, D, E, F, R>(fn: (a: A, b: B, c: C, d: D, e: E, f: F) => R, a: A, b: B, c: C, d: D, e: E, f: F): Result<R>
   static fcall<A, B, C, D, E, R>(fn: (a: A, b: B, c: C, d: D, e: E) => R, a: A, b: B, c: C, d: D, e: E): Result<R>
@@ -185,7 +187,9 @@ export default class Result<T> implements IResult<T> {
   }
 
   inspect() {
-    return ResultIsSuccess(this) ? "Success { " + this.value + " }" : "Failure { " + this.error + " }"
+    return ResultIsSuccess(this) ?
+      "Success { " + this.value + " }" :
+      "Failure { " + this.error + " }"
   }
 
   toString() {

@@ -63,6 +63,16 @@ export const ToStringTag = function (o: any): string {
   }
   return s;
 }
+
+/*export const FunctionCall = function (f: Function, thisp: any, args: any[]) {
+  let argc = args && args.length || 0
+  switch (argc) {
+    case 0: return thisp ? f.call(thisp) : f()
+    case 1: return thisp ? f.call(thisp, args[0]) : f(args[0])
+    case 2: return thisp ? f.call(thisp, args[0], args[1]) : f(args[0], args[1])
+    default: return f.apply(thisp, args)
+  }
+}*/
 export const FunctionToString = function (f: Function): string {
   return Function.prototype.toString.call(f)
 }
