@@ -1,7 +1,7 @@
 import * as reflect from "../reflect"
 import * as stacktrace from "../stacktrace"
 import { SUCCESS, FAILURE, IAssertionCallSite, IAssertion, Assertion } from "./assertion"
-import { ITestEngine, ITest, ITestReport, ITestParams } from "../unit"
+import { ITestEngine, ITest, ITestHandler, ITestParams, IStreamController } from "../unit"
 import {
   IsExtensible,
   IsFinite,
@@ -43,13 +43,6 @@ interface IAssertConstructor<T> {
   new (context: IAssertContext): T
 }
 
-interface IStreamController<T> {
-  desiredSize: number
-  enqueue(chunk: T): void
-  close(): void
-  error(e: any): void
-}
-
 interface ITestBlock<IAssert> {
   block(assert: IAssert, complete?: () => void): void
   assertFactory(ctx: IAssertContext): IAssert
@@ -62,7 +55,7 @@ interface ITestBlock<IAssert> {
 let _suiteDefault: TestSuite = null;
 let _suiteCurrent = _suiteDefault;
 
-const AssertContextCreate = function (ng: ITestEngine, t: ITest, r: ITestReport): IAssertContext {
+const AssertContextCreate = function (ng: ITestEngine, t: ITest, h: ITestHandler): IAssertContext {
   let _async = false
   let _expected: number = null
   let _closed = false
@@ -120,13 +113,14 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, r: ITestReport)
      */
     write(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
       let test = t
-      if (_closed || !IsExtensible(r.assertions)) {
+      if (_closed) {
         throw new Error('Assertions were made after report creation in ' + test)
       }
 
       message = message || 'assertion should be true'
 
-      r.assertions.push(
+      h.onTestAssertion(
+        test,
         new Assertion(isSuccess ? SUCCESS : FAILURE, test, message, position)
       )
       return isSuccess
@@ -416,31 +410,11 @@ export class Test implements ITest {
     return this
   }
 
-  run(engine: ITestEngine, params: ITestParams, complete: (report: ITestReport) => void) {
+  run(engine: ITestEngine, params: ITestParams, handler: ITestHandler) {
     let test = this
     let blocks = this.blocks
     let blockc = blocks.length
-    let startTime = engine.now()
-    let assertions: IAssertion[] = []
-    let report: ITestReport = {
-      startDate: new Date(startTime),
-      elapsedMilliseconds: NaN,
-      assertions: assertions
-    }
-    let assertionStream: IStreamController<IAssertion> = {
-      desiredSize: 1,
-      enqueue(a: IAssertion) {
-        assertions.push(a);
-      },
-      error(e: any) {
-
-      },
-      close() {
-        //finalize report
-        report.elapsedMilliseconds = engine.now() - startTime
-        ObjectFreeze(assertions)
-      }
-    };
+    //let startTime = engine.now()
 
     let timeoutMs = params.timeout || Infinity;//no timeout
 
@@ -448,15 +422,13 @@ export class Test implements ITest {
     let onBlockComplete = () => {
       if (--blockc === 0) {
         //finalize report
-        assertionStream.close()
-        ObjectFreeze(report)
-        complete(report)
+        handler.onTestEnd(test)
       }
     }
 
     let runBlock = (testBlock: ITestBlock<any>, complete: () => void) => {
-      let block = testBlock.block;
-      let assertContext = AssertContextCreate(engine, test, report);
+      let block = testBlock.block
+      let assertContext = AssertContextCreate(engine, test, handler)
       let assert = testBlock.assertFactory(assertContext);
       if (block.length >= 2) {
         //asynchronous
@@ -467,7 +439,10 @@ export class Test implements ITest {
 
       let onTimeout = () => {
         timerId = null
-        assertionStream.enqueue(Assertion.error(test, "No test completion after " + timeoutMs + "ms", null, null))
+        handler.onTestAssertion(
+          test,
+          Assertion.error(test, "No test completion after " + timeoutMs + "ms", null, null)
+        )
         complete()
       }
 
@@ -501,7 +476,10 @@ export class Test implements ITest {
       } catch (e) {
         //TODO get stacktrace from engine
         let parsed = e ? stacktrace.get(e) : null;
-        assertionStream.enqueue(Assertion.error(test, e.message, parsed && parsed[0], e.stack || e.message || null))
+        handler.onTestAssertion(
+          test,
+          Assertion.error(test, e.message, parsed && parsed[0], e.stack || e.message || null)
+        )
       } finally {
         if (!assertContext.isAsync()) {
           onComplete()

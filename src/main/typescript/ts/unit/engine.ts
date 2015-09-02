@@ -1,4 +1,4 @@
-import { ITestEngine, ITest, ITestReport, ITestParams, ITestHandlers } from "../unit"
+import { ITestEngine, ITest, ITestReport, ITestParams, ITestHandler } from "../unit"
 import { IInspector, Inspector } from "../inspect"
 import * as equal from "./equal"
 import { Now } from "./util"
@@ -19,48 +19,48 @@ type $Stacktrace = { create(): IAssertionCallSite[] }
 type $Time = { now(): number }
 
 const $equalDefault: $Equal = equal
-const $inspectDefault: $Inspector = new Inspector({ maxString: 70 });
-const $timeDefault: $Time = { now: Now };
-const $stacktraceDefault: $Stacktrace = stacktrace;
+const $inspectDefault: $Inspector = new Inspector({ maxString: 70 })
+const $timeDefault: $Time = { now: Now }
+const $stacktraceDefault: $Stacktrace = stacktrace
 
 export class Engine implements ITestEngine {
 
   //Services
-  protected $equal: $Equal = $equalDefault;
-  protected $inspect: $Inspector = $inspectDefault;
-  protected $time: $Time = $timeDefault;
-  protected $stacktrace: $Stacktrace = $stacktraceDefault;
+  protected $equal: $Equal = $equalDefault
+  protected $inspect: $Inspector = $inspectDefault
+  protected $time: $Time = $timeDefault
+  protected $stacktrace: $Stacktrace = $stacktraceDefault
 
   constructor(
     deps?: {
-      $equal?: $Equal;
-      $inspect?: $Inspector;
-      $time?: $Time;
-      $stacktrace?: $Stacktrace;
+      $equal?: $Equal
+      $inspect?: $Inspector
+      $time?: $Time
+      $stacktrace?: $Stacktrace
     }
   ) {
     if (deps) {
       if (deps.$equal !== undefined) {
-        this.$equal = deps.$equal;
+        this.$equal = deps.$equal
       }
       if (deps.$inspect !== undefined) {
-        this.$inspect = deps.$inspect;
+        this.$inspect = deps.$inspect
       }
       if (deps.$time !== undefined) {
-        this.$time = deps.$time;
+        this.$time = deps.$time
       }
       if (deps.$stacktrace !== undefined) {
-        this.$stacktrace = deps.$stacktrace;
+        this.$stacktrace = deps.$stacktrace
       }
     }
   }
 
   callstack(): IAssertionCallSite[] {
-    return this.$stacktrace.create();
+    return this.$stacktrace.create()
   }
 
   dump(o: any): string {
-    return this.$inspect.stringify(o);
+    return this.$inspect.stringify(o)
   }
 
   now(): number {
@@ -84,24 +84,15 @@ export class Engine implements ITestEngine {
   }
 
   run(
-    tests: ITest[],
+    test: ITest,
     params: ITestParams,
-    handlers: ITestHandlers
+    handler: ITestHandler
   ) {
-    let remaining = tests.length
-    let runTest = (testCase: ITest) => {
-      handlers.onTestStart(tests, testCase)
-      testCase.run(this, params, function (report: ITestReport) {
-        handlers.onTestEnd(tests, testCase, report)
-        if (--remaining === 0) {
-          handlers.onEnd(tests/*, reports*/)
-        }
-      })
-    }
-
-    handlers.onStart(tests);
-    for (let test of tests) {
-      runTest(test)
+    try {
+      test.run(this, params, handler)
+    } catch (e) {
+      handler.onTestError(test, e)
+      handler.onTestEnd(test)
     }
   }
 }

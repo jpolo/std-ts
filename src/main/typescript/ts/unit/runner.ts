@@ -1,4 +1,4 @@
-import { ITestEngine, IPrinter, ITest, ITestReport, ITestHandlers } from "../unit"
+import { ITestEngine, IPrinter, ITest, ITestReport, ITestHandler, IAssertion } from "../unit"
 import { instance as $engineDefault } from "./engine"
 
 //Constant
@@ -6,9 +6,9 @@ const FLOAT_EPSILON = 1e-5;
 
 export class Runner {
   //Config
-  protected _epsilon = FLOAT_EPSILON;
-  protected _timeout = 2000;//ms
-  protected _includeDefault = true;
+  protected _epsilon = FLOAT_EPSILON
+  protected _timeout = 2000//ms
+  protected _includeDefault = true
 
   //Service
   protected $engine: ITestEngine = $engineDefault;
@@ -53,28 +53,51 @@ export class Runner {
   }
   */
 
-  run(testCases: ITest[], onComplete?: (report: ITestReport[]) => void): void {
+  run(tests: ITest[], onComplete?: (report: ITestReport[]) => void): void {
     //if (this._includeDefault) {
     //  testCases = testCases.concat(suiteDefault.tests)
     //}
+    let { $engine } = this
     let reports: ITestReport[] = [];
+
+
+
     let config = {
       epsilon: this._epsilon,
       timeout: this._timeout
     };
-    let handlers: ITestHandlers = {
-      onStart: (tests) => { },
-      onTestStart: (tests, test) => { },
-      onTestEnd: (tests, test, report) => {
-        reports.push(report);
-      },
-      onEnd: (tests) => {
-        if (onComplete) {
-          onComplete(reports);
-        }
-      },
-    };
 
-    this.$engine.run(testCases, config, handlers)
+
+    function runTest(test: ITest) {
+      let report: ITestReport = {
+        startDate: NaN,
+        elapsedMilliseconds: NaN,
+        assertions: []
+      }
+      let handler: ITestHandler = {
+        onTestStart: (test) => {
+          report.startDate = new Date($engine.now())
+        },
+        onTestAssertion: (test, assertion) => {
+
+          //reports.push(report);
+        },
+        onTestError(e) {
+
+        },
+        onTestEnd(test) {
+          //if (onComplete) {
+          //  onComplete(reports);
+          //}
+        }
+      }
+      $engine.run(test, config, handler)
+    }
+
+    for (let test of tests) {
+      runTest(test)
+    }
+
+
   }
 }

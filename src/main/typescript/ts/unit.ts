@@ -1,7 +1,13 @@
-import { freeze } from "./reflect"
 import * as stacktrace from "./stacktrace"
 import * as assertion from "./unit/assertion"
 import { IAssertionCallSite, Assertion } from "./unit/assertion"
+
+export interface IStreamController<T> {
+  desiredSize: number
+  enqueue(chunk: T): void
+  close(): void
+  error(e: any): void
+}
 
 export interface IAssertion extends assertion.IAssertion {}
 
@@ -20,31 +26,31 @@ export interface ITestParams {
   timeout: number
 }
 
-export interface ITestHandlers {
-  onStart: (tests: ITest[]) => void
-  onTestStart: (tests: ITest[], t: ITest) => void
-  onTestEnd: (tests: ITest[], t: ITest, r: ITestReport) => void
-  onEnd: (tests: ITest[]) => void
-}
-
 export interface ITestEngine {
   callstack(): IAssertionCallSite[]
   dump(o: any): string
   now(): number
-  run(testCases: ITest[], params: ITestParams, handlers: ITestHandlers): void
+  run(test: ITest, params: ITestParams, handler: ITestHandler): void
   testEquals(actual: any, expected: any): boolean
   testEqualsStrict(actual: any, expected: any): boolean
   testEqualsNear(actual: any, expected: any, epsilon?: number): boolean
   testEqualsDeep(actual: any, expected: any): boolean
 }
 
+export interface ITestHandler {
+  onTestStart(t: ITest): void
+  onTestAssertion(t: ITest, a: IAssertion): void
+  onTestError(t: ITest, e: any): void
+  onTestEnd(t: ITest): void
+}
+
 export interface ITest {
   category: string
   name: string
-  run(engine: ITestEngine, params: ITestParams, complete: (report: ITestReport) => void): void
+  run(engine: ITestEngine, params: ITestParams, handler: ITestHandler): void
 }
 
-export const SUCCESS = assertion.SUCCESS;
-export const FAILURE = assertion.FAILURE;
-export const ERROR = assertion.ERROR;
-export const WARNING = assertion.WARNING;
+export const SUCCESS = assertion.SUCCESS
+export const FAILURE = assertion.FAILURE
+export const ERROR = assertion.ERROR
+export const WARNING = assertion.WARNING
