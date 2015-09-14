@@ -414,19 +414,29 @@ export class Test implements ITest {
     let test = this
     let blocks = this.blocks
     let blockc = blocks.length
-    //let startTime = engine.now()
-
     let timeoutMs = params.timeout || Infinity;//no timeout
+    let assertionCount = 0
+
+    handler.onTestAssertion = (function (_) {
+      return function (t: ITest, a: IAssertion) {
+        assertionCount += 1
+        return _.apply(this, arguments)
+      }
+    }(handler.onTestAssertion))
+
+    function write(a: IAssertion) {
+      handler.onTestAssertion(test, a)
+    }
 
     //finish test and send to callback
-    let onBlockComplete = () => {
+    function onBlockComplete() {
       if (--blockc === 0) {
         //finalize report
         handler.onTestEnd(test)
       }
     }
 
-    let runBlock = (testBlock: ITestBlock<any>, complete: () => void) => {
+    function runBlock(testBlock: ITestBlock<any>, complete: () => void) {
       let block = testBlock.block
       let assertContext = AssertContextCreate(engine, test, handler)
       let assert = testBlock.assertFactory(assertContext);
@@ -437,16 +447,13 @@ export class Test implements ITest {
       let isFinished = false
       let timerId = null
 
-      let onTimeout = () => {
+      function onTimeout() {
         timerId = null
-        handler.onTestAssertion(
-          test,
-          Assertion.error(test, "No test completion after " + timeoutMs + "ms", null, null)
-        )
+        write(Assertion.error(test, "No test completion after " + timeoutMs + "ms", null, null))
         complete()
       }
 
-      let onComplete = () => {
+      function onComplete() {
         if (!isFinished) {
           isFinished = true
           if (timerId) {
@@ -454,17 +461,17 @@ export class Test implements ITest {
             timerId = null
           }
 
-          if (assertions.length === 0) {
-            assertionStream.enqueue(Assertion.warning(test, "No assertion found", null))
+          if (assertionCount === 0) {
+            write(Assertion.warning(test, "No assertion found", null))
           }
 
-          this._afterRun()
+          test._afterRun()
           complete()
         }
       }
 
       try {
-        this._beforeRun()
+        test._beforeRun()
         if (assertContext.isAsync()) {
           if (IsFinite(timeoutMs)) {
             timerId = setTimeout(onTimeout, timeoutMs)
@@ -476,10 +483,7 @@ export class Test implements ITest {
       } catch (e) {
         //TODO get stacktrace from engine
         let parsed = e ? stacktrace.get(e) : null;
-        handler.onTestAssertion(
-          test,
-          Assertion.error(test, e.message, parsed && parsed[0], e.stack || e.message || null)
-        )
+        write(Assertion.error(test, e.message, parsed && parsed[0], e.stack || e.message || null))
       } finally {
         if (!assertContext.isAsync()) {
           onComplete()

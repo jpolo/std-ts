@@ -58,44 +58,49 @@ export class Runner {
     //  testCases = testCases.concat(suiteDefault.tests)
     //}
     let { $engine } = this
-    let reports: ITestReport[] = [];
-
-
-
+    let reports: ITestReport[] = []
     let config = {
       epsilon: this._epsilon,
       timeout: this._timeout
-    };
+    }
 
-
-    function runTest(test: ITest) {
+    function runTest(test: ITest, onComplete: (r: ITestReport) => void) {
       let report: ITestReport = {
-        startDate: NaN,
+        startDate: null,
         elapsedMilliseconds: NaN,
         assertions: []
       }
       let handler: ITestHandler = {
-        onTestStart: (test) => {
+        onTestStart(test: ITest) {
           report.startDate = new Date($engine.now())
         },
-        onTestAssertion: (test, assertion) => {
-
+        onTestAssertion(test: ITest, assertion: IAssertion) {
+          report.assertions.push(assertion)
           //reports.push(report);
         },
-        onTestError(e) {
+        onTestError(test: ITest, e: any) {
 
         },
-        onTestEnd(test) {
-          //if (onComplete) {
-          //  onComplete(reports);
-          //}
+        onTestEnd(test: ITest) {
+          if (onComplete) {
+            onComplete(report)
+          }
         }
       }
       $engine.run(test, config, handler)
     }
 
+    let testPending = tests.length
+    function onTestComplete(r: ITestReport) {
+      reports.push(r)
+      testPending -= 1
+      if (testPending === 0) {
+        onComplete(reports)
+      }
+    }
+
     for (let test of tests) {
-      runTest(test)
+      runTest(test, onTestComplete)
     }
 
 
