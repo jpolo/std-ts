@@ -45,7 +45,7 @@ interface IAssertConstructor<T> {
 
 interface ITestBlock<IAssert> {
   block(assert: IAssert, complete?: () => void): void
-  assertFactory(ctx: IAssertContext): IAssert
+  assertFactory(context: IAssertContext): IAssert
   disabled: boolean
 }
 
@@ -114,15 +114,17 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, h: ITestHandler
     write(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
       let test = t
       if (_closed) {
-        throw new Error('Assertions were made after report creation in ' + test)
+        h.onTestError(
+          test,
+          new Error('Assertions were made after report creation in ' + test)
+        )
+      } else {
+        message = message || 'assertion should be true'
+        h.onTestAssertion(
+          test,
+          new Assertion(isSuccess ? SUCCESS : FAILURE, test, message, position)
+        )
       }
-
-      message = message || 'assertion should be true'
-
-      h.onTestAssertion(
-        test,
-        new Assertion(isSuccess ? SUCCESS : FAILURE, test, message, position)
-      )
       return isSuccess
     },
 
@@ -326,7 +328,7 @@ export class Assert {
     return isSuccess
   }
 
-  __dump__(o: any): string {
+  protected __dump__(o: any): string {
     return this._context.dump(o)
   }
 
@@ -510,7 +512,7 @@ export class TestSuite {
   public setUp: (test?: Test) => void
   public tearDown: (test?: Test) => void
   public tests: Test[] = []
-  private _byNames: {[name: string]: Test} = {}
+  private _byNames: { [name: string]: Test } = {}
 
   constructor(
     public name: string

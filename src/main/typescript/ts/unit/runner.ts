@@ -1,8 +1,9 @@
 import { ITestEngine, IPrinter, ITest, ITestReport, ITestHandler, IAssertion } from "../unit"
-import { instance as $engineDefault } from "./engine"
+import { Engine } from "./engine"
 
 //Constant
 const FLOAT_EPSILON = 1e-5;
+const $engineDefault = new Engine()
 
 export class Runner {
   //Config
@@ -102,7 +103,5 @@ export class Runner {
     for (let test of tests) {
       runTest(test, onTestComplete)
     }
-
-
   }
 }

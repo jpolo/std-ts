@@ -21,22 +21,40 @@ export default suite("ts/timer", (self) => {
 
 
   test(".setTimeout()", (assert, done) => {
-    let spy = createSpy();
-    let timeout = 5;
-    let timerId = setTimeout(spy.call, timeout);
+    let spy = createSpy()
+    let timeout = 5
+    let timerId = setTimeout(spy.call, timeout)
+    let pending = 3
 
     //arity
     assert.strictEqual(setTimeout.length, 2)
 
+    function notify() {
+      pending--
+      if (pending === 0) {
+        done()
+      }
+    }
+
+    //timer id
+    assert.strictEqual(typeof timerId, 'number')
+
+    //assert called
     setTimeout(() => {
-      assert.ok(!spy.called);
-    }, timeout - 1);
+      assert.ok(!spy.called)
+      notify()
+    }, timeout - 1)
     setTimeout(() => {
-      assert.ok(spy.called);
-      assert.strictEqual(spy.counter, 1);
-      done();
-    }, timeout + 1);
-    assert.strictEqual(typeof timerId, 'number');
+      assert.ok(spy.called)
+      assert.strictEqual(spy.counter, 1)
+      notify()
+    }, timeout + 1)
+
+    //assert arguments
+    setTimeout((a) => {
+      assert.strictEqual(a, "foo")
+      notify()
+    }, timeout + 2, "foo")
   })
 
   test(".clearTimeout()", (assert, done) => {
@@ -95,13 +113,14 @@ export default suite("ts/timer", (self) => {
   })
 
   test(".setImmediate()", (assert, done) => {
-    let spy = createSpy();
-    let timerId = setImmediate(spy.call);
+    let spy = createSpy()
+    let timerId = setImmediate(spy.call)
+    
     setTimeout(() => {
-      assert.ok(spy.called);
-      assert.strictEqual(spy.counter, 1);
-      done();
-    }, 1);
+      assert.ok(spy.called)
+      assert.strictEqual(spy.counter, 1)
+      done()
+    }, 1)
 
     assert.strictEqual(typeof timerId, 'number')
   })

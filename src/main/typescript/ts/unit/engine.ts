@@ -3,6 +3,7 @@ import { IInspector, Inspector } from "../inspect"
 import * as equal from "./equal"
 import { Now } from "./util"
 import * as stacktrace from "../stacktrace"
+import * as timer from "../timer"
 import { IAssertion, IAssertionCallSite } from "./assertion"
 
 //Util
@@ -17,11 +18,16 @@ type $Equal = {
 type $Inspector = IInspector
 type $Stacktrace = { create(): IAssertionCallSite[] }
 type $Time = { now(): number }
+type $Timer = {
+  setTimeout(f: any, ms: number): number
+  clearTimeout(id: number): void
+}
 
 const $equalDefault: $Equal = equal
 const $inspectDefault: $Inspector = new Inspector({ maxString: 70 })
 const $timeDefault: $Time = { now: Now }
 const $stacktraceDefault: $Stacktrace = stacktrace
+const $timerDefault: $Timer = timer
 
 export class Engine implements ITestEngine {
 
@@ -30,6 +36,7 @@ export class Engine implements ITestEngine {
   protected $inspect: $Inspector = $inspectDefault
   protected $time: $Time = $timeDefault
   protected $stacktrace: $Stacktrace = $stacktraceDefault
+  protected $timer: $Timer = $timerDefault
 
   constructor(
     deps?: {
@@ -37,6 +44,7 @@ export class Engine implements ITestEngine {
       $inspect?: $Inspector
       $time?: $Time
       $stacktrace?: $Stacktrace
+      $timer?: $Timer
     }
   ) {
     if (deps) {
@@ -46,11 +54,14 @@ export class Engine implements ITestEngine {
       if (deps.$inspect !== undefined) {
         this.$inspect = deps.$inspect
       }
+      if (deps.$stacktrace !== undefined) {
+        this.$stacktrace = deps.$stacktrace
+      }
       if (deps.$time !== undefined) {
         this.$time = deps.$time
       }
-      if (deps.$stacktrace !== undefined) {
-        this.$stacktrace = deps.$stacktrace
+      if (deps.$timer !== undefined) {
+        this.$timer = deps.$timer
       }
     }
   }
@@ -96,5 +107,3 @@ export class Engine implements ITestEngine {
     }
   }
 }
-
-export const instance = new Engine();

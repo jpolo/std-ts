@@ -2,76 +2,72 @@
 const Global: any = typeof window !== "undefined" ? window : (function() { return this }())
 //const Process = Global.process
 //const IsNodeJS = {}.toString.call(Process) === "[object process]"
+const IsString = function (o: any): boolean { return typeof o === "string" }
 const SetTimeout = Global.setTimeout
 const ClearTimeout = Global.clearTimeout
 const SetInterval = Global.setInterval
 const ClearInterval = Global.clearInterval
 
-
-const Task = (function () {
-  const registry: { [k: number]: any } = {}
-  let currentId = 1
-  return {
-    create(f: any) {
-      let id = currentId
-      currentId += 1
-      registry[id] = f
-      return id
-    },
-    remove(id: number) {
-      if (registry[id] !== undefined) {
-        delete registry[id]
-      }
-    },
-    run(id: number) {
-      let task = registry[id]
-      if (task) {
-        delete registry[id]
-        task()
-      }
-    }
+//Task
+const TaskRegistry: { [k: number]: any } = {}
+const TaskGenerateId = (function () {
+  let current = 1
+  return function () {
+    let returnValue = current
+    current += 1
+    return current
   }
 }())
-/*
-const PostMessageTimer = (function () {
-  const PREFIX = "setImmediate:" + Math.random() + ":"
-
-
-  function onGlobalMessage(event) {
-    if (
-      event.source === Global &&
-      typeof event.data === "string" &&
-      event.data.indexOf(PREFIX) === 0
-    ) {
-      //runIfPresent(+event.data.slice(PREFIX.length))
-    }
+const TaskCreate = function (f: any): number {
+  let id = TaskGenerateId()
+  TaskRegistry[id] = f
+  return id
+}
+const TaskRemove = function (id: number): void {
+  delete TaskRegistry[id]
+}
+const TaskRun = function (id: number) {
+  let task = TaskRegistry[id]
+  if (task) {
+    delete TaskRegistry[id]
+    task()
   }
-
-  if (Global.addEventListener) {
-    Global.addEventListener("message", onGlobalMessage, false);
-  } else {
-    Global.attachEvent("onmessage", onGlobalMessage);
-  }
-
-  return {
-    setImmediate(f: any): number {
-      let id = createTask(f)
-      //addFromSetImmediateArguments(arguments)
-      Global.postMessage(PREFIX + id, "*")
-      return id
-    },
-    clearImmediate(id: number): void {
-
-    }
-  }
-}())*/
-
+}
 const SetImmediate: (f: any) => number =
   Global.setImmediate ? Global.setImmediate :
-  function (f: any): number { return SetTimeout(f, 0) }
+  Global.postMessage ? (function () {
+    const PREFIX = "setImmediate:" + Math.random() + ":"
+    const PREFIX_LENGTH = PREFIX.length
+
+    function onGlobalMessage(event) {
+      let { source, data } = event
+      if (
+        source === Global &&
+        IsString(data) &&
+        data.indexOf(PREFIX) === 0
+      ) {
+        TaskRun(+data.slice(PREFIX_LENGTH))
+      }
+    }
+
+    function setImmediate(f: any) {
+      let id = TaskCreate(f)
+      Global.postMessage(PREFIX + id, "*")
+      return id
+    }
+
+    if (Global.addEventListener) {
+      Global.addEventListener("message", onGlobalMessage, false)
+    } else {
+      Global.attachEvent("onmessage", onGlobalMessage)
+    }
+    return setImmediate
+  }()) :
+  function setImmediate(f: any): number { return SetTimeout(f, 0) }
 const ClearImmediate =
   Global.clearImmediate ? Global.clearImmediate :
-  function (id: number): void { return ClearTimeout(id) }
+  Global.postMessage ? function clearImmediate(id: number) { TaskRemove(id) } :
+  function clearImmediate(id: number): void { return ClearTimeout(id) }
 
 /**
  * Calls a function ```f(...args)``` after an undetermined delay
@@ -80,6 +76,9 @@ const ClearImmediate =
  * @param milliseconds the delay between two calls
  * @return the id of the task
  */
+export function setTimeout<A, B, C, D, E, F, G, H, I>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I) => void, ms: number, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I): number
+export function setTimeout<A, B, C, D, E, F, G, H>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H) => void, ms: number, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H): number
+export function setTimeout<A, B, C, D, E, F, G>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G) => void, ms: number, a: A, b: B, c: C, d: D, e: E, f: F, g: G): number
 export function setTimeout<A, B, C, D, E, F>(fn: (a: A, b: B, c: C, d: D, e: E, f: F) => void, ms: number, a: A, b: B, c: C, d: D, e: E, f: F): number
 export function setTimeout<A, B, C, D, E>(fn: (a: A, b: B, c: C, d: D, e: E) => void, ms: number, a: A, b: B, c: C, d: D, e: E): number
 export function setTimeout<A, B, C, D>(fn: (a: A, b: B, c: C, d: D) => void, ms: number, a: A, b: B, c: C, d: D): number
@@ -88,7 +87,6 @@ export function setTimeout<A, B>(fn: (a: A, b: B) => void, ms: number, a: A, b: 
 export function setTimeout<A>(fn: (a: A) => void, ms: number, a: A): number
 export function setTimeout<A>(fn: () => void, ms: number): number
 export function setTimeout(fn: Function, ms: number = 0, ...args: any[]): number {
-  //TODO: add more cardinalities
   return SetTimeout(args.length === 0 ? fn : () => { fn.apply(null, args) }, ms)
 }
 
@@ -108,8 +106,18 @@ export function clearTimeout(id: number): void {
  * @param milliseconds the delay between two calls
  * @return the id of the task
  */
-export function setInterval(f: () => void, milliseconds: number = 0, ...args: any[]): number {
-  return SetInterval(args.length === 0 ? f : () => { f.apply(null, args) }, milliseconds)
+export function setInterval<A, B, C, D, E, F, G, H, I>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I) => void, ms: number, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I): number
+export function setInterval<A, B, C, D, E, F, G, H>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H) => void, ms: number, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H): number
+export function setInterval<A, B, C, D, E, F, G>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G) => void, ms: number, a: A, b: B, c: C, d: D, e: E, f: F, g: G): number
+export function setInterval<A, B, C, D, E, F>(fn: (a: A, b: B, c: C, d: D, e: E, f: F) => void, ms: number, a: A, b: B, c: C, d: D, e: E, f: F): number
+export function setInterval<A, B, C, D, E>(fn: (a: A, b: B, c: C, d: D, e: E) => void, ms: number, a: A, b: B, c: C, d: D, e: E): number
+export function setInterval<A, B, C, D>(fn: (a: A, b: B, c: C, d: D) => void, ms: number, a: A, b: B, c: C, d: D): number
+export function setInterval<A, B, C>(fn: (a: A, b: B, c: C) => void, ms: number, a: A, b: B, c: C): number
+export function setInterval<A, B>(fn: (a: A, b: B) => void, ms: number, a: A, b: B): number
+export function setInterval<A>(fn: (a: A) => void, ms: number, a: A): number
+export function setInterval<A>(fn: () => void, ms: number): number
+export function setInterval(fn: Function, ms: number = 0, ...args: any[]): number {
+  return SetInterval(args.length === 0 ? fn : () => { fn.apply(null, args) }, ms)
 }
 
 /**
@@ -127,9 +135,18 @@ export function clearInterval(id: number): void {
  * @param f the function that will be called
  * @return the id of the task
  */
-export function setImmediate(f: () => void, ...args: any[]): number {
-  //TODO: add more cardinalities
-  return SetImmediate(args.length === 0 ? f : () => { f.apply(null, args) })
+export function setImmediate<A, B, C, D, E, F, G, H, I>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I) => void, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I): number
+export function setImmediate<A, B, C, D, E, F, G, H>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H) => void, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H): number
+export function setImmediate<A, B, C, D, E, F, G>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G) => void, a: A, b: B, c: C, d: D, e: E, f: F, g: G): number
+export function setImmediate<A, B, C, D, E, F>(fn: (a: A, b: B, c: C, d: D, e: E, f: F) => void, a: A, b: B, c: C, d: D, e: E, f: F): number
+export function setImmediate<A, B, C, D, E>(fn: (a: A, b: B, c: C, d: D, e: E) => void, a: A, b: B, c: C, d: D, e: E): number
+export function setImmediate<A, B, C, D>(fn: (a: A, b: B, c: C, d: D) => void, a: A, b: B, c: C, d: D): number
+export function setImmediate<A, B, C>(fn: (a: A, b: B, c: C) => void, a: A, b: B, c: C): number
+export function setImmediate<A, B>(fn: (a: A, b: B) => void, a: A, b: B): number
+export function setImmediate<A>(fn: (a: A) => void, a: A): number
+export function setImmediate<A>(fn: () => void): number
+export function setImmediate(fn: () => void, ...args: any[]): number {
+  return SetImmediate(args.length === 0 ? fn : () => { fn.apply(null, args) })
 }
 
 /**

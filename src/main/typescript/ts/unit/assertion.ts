@@ -1,10 +1,10 @@
 import { ICallSite } from "../stacktrace"
 import { ITest } from "../unit"
 
-export const SUCCESS = "SUCCESS";
-export const FAILURE = "FAILURE";
-export const ERROR = "ERROR";
-export const WARNING = "WARNING";
+export const SUCCESS = "SUCCESS"
+export const FAILURE = "FAILURE"
+export const ERROR = "ERROR"
+export const WARNING = "WARNING"
 
 export interface IAssertion {
   type: string
