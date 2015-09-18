@@ -1,4 +1,4 @@
-
+//Avoid import here
 const global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 
 export const INT8_MIN_VALUE = -0x80

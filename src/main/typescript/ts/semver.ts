@@ -1,4 +1,4 @@
-import { IHash, hashString } from "ts/hash"
+import { IHash, hashString } from "./hash"
 
 //reference: https://github.com/npm/node-semver/blob/master/semver.js
 

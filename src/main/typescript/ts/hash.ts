@@ -1,4 +1,4 @@
-import { getId, hasId } from "ts/id"
+import { getId, hasId } from "./id"
 
 //see https://github.com/facebook/immutable-js/blob/master/src/Hash.js
 
