@@ -5,7 +5,7 @@ interface IListData<T> {
   _length: number
 }
 
-interface INode<T> {
+export interface INode<T> {
   value: T
   previous: INode<T>
   next: INode<T>

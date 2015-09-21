@@ -35,7 +35,7 @@ export function copy(m: Matrix2, dest?: Matrix2): Matrix2 {
 }
 
 export function create(
-  m00: number, m01: number, 
+  m00: number, m01: number,
   m10: number, m11: number
 ): Matrix2 {
   let m = __arrayCreate(NumberArray);
@@ -47,7 +47,7 @@ export function create(
 }
 
 export function determinant(m: Matrix2): number {
-  return m[0] * m[3] - m[2] * m[1];  
+  return m[0] * m[3] - m[2] * m[1];
 }
 
 export function identity(dest?: Matrix2): Matrix2 {
@@ -56,7 +56,7 @@ export function identity(dest?: Matrix2): Matrix2 {
   r[1] = 0;
   r[2] = 0;
   r[3] = 1;
-  return r;  
+  return r;
 }
 
 export function transpose(m: Matrix2, dest?: Matrix2): Matrix2 {

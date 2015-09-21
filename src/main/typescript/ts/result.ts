@@ -16,11 +16,11 @@ function IsResult<T>(r: any): boolean {
   return r instanceof Result
 }
 
-function ResultIsSuccess<T>(r: IResult<T>): boolean {
+function ResultIsSuccess(r: any): boolean {
   return r && r.hasOwnProperty($$value)
 }
 
-function ResultIsFailure<T>(r: IResult<T>): boolean {
+function ResultIsFailure(r: any): boolean {
   return r && r.hasOwnProperty($$error)
 }
 
@@ -57,12 +57,12 @@ function ResultCreateFailure(e: any): Result<any> {
   return r
 }
 
-function ResultGet<T>(r: IResult<T>): T {
-  if (ResultIsSuccess(r)) {
-    return r.value
-  } else {
-    throw r.error
-  }
+function ResultGetValue<T>(r: IResult<T>): T {
+  return r.value
+}
+
+function ResultGetError(r: IResult<any>): any {
+  return r.error
 }
 
 /*
@@ -74,14 +74,14 @@ function ResultTransform<T, R>(r: IResult<T>, onSuccess?: (v: T) => R | Result<R
   let returnValue = <any>r
   if (ResultIsSuccess(this)) {
     try {
-      returnValue = ResultCreateSuccess(onSuccess(r.value))
+      returnValue = ResultCreateSuccess(onSuccess(ResultGetValue(r)))
     } catch (e) {
       returnValue = ResultCreateFailure(e)
     }
   } else {
     if (onFailure !== null) {
       try {
-        returnValue = ResultCreateSuccess(onFailure(r.error))
+        returnValue = ResultCreateSuccess(onFailure(ResultGetError(r)))
       } catch (e) {
         returnValue = ResultCreateFailure(e)
       }
@@ -152,7 +152,10 @@ export default class Result<T> implements IResult<T> {
   }
 
   equals(o: any): boolean {
-    return IsResult(o) && (ResultIsSuccess(this) ? Equals(this.value, o.value) : Equals(this.error, o.error))
+    return IsResult(o) && (ResultIsSuccess(this) ?
+      Equals(ResultGetValue(this), ResultGetValue(o)) :
+      Equals(ResultGetError(this), ResultGetError(o))
+    )
   }
 
   /*
@@ -166,16 +169,20 @@ export default class Result<T> implements IResult<T> {
   }*/
 
   map<U>(f: (v: T) => U): Result<U> {
-    return ResultIsSuccess(this) ? ResultCreateSuccess(f(this.value)) : <any>this
+    return ResultIsSuccess(this) ? ResultCreateSuccess(f(ResultGetValue(this))) : <any>this
   }
 
   /*
   flatMap<U>(f: (v: T) => Result<U>): Result<U> {
-    return this._isSuccess ? f(this.failure) : <any>this
+    return ResultIsSuccess(this) ? f(this.success) : <any>this
   }*/
 
   get(): T {
-    return ResultGet(this)
+    if (ResultIsSuccess(this)) {
+      return ResultGetValue(this)
+    } else {
+      throw ResultGetError(this)
+    }
   }
 
   then<R>(onSuccess?: (value: T) => R | Result<R>, onFailure?: (error: any) => R | Result<R> | void): Result<R> {
@@ -188,8 +195,14 @@ export default class Result<T> implements IResult<T> {
 
   inspect() {
     return ResultIsSuccess(this) ?
-      "Success { " + this.value + " }" :
-      "Failure { " + this.error + " }"
+      "Success { " + ResultGetValue(this) + " }" :
+      "Failure { " + ResultGetError(this) + " }"
+  }
+
+  toJSON() {
+    return ResultIsSuccess(this) ?
+      { value: ResultGetValue(this) } :
+      { error: ResultGetError(this) }
   }
 
   toString() {
