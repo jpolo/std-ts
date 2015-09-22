@@ -285,7 +285,7 @@ export class Assert {
                 actual.message === expected.message
               message = this.__dump__(actual) + ' thrown be like ' + this.__dump__(expected)
             } else {
-              isSuccess = actual === this.__engine__().testEqualsStrict(actual, expected)
+              isSuccess = actual === this.__engine__().equalsStrict(actual, expected)
               message = this.__dump__(actual) + ' thrown must be ' + this.__dump__(expected)
             }
         }
@@ -342,12 +342,12 @@ export class Assert {
 
   protected _strictEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
     message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' be ') + this.__dump__(o2))
-    return this.__assert__(this.__engine__().testEqualsStrict(o1, o2) === !not, message, position)
+    return this.__assert__(this.__engine__().equalsSame(o1, o2) === !not, message, position)
   }
 
   protected _equal(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
     message = message || (this.__dump__(o1) + (' must' + (not ? ' not' : '') + ' equal ') + this.__dump__(o2))
-    return this.__assert__(this.__engine__().testEquals(o1, o2) === !not, message, position)
+    return this.__assert__(this.__engine__().equalsSimple(o1, o2) === !not, message, position)
   }
 
   protected _propEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
@@ -361,7 +361,7 @@ export class Assert {
     for (let i = 0, l = keys1.length; i < l; ++i) {
       let key1 = keys1[i]
       let key2 = keys2[i]
-      if (key1 === key2 && !engine.testEqualsStrict(o1[key1], o2[key2])) {
+      if (key1 === key2 && !engine.equalsSame(o1[key1], o2[key2])) {
         isSuccess = false
         break
       }
@@ -371,7 +371,7 @@ export class Assert {
 
   protected _deepEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
     message = message || (this.__dump__(o1) + (' must equals ') + this.__dump__(o2))
-    return this.__assert__(this.__engine__().testEqualsDeep(o1, o2) === !not, message, position)
+    return this.__assert__(this.__engine__().equalsDeep(o1, o2) === !not, message, position)
   }
 }
 

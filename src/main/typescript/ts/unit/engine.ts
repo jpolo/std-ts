@@ -1,4 +1,4 @@
-import { ITestEngine, ITest, ITestReport, ITestParams, ITestHandler } from "../unit"
+import { ITestReport, ITestParams, ITestHandler } from "../unit"
 import { IInspector, Inspector } from "../inspect"
 import * as equal from "./equal"
 import { Now } from "./util"
@@ -10,13 +10,16 @@ import { IAssertion, IAssertionCallSite } from "./assertion"
 
 //Service
 interface ITestEngineEqual {
-  is(lhs: any, rhs: any): boolean
-  equals(lhs: any, rhs: any): boolean
+  equalsSame(lhs: any, rhs: any): boolean
+  equalsSimple(lhs: any, rhs: any): boolean
+  equalsStrict(lhs: any, rhs: any): boolean
   equalsNear(lhs: any, rhs: any, epsilon: any): boolean
   equalsProperties(lhs: any, rhs: any): boolean
   equalsDeep(lhs: any, rhs: any): boolean
 }
-interface ITestEngineInspector extends IInspector {}
+interface ITestEngineDump {
+  dump(o: any): string
+}
 interface ITestEngineStacktrace {
   callstack(): IAssertionCallSite[]
 }
@@ -31,9 +34,43 @@ interface ITestEngineTimer {
   setImmediate(f: any): number
   clearImmediate(id: number): void
 }
+interface ITestEngineRun {
+  run(test: ITest, params: ITestParams, handler: ITestHandler)
+}
+export interface ITestEngine extends
+  ITestEngineEqual,
+  ITestEngineDump,
+  ITestEngineRun,
+  ITestEngineStacktrace,
+  ITestEngineTime,
+  ITestEngineTimer {
+}
+
+export interface ITest {
+  category: string
+  name: string
+  run(engine: ITestEngine, params: ITestParams, handler: ITestHandler): void
+}
+
+export interface ITestEngineContext {
+  //getTest(): ITest
+  getTimeout(): number
+  //getEngine(): ITestEngine
+  onStart(): void
+  onAssertion(a: IAssertion): void
+  onError(e: any): void
+  onEnd(): void
+}
 
 const $equalDefault: ITestEngineEqual = equal
-const $inspectDefault: ITestEngineInspector = new Inspector({ maxString: 70 })
+const $dumpDefault: ITestEngineDump = (function () {
+  let inspector = new Inspector({ maxString: 70 })
+  return {
+    dump(o: any) {
+      return inspector.stringify(o)
+    }
+  }
+}())
 const $timeDefault: ITestEngineTime = {
   now: Now
 }
@@ -45,29 +82,29 @@ const $timerDefault: ITestEngineTimer = timer
 export class Engine implements ITestEngine {
 
   //Services
+  protected $dump: ITestEngineDump = $dumpDefault
   protected $equal: ITestEngineEqual = $equalDefault
-  protected $inspect: ITestEngineInspector = $inspectDefault
-  protected $time: ITestEngineTime = $timeDefault
   protected $stacktrace: ITestEngineStacktrace = $stacktraceDefault
+  protected $time: ITestEngineTime = $timeDefault
   protected $timer: ITestEngineTimer = $timerDefault
 
   constructor(
     deps?: {
       $equal?: ITestEngineEqual
-      $inspect?: ITestEngineInspector
+      $dump?: ITestEngineDump
       $time?: ITestEngineTime
       $stacktrace?: ITestEngineStacktrace
       $timer?: ITestEngineTimer
     }
   ) {
     if (deps) {
-      let { $equal, $inspect, $stacktrace, $time, $timer } = deps
+      let { $equal, $dump, $stacktrace, $time, $timer } = deps
 
       if ($equal !== undefined) {
         this.$equal = $equal
       }
-      if ($inspect !== undefined) {
-        this.$inspect = $inspect
+      if ($dump !== undefined) {
+        this.$dump = $dump
       }
       if ($stacktrace !== undefined) {
         this.$stacktrace = $stacktrace
@@ -86,27 +123,59 @@ export class Engine implements ITestEngine {
   }
 
   dump(o: any): string {
-    return this.$inspect.stringify(o)
+    return this.$dump.dump(o)
   }
 
   now(): number {
     return this.$time.now()
   }
 
-  testEqualsStrict(a: any, b: any): boolean {
-    return this.$equal.is(a, b)
+  equalsDeep(o1: any, o2: any): boolean {
+    return this.$equal.equalsDeep(o1, o2)
   }
 
-  testEquals(a: any, b: any): boolean {
-    return this.$equal.equals(a, b)
-  }
-
-  testEqualsNear(o1: any, o2: any, epsilon: number): boolean {
+  equalsNear(o1: any, o2: any, epsilon: number): boolean {
     return this.$equal.equalsNear(o1, o2, epsilon)
   }
 
-  testEqualsDeep(o1: any, o2: any): boolean {
-    return this.$equal.equalsDeep(o1, o2)
+  equalsProperties(a: any, b: any): boolean {
+    return this.$equal.equalsProperties(a, b)
+  }
+
+  equalsSame(a: any, b: any): boolean {
+    return this.$equal.equalsSame(a, b)
+  }
+
+  equalsSimple(a: any, b: any): boolean {
+    return this.$equal.equalsSimple(a, b)
+  }
+
+  equalsStrict(a: any, b: any): boolean {
+    return this.$equal.equalsStrict(a, b)
+  }
+
+  setTimeout(f: any, ms: number) {
+    return this.$timer.setTimeout(f, ms)
+  }
+
+  clearTimeout(id: number) {
+    return this.$timer.clearTimeout(id)
+  }
+
+  setInterval(f: any, ms: number) {
+    return this.$timer.setInterval(f, ms)
+  }
+
+  clearInterval(id: number) {
+    return this.$timer.clearInterval(id)
+  }
+
+  setImmediate(f: any) {
+    return this.$timer.setImmediate(f)
+  }
+
+  clearImmediate(id: number) {
+    return this.$timer.clearImmediate(id)
   }
 
   run(

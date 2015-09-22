@@ -3,24 +3,23 @@ import { Engine } from "../../../../main/typescript/ts/unit/engine"
 
 export default test("ts/unit/engine.Engine", (assert) => {
   var engine = new Engine()
-  
-  //#testEquals()
-  var message = "#testEquals() failure";
-  assert(engine.testEquals(1, 1), message)
-  assert(engine.testEquals(false, 0), message)
-  assert(!engine.testEquals(0, 1), message)
-  assert(!engine.testEquals([0], [0]), message)
-  assert(engine.testEquals("1", 1), message)
 
+  //#equalsSimple()
+  var message = "#equalsSimple() failure";
+  assert(engine.equalsSimple(1, 1), message)
+  assert(engine.equalsSimple(false, 0), message)
+  assert(!engine.equalsSimple(0, 1), message)
+  assert(!engine.equalsSimple([0], [0]), message)
+  assert(engine.equalsSimple("1", 1), message)
 
-  //#testEqualsStrict()
+  //#equalsStrict()
   message = "#testEqualsStrict() failure";
-  assert(engine.testEqualsStrict(1, 1), message)
-  assert(engine.testEqualsStrict(NaN, NaN), message)
-  assert(!engine.testEqualsStrict(false, 0), message)
-  assert(!engine.testEqualsStrict(0, 1), message)
-  assert(!engine.testEqualsStrict([0], [0]), message)
-  assert(!engine.testEqualsStrict("1", 1), message)
+  assert(engine.equalsStrict(1, 1), message)
+  assert(engine.equalsStrict(NaN, NaN), message)
+  assert(!engine.equalsStrict(false, 0), message)
+  assert(!engine.equalsStrict(0, 1), message)
+  assert(!engine.equalsStrict([0], [0]), message)
+  assert(!engine.equalsStrict("1", 1), message)
 
   /*
   //#testEqualNear()
@@ -32,16 +31,16 @@ export default test("ts/unit/engine.Engine", (assert) => {
   assert(!engine.testEqualsNear(0, 1), message)
   assert(!engine.testEqualsNear("1", 1), message)
   */
-    
+
   //#testEqualDeep()
   message = "#testEqualDeep() failure";
-  assert(engine.testEqualsDeep([0, 1], [0, 1]), message)
-  assert(engine.testEqualsDeep([0, ["a", "b"]], [0, ["a", "b"]]), message)
-  assert(engine.testEqualsDeep([NaN, NaN], [NaN, NaN]))
-  assert(engine.testEqualsDeep({ foo: 1, bar: 2 }, { foo: 1, bar: 2 }), message)
-  assert(!engine.testEqualsDeep({ foo: 1, bar: 2 }, { foo: 1 }), message)
-  assert(!engine.testEqualsDeep([false], [0]), message)
-  assert(!engine.testEqualsDeep(["1"], [1]), message)
+  assert(engine.equalsDeep([0, 1], [0, 1]), message)
+  assert(engine.equalsDeep([0, ["a", "b"]], [0, ["a", "b"]]), message)
+  assert(engine.equalsDeep([NaN, NaN], [NaN, NaN]))
+  assert(engine.equalsDeep({ foo: 1, bar: 2 }, { foo: 1, bar: 2 }), message)
+  assert(!engine.equalsDeep({ foo: 1, bar: 2 }, { foo: 1 }), message)
+  assert(!engine.equalsDeep([false], [0]), message)
+  assert(!engine.equalsDeep(["1"], [1]), message)
 
   //#dump()
   message = "#testEqualDeep() failure";
@@ -63,5 +62,5 @@ export default test("ts/unit/engine.Engine", (assert) => {
 
   //regexp
   assert(engine.dump(/abc(.*)/gi) === '/abc(.*)/gi', message)
-  
+
 });

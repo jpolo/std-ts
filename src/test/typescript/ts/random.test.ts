@@ -8,7 +8,7 @@ class AssertCustom extends Assert {
     var message = ""
     expected.forEach((expected, index) => {
       var actual = f()
-      if (!this.__engine__().testEqualsStrict(expected, actual)) {
+      if (!this.__engine__().equalsStrict(expected, actual)) {
         isSuccess = false
         message += this.__dump__(actual) + ' must be ' + this.__dump__(expected) + '\n'
       }

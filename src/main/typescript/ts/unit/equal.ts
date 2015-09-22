@@ -17,7 +17,7 @@ import {
  * @param b right side parameter
  * @return the equality result
  */
-export function is(a: any, b: any): boolean {
+export function equalsSame(a: any, b: any): boolean {
   return SameValue(a, b)
 }
 
@@ -28,7 +28,7 @@ export function is(a: any, b: any): boolean {
  * @param b right side parameter
  * @return the non-strict equality result
  */
-export function equals(a: any, b: any): boolean {
+export function equalsSimple(a: any, b: any): boolean {
   return (
     SameValue(a, b) ||
     (

@@ -1,5 +1,5 @@
-import * as stacktrace from "./stacktrace"
 import * as assertion from "./unit/assertion"
+import * as engine from "./unit/engine"
 import { IAssertionCallSite, Assertion } from "./unit/assertion"
 
 export interface IStreamController<T> {
@@ -26,16 +26,7 @@ export interface ITestParams {
   timeout: number
 }
 
-export interface ITestEngine {
-  callstack(): IAssertionCallSite[]
-  dump(o: any): string
-  now(): number
-  run(test: ITest, params: ITestParams, handler: ITestHandler): void
-  testEquals(actual: any, expected: any): boolean
-  testEqualsStrict(actual: any, expected: any): boolean
-  testEqualsNear(actual: any, expected: any, epsilon?: number): boolean
-  testEqualsDeep(actual: any, expected: any): boolean
-}
+export interface ITestEngine extends engine.ITestEngine {}
 
 export interface ITestHandler {
   onTestStart(t: ITest): void
@@ -44,11 +35,7 @@ export interface ITestHandler {
   onTestEnd(t: ITest): void
 }
 
-export interface ITest {
-  category: string
-  name: string
-  run(engine: ITestEngine, params: ITestParams, handler: ITestHandler): void
-}
+export interface ITest extends engine.ITest {}
 
 export const SUCCESS = assertion.SUCCESS
 export const FAILURE = assertion.FAILURE
