@@ -21,19 +21,9 @@ export interface IPrinter {
   print(reports: ITestReport[]): void
 }
 
-export interface ITestParams {
-  epsilon: number
-  timeout: number
-}
+export interface ITestContext extends engine.ITestContext {}
 
 export interface ITestEngine extends engine.ITestEngine {}
-
-export interface ITestHandler {
-  onTestStart(t: ITest): void
-  onTestAssertion(t: ITest, a: IAssertion): void
-  onTestError(t: ITest, e: any): void
-  onTestEnd(t: ITest): void
-}
 
 export interface ITest extends engine.ITest {}
 

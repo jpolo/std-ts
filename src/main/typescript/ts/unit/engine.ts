@@ -1,4 +1,3 @@
-import { ITestReport, ITestParams, ITestHandler } from "../unit"
 import { IInspector, Inspector } from "../inspect"
 import * as equal from "./equal"
 import { Now } from "./util"
@@ -35,7 +34,8 @@ interface ITestEngineTimer {
   clearImmediate(id: number): void
 }
 interface ITestEngineRun {
-  run(test: ITest, params: ITestParams, handler: ITestHandler)
+  createContext(t: ITest, timeout?: number): ITestContext
+  run(context: ITestContext)
 }
 export interface ITestEngine extends
   ITestEngineEqual,
@@ -49,13 +49,13 @@ export interface ITestEngine extends
 export interface ITest {
   category: string
   name: string
-  run(engine: ITestEngine, params: ITestParams, handler: ITestHandler): void
+  run(context: ITestContext): void
 }
 
-export interface ITestEngineContext {
-  //getTest(): ITest
+export interface ITestContext {
   getTimeout(): number
-  //getEngine(): ITestEngine
+  getTest(): ITest
+  getEngine(): ITestEngine
   onStart(): void
   onAssertion(a: IAssertion): void
   onError(e: any): void
@@ -178,16 +178,26 @@ export class Engine implements ITestEngine {
     return this.$timer.clearImmediate(id)
   }
 
-  run(
-    test: ITest,
-    params: ITestParams,
-    handler: ITestHandler
-  ) {
+  createContext(t: ITest, timeout: number = Infinity): ITestContext {
+    let engine = this
+    return {
+      getTest() { return t },
+      getTimeout() { return timeout },
+      getEngine() { return engine },
+      onStart: null,
+      onAssertion: null,
+      onError: null,
+      onEnd: null
+    }
+  }
+
+  run(context: ITestContext) {
+    let engine = this
     try {
-      test.run(this, params, handler)
+      context.getTest().run(context)
     } catch (e) {
-      handler.onTestError(test, e)
-      handler.onTestEnd(test)
+      context.onError(e)
+      context.onEnd()
     }
   }
 }

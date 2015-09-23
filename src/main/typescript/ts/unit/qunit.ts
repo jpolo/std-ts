@@ -1,7 +1,7 @@
 import * as reflect from "../reflect"
 import * as stacktrace from "../stacktrace"
 import { SUCCESS, FAILURE, IAssertionCallSite, IAssertion, Assertion } from "./assertion"
-import { ITestEngine, ITest, ITestHandler, ITestParams, IStreamController } from "../unit"
+import { ITestEngine, ITest, ITestContext, IStreamController } from "../unit"
 import {
   IsExtensible,
   IsFinite,
@@ -55,7 +55,7 @@ interface ITestBlock<IAssert> {
 let _suiteDefault: TestSuite = null;
 let _suiteCurrent = _suiteDefault;
 
-const AssertContextCreate = function (ng: ITestEngine, t: ITest, h: ITestHandler): IAssertContext {
+const AssertContextCreate = function (context: ITestContext): IAssertContext {
   let _async = false
   let _expected: number = null
   let _closed = false
@@ -79,7 +79,7 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, h: ITestHandler
      * @return the test
      */
     getTest(): ITest {
-      return t
+      return context.getTest()
     },
 
     /**
@@ -88,7 +88,7 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, h: ITestHandler
      * @return the engine
      */
     getEngine(): ITestEngine {
-      return ng
+      return context.getEngine()
     },
 
     /**
@@ -98,7 +98,7 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, h: ITestHandler
      * @return the callsite
      */
     getPosition(offset = 0): IAssertionCallSite {
-      return ng.callstack()[3 + offset]
+      return context.getEngine().callstack()[3 + offset]
     },
 
     //open(): void {  },
@@ -112,17 +112,14 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, h: ITestHandler
      * @return the isSuccess
      */
     write(isSuccess: boolean, message: string, position: IAssertionCallSite): boolean {
-      let test = t
       if (_closed) {
-        h.onTestError(
-          test,
+        context.onError(
           new Error('Assertions were made after report creation in ' + test)
         )
       } else {
         message = message || 'assertion should be true'
-        h.onTestAssertion(
-          test,
-          new Assertion(isSuccess ? SUCCESS : FAILURE, test, message, position)
+        context.onAssertion(
+          new Assertion(isSuccess ? SUCCESS : FAILURE, context.getTest(), message, position)
         )
       }
       return isSuccess
@@ -144,7 +141,7 @@ const AssertContextCreate = function (ng: ITestEngine, t: ITest, h: ITestHandler
      * @return the object representation
      */
     dump(o: any): string {
-      return ng.dump(o)
+      return context.getEngine().dump(o)
     }
   }
 }
@@ -412,35 +409,35 @@ export class Test implements ITest {
     return this
   }
 
-  run(engine: ITestEngine, params: ITestParams, handler: ITestHandler) {
+  run(context: ITestContext) {
     let test = this
     let blocks = this.blocks
     let blockc = blocks.length
-    let timeoutMs = params.timeout || Infinity;//no timeout
+    let timeoutMs = context.getTimeout() || Infinity;//no timeout
     let assertionCount = 0
 
-    handler.onTestAssertion = (function (_) {
-      return function (t: ITest, a: IAssertion) {
+    context.onAssertion = (function (_) {
+      return function (a: IAssertion) {
         assertionCount += 1
         return _.apply(this, arguments)
       }
-    }(handler.onTestAssertion))
+    }(context.onAssertion))
 
     function write(a: IAssertion) {
-      handler.onTestAssertion(test, a)
+      context.onAssertion(a)
     }
 
     //finish test and send to callback
     function onBlockComplete() {
       if (--blockc === 0) {
         //finalize report
-        handler.onTestEnd(test)
+        context.onEnd()
       }
     }
 
     function runBlock(testBlock: ITestBlock<any>, complete: () => void) {
       let block = testBlock.block
-      let assertContext = AssertContextCreate(engine, test, handler)
+      let assertContext = AssertContextCreate(context)
       let assert = testBlock.assertFactory(assertContext);
       if (block.length >= 2) {
         //asynchronous

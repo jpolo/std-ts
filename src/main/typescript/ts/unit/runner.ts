@@ -1,4 +1,4 @@
-import { ITestEngine, IPrinter, ITest, ITestReport, ITestHandler, IAssertion } from "../unit"
+import { ITestEngine, IPrinter, ITest, ITestReport, ITestContext, IAssertion } from "../unit"
 import { Engine } from "./engine"
 
 //Constant
@@ -60,10 +60,7 @@ export class Runner {
     //}
     let { $engine } = this
     let reports: ITestReport[] = []
-    let config = {
-      epsilon: this._epsilon,
-      timeout: this._timeout
-    }
+    let { _epsilon, _timeout } = this
 
     function runTest(test: ITest, onComplete: (r: ITestReport) => void) {
       let report: ITestReport = {
@@ -71,24 +68,23 @@ export class Runner {
         elapsedMilliseconds: NaN,
         assertions: []
       }
-      let handler: ITestHandler = {
-        onTestStart(test: ITest) {
-          report.startDate = new Date($engine.now())
-        },
-        onTestAssertion(test: ITest, assertion: IAssertion) {
-          report.assertions.push(assertion)
-          //reports.push(report);
-        },
-        onTestError(test: ITest, e: any) {
+      let context = $engine.createContext(test, _timeout)
+      context.onStart = () => {
+        report.startDate = new Date($engine.now())
+      },
+      context.onAssertion = (assertion: IAssertion) => {
+        report.assertions.push(assertion)
+        //reports.push(report);
+      },
+      context.onError = (e: any) => {
 
-        },
-        onTestEnd(test: ITest) {
-          if (onComplete) {
-            onComplete(report)
-          }
+      }
+      context.onEnd = () => {
+        if (onComplete) {
+          onComplete(report)
         }
       }
-      $engine.run(test, config, handler)
+      $engine.run(context)
     }
 
     let testPending = tests.length
