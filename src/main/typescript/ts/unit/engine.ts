@@ -34,8 +34,16 @@ interface ITestEngineTimer {
   clearImmediate(id: number): void
 }
 interface ITestEngineRun {
-  createContext(t: ITest, timeout?: number): ITestContext
-  run(context: ITestContext)
+  run(context: ITestEngineRunContext)
+}
+
+export interface ITestEngineRunContext {
+  getTimeout(): number
+  getTest(): ITest
+  onStart(): void
+  onAssertion(a: IAssertion): void
+  onError(e: any): void
+  onEnd(): void
 }
 export interface ITestEngine extends
   ITestEngineEqual,
@@ -49,17 +57,11 @@ export interface ITestEngine extends
 export interface ITest {
   category: string
   name: string
-  run(context: ITestContext): void
+  run(context: ITestRunContext): void
 }
 
-export interface ITestContext {
-  getTimeout(): number
-  getTest(): ITest
+export interface ITestRunContext extends ITestEngineRunContext {
   getEngine(): ITestEngine
-  onStart(): void
-  onAssertion(a: IAssertion): void
-  onError(e: any): void
-  onEnd(): void
 }
 
 const $equalDefault: ITestEngineEqual = equal
@@ -178,23 +180,19 @@ export class Engine implements ITestEngine {
     return this.$timer.clearImmediate(id)
   }
 
-  createContext(t: ITest, timeout: number = Infinity): ITestContext {
+  run(context: ITestEngineRunContext) {
     let engine = this
-    return {
-      getTest() { return t },
-      getTimeout() { return timeout },
-      getEngine() { return engine },
-      onStart: null,
-      onAssertion: null,
-      onError: null,
-      onEnd: null
-    }
-  }
-
-  run(context: ITestContext) {
-    let engine = this
+    let test = context.getTest()
     try {
-      context.getTest().run(context)
+      test.run({
+        getTest() { return test },
+        getTimeout() { return context.getTimeout() },
+        getEngine() { return engine },
+        onStart() { context.onStart() },
+        onAssertion(a: IAssertion) { context.onAssertion(a) },
+        onError(e: any) { context.onError(e) },
+        onEnd() { context.onEnd() }
+      })
     } catch (e) {
       context.onError(e)
       context.onEnd()

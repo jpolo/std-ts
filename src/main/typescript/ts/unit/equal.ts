@@ -22,11 +22,11 @@ export function equalsSame(a: any, b: any): boolean {
 }
 
 /**
- * Return ```true``` if ```a``` is equals to ```b```
+ * Return ```true``` if ```a == b```
  *
  * @param a left side parameter
  * @param b right side parameter
- * @return the non-strict equality result
+ * @return the strict equality result
  */
 export function equalsSimple(a: any, b: any): boolean {
   return (
@@ -40,7 +40,7 @@ export function equalsSimple(a: any, b: any): boolean {
 }
 
 /**
- * Return ```true``` if ```a``` is strictly equal to ```b```
+ * Return ```true``` if ```a === b```
  *
  * @param a left side parameter
  * @param b right side parameter

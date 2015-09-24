@@ -21,7 +21,7 @@ export interface IPrinter {
   print(reports: ITestReport[]): void
 }
 
-export interface ITestContext extends engine.ITestContext {}
+export interface ITestRunContext extends engine.ITestRunContext {}
 
 export interface ITestEngine extends engine.ITestEngine {}
 

@@ -1,5 +1,5 @@
-import { ITestEngine, IPrinter, ITest, ITestReport, ITestContext, IAssertion } from "../unit"
-import { Engine } from "./engine"
+import { ITestEngine, IPrinter, ITest, ITestReport, ITestRunContext, IAssertion } from "../unit"
+import { Engine, ITestEngineRunContext } from "./engine"
 
 //Constant
 const FLOAT_EPSILON = 1e-5;
@@ -68,20 +68,22 @@ export class Runner {
         elapsedMilliseconds: NaN,
         assertions: []
       }
-      let context = $engine.createContext(test, _timeout)
-      context.onStart = () => {
-        report.startDate = new Date($engine.now())
-      },
-      context.onAssertion = (assertion: IAssertion) => {
-        report.assertions.push(assertion)
-        //reports.push(report);
-      },
-      context.onError = (e: any) => {
+      let context: ITestEngineRunContext = {
+        getTimeout() { return _timeout },
+        getTest() { return test },
+        onStart() {
+          report.startDate = new Date($engine.now())
+        },
+        onAssertion(assertion: IAssertion) {
+          report.assertions.push(assertion)
+        },
+        onError(e: any) {
 
-      }
-      context.onEnd = () => {
-        if (onComplete) {
-          onComplete(report)
+        },
+        onEnd() {
+          if (onComplete) {
+            onComplete(report)
+          }
         }
       }
       $engine.run(context)

@@ -1,7 +1,7 @@
 import * as reflect from "../reflect"
 import * as stacktrace from "../stacktrace"
 import { SUCCESS, FAILURE, IAssertionCallSite, IAssertion, Assertion } from "./assertion"
-import { ITestEngine, ITest, ITestContext, IStreamController } from "../unit"
+import { ITestEngine, ITest, ITestRunContext, IStreamController } from "../unit"
 import {
   IsExtensible,
   IsFinite,
@@ -55,7 +55,7 @@ interface ITestBlock<IAssert> {
 let _suiteDefault: TestSuite = null;
 let _suiteCurrent = _suiteDefault;
 
-const AssertContextCreate = function (context: ITestContext): IAssertContext {
+const AssertContextCreate = function (context: ITestRunContext): IAssertContext {
   let _async = false
   let _expected: number = null
   let _closed = false
@@ -409,7 +409,7 @@ export class Test implements ITest {
     return this
   }
 
-  run(context: ITestContext) {
+  run(context: ITestRunContext) {
     let test = this
     let blocks = this.blocks
     let blockc = blocks.length
