@@ -1,5 +1,5 @@
 //Util
-const __isNode = function (o) {
+const IsNode = function (o) {
   return (
     typeof Node === "object" ? o instanceof Node :
     o &&
@@ -8,10 +8,10 @@ const __isNode = function (o) {
     typeof o.nodeName === "string"
   );
 };
-const __isElement = function (o) {
+const IsElement = function (o) {
   return o.nodeType === NodeType.ELEMENT_NODE;
 };
-const __isElementOrDocument = function (n: Node) {
+const IsElementOrDocument = function (n: Node) {
   let nodeType = n.nodeType;
   return (
     nodeType === NodeType.ELEMENT_NODE ||
@@ -19,12 +19,12 @@ const __isElementOrDocument = function (n: Node) {
     nodeType === NodeType.DOCUMENT_NODE
   );
 };
-const __setText = function (n: Node, text: string) {
-  if (__isElementOrDocument(n)) {
+const SetText = function (n: Node, text: string) {
+  if (IsElementOrDocument(n)) {
     n.textContent = text;
   }
 };
-const __getText = function (n: Node) {
+const GetText = function (n: Node) {
   let returnValue = "";
   let nodeType = n.nodeType;
 
@@ -40,7 +40,7 @@ const __getText = function (n: Node) {
       returnValue = "";
       // Traverse its children
       for (n = n.firstChild; n; n = n.nextSibling) {
-        returnValue += __getText(n);
+        returnValue += GetText(n);
       }
     }
   } else if (
@@ -136,7 +136,7 @@ export function empty(node: Node): void {
 }
 
 export function isNode(o: any): boolean {
-  return __isNode(o);
+  return IsNode(o);
 }
 
 export function nodeType(node: Node): NodeType {

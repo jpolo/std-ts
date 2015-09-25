@@ -6,55 +6,126 @@ export default test("ts/unit/engine.Engine", (assert) => {
   let message: string
 
   //#equalsStrict()
-  message = "#equalsStrict() failure";
-  assert(engine.equalsStrict(1, 1), message)
-  assert(!engine.equalsStrict(false, 0), message)
-  assert(!engine.equalsStrict(undefined, false), message)
-  assert(!engine.equalsStrict(undefined, null), message)
-  assert(!engine.equalsStrict(0, 1), message)
-  assert(!engine.equalsStrict(NaN, NaN), message)
-  assert(!engine.equalsStrict([0], [0]), message)
-  assert(!engine.equalsStrict("1", 1), message)
+  (function () {
+    let message = "#equalsStrict() failure"
+
+    function eq(a, b) {
+      return engine.equalsStrict(a, b)
+    }
+    function assert_eq(a, b) {
+      return assert(eq(a, b), message)
+    }
+    function assert_neq(a, b) {
+      return assert(!eq(a, b), message)
+    }
+
+    assert_eq(1, 1)
+    assert_neq(false, 0)
+    assert_neq(undefined, false)
+    assert_neq(undefined, null)
+    assert_neq(0, 1)
+    assert_neq(NaN, NaN)
+    assert_neq([0], [0])
+    assert_neq("1", 1)
+  }());
+
 
   //#equalsSimple()
-  message = "#equalsSimple() failure";
-  /*assert(engine.equalsSimple(1, 1), message)
-  assert(engine.equalsSimple(undefined, false), message)
-  assert(engine.equalsSimple(undefined, null), message)
-  assert(engine.equalsSimple(false, 0), message)
-  assert(!engine.equalsSimple(0, 1), message)
-  assert(!engine.equalsSimple([0], [0]), message)
-  assert(engine.equalsSimple("1", 1), message)*/
+  (function () {
+    let message = "#equalsSimple() failure"
+
+    function eq(a, b) {
+      return engine.equalsSimple(a, b)
+    }
+    function assert_eq(a, b) {
+      return assert(eq(a, b), message)
+    }
+    function assert_neq(a, b) {
+      return assert(!eq(a, b), message)
+    }
+    assert_eq(1, 1)
+    assert_eq(undefined, false)
+    assert_eq(undefined, null)
+    assert_eq(false, 0)
+    assert_neq(NaN, NaN)
+    assert_neq(0, 1)
+    assert_eq("1", 1)
+    assert_neq([0], [0])
+  }());
 
   //#equalsSame()
-  message = "#equalsSame() failure";
-  assert(engine.equalsSame(1, 1), message)
-  assert(engine.equalsSame(NaN, NaN), message)
-  assert(!engine.equalsSame(false, 0), message)
-  assert(!engine.equalsSame(0, 1), message)
-  assert(!engine.equalsSame([0], [0]), message)
-  assert(!engine.equalsSame("1", 1), message)
+  (function () {
+    let message = "#equalsSame() failure"
+
+    function eq(a, b) {
+      return engine.equalsSame(a, b)
+    }
+    function assert_eq(a, b) {
+      return assert(eq(a, b), message)
+    }
+    function assert_neq(a, b) {
+      return assert(!eq(a, b), message)
+    }
+
+    assert_eq(1, 1)
+    assert_eq(NaN, NaN)
+    assert_neq(false, 0)
+    assert_neq(0, 1)
+    assert_neq([0], [0])
+    assert_neq("1", 1)
+  }());
+
 
   /*
   //#equalNear()
-  message = path + "#equalNear() failure";
-  assert(engine.equalNear(1, 1), message)
-  assert(engine.equalNear(1, 1.1, 0.11), message);
-  assert(!engine.equalNear(1.1, 1), message)
-  assert(!engine.equalNear(false, 0), message)
-  assert(!engine.equalNear(0, 1), message)
-  assert(!engine.equalNear("1", 1), message)
+  (function () {
+    let message = "#equalNear() failure";
+
+    function eq(a, b) {
+      return engine.equalNear(a, b)
+    }
+    function assert_eq(a, b) {
+      return assert(eq(a, b), message)
+    }
+    function assert_neq(a, b) {
+      return assert(!eq(a, b), message)
+    }
+
+    assert_eq(1, 1)
+    assert(engine.equalNear(1, 1.1, 0.11), message);
+    assert(!engine.equalNear(1.1, 1), message)
+    assert(!engine.equalNear(false, 0), message)
+    assert(!engine.equalNear(0, 1), message)
+    assert(!engine.equalNear("1", 1), message)
+  }());
+
   */
 
   //#equalDeep()
-  message = "#equalDeep() failure";
-  assert(engine.equalsDeep([0, 1], [0, 1]), message)
-  assert(engine.equalsDeep([0, ["a", "b"]], [0, ["a", "b"]]), message)
-  assert(engine.equalsDeep([NaN, NaN], [NaN, NaN]))
-  assert(engine.equalsDeep({ foo: 1, bar: 2 }, { foo: 1, bar: 2 }), message)
-  assert(!engine.equalsDeep({ foo: 1, bar: 2 }, { foo: 1 }), message)
-  assert(!engine.equalsDeep([false], [0]), message)
-  assert(!engine.equalsDeep(["1"], [1]), message)
+  (function () {
+    let message = "#equalsDeep() failure"
+
+    function eq(a, b) {
+      return engine.equalsDeep(a, b)
+    }
+    function assert_eq(a, b) {
+      return assert(eq(a, b), message)
+    }
+    function assert_neq(a, b) {
+      return assert(!eq(a, b), message)
+    }
+
+    assert_eq([0, 1], [0, 1])
+    assert_eq([0, ["a", "b"]], [0, ["a", "b"]])
+    assert_eq([NaN, NaN], [NaN, NaN])
+    assert_eq({ foo: 1, bar: 2 }, { foo: 1, bar: 2 })
+    assert_neq({ foo: 1, bar: 2 }, { foo: 1 })
+    assert_neq([false], [0])
+    assert_neq(["1"], [1])
+  }());
+
+
+
 
   //#dump()
   message = "#dump() failure";
