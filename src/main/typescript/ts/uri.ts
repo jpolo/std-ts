@@ -1,11 +1,27 @@
-
 //Util
 const __ostring = {}.toString;
 const __isArray = Array.isArray || function (o) { return __ostring.call(o) === "[object Array]"; };
 const __isString = function (o: any): boolean { return typeof o === 'string'; }
-const __keys = Object.keys || function (o: any): string[] { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+const __keys = Object.keys || function (o: any): string[] { let ks = []; for (let k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
 const __strIsEmpty = function (o: string) { return !o || o.length === 0; };
-
+const reParser = new RegExp(
+  '^' +
+  '(?:' +
+  '([^:/?#.]+)' +                     // scheme - ignore special characters
+  // used by other URL parts such as :,
+  // ?, /, #, and .
+  ':)?' +
+  '(?://' +
+  '(?:([^/?#]*)@)?' +                 // userInfo
+  '([^/#?]*?)' +                      // domain
+  '(?::([0-9]+))?' +                  // port
+  '(?=[/#?]|$)' +                     // authority-terminating character
+  ')?' +
+  '([^?#]+)?' +                         // path
+  '(?:\\?([^#]*))?' +                   // query
+  '(?:#(.*))?' +                        // fragment
+  '$');
+  
 export function parse(s: string): URI {
   return URI.parse(s);
 }
@@ -29,7 +45,7 @@ export interface IURI {
 export class URI implements IURI {
 
   static cast(o: any): URI {
-    var returnValue;
+    let returnValue;
     if (o) {
       if (o instanceof URI) {
         returnValue = o;
@@ -51,8 +67,8 @@ export class URI implements IURI {
   }
 
   static compare(a: IURI, b: IURI): number {
-    var aStr = URI.stringify(a)
-    var bStr = URI.stringify(b)
+    let aStr = URI.stringify(a)
+    let bStr = URI.stringify(b)
     return (
       aStr === bStr ? 0 :
       aStr > bStr ? 1 :
@@ -65,8 +81,8 @@ export class URI implements IURI {
   }
 
   static fromString(s: string): URI {
-    var returnValue: URI;
-    var parts: Array<any> = s.match(reParser);
+    let returnValue: URI;
+    let parts: Array<any> = s.match(reParser);
     if (parts) {
       returnValue = URI.fromArray([
         decodeComponent(parts[1]),
@@ -115,25 +131,25 @@ export class URI implements IURI {
   }
 
   static stringify(uri: IURI): string {
-    var s = "";
+    let s = "";
 
     if (s === undefined || s === null) {
       s += uri;
     } else {
-      var reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
-      var reDisallowedInFragment = /#/g;
-      var reDisallowedInAbsolutePath = /[\#\?]/g;
-      var reDisallowedInRelativePath =/[\#\?:]/g;
+      let reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
+      let reDisallowedInFragment = /#/g;
+      let reDisallowedInAbsolutePath = /[\#\?]/g;
+      let reDisallowedInRelativePath =/[\#\?:]/g;
 
-      var scheme = uri.scheme;
-      var userInfo = uri.userInfo;
-      var domain = uri.domain;
-      var port = uri.port;
-      var path = uri.path;
-      var query = uri.query;
-      var fragment = uri.fragment;
+      let scheme = uri.scheme;
+      let userInfo = uri.userInfo;
+      let domain = uri.domain;
+      let port = uri.port;
+      let path = uri.path;
+      let query = uri.query;
+      let fragment = uri.fragment;
 
-      var s = '';
+      let s = '';
 
       if (scheme != null) {
         s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ':';
@@ -277,24 +293,6 @@ export class URI implements IURI {
   }
 }
 
-var reParser = new RegExp(
-  '^' +
-  '(?:' +
-  '([^:/?#.]+)' +                     // scheme - ignore special characters
-  // used by other URL parts such as :,
-  // ?, /, #, and .
-  ':)?' +
-  '(?://' +
-  '(?:([^/?#]*)@)?' +                 // userInfo
-  '([^/#?]*?)' +                      // domain
-  '(?::([0-9]+))?' +                  // port
-  '(?=[/#?]|$)' +                     // authority-terminating character
-  ')?' +
-  '([^?#]+)?' +                         // path
-  '(?:\\?([^#]*))?' +                   // query
-  '(?:#(.*))?' +                        // fragment
-  '$');
-
 export function encodeComponent(s: string): string {
   return s == null ? '' : encodeURIComponent(s)
 }
@@ -312,12 +310,12 @@ function encodeSpecialChars(unescapedPart: string, extra) {
 }
 
 function encodeChar(ch: string): string {
-  var n = ch.charCodeAt(0);
+  let n = ch.charCodeAt(0);
   return '%' + ((n >> 4) & 0xf).toString(16) + (n & 0xf).toString(16);
 }
 
 export function encodeQuery(qs: IQueryString): string {
-  var s = null, okeys, i, l, key, val;
+  let s = null, okeys, i, l, key, val;
   if (qs) {
     okeys = __keys(qs);
 
@@ -351,12 +349,12 @@ export function encodeQuery(qs: IQueryString): string {
 }
 
 export function decodeQuery(s: string): IQueryString {
-  var qs = null;
+  let qs = null;
   if (s) {
     qs = {};
-    var pairs = s.split('&');
-    var indexOfEquals, pair, key, val, qsval;
-    for (var i = 0, l = pairs.length; i < l; ++i) {
+    let pairs = s.split('&');
+    let indexOfEquals, pair, key, val, qsval;
+    for (let i = 0, l = pairs.length; i < l; ++i) {
       pair = pairs[i];
       indexOfEquals = pair.indexOf('=');
       key = pair;
@@ -400,7 +398,7 @@ function _queryEquals(l: any, r: any): boolean {
       lkeys.sort();
       rkeys.sort();
 
-      for (var i = 0, key; i < lkeyc; ++i) {
+      for (let i = 0, key; i < lkeyc; ++i) {
         key = lkeys[i];
         if (key !== rkeys[i] || l[key] !== r[key]) {
           returnValue = false;
