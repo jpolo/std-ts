@@ -15,6 +15,7 @@ export const UINT32_MIN_VALUE = 0
 export const UINT32_MAX_VALUE = 0xffffffff
 export const DATE_MAX_MILLISECONDS = 8640000000000000
 export const DATE_MIN_MILLISECONDS = -DATE_MAX_MILLISECONDS
+export const EPSILON = 2.220446049250313e-16
 
 export const IsExtensible = Object.isExtensible || function (o: any) { return true }
 export const IsFinite = isFinite

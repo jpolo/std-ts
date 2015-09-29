@@ -9,12 +9,12 @@ const DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE
 const ToNumber = Number
 const IsNaN = (n: number) => { return n !== n }
 const IsFinite = isFinite
-var math_acos = Math.acos;
-var math_asin = Math.asin;
-var math_atan = Math.atan;
-var math_atan2 = Math.atan2;
-var math_eq = (l: number, r: number) => { return IsNaN(l) === IsNaN(r) && l == r }
-var math_abs = Math.abs;
+const math_acos = Math.acos
+const math_asin = Math.asin
+const math_atan = Math.atan
+const math_atan2 = Math.atan2
+//const math_eq = (l: number, r: number) => { return IsNaN(l) === IsNaN(r) && l == r }
+const math_abs = Math.abs
 var math_ceil = Math.ceil;
 var math_cos = Math.cos;
 var math_clz32 = Math['clz32'];
