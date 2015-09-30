@@ -93,9 +93,8 @@ export function equalsDeep(a: any, b: any): boolean {
 
 function equalsFloat(a: number, b: number, epsilon: number): boolean {
   return (
-    IsNaN(b) ? IsNaN(a) :
-    IsNaN(a) ? false :
-    !IsFinite(b) && !IsFinite(a) ? (b > 0) == (a > 0) :
+    IsNaN(a) || IsNaN(b) ? false :
+    //!IsFinite(b) && !IsFinite(a) ? (b > 0) == (a > 0) :
     Math.abs(a - b) <= epsilon
   )
 }

@@ -26,8 +26,7 @@ export function compile(jscode: string, options?: Option): (locals?: Locals) => 
   let fnWithContext: Function;
   let fnNoContext: Function;
   let evalCode = jscode;
-  const sourceURL = options.sourceURL;
-  const sourceMappingURL = options.sourceMappingURL;
+  const { sourceURL, sourceMappingURL } = options;
 
   if (sourceURL) {
     //Firebug and Webkit annotation

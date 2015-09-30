@@ -7,9 +7,7 @@ const $engineDefault = new Engine()
 
 export class Runner {
   //Config
-  protected _epsilon = FLOAT_EPSILON
   protected _timeout = 2000//ms
-  protected _includeDefault = true
 
   //Service
   protected $engine: ITestEngine = $engineDefault;
@@ -28,16 +26,8 @@ export class Runner {
   }
 
   config(options: {
-    epsilon?: number
-    //includeDefault?: boolean
     timeout?: number
   }) {
-    if (options.epsilon !== undefined) {
-      this._epsilon = options.epsilon;
-    }
-    //if (options.includeDefault !== undefined) {
-    //  this._includeDefault = options.includeDefault;
-    //}
     if (options.timeout !== undefined) {
       this._timeout = options.timeout;
     }
@@ -58,9 +48,8 @@ export class Runner {
     //if (this._includeDefault) {
     //  testCases = testCases.concat(suiteDefault.tests)
     //}
-    let { $engine } = this
+    let { $engine, _timeout } = this
     let reports: ITestReport[] = []
-    let { _epsilon, _timeout } = this
 
     function runTest(test: ITest, onComplete: (r: ITestReport) => void) {
       let report: ITestReport = {

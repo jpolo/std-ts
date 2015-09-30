@@ -3,21 +3,19 @@ const Global: any = typeof window !== "undefined" ? window : (function() { retur
 //const Process = Global.process
 //const IsNodeJS = {}.toString.call(Process) === "[object process]"
 const IsString = function (o: any): boolean { return typeof o === "string" }
-const SetTimeout = Global.setTimeout
-const ClearTimeout = Global.clearTimeout
-const SetInterval = Global.setInterval
-const ClearInterval = Global.clearInterval
+const SetTimeout = function (f: Function, ms: number) { return Global.setTimeout(f, ms) }
+const ClearTimeout = function (id: number) { return Global.clearTimeout(id) }
+const SetInterval = function (f: Function, ms: number) { return Global.setInterval(f, ms) }
+const ClearInterval = function (id: number) { return Global.clearInterval(id) }
 
 //Task
+let TaskCurrentId = 1
 const TaskRegistry: { [k: number]: any } = {}
-const TaskGenerateId = (function () {
-  let current = 1
-  return function () {
-    let returnValue = current
-    current += 1
-    return current
-  }
-}())
+const TaskGenerateId = function () {
+  let returnValue = TaskCurrentId
+  TaskCurrentId += 1
+  return TaskCurrentId
+}
 const TaskCreate = function (f: any): number {
   let id = TaskGenerateId()
   TaskRegistry[id] = f
