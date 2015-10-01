@@ -1,6 +1,6 @@
 import * as assertion from "./unit/assertion"
-import * as engine from "./unit/engine"
-import { IAssertionCallSite, Assertion } from "./unit/assertion"
+export { ITestRunContext, ITestEngine, ITest } from "./unit/engine"
+export { SUCCESS, FAILURE, ERROR, WARNING, IAssertion } from "./unit/assertion"
 
 export interface IStreamController<T> {
   desiredSize: number
@@ -9,10 +9,8 @@ export interface IStreamController<T> {
   error(e: any): void
 }
 
-export interface IAssertion extends assertion.IAssertion {}
-
 export interface ITestReport {
-  assertions: IAssertion[]
+  assertions: assertion.IAssertion[]
   startDate: Date
   elapsedMilliseconds: number
 }
@@ -20,14 +18,3 @@ export interface ITestReport {
 export interface IPrinter {
   print(reports: ITestReport[]): void
 }
-
-export interface ITestRunContext extends engine.ITestRunContext {}
-
-export interface ITestEngine extends engine.ITestEngine {}
-
-export interface ITest extends engine.ITest {}
-
-export const SUCCESS = assertion.SUCCESS
-export const FAILURE = assertion.FAILURE
-export const ERROR = assertion.ERROR
-export const WARNING = assertion.WARNING

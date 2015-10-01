@@ -13,7 +13,7 @@ interface ITestEngineEqual {
   equalsSimple(lhs: any, rhs: any): boolean
   equalsStrict(lhs: any, rhs: any): boolean
   equalsNear(lhs: any, rhs: any, epsilon: any): boolean
-  equalsProperties(lhs: any, rhs: any): boolean
+  equalsProperties(lhs: any, rhs: any, equalsFn: (a: any, b: any) => boolean): boolean
   equalsDeep(lhs: any, rhs: any): boolean
 }
 interface ITestEngineDump {
@@ -26,9 +26,9 @@ interface ITestEngineTime {
   now(): number
 }
 interface ITestEngineTimer {
-  setTimeout(f: any, ms: number): number
+  setTimeout(f: any, ms?: number): number
   clearTimeout(id: number): void
-  setInterval(f: any, ms: number): number
+  setInterval(f: any, ms?: number): number
   clearInterval(id: number): void
   setImmediate(f: any): number
   clearImmediate(id: number): void
@@ -80,6 +80,26 @@ const $stacktraceDefault: ITestEngineStacktrace = {
   callstack() { return stacktrace.create() }
 }
 const $timerDefault: ITestEngineTimer = timer
+
+
+class Context<T> {
+
+  static unit = new Context()
+  static create<T>(o: T): Context<T> & T {
+    return Context.unit.createChild(o)
+  }
+
+  createChild<U>(ext: U): Context<T & U> & T & U {
+    let returnValue: any = new Context()
+    for (let key of Object.keys(this)) {
+      returnValue[key] = this[key]
+    }
+    for (let key of Object.keys(ext)) {
+      returnValue[key] = ext[key]
+    }
+    return returnValue
+  }
+}
 
 export class Engine implements ITestEngine {
 
@@ -140,8 +160,8 @@ export class Engine implements ITestEngine {
     return this.$equal.equalsNear(o1, o2, epsilon)
   }
 
-  equalsProperties(a: any, b: any): boolean {
-    return this.$equal.equalsProperties(a, b)
+  equalsProperties(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
+    return this.$equal.equalsProperties(a, b, equalsFn)
   }
 
   equalsSame(a: any, b: any): boolean {
@@ -156,7 +176,7 @@ export class Engine implements ITestEngine {
     return this.$equal.equalsStrict(a, b)
   }
 
-  setTimeout(f: any, ms: number) {
+  setTimeout(f: any, ms?: number) {
     return this.$timer.setTimeout(f, ms)
   }
 
@@ -164,7 +184,7 @@ export class Engine implements ITestEngine {
     return this.$timer.clearTimeout(id)
   }
 
-  setInterval(f: any, ms: number) {
+  setInterval(f: any, ms?: number) {
     return this.$timer.setInterval(f, ms)
   }
 
@@ -183,6 +203,10 @@ export class Engine implements ITestEngine {
   run(context: ITestEngineRunContext) {
     let engine = this
     let test = context.getTest()
+    /*let timeoutId = this.setTimeout(() => {
+
+    })*/
+
     try {
       test.run({
         getTest() { return test },

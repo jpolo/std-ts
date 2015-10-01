@@ -2,12 +2,12 @@ import {
   SUCCESS, FAILURE, ERROR, WARNING,
   IAssertion, IPrinter, ITestReport
 } from "../../unit"
-import * as reflect from "../../reflect"
+import {
+  OwnKeys,
+  OwnKeysSorted,
+  ToString
+} from "../util"
 
-//ECMA like
-const OwnKeys = reflect.ownKeys;
-const OwnKeysSorted = function (o) { return OwnKeys(o).sort(); };
-const ToString = function (o) { return "" + o; };
 
 export class HTMLPrinter implements IPrinter {
 

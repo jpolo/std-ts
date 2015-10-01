@@ -2,7 +2,6 @@ import { ITestEngine, IPrinter, ITest, ITestReport, ITestRunContext, IAssertion 
 import { Engine, ITestEngineRunContext } from "./engine"
 
 //Constant
-const FLOAT_EPSILON = 1e-5;
 const $engineDefault = new Engine()
 
 export class Runner {
@@ -13,16 +12,8 @@ export class Runner {
   protected $engine: ITestEngine = $engineDefault;
 
   constructor(
-    private _printers: IPrinter[] = [],
-    deps?: {
-      $engine: ITestEngine
-    }
+    private _printers: IPrinter[] = []
   ) {
-    if (deps) {
-      if (deps.$engine !== undefined) {
-        this.$engine = deps.$engine;
-      }
-    }
   }
 
   config(options: {
@@ -37,9 +28,7 @@ export class Runner {
   /*
   printers(printers: IPrinter[]) {
     return new Runner(
-      this._printers.concat(printers), {
-        $engine: this.$engine
-      }
+      this._printers.concat(printers)
     );
   }
   */

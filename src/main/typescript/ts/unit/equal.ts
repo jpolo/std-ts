@@ -5,8 +5,8 @@ import {
   IsNumber,
   IsObject,
   SameValue,
-  ObjectKeys,
-  ObjectKeysSorted,
+  OwnKeys,
+  OwnKeysSorted,
   ToStringTag
 } from "./util"
 
@@ -74,10 +74,11 @@ export function equalsNear(a: any, b: any, epsilon: number): boolean {
  *
  * @param a left side parameter
  * @param b right side parameter
+ * @param equalsFn the property equality function
  * @return the property equality test
  */
-export function equalsProperties(a: any, b: any): boolean {
-  return equalsObject(a, b, equalsStrict)
+export function equalsProperties(a: any, b: any, equalsFn = equalsStrict): boolean {
+  return equalsObject(a, b, equalsFn)
 }
 
 /**
@@ -134,9 +135,9 @@ function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean)
   return returnValue
 }
 
-function equalsObject(a: any, b: any, equalFn: (av: any, bv: any) => boolean): boolean {
-  let akeys = ObjectKeysSorted(a)
-  let bkeys = ObjectKeysSorted(b)
+function equalsObject(a: any, b: any, equalsFn: (av: any, bv: any) => boolean): boolean {
+  let akeys = OwnKeysSorted(a)
+  let bkeys = OwnKeysSorted(b)
   let returnValue = false
   //Compare keys first to deep value
   if (equalsArray(akeys, bkeys, equalsStrict)) {
@@ -144,7 +145,7 @@ function equalsObject(a: any, b: any, equalFn: (av: any, bv: any) => boolean): b
     for (let i = 0, l = akeys.length; i < l; ++i) {
       let akey = akeys[i]
       let bkey = bkeys[i]
-      if (akey !== bkey || !equalFn(a[akey], b[bkey])) {
+      if (akey !== bkey || !equalsFn(a[akey], b[bkey])) {
         returnValue = false
         break
       }
@@ -153,12 +154,12 @@ function equalsObject(a: any, b: any, equalFn: (av: any, bv: any) => boolean): b
   return returnValue
 }
 
-function equalsMap(a: any, b: any, equalFn: (a: any, b: any) => boolean): boolean {
+function equalsMap(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
   console.warn("equalsMap() not implemented")
   return true
 }
 
-function equalsSet(a: any, b: any, equalFn: (a: any, b: any) => boolean): boolean {
+function equalsSet(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
   let returnValue = false
   function SetToArray(o): any[] {
     let a = []
@@ -169,12 +170,12 @@ function equalsSet(a: any, b: any, equalFn: (a: any, b: any) => boolean): boolea
   if (a.size() === b.size()) {
     let avalues = SetToArray(a)
     let bvalues = SetToArray(b)
-    returnValue = equalsArray(avalues, bvalues, equalFn)
+    returnValue = equalsArray(avalues, bvalues, equalsFn)
   }
   return returnValue
 }
 
-function equalsAny(a: any, b: any, equalFn: (a: any, b: any) => boolean) {
+function equalsAny(a: any, b: any, equalsFn: (a: any, b: any) => boolean) {
   if (!SameValue(a, b)) {
     let atag = ToStringTag(a)
     let btag = ToStringTag(b)
@@ -188,19 +189,19 @@ function equalsAny(a: any, b: any, equalFn: (a: any, b: any) => boolean) {
       case 'String':
         return (btag === atag) && (a == b)
       case 'Array':
-        return (btag === atag) && equalsArray(a, b, equalFn)
+        return (btag === atag) && equalsArray(a, b, equalsFn)
       case 'Date':
         return (btag === atag) && equalsDate(a, b)
       case 'RegExp':
         return (btag === atag) && equalsRegExp(a, b)
       case 'Map':
-        return (btag === atag) && equalsMap(a, b, equalFn)
+        return (btag === atag) && equalsMap(a, b, equalsFn)
       case 'Set':
-        return (btag === atag) && equalsSet(a, b, equalFn)
+        return (btag === atag) && equalsSet(a, b, equalsFn)
       case 'Object':
       case 'Function':
       default:
-        return equalsObject(a, b, equalFn)
+        return equalsObject(a, b, equalsFn)
     }
   }
   return true

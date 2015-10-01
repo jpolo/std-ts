@@ -18,14 +18,15 @@ export const DATE_MIN_MILLISECONDS = -DATE_MAX_MILLISECONDS
 export const EPSILON = 2.220446049250313e-16
 
 export const IsExtensible = Object.isExtensible || function (o: any) { return true }
-export const IsFinite = isFinite
+export const IsFinite = function (o) { return global.isFinite(o) }
 export const IsEmpty = function (o: any) { return o === undefined || o === null }
 export const IsNaN = function (o: any) { return o !== o }
 export const IsNumber = function (o: any) { return typeof o === 'number' }
+export const IsFunction = function (o): boolean { return typeof o === 'function'; }
 export const IsObject = function (o: any) { return o !== null && (typeof o == "object") }
 export const SameValue = Object['is'] || function (a: any, b: any) { return a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b) }
-export const ObjectKeys = Object.keys || function (o: any): string[] { let keys = []; for (let prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } } return keys; }
-export const ObjectKeysSorted = function (o: any) { return ObjectKeys(o).sort() }
+export const OwnKeys = Object.keys || function (o: any): string[] { let keys = []; for (let prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } } return keys; }
+export const OwnKeysSorted = function (o: any) { return OwnKeys(o).sort() }
 export const ObjectFreeze = Object.freeze || function <T>(o: T): T { return o }
 export const GetPrototypeOf = Object.getPrototypeOf || function (o: any) { return o.__proto__ }
 export const Type = function (o: any): string {

@@ -11,8 +11,8 @@ import {
   IsObject,
   GetPrototypeOf,
   SameValue,
-  ObjectKeys,
-  ObjectKeysSorted,
+  OwnKeys,
+  OwnKeysSorted,
   ObjectFreeze,
   ToString,
   ToStringTag,
@@ -351,18 +351,7 @@ export class Assert {
     let engine = this.__engine__()
     message = message || (this.__dump__(o1) + (' must have same properties as ') + this.__dump__(o2))
 
-    //TODO move to equal module
-    let keys1 = ObjectKeysSorted(o1)
-    let keys2 = ObjectKeysSorted(o2)
-    let isSuccess = true
-    for (let i = 0, l = keys1.length; i < l; ++i) {
-      let key1 = keys1[i]
-      let key2 = keys2[i]
-      if (key1 === key2 && !engine.equalsSame(o1[key1], o2[key2])) {
-        isSuccess = false
-        break
-      }
-    }
+    let isSuccess = engine.equalsProperties(o1, o2, engine.equalsSame)
     return this.__assert__(isSuccess, message, position)
   }
 
