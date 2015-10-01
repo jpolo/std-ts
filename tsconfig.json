@@ -53,6 +53,7 @@
         "./src/main/typescript/ts/storage/memory.ts",
         "./src/main/typescript/ts/storage/session.ts",
         "./src/main/typescript/ts/storage/storage.ts",
+        "./src/main/typescript/ts/time.ts",
         "./src/main/typescript/ts/timer.ts",
         "./src/main/typescript/ts/unit.ts",
         "./src/main/typescript/ts/unit/arbitrary.ts",

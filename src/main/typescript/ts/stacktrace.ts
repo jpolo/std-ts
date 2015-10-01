@@ -1,8 +1,7 @@
-const __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-const __isGlobal = function (o: any) { return o === __global; }
-const __isObject = function (o: any) { return o !== null && (typeof o === "object" || typeof o === "function"); }
-const __ostring = Object.prototype.toString;
-const __stringTag = function (o: any): string {
+const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
+const IsGlobal = function (o: any) { return o === Global; };
+const IsObject = function (o: any) { return o !== null && (typeof o === "object" || typeof o === "function"); }
+const ToStringTag = function (o: any): string {
   let s = '';
   if (o === null) {
     s = 'Null';
@@ -13,7 +12,7 @@ const __stringTag = function (o: any): string {
       case 'number': s = 'Number'; break;
       case 'string': s = 'String'; break;
       case 'undefined': s = 'Undefined'; break;
-      default: /*object*/ s = o.constructor.name || __ostring.call(o).slice(8, -1);
+      default: /*object*/ s = o.constructor.name || Object.prototype.toString.call(o).slice(8, -1);
     }
   }
   return s;
@@ -164,7 +163,7 @@ const ErrorParse = (function () {
     let result = new Array(argc)
     for (let i = 0; i < argc; ++i) {
       let arg = args[i]
-      switch(__stringTag(arg)) {
+      switch(ToStringTag(arg)) {
         case 'Undefined':
           result[i] = 'undefined'
           break
@@ -422,7 +421,7 @@ class CallSite implements ICallSite {
     let d = this[$$data];
     if (!d) {
       let parts = this._s.split("@", 2);
-      let receiver = __global;
+      let receiver = Global;
       let fun = null;
       let functionName = parts[0] || "";
       let fileName = "";
@@ -456,11 +455,11 @@ class CallSite implements ICallSite {
       //isNative = false;
 
       //isConstructor
-      let ctor = __isObject(receiver) ? receiver.constructor : null;
+      let ctor = IsObject(receiver) ? receiver.constructor : null;
       let isConstructor = !ctor ? false : fun === ctor;
 
       //isTopLevel
-      let isTopLevel = (receiver == null) || __isGlobal(receiver);
+      let isTopLevel = (receiver == null) || IsGlobal(receiver);
 
       d = this[$$data] = {
         _this: receiver,

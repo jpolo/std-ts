@@ -27,6 +27,12 @@ export const IsObject = function (o: any) { return o !== null && (typeof o == "o
 export const SameValue = Object['is'] || function (a: any, b: any) { return a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b) }
 export const OwnKeys = Object.keys || function (o: any): string[] { let keys = []; for (let prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } } return keys; }
 export const OwnKeysSorted = function (o: any) { return OwnKeys(o).sort() }
+export const ObjectAssign = function <T, U>(o: T, ext: U): T & U {
+  for (let key of OwnKeys(ext)) {
+    o[key] = ext[key]
+  }
+  return <any>o
+}
 export const ObjectFreeze = Object.freeze || function <T>(o: T): T { return o }
 export const GetPrototypeOf = Object.getPrototypeOf || function (o: any) { return o.__proto__ }
 export const Type = function (o: any): string {

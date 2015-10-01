@@ -1,11 +1,11 @@
 import { IInspector, Inspector } from "../inspect"
 import * as equal from "./equal"
-import { Now } from "./util"
 import * as stacktrace from "../stacktrace"
+import * as time from "../time"
 import * as timer from "../timer"
 import { IAssertion, IAssertionCallSite } from "./assertion"
+import { IsFinite, ObjectAssign } from "./util"
 
-//Util
 
 //Service
 interface ITestEngineEqual {
@@ -22,17 +22,8 @@ interface ITestEngineDump {
 interface ITestEngineStacktrace {
   callstack(): IAssertionCallSite[]
 }
-interface ITestEngineTime {
-  now(): number
-}
-interface ITestEngineTimer {
-  setTimeout(f: any, ms?: number): number
-  clearTimeout(id: number): void
-  setInterval(f: any, ms?: number): number
-  clearInterval(id: number): void
-  setImmediate(f: any): number
-  clearImmediate(id: number): void
-}
+interface ITestEngineTime extends time.ITimeModule {}
+interface ITestEngineTimer extends timer.ITimerModule {}
 interface ITestEngineRun {
   run(context: ITestEngineRunContext)
 }
@@ -73,9 +64,7 @@ const $dumpDefault: ITestEngineDump = (function () {
     }
   }
 }())
-const $timeDefault: ITestEngineTime = {
-  now: Now
-}
+const $timeDefault: ITestEngineTime = time
 const $stacktraceDefault: ITestEngineStacktrace = {
   callstack() { return stacktrace.create() }
 }
@@ -91,12 +80,7 @@ class Context<T> {
 
   createChild<U>(ext: U): Context<T & U> & T & U {
     let returnValue: any = new Context()
-    for (let key of Object.keys(this)) {
-      returnValue[key] = this[key]
-    }
-    for (let key of Object.keys(ext)) {
-      returnValue[key] = ext[key]
-    }
+    ObjectAssign(ObjectAssign(returnValue, this), ext)
     return returnValue
   }
 }
@@ -112,10 +96,10 @@ export class Engine implements ITestEngine {
 
   constructor(
     deps?: {
-      $equal?: ITestEngineEqual
       $dump?: ITestEngineDump
-      $time?: ITestEngineTime
+      $equal?: ITestEngineEqual
       $stacktrace?: ITestEngineStacktrace
+      $time?: ITestEngineTime
       $timer?: ITestEngineTimer
     }
   ) {
@@ -203,20 +187,51 @@ export class Engine implements ITestEngine {
   run(context: ITestEngineRunContext) {
     let engine = this
     let test = context.getTest()
-    /*let timeoutId = this.setTimeout(() => {
+    let timeoutMs = context.getTimeout()
+    let opened = false
+    let timerId: number = null
+    let stream = {
+      getTest() { return test },
+      getTimeout() { return context.getTimeout() },
+      getEngine() { return engine },
+      onStart() {
+        if (!opened) {
+          opened = true
+          if (IsFinite(timeoutMs)) {
+            timerId = engine.setTimeout(() => {
+              timerId = null
+              stream.onError(new Error("No test completion after " + timeoutMs + "ms"))
+              stream.onEnd()
+            }, timeoutMs)
+          }
+          context.onStart()
+        }
+      },
+      onAssertion(a: IAssertion) {
+        if (opened) {
+          context.onAssertion(a)
+        }
+      },
+      onError(e: any) {
+        if (opened) {
+          context.onError(e)
+        }
+      },
+      onEnd() {
+        if (opened) {
+          opened = false
+          if (timerId) {
+            engine.clearTimeout(timerId)
+            timerId = null
+          }
+          context.onEnd()
+        }
+      }
+    }
 
-    })*/
 
     try {
-      test.run({
-        getTest() { return test },
-        getTimeout() { return context.getTimeout() },
-        getEngine() { return engine },
-        onStart() { context.onStart() },
-        onAssertion(a: IAssertion) { context.onAssertion(a) },
-        onError(e: any) { context.onError(e) },
-        onEnd() { context.onEnd() }
-      })
+      test.run(stream)
     } catch (e) {
       context.onError(e)
       context.onEnd()

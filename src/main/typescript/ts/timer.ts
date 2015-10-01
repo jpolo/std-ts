@@ -2,7 +2,6 @@
 const Global: any = typeof window !== "undefined" ? window : (function() { return this }())
 //const Process = Global.process
 //const IsNodeJS = {}.toString.call(Process) === "[object process]"
-const IsString = function (o: any): boolean { return typeof o === "string" }
 const SetTimeout = function (f: Function, ms: number) { return Global.setTimeout(f, ms) }
 const ClearTimeout = function (id: number) { return Global.clearTimeout(id) }
 const SetInterval = function (f: Function, ms: number) { return Global.setInterval(f, ms) }
@@ -41,7 +40,7 @@ const SetImmediate: (f: any) => number =
       let { source, data } = event
       if (
         source === Global &&
-        IsString(data) &&
+        typeof data === "string" &&
         data.indexOf(PREFIX) === 0
       ) {
         TaskRun(+data.slice(PREFIX_LENGTH))
@@ -67,6 +66,16 @@ const ClearImmediate =
   Global.postMessage ? function clearImmediate(id: number) { TaskRemove(id) } :
   function clearImmediate(id: number): void { return ClearTimeout(id) }
 
+
+export interface ITimerModule {
+  setTimeout: typeof setTimeout
+  clearTimeout: typeof clearTimeout
+  setInterval: typeof setInterval
+  clearInterval: typeof clearInterval
+  setImmediate: typeof setImmediate
+  clearImmediate: typeof clearImmediate
+}
+
 /**
  * Calls a function ```f(...args)``` after an undetermined delay
  *
@@ -83,7 +92,7 @@ export function setTimeout<A, B, C, D>(fn: (a: A, b: B, c: C, d: D) => void, ms:
 export function setTimeout<A, B, C>(fn: (a: A, b: B, c: C) => void, ms: number, a: A, b: B, c: C): number
 export function setTimeout<A, B>(fn: (a: A, b: B) => void, ms: number, a: A, b: B): number
 export function setTimeout<A>(fn: (a: A) => void, ms: number, a: A): number
-export function setTimeout<A>(fn: () => void, ms: number): number
+export function setTimeout<A>(fn: () => void, ms?: number): number
 export function setTimeout(fn: Function, ms: number = 0, ...args: any[]): number {
   return SetTimeout(args.length === 0 ? fn : () => { fn.apply(null, args) }, ms)
 }

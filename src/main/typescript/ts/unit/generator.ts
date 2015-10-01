@@ -1,5 +1,3 @@
-import { IIterator, IIteratorResult, Iterator } from "../iterator"
-
 //Constant
 const SIZE = 100
 const LN2 = Math.log(2)
@@ -7,9 +5,7 @@ const LN2 = Math.log(2)
 const Floor = Math.floor
 const Round = Math.round
 const Log = Math.log
-const Log2 = function (n: number): number {
-  return Log(n) / LN2
-}
+const Log2 = function (n: number): number { return Log(n) / LN2 }
 const genSize = GeneratorCreate(function (params: Params) {
   return ParamsRandomInt(params, 0, ParamsSize(params))
 })
@@ -58,7 +54,7 @@ function ParamsSize(p: Params): number {
   return r >= 0 ? r : 0
 }
 
-function IsGenerator(o: any): boolean {
+function IsIGenerator(o: any): boolean {
   return typeof o === "function" && typeof o.next === "function"
 }
 
@@ -87,7 +83,7 @@ function GeneratorCreate<Result>(f: (params: Params) => Result): IGenerator<Resu
 function GeneratorFrom<T>(o: IGenerator<T>): IGenerator<T>
 function GeneratorFrom<T>(o: T): IGenerator<T>
 function GeneratorFrom(o: any): IGenerator<any> {
-  return IsGenerator(o) ? o : GeneratorCreate(function (params: Params) {
+  return IsIGenerator(o) ? o : GeneratorCreate(function (params: Params) {
     return o
   })
 }
