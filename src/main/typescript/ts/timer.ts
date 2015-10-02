@@ -63,8 +63,8 @@ const SetImmediate: (f: any) => number =
   function setImmediate(f: any): number { return SetTimeout(f, 0) }
 const ClearImmediate =
   Global.clearImmediate ? Global.clearImmediate :
-  Global.postMessage ? function clearImmediate(id: number) { TaskRemove(id) } :
-  function clearImmediate(id: number): void { return ClearTimeout(id) }
+  Global.postMessage ? function (id: number) { TaskRemove(id) } :
+  function (id: number): void { return ClearTimeout(id) }
 
 
 export interface ITimerModule {
