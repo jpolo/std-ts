@@ -1,34 +1,33 @@
 //Util
-const __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-const __sym: (o: any) => any = __global.Symbol || function (o) { return "@@" + o; };
-const __descriptor = { value: null, enumerable: false, configurable: true, writable: true };
-const __def = Object.defineProperty || function (o, k, d) { o[k] = d.value; };
-const __set = function (o, k, v) {
-  __descriptor.value = v
-  __def(o, k, __descriptor);
-};
+const Global: any = typeof window !== "undefined" ? window : (function() { return this; }())
+const SymbolCreate: (o: any) => any = Global.Symbol || function (o) { return "@@" + o; }
+const DescriptorDefault = { value: null, enumerable: false, configurable: true, writable: true }
+const DefineProperty = Object.defineProperty || function (o: any, k: string, d: PropertyDescriptor) { o[k] = d.value }
+const Put = function (o: any, k: string, v: any) {
+  DescriptorDefault.value = v
+  DefineProperty(o, k, DescriptorDefault)
+}
 
-
-const $$dispatcher = __sym("signal");
-const __signalDispatcher = function (o: any, create: boolean): { [k: string]: ISignalBindingQueue } {
-  var dispatcher = o[$$dispatcher];
+const $$dispatcher = SymbolCreate("signal")
+const GetSignalDispatcher = function (o: any, create: boolean): ISignalDispatcher {
+  let dispatcher = o[$$dispatcher]
   if (!dispatcher && create) {
-    dispatcher = {};
-    __set(o, $$dispatcher, dispatcher);
+    dispatcher = {}
+    Put(o, $$dispatcher, dispatcher)
   }
-  return dispatcher;
+  return dispatcher
 };
-const __signalKey = function <T>(sig: ISignal<T>): string {
+const SignalKey = function <T>(sig: ISignal<T>): string {
   return <string> sig;
 };
-const __signalBindingsFor = function <T>(o: any, sig: ISignal<T>): ISignalBindingQueue {
-  var dispatcher = __signalDispatcher(o, false);
-  return dispatcher ? dispatcher[__signalKey(sig)] : null;
-}
-const __queuePush = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
-  var head = q.head;
+const SignalBindingsFor = function <T>(o: any, sig: ISignal<T>): ISignalBindingQueue {
+  let dispatcher = GetSignalDispatcher(o, false);
+  return dispatcher ? dispatcher[SignalKey(sig)] : null;
+};
+const SignalBindingsPush = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
+  let head = q.head;
   if (head) {
-    var last = head.prev;
+    let last = head.prev;
     //b as last next element
     last.next = b;
     b.prev = last;
@@ -41,25 +40,28 @@ const __queuePush = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
   }
   q.length++;
 };
-const __queueRemove = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
-  var head = q.head;
-  var prev = b.prev;
-  var next = b.next;
-  
+const SignalBindingsRemove = function (q: ISignalBindingQueue, b: ISignalBinding<any>) {
+  let head = q.head;
+  let prev = b.prev;
+  let next = b.next;
+
   prev.next = next;
   next.prev = prev;
-  
+
   if (head === b) {
     q.head = next === head ? null : next;
   }
   q.length--;
 };
 
-
 export interface ISignal<T> extends String {}
 
 export interface ISignalHandler<T> {
   (v: T): void
+}
+
+interface ISignalDispatcher {
+  [k: string]: ISignalBindingQueue
 }
 
 interface ISignalBindingQueue {
@@ -87,15 +89,15 @@ export function has<T>(o: any, sig: ISignal<T>): boolean {
 }
 
 export function count<T>(o: any, sig: ISignal<T>): number {
-  var bindings = __signalBindingsFor(o, sig);
+  let bindings = SignalBindingsFor(o, sig);
   return bindings ? bindings.length : 0;
 }
 
 export function connect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>, once = false) {
-  var dispatcher = __signalDispatcher(o, true);
-  var key = __signalKey(sig);
-  var bindings = dispatcher[key];
-  var binding = { f: f, once: once, next: null, prev: null };
+  let dispatcher = GetSignalDispatcher(o, true);
+  let key = SignalKey(sig);
+  let bindings = dispatcher[key];
+  let binding: ISignalBinding<T> = { f: f, once: once, next: null, prev: null };
   if (!bindings) {
     dispatcher[key] = {
       head: binding,
@@ -104,19 +106,19 @@ export function connect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>, once =
     binding.prev = binding;
     binding.next = binding;
   } else {
-    __queuePush(bindings, binding);
+    SignalBindingsPush(bindings, binding);
   }
 }
 
 export function disconnect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>) {
-  var bindings = __signalBindingsFor(o, sig);
+  let bindings = SignalBindingsFor(o, sig);
   if (bindings) {
-    var head = bindings.head;
+    let head = bindings.head;
     if (head) {
-      var binding = head;
+      let binding = head;
       do {
         if (binding.f === f) {
-          __queueRemove(bindings, binding);
+          SignalBindingsRemove(bindings, binding);
           head = bindings.head;
           if (!head) {
             break;
@@ -129,15 +131,15 @@ export function disconnect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>) {
 }
 
 export function emit<T>(o: any, sig: ISignal<T>, v: T) {
-  var bindings = __signalBindingsFor(o, sig);
+  let bindings = SignalBindingsFor(o, sig);
   if (bindings) {
-    var head = bindings.head;
+    let head = bindings.head;
     if (head) {
-      var binding = head;
+      let binding = head;
       do {
         binding.f(v);
         if (binding.once) {
-          __queueRemove(bindings, binding);
+          SignalBindingsRemove(bindings, binding);
           head = bindings.head;
           if (!head) {
             break;

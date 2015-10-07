@@ -192,7 +192,7 @@ export class Engine implements ITestEngine {
     let timerId: number = null
     let stream = {
       getTest() { return test },
-      getTimeout() { return context.getTimeout() },
+      getTimeout() { return timeoutMs },
       getEngine() { return engine },
       onStart() {
         if (!opened) {
