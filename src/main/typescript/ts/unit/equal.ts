@@ -29,14 +29,7 @@ export function equalsSame(a: any, b: any): boolean {
  * @return the strict equality result
  */
 export function equalsSimple(a: any, b: any): boolean {
-  return (
-    SameValue(a, b) ||
-    (
-      !IsEmpty(a) && a.equals ? a.equals(b) :
-      !IsEmpty(b) && b.equals ? b.equals(a) :
-      a == b
-    )
-  )
+  return a == b
 }
 
 /**

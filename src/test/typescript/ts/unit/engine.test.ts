@@ -44,7 +44,7 @@ export default test("ts/unit/engine.Engine", (assert) => {
       return assert(!eq(a, b), message)
     }
     assert_eq(1, 1)
-    assert_eq(undefined, false)
+    assert_neq(undefined, false)
     assert_eq(undefined, null)
     assert_eq(false, 0)
     assert_neq(NaN, NaN)

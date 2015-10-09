@@ -15,6 +15,6 @@ export interface ITestReport {
   elapsedMilliseconds: number
 }
 
-export interface IPrinter {
+export interface IReporter {
   print(reports: ITestReport[]): void
 }

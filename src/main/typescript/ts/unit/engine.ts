@@ -188,24 +188,14 @@ export class Engine implements ITestEngine {
     let engine = this
     let test = context.getTest()
     let timeoutMs = context.getTimeout()
-    let opened = false
+    let opened = true
     let timerId: number = null
     let stream = {
       getTest() { return test },
       getTimeout() { return timeoutMs },
       getEngine() { return engine },
       onStart() {
-        if (!opened) {
-          opened = true
-          if (IsFinite(timeoutMs)) {
-            timerId = engine.setTimeout(() => {
-              timerId = null
-              stream.onError(new Error("No test completion after " + timeoutMs + "ms"))
-              stream.onEnd()
-            }, timeoutMs)
-          }
-          context.onStart()
-        }
+        context.onStart()
       },
       onAssertion(a: IAssertion) {
         if (opened) {
@@ -227,6 +217,15 @@ export class Engine implements ITestEngine {
           context.onEnd()
         }
       }
+    }
+
+    //timeout
+    if (IsFinite(timeoutMs)) {
+      timerId = engine.setTimeout(() => {
+        timerId = null
+        stream.onError(new Error("No test completion after " + timeoutMs + "ms"))
+        stream.onEnd()
+      }, timeoutMs)
     }
 
 

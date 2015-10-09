@@ -1,6 +1,6 @@
 import {
   SUCCESS, FAILURE, ERROR, WARNING,
-  IAssertion, IPrinter, ITestReport
+  IAssertion, IReporter, ITestReport
 } from "../../unit"
 import {
   OwnKeys,
@@ -9,7 +9,7 @@ import {
 } from "../util"
 
 
-export class HTMLPrinter implements IPrinter {
+export class HTMLReporter implements IReporter {
 
   print(reports: ITestReport[]) {
     let startTime: number = null

@@ -1,4 +1,4 @@
-import { ITestEngine, IPrinter, ITest, ITestReport, ITestRunContext, IAssertion } from "../unit"
+import { ITestEngine, IReporter, ITest, ITestReport, ITestRunContext, IAssertion } from "../unit"
 import { Engine, ITestEngineRunContext } from "./engine"
 
 //Constant
@@ -12,7 +12,7 @@ export class Runner {
   protected $engine: ITestEngine = $engineDefault;
 
   constructor(
-    private _printers: IPrinter[] = []
+    private _printers: IReporter[] = []
   ) {
   }
 
