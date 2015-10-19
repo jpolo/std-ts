@@ -15,7 +15,7 @@ interface ISignalBinding<T> {
   next: ISignalBinding<any>//next
 }
 
-export interface ISignal<T> extends String {}
+export interface ISignalSymbol<T> extends String {}
 
 export interface ISignalHandler<T> {
   (v: T): void
@@ -49,9 +49,9 @@ function GetSignalDispatcher(o: any, create: boolean): ISignalDispatcher {
   return dispatcher
 }
 
-function GetSignalBindingQueue<T>(o: any, sig: ISignal<T>, create: boolean): ISignalBindingQueue<T> {
+function GetSignalBindingQueue<T>(o: any, s: ISignalSymbol<T>, create: boolean): ISignalBindingQueue<T> {
   let dispatcher = GetSignalDispatcher(o, create)
-  let key = <string> sig
+  let key = <string> s
   let queue = dispatcher ? dispatcher[key] : null
   if (!queue && create) {
     queue = dispatcher[key] = {
@@ -109,24 +109,24 @@ function SignalBindingQueueFind<T>(q: ISignalBindingQueue<T>, f: ISignalHandler<
   return returnValue
 }
 
-export function signal<T>(s: string): ISignal<T> {
+export function signal<T>(s: string): ISignalSymbol<T> {
   if (s === undefined || s === null || s.length === 0) {
     throw TypeError("signal must not be a non-empty string.");
   }
   return s;
 }
 
-export function has<T>(o: any, sig: ISignal<T>): boolean {
-  return count(o, sig) !== 0
+export function has<T>(o: any, s: ISignalSymbol<T>): boolean {
+  return count(o, s) !== 0
 }
 
-export function count<T>(o: any, sig: ISignal<T>): number {
-  let bindings = GetSignalBindingQueue(o, sig, false)
+export function count<T>(o: any, s: ISignalSymbol<T>): number {
+  let bindings = GetSignalBindingQueue(o, s, false)
   return bindings ? bindings.length : 0
 }
 
-export function connect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>, once = false) {
-  let bindings = GetSignalBindingQueue(o, sig, true)
+export function connect<T>(o: any, s: ISignalSymbol<T>, f: ISignalHandler<T>, once = false): void {
+  let bindings = GetSignalBindingQueue(o, s, true)
   let binding: ISignalBinding<T> = SignalBindingQueueFind(bindings, f, once)
   if (!binding) {
     binding = { f: f, once: once, next: null, prev: null }
@@ -134,8 +134,8 @@ export function connect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>, once =
   }
 }
 
-export function disconnect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>, once = false) {
-  let bindings = GetSignalBindingQueue(o, sig, false)
+export function disconnect<T>(o: any, s: ISignalSymbol<T>, f: ISignalHandler<T>, once = false): void {
+  let bindings = GetSignalBindingQueue(o, s, false)
   if (bindings) {
     let binding = SignalBindingQueueFind(bindings, f, once)
     if (binding) {
@@ -144,8 +144,8 @@ export function disconnect<T>(o: any, sig: ISignal<T>, f: ISignalHandler<T>, onc
   }
 }
 
-export function emit<T>(o: any, sig: ISignal<T>, v: T) {
-  let bindings = GetSignalBindingQueue(o, sig, false)
+export function emit<T>(o: any, s: ISignalSymbol<T>, v: T): void {
+  let bindings = GetSignalBindingQueue(o, s, false)
   if (bindings) {
     let head = bindings.head
     if (head) {

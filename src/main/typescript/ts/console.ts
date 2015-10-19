@@ -1,77 +1,58 @@
-//Constant
-var ES_COMPAT = 3;
-
 //Util
-var __void = function () {};
-var __now = Date.now;
-var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-var __console: Console = __global.console ? __global.console : null;
-var __forEach = function <T>(a: T[], f: (v: T, i?: number, a?: T[]) => void) {
+const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
+const GlobalConsole: Console = Global.console ? Global.console : <any>{};
+function Void() {}
+function Now() { return Date.now ? Date.now() : (new Date()).getTime() }
+function Each<T>(a: T[], f: (v: T, i?: number, a?: T[]) => void) {
   for (var i = 0, l = a.length; i < l; ++i) {
     f(a[i], i, a);
   }
 };
 
 //COMPAT
-if (ES_COMPAT <= 3) {
-  __now = __now || function () { return new Date().getTime(); };
-  __console = __console || <any>{};
-  
-  if (!__console.log) __console.log = __void;
+if (!Global.console) {
+
+  if (!GlobalConsole.log) {
+    GlobalConsole.log = Void;
+  }
 
   // Implement other log levels to console.log if missing
-  __forEach([
-    "debug", 
-    "info", 
-    "warn", 
-    "error",
-    
-    "dir",
-    "dirxml"
-  ], (v) => {
-    if (!__console[v]) {
-      __console[v] = __console.log;
+  Each([ "debug", "info", "warn", "error", "dir", "dirxml" ], (v) => {
+    if (!GlobalConsole[v]) {
+      GlobalConsole[v] = GlobalConsole.log;
     }
   });
 
   // Implement console.assert if missing
-  if (!__console.assert) {
-    __console.assert = function (expr, ...args: any[]) {
+  if (!GlobalConsole.assert) {
+    GlobalConsole.assert = function assert(expr, ...args: any[]) {
       if (!expr) {
-        __console.error.apply(__console, [ "Assertion failed:" ].concat(args));
+        GlobalConsole.error.apply(GlobalConsole, [ "Assertion failed:" ].concat(args));
       }
     };
   }
-  
+
   // Implement console.time and console.timeEnd if one of them is missing
-  if (!__console.time || !__console.timeEnd) {
-    var timers = {};
-    __console.time = function(id) {
-      timers[id] = __now();
+  if (!GlobalConsole.time || !GlobalConsole.timeEnd) {
+    let timers = {};
+    GlobalConsole.time = function time(id) {
+      timers[id] = Now();
     };
-    __console.timeEnd = function(id) {
+    GlobalConsole.timeEnd = function timeEnd(id) {
       var start = timers[id];
       if (start) {
-        __console.log(id + ": " + (__now() - start) + "ms");
+        GlobalConsole.log(id + ": " + (Now() - start) + "ms");
         delete timers[id];
       }
     };
   }
-  
+
   // Dummy implementations of other console features to prevent error messages
   // in browsers not supporting it.
-  __forEach([
-    "clear", 
-    "trace", 
-    "group", 
-    "groupEnd", 
-    "profile",
-    "profileEnd",
-    "count"
-  ], (v, i) => {
-    if (!__console[v]) {
-      __console[v] = __void;
+  Each(["clear", "trace", "group", "groupEnd", "profile", "profileEnd", "count"], (v, i) => {
+    if (!GlobalConsole[v]) {
+      GlobalConsole[v] = Void;
     }
   });
 }
-export default __console;
+export default GlobalConsole;
