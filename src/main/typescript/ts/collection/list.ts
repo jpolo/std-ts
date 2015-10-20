@@ -136,7 +136,7 @@ function Identity<T>(o: T): T {
   return o
 }
 
-export class List<T> {
+export default class List<T> {
 
   static from<A>(list: List<A>): List<A>
   static from<A, B>(list: List<A>, mapFn: (v: A) => B, thisp?: any): List<B>

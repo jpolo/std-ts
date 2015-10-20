@@ -1,3 +1,3 @@
-import listSuite from "./list.test"
+import listSuite from "./List.test"
 
 export default listSuite;
