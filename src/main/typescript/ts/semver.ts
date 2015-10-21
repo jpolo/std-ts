@@ -3,7 +3,7 @@ import { IHash, hashString } from "./hash"
 //reference: https://github.com/npm/node-semver/blob/master/semver.js
 
 //Util
-const ToString = function (o: any): string { return "" + o; };
+function ToString(o: any): string { return "" + o; };
 
 export interface ISemVer {
   major: number;

@@ -12,8 +12,8 @@ export interface INode<T> {
 }
 
 //ECMA like
-const IsArray = Array.isArray || function (o: any): boolean {
-  return Object.prototype.toString.call(o) === "[object Array]"
+function IsArray(o: any): boolean {
+  return Array.isArray ? Array.isArray (o) : Object.prototype.toString.call(o) === "[object Array]"
 }
 
 function IsList(o: any): boolean {
@@ -70,42 +70,11 @@ function ListEnqueueIterator<A, B>(list: IListData<B>, iter: IIterator<A>, f: (v
   list._length += length
 }
 
-function ListEnqueueArray<A, B>(list: IListData<B>, values: A[], mapFn: (v: A) => B): void {
-  let head = list._head
-  let valuec = values.length
-  let node: INode<B>
-  let lastNode: INode<B>
-  let length = 0
-
-  //length >= 1
-  if (valuec >= 1) {
-    node = NodeCreate(mapFn(values[0]))
-    lastNode = node
-    if (!head) {
-      head = list._head = node.previous = node.next = node
-    } else {
-      ListConnect(list, head.previous, node)
-    }
-    length += 1
-  }
-
-  //length >= 2
-  for (let $index = 1; $index < valuec; $index++) {
-    node = NodeCreate(mapFn(values[$index]))
-    ListConnect(list, lastNode, node)
-    lastNode = node
-    length += 1
-  }
-
-  ListConnect(list, lastNode, head)
-  list._length += length
-}
-
-function ListEnqueue<A, B>(list: IListData<B>, values: A[], f: (v: A) => B): void
-function ListEnqueue<A, B>(list: IListData<B>, values: List<A>, f: (v: A) => B): void
-function ListEnqueue<A, B>(list: IListData<B>, values: any, f: (v: A) => B): void  {
+function ListEnqueue<A, B>(list: IListData<B>, values: A[], mapFn: (v: A) => B): void
+function ListEnqueue<A, B>(list: IListData<B>, values: List<A>, mapFn: (v: A) => B): void
+function ListEnqueue<A, B>(list: IListData<B>, values: any, mapFn: (v: A) => B): void  {
   if (IsList(values)) {
-    ListEnqueueIterator(list, new ListIterator<A>(values), f)
+    ListEnqueueIterator(list, new ListIterator<A>(values), mapFn)
   } else if (IsArray(values)) {
     let index = 0
     let length = values.length
@@ -115,7 +84,7 @@ function ListEnqueue<A, B>(list: IListData<B>, values: any, f: (v: A) => B): voi
           index < length ? { done: false, value: values[index] } : { done: true, value: undefined }
         )
       }
-    }, f)
+    }, mapFn)
   }
 }
 
@@ -152,7 +121,7 @@ export default class List<T> {
 
   static of<S>(...values: S[]): List<S> {
     let list = new List<S>()
-    ListEnqueueArray(ListData(list), values, Identity)
+    ListEnqueue(ListData(list), values, Identity)
     return list
   }
 
@@ -200,7 +169,7 @@ export default class List<T> {
 
   push(...values: T[]): number {
     let data = ListData(this)
-    ListEnqueueArray(data, values, Identity)
+    ListEnqueue(data, values, Identity)
     return data._length
   }
 

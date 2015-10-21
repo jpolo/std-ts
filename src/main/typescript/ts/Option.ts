@@ -19,8 +19,7 @@ function OptionGet<T>(o: Option<T>): T {
   return o[0];
 }
 
-//Compat
-export class Option<T> {
+export default class Option<T> {
 
   static empty(): Option<any> {
     return __none;

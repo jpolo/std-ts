@@ -1,9 +1,9 @@
 import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit"
 import List from "../../../../main/typescript/ts/collection/List"
 
-export default suite("ts/collection/list.List", (self) => {
+export default suite("ts/collection/List", (self) => {
 
-  var l: List<string>
+  let l: List<string>
 
   self.setUp = () => {
     l = new List<string>()
