@@ -1,8 +1,23 @@
 //Util
-const __ostring = {}.toString;
-const __isArray = Array.isArray || function (o) { return __ostring.call(o) === "[object Array]"; };
-const __isString = function (o: any): boolean { return typeof o === 'string'; }
-const __keys = Object.keys || function (o: any): string[] { let ks = []; for (let k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+function IsArray(o: any) {
+  return Array.isArray ?
+    Array.isArray(o) :
+    Object.prototype.toString.call(o) === "[object Array]"
+}
+function IsString(o: any) { return typeof o === "string" }
+function OwnKeys(o: any) {
+  let ks: string[]
+  if (Object.keys) {
+    ks = Object.keys(o)
+  } else {
+    for (let k in o) {
+      if (o.hasOwnProperty(k)) {
+        ks.push(k)
+      }
+    }
+  }
+  return ks
+}
 const __strIsEmpty = function (o: string) { return !o || o.length === 0; };
 const reParser = new RegExp(
   '^' +
@@ -21,7 +36,7 @@ const reParser = new RegExp(
   '(?:\\?([^#]*))?' +                   // query
   '(?:#(.*))?' +                        // fragment
   '$');
-  
+
 export function parse(s: string): URI {
   return URI.parse(s);
 }
@@ -49,11 +64,11 @@ export class URI implements IURI {
     if (o) {
       if (o instanceof URI) {
         returnValue = o;
-      } else if (__isString(o)) {
+      } else if (IsString(o)) {
         returnValue = URI.fromString(o);
       } else if ('toURI' in o) {
         returnValue = URI.cast(o.toURI());
-      } else if (__isArray(o)) {
+      } else if (IsArray(o)) {
         returnValue = URI.fromArray(o);
       } else {
         returnValue = URI.fromObject(o);
@@ -303,7 +318,7 @@ export function decodeComponent(s: string): string {
 
 function encodeSpecialChars(unescapedPart: string, extra) {
   return (
-    __isString(unescapedPart) ?
+    IsString(unescapedPart) ?
     encodeURI(unescapedPart).replace(extra, encodeChar) :
     null
   )
@@ -317,7 +332,7 @@ function encodeChar(ch: string): string {
 export function encodeQuery(qs: IQueryString): string {
   let s = null, okeys, i, l, key, val;
   if (qs) {
-    okeys = __keys(qs);
+    okeys = OwnKeys(qs);
 
     for (i = 0, l = okeys.length; i < l; ++i) {
       if (i === 0) {
@@ -328,7 +343,7 @@ export function encodeQuery(qs: IQueryString): string {
       key = okeys[i];
       val = qs[key];
 
-      if (__isArray(val) && !__isString(val)) {
+      if (IsArray(val) && !IsString(val)) {
         for (i = 0, l = val.length; i < l; ++i) {
           if (s.length > 0) {
             s += '&';
@@ -369,7 +384,7 @@ export function decodeQuery(s: string): IQueryString {
       val = decodeComponent(val);
       qsval = qs[key];
       if (qsval) {
-        if (!__isArray(qsval)) {
+        if (!IsArray(qsval)) {
           qs[key] = [qsval, val];
         } else {
           qs[key].push(val);
@@ -387,8 +402,8 @@ export function decodeQuery(s: string): IQueryString {
 function _queryEquals(l: any, r: any): boolean {
   let returnValue = true;
   if (l !== r) {
-    let lkeys = __keys(l);
-    let rkeys = __keys(r);
+    let lkeys = OwnKeys(l);
+    let rkeys = OwnKeys(r);
     let lkeyc: number = lkeys.length;
     let rkeyc: number = rkeys.length;
 

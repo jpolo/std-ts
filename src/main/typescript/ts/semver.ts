@@ -3,7 +3,9 @@ import { IHash, hashString } from "./hash"
 //reference: https://github.com/npm/node-semver/blob/master/semver.js
 
 //Util
-function ToString(o: any): string { return "" + o; };
+function Has(o: any, prop: string) { return (prop in o) }
+function ToUint32(o: any) { return o >>>0 }
+function ToString(o: any): string { return "" + o }
 
 export interface ISemVer {
   major: number;
@@ -16,7 +18,7 @@ export interface ISemVer {
 export class SemVer implements ISemVer, IHash {
 
   static cast(o: any): SemVer {
-    var returnValue: SemVer = null;
+    let returnValue: SemVer = null;
     if (o) {
       if (o instanceof SemVer) {
         returnValue = o;
@@ -41,9 +43,9 @@ export class SemVer implements ISemVer, IHash {
     return (o && (
       o instanceof SemVer ||
       (
-        ("major" in o) &&
-        ("minor" in o) &&
-        ("patch" in o)
+        Has(o, "major") &&
+        Has(o, "minor") &&
+        Has(o, "patch")
       )
     ));
   }
@@ -105,21 +107,11 @@ export class SemVer implements ISemVer, IHash {
     prerelease?: Array<number|string>,
     build?: Array<string>
   ) {
-    this.major = major >>> 0;
-    this.minor = minor >>> 0;
-    this.patch = patch >>> 0;
+    this.major = ToUint32(major);
+    this.minor = ToUint32(minor);
+    this.patch = ToUint32(patch);
     this.prerelease = prerelease ? prerelease.slice() : [];//copy
     this.build = build ? build.slice() : [];//copy
-  }
-
-  clone(): SemVer {
-    return new SemVer(
-      this.major,
-      this.minor,
-      this.patch,
-      this.prerelease,
-      this.build
-    );
   }
 
   compare(o: ISemVer): number {
@@ -141,18 +133,15 @@ export class SemVer implements ISemVer, IHash {
   }
 
   inspect() {
-    var s = 'SemVer { "';
-    s += ToString(this);
-    s += '" }';
-    return s;
+    return 'SemVer { "' +  ToString(this) + '" }'
   }
 
   toJSON() {
-    return ToString(this);
+    return ToString(this)
   }
 
   toString(): string {
-    return __strSemVer(this);
+    return __strSemVer(this)
   }
 
 }
