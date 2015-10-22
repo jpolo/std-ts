@@ -156,14 +156,7 @@ export class URI implements IURI {
       let reDisallowedInAbsolutePath = /[\#\?]/g;
       let reDisallowedInRelativePath =/[\#\?:]/g;
 
-      let scheme = uri.scheme;
-      let userInfo = uri.userInfo;
-      let domain = uri.domain;
-      let port = uri.port;
-      let path = uri.path;
-      let query = uri.query;
-      let fragment = uri.fragment;
-
+      let { scheme, userInfo, domain, port, path, query, fragment } = uri;
       let s = '';
 
       if (scheme != null) {
@@ -279,7 +272,7 @@ export class URI implements IURI {
   }
 
   toString(): string {
-    return stringify(this);
+    return URI.stringify(this);
   }
 
   /*unapply<T>(fn: (

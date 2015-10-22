@@ -1,5 +1,5 @@
 //Util
-const IsNode = function (o) {
+function IsNode(o) {
   return (
     typeof Node === "object" ? o instanceof Node :
     o &&
@@ -7,24 +7,28 @@ const IsNode = function (o) {
     typeof o.nodeType === "number" &&
     typeof o.nodeName === "string"
   );
-};
-const IsElement = function (o) {
+}
+
+function IsElement(o) {
   return o.nodeType === NodeType.ELEMENT_NODE;
-};
-const IsElementOrDocument = function (n: Node) {
+}
+
+function IsElementOrDocument(n: Node) {
   let nodeType = n.nodeType;
   return (
     nodeType === NodeType.ELEMENT_NODE ||
     nodeType === NodeType.DOCUMENT_FRAGMENT_NODE ||
     nodeType === NodeType.DOCUMENT_NODE
   );
-};
-const SetText = function (n: Node, text: string) {
+}
+
+function SetText(n: Node, text: string) {
   if (IsElementOrDocument(n)) {
     n.textContent = text;
   }
-};
-const GetText = function (n: Node) {
+}
+
+function GetText(n: Node) {
   let returnValue = "";
   let nodeType = n.nodeType;
 
@@ -50,7 +54,7 @@ const GetText = function (n: Node) {
     returnValue = n.nodeValue;
   }
   return returnValue;
-};
+}
 
 export enum NodeType {
   ELEMENT_NODE = 1,

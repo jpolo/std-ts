@@ -5,7 +5,7 @@ interface IListData<T> {
   _length: number
 }
 
-export interface INode<T> {
+interface INode<T> {
   value: T
   previous: INode<T>
   next: INode<T>
@@ -13,7 +13,7 @@ export interface INode<T> {
 
 //ECMA like
 function IsArray(o: any): boolean {
-  return Array.isArray ? Array.isArray (o) : Object.prototype.toString.call(o) === "[object Array]"
+  return Array.isArray ? Array.isArray(o) : Object.prototype.toString.call(o) === "[object Array]"
 }
 
 function IsList(o: any): boolean {
@@ -37,37 +37,36 @@ function ListClear<T>(list: IListData<T>) {
   list._length = 0
 }
 
-function ListEnqueueIterator<A, B>(list: IListData<B>, iter: IIterator<A>, f: (v: A) => B): void {
-  let head = list._head
+function ListEnqueueIterator<A, B>(list: IListData<B>, iter: IIterator<A>, mapFn: (v: A) => B): void {
   let iteratorResult = iter.next()
-  let node: INode<B>
-  let lastNode: INode<B>
-  let length = 0
 
-  //length == 1
+  //length >= 1
   if (!iteratorResult.done) {
-    node = NodeCreate(f(iteratorResult.value))
+    let head = list._head
+    let node: INode<B>
+    let lastNode: INode<B>
+    let length = 0
+
+    node = NodeCreate(mapFn(iteratorResult.value))
     lastNode = node
     if (!head) {
       head = list._head = node.previous = node.next = node
     } else {
       ListConnect(list, head.previous, node)
     }
-
-    iteratorResult = iter.next()
     length += 1
-  }
 
-  //length == 2
-  while (!(iteratorResult = iter.next()).done) {
-    node = NodeCreate(f(iteratorResult.value))
-    ListConnect(list, lastNode, node)
-    lastNode = node
-    length += 1
-  }
+    //length >= 2
+    while (!(iteratorResult = iter.next()).done) {
+      node = NodeCreate(mapFn(iteratorResult.value))
+      ListConnect(list, lastNode, node)
+      lastNode = node
+      length += 1
+    }
 
-  ListConnect(list, lastNode, head)
-  list._length += length
+    ListConnect(list, lastNode, head)
+    list._length += length
+  }
 }
 
 function ListEnqueue<A, B>(list: IListData<B>, values: A[], mapFn: (v: A) => B): void
@@ -80,17 +79,21 @@ function ListEnqueue<A, B>(list: IListData<B>, values: any, mapFn: (v: A) => B):
     let length = values.length
     ListEnqueueIterator(list, {
       next() {
+        let currentIndex = index
+        index += 1
         return (
-          index < length ? { done: false, value: values[index] } : { done: true, value: undefined }
+          currentIndex < length ?
+            { done: false, value: values[currentIndex] } :
+            { done: true, value: undefined }
         )
       }
     }, mapFn)
   }
 }
 
-function ListConnect<T>(list: IListData<T>, l: INode<T>, r: INode<T>): void {
-  l.next = r
-  r.previous = l
+function ListConnect<T>(list: IListData<T>, left: INode<T>, right: INode<T>): void {
+  left.next = right
+  right.previous = left
 }
 
 function ListDisconnect<T>(list: IListData<T>, node: INode<T>): void {
@@ -227,21 +230,22 @@ export default class List<T> {
 
 class ListIterator<T> {
 
-  protected _data: IListData<T>
-  protected _current: INode<T>
+  private _data: IListData<T>
+  private _current: INode<T>
 
   constructor(list: List<T>) {
     this._data = ListData(list)
-    this._current = this._getHead()
+    this._current = this._data._head
   }
 
   next() {
+    let data = this._data
     let current = this._current
     let done = true
     let value: T
     if (current) {
       let next = current.next
-      this._current = (next !== this._getHead()) ? next : null
+      this._current = (next !== data._head) ? next : null
       done = false
       value = current.value
     }
@@ -249,9 +253,5 @@ class ListIterator<T> {
       done: done,
       value: value
     }
-  }
-
-  _getHead(): INode<T> {
-    return this._data._head
   }
 }
