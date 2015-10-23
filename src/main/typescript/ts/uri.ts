@@ -1,10 +1,19 @@
 //Util
 function IsArray(o: any) {
-  return Array.isArray ?
-    Array.isArray(o) :
-    Object.prototype.toString.call(o) === "[object Array]"
+  return Array.isArray ? Array.isArray(o) : Object.prototype.toString.call(o) === "[object Array]"
 }
 function IsString(o: any) { return typeof o === "string" }
+function IsIURI(o: any) {
+  return (o &&
+    ('scheme' in o) &&
+    ('userInfo' in o) &&
+    ('domain' in o) &&
+    ('port' in o) &&
+    ('path' in o) &&
+    ('query' in o) &&
+    ('fragment' in o)
+  )
+}
 function OwnKeys(o: any) {
   let ks: string[]
   if (Object.keys) {
@@ -36,14 +45,6 @@ const reParser = new RegExp(
   '(?:\\?([^#]*))?' +                   // query
   '(?:#(.*))?' +                        // fragment
   '$');
-
-export function parse(s: string): URI {
-  return URI.parse(s);
-}
-
-export function stringify(uri: IURI): string {
-  return URI.stringify(uri);
-}
 
 export interface IQueryString { [s: string]: string; }
 
@@ -127,18 +128,7 @@ export class URI implements IURI {
   }
 
   static isURI(o: any): boolean {
-    return (
-      o &&
-      (o instanceof URI || (
-        ('scheme' in o) &&
-        ('userInfo' in o) &&
-        ('domain' in o) &&
-        ('port' in o) &&
-        ('path' in o) &&
-        ('query' in o) &&
-        ('fragment' in o)
-      ))
-    );
+    return (o instanceof URI) || IsIURI(o);
   }
 
   static parse(s: string): URI {
@@ -274,27 +264,6 @@ export class URI implements IURI {
   toString(): string {
     return URI.stringify(this);
   }
-
-  /*unapply<T>(fn: (
-    scheme: string,
-    userInfo: string,
-    domain: string,
-    port: number,
-    path: string,
-    query: IQueryString,
-    fragment: string
-    ) => T
-  ): T {
-    return fn(
-      this.scheme,
-      this.userInfo,
-      this.domain,
-      this.port,
-      this.path,
-      this.query,
-      this.fragment
-    );
-  }*/
 
   valueOf() {
     return this.toString();
