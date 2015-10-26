@@ -1,4 +1,4 @@
-//Util
+// Util
 function IsNode(o) {
   return (
     typeof Node === "object" ? o instanceof Node :

@@ -71,6 +71,18 @@ module.exports = function(grunt) {
       "target_report": "target/report"
     },
 
+    tslint: {
+      options: {
+        configuration: grunt.file.readJSON('tslint.json')
+      },
+      src: {
+        src: [
+          '<%= dir.source_ts %>',
+          '<%= dir.source_test_ts %>'
+        ]
+      }
+    },
+
     // ---- clean workspace
     clean: {
       target: {
@@ -111,6 +123,7 @@ module.exports = function(grunt) {
   });
   // ----- Setup tasks
   grunt.loadNpmTasks('grunt-typescript');
+  grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.registerTask('compile', ['tsconfig', 'typescript:compile']);
