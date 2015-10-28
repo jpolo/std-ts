@@ -1,14 +1,14 @@
-import { ITestEngine, IReporter, ITest, ITestReport, ITestRunContext, IAssertion } from "../unit"
-import { Engine, ITestEngineRunContext } from "./engine"
+import { ITestEngine, IReporter, ITest, ITestReport, ITestRunContext, IAssertion } from "../unit";
+import { Engine, ITestEngineRunContext } from "./engine";
 
-//Constant
-const $engineDefault = new Engine()
+// Constant
+const $engineDefault = new Engine();
 
 export class Runner {
-  //Config
-  protected _timeout = 2000//ms
+  // Config
+  protected _timeout = 2000; // ms
 
-  //Service
+  // Service
   protected $engine: ITestEngine = $engineDefault;
 
   constructor(
@@ -34,50 +34,47 @@ export class Runner {
   */
 
   run(tests: ITest[], onComplete?: (report: ITestReport[]) => void): void {
-    //if (this._includeDefault) {
-    //  testCases = testCases.concat(suiteDefault.tests)
-    //}
-    let { $engine, _timeout } = this
-    let reports: ITestReport[] = []
+    let { $engine, _timeout } = this;
+    let reports: ITestReport[] = [];
 
     function runTest(test: ITest, onComplete: (r: ITestReport) => void) {
       let report: ITestReport = {
         startDate: null,
         elapsedMilliseconds: NaN,
         assertions: []
-      }
+      };
       let context: ITestEngineRunContext = {
-        getTimeout() { return _timeout },
-        getTest() { return test },
+        getTimeout() { return _timeout; },
+        getTest() { return test; },
         onStart() {
-          report.startDate = new Date($engine.now())
+          report.startDate = new Date($engine.now());
         },
         onAssertion(assertion: IAssertion) {
-          report.assertions.push(assertion)
+          report.assertions.push(assertion);
         },
         onError(e: any) {
 
         },
         onEnd() {
           if (onComplete) {
-            onComplete(report)
+            onComplete(report);
           }
         }
-      }
-      $engine.run(context)
+      };
+      $engine.run(context);
     }
 
-    let testPending = tests.length
+    let testPending = tests.length;
     function onTestComplete(r: ITestReport) {
-      reports.push(r)
-      testPending -= 1
+      reports.push(r);
+      testPending -= 1;
       if (testPending === 0) {
-        onComplete(reports)
+        onComplete(reports);
       }
     }
 
     for (let test of tests) {
-      runTest(test, onTestComplete)
+      runTest(test, onTestComplete);
     }
   }
 }

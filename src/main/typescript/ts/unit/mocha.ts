@@ -1,26 +1,26 @@
-import { SUCCESS, FAILURE, IAssertionCallSite, Assertion } from "./assertion"
-import { ITestEngine, ITest, ITestReport } from "../unit"
+import { SUCCESS, FAILURE, IAssertionCallSite, Assertion } from "./assertion";
+import { ITestEngine, ITest, ITestReport } from "../unit";
 
 class Suite {
-  protected _suites: { [k: string]: Suite } = {}
-  protected _tests: { [k: string]: Test } = {}
+  protected _suites: { [k: string]: Suite } = {};
+  protected _tests: { [k: string]: Test } = {};
 
   constructor(protected _name: string, protected _parent: Suite = null) {}
 
   getName() {
-    return this._name
+    return this._name;
   }
 
   getFullName() {
-    return this._parent ? this._parent.getFullName() + this._name : this._name
+    return this._parent ? this._parent.getFullName() + this._name : this._name;
   }
 
   getSuite(name: string) {
-    return this._suites[name] || (this._suites[name] = new Suite(name, this))
+    return this._suites[name] || (this._suites[name] = new Suite(name, this));
   }
 
   getTest(name: string) {
-    return this._tests[name] || (this._tests[name] = new Test(name, this))
+    return this._tests[name] || (this._tests[name] = new Test(name, this));
   }
 }
 
@@ -28,50 +28,50 @@ class Test {
   constructor(protected _name: string, protected _suite: Suite) {}
 
   getName() {
-    return this._name
+    return this._name;
   }
 
   getFullName() {
-    return this._suite ? this._suite.getFullName() + this._name : this._name
+    return this._suite ? this._suite.getFullName() + this._name : this._name;
   }
 }
 
-let rootSuite: Suite = new Suite("")
+let rootSuite: Suite = new Suite("");
 
-let currentDisabled = false
-let currentSuite: Suite = rootSuite
-let currentTest: Test = null
+let currentDisabled = false;
+let currentSuite: Suite = rootSuite;
+let currentTest: Test = null;
 
 export function describe(description: string, f?: () => void) {
-  let previousSuite = currentSuite
-  currentSuite = currentSuite.getSuite(description)
+  let previousSuite = currentSuite;
+  currentSuite = currentSuite.getSuite(description);
   if (f) {
-    f()
-    currentSuite = previousSuite
+    f();
+    currentSuite = previousSuite;
   }
 }
 
 export function xdescribe(description: string, f?: () => void) {
-  let previousDisabled = currentDisabled
-  let previousSuite = currentSuite
-  currentSuite = currentSuite.getSuite(description)
+  let previousDisabled = currentDisabled;
+  let previousSuite = currentSuite;
+  currentSuite = currentSuite.getSuite(description);
   if (f) {
-    currentDisabled = true
-    f()
-    currentSuite = previousSuite
-    currentDisabled = previousDisabled
+    currentDisabled = true;
+    f();
+    currentSuite = previousSuite;
+    currentDisabled = previousDisabled;
   }
 }
 
 export function it(description: string, f?: () => void) {
   if (currentSuite === null) {
-    throw SyntaxError('it() must be called inside describe() block')
+    throw SyntaxError("it() must be called inside describe() block");
   }
-  let previousTest = currentTest
-  currentTest = currentSuite.getTest(description)
+  let previousTest = currentTest;
+  currentTest = currentSuite.getTest(description);
   if (f) {
-    f()
-    currentTest = previousTest
+    f();
+    currentTest = previousTest;
   }
 }
 
