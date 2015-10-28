@@ -1,18 +1,22 @@
-import { IStorage } from "./storage"
+import { IStorage } from "./storage";
 
-//Util
-const __str = function (o) { return "" + o };
-const __keys = Object.keys || function (o) {
-  let keys = [];
-  for (let key in o) {
-    if (o.hasOwnProperty(key)) {
-      keys.push(key);
+// Util
+function ToString(o) { return "" + o; }
+function OwnKeys(o) {
+  let keys: string[];
+  if (Object.keys) {
+    keys = Object.keys(o);
+  } else {
+    for (let key in o) {
+      if (o.hasOwnProperty(key)) {
+        keys.push(key);
+      }
     }
   }
   return keys;
-};
-const __getData = function (o): { [k: string]: string } { return o.__data__ || (o.__data__ = {}); };
-const __clearData = function (o): void { o.__data__ = {}; };
+}
+function GetData(o): { [k: string]: string } { return o.__data__ || (o.__data__ = {}); }
+function ClearData(o): void { o.__data__ = {}; }
 
 class MemoryStorage implements IStorage {
 
@@ -23,30 +27,30 @@ class MemoryStorage implements IStorage {
   }
 
   key(i: number): string {
-    return __keys(__getData(this))[i];
+    return OwnKeys(GetData(this))[i];
   }
 
   getItem(k: string): string {
-    let data = __getData(this);
+    let data = GetData(this);
     return data.hasOwnProperty(k) ? data[k] : null;
   }
 
   setItem(k: string, v: string): void {
-    let data = __getData(this);
-    data[k] = __str(v);
+    let data = GetData(this);
+    data[k] = ToString(v);
   }
 
   removeItem(k: string): void {
-    let data = __getData(this);
+    let data = GetData(this);
     delete data[k];
   }
 
   size(): number {
-    return __keys(__getData(this)).length;
+    return OwnKeys(GetData(this)).length;
   }
 
   clear(): void {
-    __clearData(this);
+    ClearData(this);
   }
 }
 

@@ -1,8 +1,8 @@
 
-//Util
+// Util
 let __none: Option<any>;
 
-//ECMA like spec
+// ECMA like spec
 function IsOption(o: any) {
   return o instanceof Option;
 }
@@ -28,7 +28,7 @@ export default class Option<T> {
   static cast<S>(o: Option<S>): Option<S>
   static cast<S>(o: S): Option<S>
   static cast<S>(o: any): Option<S> {
-    var returnValue: Option<S>;
+    let returnValue: Option<S>;
     if (o === undefined) {
       returnValue = __none;
     } else if (o instanceof Option) {
@@ -62,8 +62,8 @@ export default class Option<T> {
     return none;
   }());
 
-  length = 1
-  0: T
+  length = 1;
+  0: T;
 
   constructor(value: T) {
     this[0] = value;
@@ -89,7 +89,7 @@ export default class Option<T> {
     return OptionIsNone(this) ? alt() : this;
   }
 
-  //array like
+  // array like
   forEach(f: (v: T) => void): void {
     if (!OptionIsNone(this)) {
       f(OptionGet(this));

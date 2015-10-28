@@ -1,15 +1,15 @@
-//Util
+// Util
 const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
 const GlobalConsole: Console = Global.console ? Global.console : <any>{};
 function Void() {}
-function Now() { return Date.now ? Date.now() : (new Date()).getTime() }
+function Now() { return Date.now ? Date.now() : (new Date()).getTime(); }
 function Each<T>(a: T[], f: (v: T, i?: number, a?: T[]) => void) {
   for (var i = 0, l = a.length; i < l; ++i) {
     f(a[i], i, a);
   }
 };
 
-//COMPAT
+// COMPAT
 if (!Global.console) {
 
   if (!GlobalConsole.log) {
@@ -39,7 +39,7 @@ if (!Global.console) {
       timers[id] = Now();
     };
     GlobalConsole.timeEnd = function timeEnd(id) {
-      var start = timers[id];
+      let start = timers[id];
       if (start) {
         GlobalConsole.log(id + ": " + (Now() - start) + "ms");
         delete timers[id];

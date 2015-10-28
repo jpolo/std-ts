@@ -6,13 +6,13 @@ const ONE_THIRD = 1 / 3
 const RADIAN_TO_DEGREE = 180 / Math.PI
 const DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE
 
-const ToNumber = Number
-const IsNaN = (n: number) => { return n !== n }
-const IsFinite = isFinite
-const math_acos = Math.acos
-const math_asin = Math.asin
-const math_atan = Math.atan
-const math_atan2 = Math.atan2
+const ToNumber = Number;
+const IsNaN = (n: number) => { return n !== n; };
+const IsFinite = isFinite;
+const math_acos = Math.acos;
+const math_asin = Math.asin;
+const math_atan = Math.atan;
+const math_atan2 = Math.atan2;
 //const math_eq = (l: number, r: number) => { return IsNaN(l) === IsNaN(r) && l == r }
 const math_abs = Math.abs
 var math_ceil = Math.ceil;
@@ -261,19 +261,19 @@ export function isPrime(n: number): boolean {
       }
     }
   }
-  return returnValue
+  return returnValue;
 }
 
 export function log(n: number): number {
-  return math_log(n)
+  return math_log(n);
 }
 
 export function log2(n: number): number {
-  return math_log2(n)
+  return math_log2(n);
 }
 
 export function log10(n: number): number {
-  return math_log10(n)
+  return math_log10(n);
 }
 
 export function log1p(n: number): number {
@@ -285,49 +285,49 @@ export function mod(n: number, divisor: number): number {
     divisor > 0 ? n - divisor * math_floor(n / divisor) :
     divisor == 0 ? n :
     NaN
-  )
+  );
 }
 
 export function pow(n: number, power: number): number {
-  return math_pow(n, power)
+  return math_pow(n, power);
 }
 
 export function round(n: number): number {
-  return math_round(n)
+  return math_round(n);
 }
 
 export function sign(n: number): number {
-  return math_sign(n)
+  return math_sign(n);
 }
 
 export function sin(n: number): number {
-  return math_sin(n)
+  return math_sin(n);
 }
 
 export function sinh(n: number): number {
-  return math_sinh(n)
+  return math_sinh(n);
 }
 
 export function sqrt(n: number): number {
-  return math_sqrt(n)
+  return math_sqrt(n);
 }
 
 export function tan(n: number): number {
-  return math_tan(n)
+  return math_tan(n);
 }
 
 export function tanh(n: number): number {
-  return math_tanh(n)
+  return math_tanh(n);
 }
 
 export function toDegree(angleRadian: number): number {
-  return angleRadian * RADIAN_TO_DEGREE
+  return angleRadian * RADIAN_TO_DEGREE;
 }
 
 export function toRadian(angleDegree: number): number {
-  return angleDegree * DEGREE_TO_RADIAN
+  return angleDegree * DEGREE_TO_RADIAN;
 }
 
 export function trunc(n: number): number {
-  return math_trunc(n)
+  return math_trunc(n);
 }

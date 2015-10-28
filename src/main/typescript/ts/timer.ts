@@ -1,79 +1,79 @@
-//Util
-const Global: any = typeof window !== "undefined" ? window : (function() { return this }())
-//const Process = Global.process
-//const IsNodeJS = {}.toString.call(Process) === "[object process]"
-const SetTimeout = function (f: Function, ms: number) { return Global.setTimeout(f, ms) }
-const ClearTimeout = function (id: number) { return Global.clearTimeout(id) }
-const SetInterval = function (f: Function, ms: number) { return Global.setInterval(f, ms) }
-const ClearInterval = function (id: number) { return Global.clearInterval(id) }
+// Util
+const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+// const Process = Global.process
+// const IsNodeJS = {}.toString.call(Process) === "[object process]"
+const SetTimeout = function (f: Function, ms: number) { return Global.setTimeout(f, ms); };
+const ClearTimeout = function (id: number) { return Global.clearTimeout(id); };
+const SetInterval = function (f: Function, ms: number) { return Global.setInterval(f, ms); };
+const ClearInterval = function (id: number) { return Global.clearInterval(id); };
 
-//Task
-let TaskCurrentId = 1
-const TaskRegistry: { [k: number]: any } = {}
+// Task
+let TaskCurrentId = 1;
+const TaskRegistry: { [k: number]: any } = {};
 const TaskGenerateId = function () {
-  let returnValue = TaskCurrentId
-  TaskCurrentId += 1
-  return TaskCurrentId
-}
+  let returnValue = TaskCurrentId;
+  TaskCurrentId += 1;
+  return TaskCurrentId;
+};
 const TaskCreate = function (f: any): number {
-  let id = TaskGenerateId()
-  TaskRegistry[id] = f
-  return id
-}
+  let id = TaskGenerateId();
+  TaskRegistry[id] = f;
+  return id;
+};
 const TaskRemove = function (id: number): void {
-  delete TaskRegistry[id]
-}
+  delete TaskRegistry[id];
+};
 const TaskRun = function (id: number) {
-  let task = TaskRegistry[id]
+  let task = TaskRegistry[id];
   if (task) {
-    delete TaskRegistry[id]
-    task()
+    delete TaskRegistry[id];
+    task();
   }
-}
+};
 const SetImmediate: (f: any) => number =
   Global.setImmediate ? Global.setImmediate :
   Global.postMessage ? (function () {
-    const PREFIX = "setImmediate:" + Math.random() + ":"
-    const PREFIX_LENGTH = PREFIX.length
+    const PREFIX = "setImmediate:" + Math.random() + ":";
+    const PREFIX_LENGTH = PREFIX.length;
 
     function onGlobalMessage(event) {
-      let { source, data } = event
+      let { source, data } = event;
       if (
         source === Global &&
         typeof data === "string" &&
         data.indexOf(PREFIX) === 0
       ) {
-        TaskRun(+data.slice(PREFIX_LENGTH))
+        TaskRun(+data.slice(PREFIX_LENGTH));
       }
     }
 
     function setImmediate(f: any) {
-      let id = TaskCreate(f)
-      Global.postMessage(PREFIX + id, "*")
-      return id
+      let id = TaskCreate(f);
+      Global.postMessage(PREFIX + id, "*");
+      return id;
     }
 
     if (Global.addEventListener) {
-      Global.addEventListener("message", onGlobalMessage, false)
+      Global.addEventListener("message", onGlobalMessage, false);
     } else {
-      Global.attachEvent("onmessage", onGlobalMessage)
+      Global.attachEvent("onmessage", onGlobalMessage);
     }
-    return setImmediate
+    return setImmediate;
   }()) :
-  function setImmediate(f: any): number { return SetTimeout(f, 0) }
+  function setImmediate(f: any): number { return SetTimeout(f, 0); };
 const ClearImmediate =
   Global.clearImmediate ? Global.clearImmediate :
-  Global.postMessage ? function (id: number) { TaskRemove(id) } :
-  function (id: number): void { return ClearTimeout(id) }
+  Global.postMessage ? function (id: number) { TaskRemove(id); } :
+  function (id: number): void { return ClearTimeout(id); };
 
 
 export interface ITimerModule {
-  setTimeout: typeof setTimeout
-  clearTimeout: typeof clearTimeout
-  setInterval: typeof setInterval
-  clearInterval: typeof clearInterval
-  setImmediate: typeof setImmediate
-  clearImmediate: typeof clearImmediate
+  setTimeout: typeof setTimeout;
+  clearTimeout: typeof clearTimeout;
+  setInterval: typeof setInterval;
+  clearInterval: typeof clearInterval;
+  setImmediate: typeof setImmediate;
+  clearImmediate: typeof clearImmediate;
 }
 
 /**
@@ -94,7 +94,7 @@ export function setTimeout<A, B>(fn: (a: A, b: B) => void, ms: number, a: A, b: 
 export function setTimeout<A>(fn: (a: A) => void, ms: number, a: A): number
 export function setTimeout<A>(fn: () => void, ms?: number): number
 export function setTimeout(fn: Function, ms: number = 0, ...args: any[]): number {
-  return SetTimeout(args.length === 0 ? fn : () => { fn.apply(null, args) }, ms)
+  return SetTimeout(args.length === 0 ? fn : () => { fn.apply(null, args); }, ms);
 }
 
 /**
@@ -103,7 +103,7 @@ export function setTimeout(fn: Function, ms: number = 0, ...args: any[]): number
  * @param id The id of the task
  */
 export function clearTimeout(id: number): void {
-  ClearTimeout(id)
+  ClearTimeout(id);
 }
 
 /**
@@ -124,7 +124,7 @@ export function setInterval<A, B>(fn: (a: A, b: B) => void, ms: number, a: A, b:
 export function setInterval<A>(fn: (a: A) => void, ms: number, a: A): number
 export function setInterval<A>(fn: () => void, ms: number): number
 export function setInterval(fn: Function, ms: number = 0, ...args: any[]): number {
-  return SetInterval(args.length === 0 ? fn : () => { fn.apply(null, args) }, ms)
+  return SetInterval(args.length === 0 ? fn : () => { fn.apply(null, args); }, ms);
 }
 
 /**
@@ -133,7 +133,7 @@ export function setInterval(fn: Function, ms: number = 0, ...args: any[]): numbe
  * @param id The id of the task
  */
 export function clearInterval(id: number): void {
-  ClearInterval(id)
+  ClearInterval(id);
 }
 
 /**
@@ -153,7 +153,7 @@ export function setImmediate<A, B>(fn: (a: A, b: B) => void, a: A, b: B): number
 export function setImmediate<A>(fn: (a: A) => void, a: A): number
 export function setImmediate<A>(fn: () => void): number
 export function setImmediate(fn: () => void, ...args: any[]): number {
-  return SetImmediate(args.length === 0 ? fn : () => { fn.apply(null, args) })
+  return SetImmediate(args.length === 0 ? fn : () => { fn.apply(null, args); });
 }
 
 /**
@@ -162,5 +162,5 @@ export function setImmediate(fn: () => void, ...args: any[]): number {
  * @param id The id of the task
  */
 export function clearImmediate(id: number): void {
-  ClearImmediate(id)
+  ClearImmediate(id);
 }

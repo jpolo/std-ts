@@ -1,29 +1,29 @@
 module error {
 
-  //Util
+  // Util
   const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
   const GlobalConsole: Console = typeof console !== "undefined" ? Global.console : null;
-  const GlobalError = Global.Error
+  const GlobalError = Global.Error;
   function ToString(o) { return "" + o; }
-  function Dump(o) { return ToString(o) }
+  function Dump(o) { return ToString(o); }
   function FunctionName(f: Function) {
-    return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]))
+    return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]));
   }
   function ErrorStackTrace(error, stripPoint) {
     if (GlobalError.captureStackTrace) {
-      GlobalError.captureStackTrace(error, stripPoint)
+      GlobalError.captureStackTrace(error, stripPoint);
     } else {
-      let stackString = (<any>new GlobalError()).stack
-      //Remove first calls
-      let stack = stackString.split("\n").slice(1)//first is Error string, second is __captureStackTrace
-      error.stack = ToString(error) + "\n" + stack.join("\n")
+      let stackString = (<any>new GlobalError()).stack;
+      // Remove first calls
+      let stack = stackString.split("\n").slice(1); // first is Error string, second is __captureStackTrace
+      error.stack = ToString(error) + "\n" + stack.join("\n");
     }
   }
   function HandleUncaughtError(error, prefix) {
     if (GlobalConsole) {
       let str = error && (error instanceof Error) ? ToString(error.stack || error) : Dump(error);
       GlobalConsole.error(prefix + str);
-    } else {//rethrow so it is catched by global.onerror
+    } else { // rethrow so it is catched by global.onerror
       throw error;
     }
   }

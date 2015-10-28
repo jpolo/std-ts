@@ -1,68 +1,68 @@
-//Symbol
-const $$value = "value"
-const $$error = "error"
+// Symbol
+const $$value = "value";
+const $$error = "error";
 
 interface IResult<T> {
-  value?: T
-  error?: any
+  value?: T;
+  error?: any;
 }
 
-//ECMA like functions
+// ECMA like functions
 function Equals(lhs: any, rhs: any): boolean {
-  return lhs === rhs
+  return lhs === rhs;
 }
 
 function IsResult<T>(r: any): boolean {
-  return r instanceof Result
+  return r instanceof Result;
 }
 
 function ResultIsSuccess(r: any): boolean {
-  return r && r.hasOwnProperty($$value)
+  return r && r.hasOwnProperty($$value);
 }
 
 function ResultIsFailure(r: any): boolean {
-  return r && r.hasOwnProperty($$error)
+  return r && r.hasOwnProperty($$error);
 }
 
 function ResultFunctionApply<R>(f: any, args: any): Result<R> {
-  let result: Result<any>
-  let isFailure = false
-  let value: any
-  let error: any
-  let argc = args && args.length || 0
+  let result: Result<any>;
+  let isFailure = false;
+  let value: any;
+  let error: any;
+  let argc = args && args.length || 0;
   try {
     switch (argc) {
       case 0:
-        value = f()
-        break
+        value = f();
+        break;
       default:
-        value = f.apply(null, args)
+        value = f.apply(null, args);
     }
   } catch (e) {
-    isFailure = true
-    error = e
+    isFailure = true;
+    error = e;
   }
-  return isFailure ? ResultCreateFailure(error) : ResultCreateSuccess(value)
+  return isFailure ? ResultCreateFailure(error) : ResultCreateSuccess(value);
 }
 
 function ResultCreateSuccess<V>(v: V): Result<V> {
-  let r = new Result<V>()
-  r.value = v
-  return r
+  let r = new Result<V>();
+  r.value = v;
+  return r;
 }
 
 function ResultCreateFailure(e: any): Result<any> {
-  let r = new Result<any>()
-  r.error = e
-  return r
+  let r = new Result<any>();
+  r.error = e;
+  return r;
 }
 
 function ResultGetValue<T>(r: IResult<T>): T {
-  return r.value
+  return r.value;
 }
 
 function ResultGetError(r: IResult<any>): any {
-  return r.error
+  return r.error;
 }
 
 /*
@@ -71,35 +71,35 @@ function flatMap<T, U>(r: IResult<T>, f: (v: T) => IResult<U>): Result<U> {
 }*/
 
 function ResultTransform<T, R>(r: IResult<T>, onSuccess?: (v: T) => R | Result<R>, onFailure?: (e: any) => R | Result<R> | void): Result<R> {
-  let returnValue = <any>r
+  let returnValue = <any>r;
   if (ResultIsSuccess(this)) {
     try {
-      returnValue = ResultCreateSuccess(onSuccess(ResultGetValue(r)))
+      returnValue = ResultCreateSuccess(onSuccess(ResultGetValue(r)));
     } catch (e) {
-      returnValue = ResultCreateFailure(e)
+      returnValue = ResultCreateFailure(e);
     }
   } else {
     if (onFailure !== null) {
       try {
-        returnValue = ResultCreateSuccess(onFailure(ResultGetError(r)))
+        returnValue = ResultCreateSuccess(onFailure(ResultGetError(r)));
       } catch (e) {
-        returnValue = ResultCreateFailure(e)
+        returnValue = ResultCreateFailure(e);
       }
     }
   }
-  return returnValue
+  return returnValue;
 }
 
 export default class Result<T> implements IResult<T> {
-  value: T
-  error: any
+  value: T;
+  error: any;
 
   static success<V>(v: V): Result<V> {
-    return ResultCreateSuccess(v)
+    return ResultCreateSuccess(v);
   }
 
   static failure(e: any): Result<any> {
-    return ResultCreateFailure(e)
+    return ResultCreateFailure(e);
   }
 
   static fcall<A, B, C, D, E, F, G, H, I, R>(fn: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I) => R, a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I): Result<R>
@@ -114,7 +114,7 @@ export default class Result<T> implements IResult<T> {
   static fcall<A, R>(fn: (a: A) => R, a: A): Result<R>
   static fcall<R>(fn: () => R): Result<R>
   static fcall(fn: any, ...args: any[]): Result<any> {
-    return ResultFunctionApply(fn, args)
+    return ResultFunctionApply(fn, args);
   }
 
   static fapply<A, B, C, D, E, F, G, H, I, R>(f: (a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I) => R, args: [A, B, C, D, E, F, G, H, I]): Result<R>
@@ -128,34 +128,34 @@ export default class Result<T> implements IResult<T> {
   static fapply<A, R>(f: (a: A) => R, args: [A]): Result<R>
   static fapply<R>(f: () => R, args?: any[]): Result<R>
   static fapply(f: any, args?: any): Result<any> {
-    return ResultFunctionApply(f, args)
+    return ResultFunctionApply(f, args);
   }
 
   static isResult<S>(r: any): boolean {
-    return IsResult(r)
+    return IsResult(r);
   }
 
   static isSuccess<S>(r: IResult<S>): boolean {
-    return ResultIsSuccess(r)
+    return ResultIsSuccess(r);
   }
 
   static isFailure<S>(r: IResult<S>): boolean {
-    return ResultIsFailure(r)
+    return ResultIsFailure(r);
   }
 
   isSuccess(): boolean {
-    return ResultIsSuccess(this)
+    return ResultIsSuccess(this);
   }
 
   isFailure(): boolean {
-    return ResultIsFailure(this)
+    return ResultIsFailure(this);
   }
 
   equals(o: any): boolean {
     return IsResult(o) && (ResultIsSuccess(this) ?
       Equals(ResultGetValue(this), ResultGetValue(o)) :
       Equals(ResultGetError(this), ResultGetError(o))
-    )
+    );
   }
 
   /*
@@ -169,7 +169,7 @@ export default class Result<T> implements IResult<T> {
   }*/
 
   map<U>(f: (v: T) => U): Result<U> {
-    return ResultIsSuccess(this) ? ResultCreateSuccess(f(ResultGetValue(this))) : <any>this
+    return ResultIsSuccess(this) ? ResultCreateSuccess(f(ResultGetValue(this))) : <any>this;
   }
 
   /*
@@ -179,33 +179,33 @@ export default class Result<T> implements IResult<T> {
 
   get(): T {
     if (ResultIsSuccess(this)) {
-      return ResultGetValue(this)
+      return ResultGetValue(this);
     } else {
-      throw ResultGetError(this)
+      throw ResultGetError(this);
     }
   }
 
   then<R>(onSuccess?: (value: T) => R | Result<R>, onFailure?: (error: any) => R | Result<R> | void): Result<R> {
-    return ResultTransform(this, onSuccess, onFailure)
+    return ResultTransform(this, onSuccess, onFailure);
   }
 
   catch<R>(onFailure: (error: any) => R | Result<R>): Result<R> {
-    return ResultTransform(this, null, onFailure)
+    return ResultTransform(this, null, onFailure);
   }
 
   inspect() {
     return ResultIsSuccess(this) ?
       "Success { " + ResultGetValue(this) + " }" :
-      "Failure { " + ResultGetError(this) + " }"
+      "Failure { " + ResultGetError(this) + " }";
   }
 
   toJSON() {
     return ResultIsSuccess(this) ?
       { value: ResultGetValue(this) } :
-      { error: ResultGetError(this) }
+      { error: ResultGetError(this) };
   }
 
   toString() {
-    return this.inspect()
+    return this.inspect();
   }
 }

@@ -1,35 +1,42 @@
-import console from "./console"
+import console from "./console";
 
-//Constant
+// Constant
 const ES_COMPAT = 3;
 
-//Util
-const __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-const __void = function () {};
-const __format = function (n: string, s: string) { return n + ' { ' + s + ' }' };
-const __keys = Object.keys || function (o) { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };;
-const __cmp = function(a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1 };
+// ECMA like functions
+const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
+function OwnKeys(o: any) {
+  let ks: string[];
+  if (Object.keys) {
+    ks = Object.keys(o);
+  } else {
+    for (let k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } }
+  }
+  return ks;
+}
+
+function Compare(a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1; };
 const __str = function (o) { return "" + o; };
-const __strCmp = function(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 };
+const __strCmp = function(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1; };
 const __throwAsync = function(e) { setTimeout(() => { throw e; }, 0); };
 const __arrayCmp = function <T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): number {
-  var returnValue = 0
-  var al = a.length
-  var bl = b.length
+  let returnValue = 0;
+  let al = a.length;
+  let bl = b.length;
   if (al === bl) {
-    for (var i = 0, l = al; i < l; ++i) {
-      var r = cmpFn(a[i], b[i]);
+    for (let i = 0, l = al; i < l; ++i) {
+      let r = cmpFn(a[i], b[i]);
       if (r !== 0) {
-        returnValue = r
-        break
+        returnValue = r;
+        break;
       }
     }
   }
-  return returnValue
+  return returnValue;
 };
 
 
-//Services
+// Services
 type $Console = {
   debug(...a: any[]);
   info(...a: any[]);
@@ -42,66 +49,65 @@ const $consoleDefault: $Console = console;
 const $timeDefault: $Time = { now: Date.now || function () { return (new Date()).getTime(); } };
 
 export interface IDispatcher {
-  isEnabledFor(level: ILevel, group: string): boolean
-  send(level: ILevel, group: string, data: any[])
+  isEnabledFor(level: ILevel, group: string): boolean;
+  send(level: ILevel, group: string, data: any[]);
 }
 
 export interface ILevel {
-  name: string
-  value: number
+  name: string;
+  value: number;
 }
 
 export interface IMessage {
-  level: ILevel
-  group: string
-  //message: string
-  data: any[]
-  timestamp: number
+  level: ILevel;
+  group: string;
+  data: any[];
+  timestamp: number;
 }
 
 export interface IFilter {
-  (message?: IMessage): boolean
+  (message?: IMessage): boolean;
 }
 
 export interface IReporter {
-  receive(message: IMessage)
+  receive(message: IMessage);
 }
 
 export class Level implements ILevel {
 
   static cast(o: any): Level {
     if (o instanceof Level) {
-      return o
+      return o;
     } else if (typeof o === "number") {
-      return Level.fromNumber(o)
+      return Level.fromNumber(o);
     } else if (typeof o === "string") {
-      return Level.fromString(o)
+      return Level.fromString(o);
     }
   }
 
   static compare(lhs: ILevel, rhs: ILevel): number {
-    var returnValue = NaN;
+    let returnValue = NaN;
     if (lhs != null && rhs != null) {
-      var lv = lhs.value;
-      var rv = rhs.value;
+      let lv = lhs.value;
+      let rv = rhs.value;
       returnValue = lv === rv ? 0 : lv < rv ? -1 : 1;
     }
     return returnValue;
   }
 
   static create(name: string, level: number): Level {
-    name = name.toUpperCase()
-    level = level >>> 0
-    var byName = Level._byValue
-    var byValue = Level._byValue
+    name = name.toUpperCase();
+    level = level >>> 0;
+    let byName = Level._byValue;
+    let byValue = Level._byValue;
     if (byName[name]) {
-      throw new Error(byName[name] + ' is already defined')
+      throw new Error(byName[name] + " is already defined");
     }
     if (byValue[level]) {
-      throw new Error(byValue[level] + ' is already defined')
+      throw new Error(byValue[level] + " is already defined");
     }
-    var levelObj = byName[name] = byValue[level] = new Level(name, level, Level._constructorKey);
-    return levelObj
+    let levelObj = byName[name] = byValue[level] = new Level(name, level, Level._constructorKey);
+    return levelObj;
   }
 
   static fromNumber(val: number): Level {
@@ -112,8 +118,8 @@ export class Level implements ILevel {
     return Level._instances[s.toUpperCase()];
   }
 
-  private static _instances: {[key: string]: Level} = {}
-  private static _byValue: {[key: number]: Level} = {}
+  private static _instances: {[key: string]: Level} = {};
+  private static _byValue: {[key: number]: Level} = {};
   private static _constructorKey = {};
 
   constructor(
@@ -122,40 +128,40 @@ export class Level implements ILevel {
     constructorKey: any
   ) {
     if (constructorKey !== Level._constructorKey) {
-      throw new Error('new Level() cannot be called directly');
+      throw new Error("new Level() cannot be called directly");
     }
   }
 
   compare(l: ILevel): number {
-    return Level.compare(this, l)
+    return Level.compare(this, l);
   }
 
   equals(o: any): boolean {
-    return this === o || (!!o && (o instanceof Level) && Level.compare(this, o) === 0)
+    return this === o || (!!o && (o instanceof Level) && Level.compare(this, o) === 0);
   }
 
   valueOf() {
-    return this.value
+    return this.value;
   }
 
   inspect(): string {
-    return __format('Level', 'name: "' + this.name + '", value: ' + this.value)
+    return `Level { name: "${this.name}", value: "${this.value}"}`;
   }
 
   toJSON() {
-    return this.value
+    return this.value;
   }
 
   toString(): string {
-    return this.name
+    return this.name;
   }
 }
 
-export const DEBUG = Level.create('DEBUG', 0)
-export const INFO = Level.create('INFO', 10)
-export const WARN = Level.create('WARN', 20)
-export const ERROR = Level.create('ERROR', 30)
-export const FATAL = Level.create('FATAL', 40)
+export const DEBUG = Level.create("DEBUG", 0);
+export const INFO = Level.create("INFO", 10);
+export const WARN = Level.create("WARN", 20);
+export const ERROR = Level.create("ERROR", 30);
+export const FATAL = Level.create("FATAL", 40);
 
 export class Message implements IMessage {
 
@@ -163,8 +169,8 @@ export class Message implements IMessage {
     return (
       Level.compare(a.level, b.level) ||
       __strCmp(a.group, b.group) ||
-      __arrayCmp(a.data, b.data, __cmp)
-    )
+      __arrayCmp(a.data, b.data, Compare)
+    );
   }
 
   constructor(
@@ -176,7 +182,7 @@ export class Message implements IMessage {
   }
 
   compare(o: IMessage): number {
-    return Message.compare(this, o)
+    return Message.compare(this, o);
   }
 
   equals(o: any): boolean {
@@ -184,15 +190,11 @@ export class Message implements IMessage {
       !!o &&
       (o instanceof Message) &&
       Message.compare(this, o) === 0
-    )
+    );
   }
 
   inspect(): string {
-    return __format('Message',
-      'level: ' + this.level.name + ', ' +
-      'group: "' + this.group + '", ' +
-      'data: "' + this.data + '"'
-    )
+    return `Message { level: ${this.level.name}, group: "${this.group}", data: "${this.data}" }`;
   }
 
   toJSON() {
@@ -201,16 +203,16 @@ export class Message implements IMessage {
       group: this.group,
       data: this.data,
       timestamp: this.timestamp
-    }
+    };
   }
 
   toString(): string {
-    return '[' + this.level.name + '|' + this.group + '] ' + this.data.join(" ")
+    return `[${this.level.name}|${this.group}] ${this.data.join(" ")}`;
   }
 }
 
 export function logger(group: string): Logger {
-  return $dispatcher.getLogger(group)
+  return $dispatcher.getLogger(group);
 }
 
 /*
@@ -223,19 +225,19 @@ function loggerFor(o: any): Logger {
 */
 
 export class Logger {
-  //static SEPARATOR = '.'
+  // static SEPARATOR = '.'
 
-  protected $dispatcher: IDispatcher
+  protected $dispatcher: IDispatcher;
 
   constructor(
     public name: string,
     $dispatcher: IDispatcher
   ) {
-    this.$dispatcher = $dispatcher
+    this.$dispatcher = $dispatcher;
   }
 
   inspect() {
-    return __format('Logger', 'name: "' + this.name + '"')
+    return "Logger { name: \"" + this.name + "\ }";
   }
 
   log(level: ILevel, ...args: any[]): void {
@@ -263,29 +265,29 @@ export class Logger {
   }
 
   toString(): string {
-    return this.inspect()
+    return this.inspect();
   }
 
   protected _dispatch(level: ILevel, args: any[]): void  {
-    var name = this.name
-    var dispatcher = this.$dispatcher
+    let name = this.name;
+    let dispatcher = this.$dispatcher;
     if (!dispatcher) {
       throw new Error("dispatcher is required");
     }
 
-    //if (dispatcher.isEnabledFor(level, name)) {
+    // if (dispatcher.isEnabledFor(level, name)) {
     dispatcher.send(level, name, args);
-    //}
+    // }
   }
 }
 
 export class Dispatcher implements IDispatcher {
-  reporters: { [key: string]: { filter?: IFilter; reporter: IReporter; } } = {}
+  reporters: { [key: string]: { filter?: IFilter; reporter: IReporter; } } = {};
 
-  protected _loggers: { [name: string]: Logger } = {}
+  protected _loggers: { [name: string]: Logger } = {};
 
-  //Services
-  protected $time: $Time = $timeDefault
+  // Services
+  protected $time: $Time = $timeDefault;
 
   constructor(
     deps?: {
@@ -300,43 +302,43 @@ export class Dispatcher implements IDispatcher {
   }
 
   getLogger(name: string): Logger {
-    var loggers = this._loggers
-    return loggers[name] || (loggers[name] = new Logger(name, this))
+    let loggers = this._loggers;
+    return loggers[name] || (loggers[name] = new Logger(name, this));
   }
 
   isEnabledFor(level: ILevel, group: string): boolean {
-    var returnValue = false
-    var reporters = this.reporters
-    var logMessage = new Message(level, group, null)
-    var names = __keys(reporters)
+    let returnValue = false;
+    let reporters = this.reporters;
+    let logMessage = new Message(level, group, null);
+    let names = OwnKeys(reporters);
     for (let name of names) {
-      var target = reporters[name]
+      let target = reporters[name];
       if (__filter(target, logMessage)) {
-        returnValue = true
-        break
+        returnValue = true;
+        break;
       }
     }
-    return returnValue
+    return returnValue;
   }
 
   send(level: ILevel, group: string, data: any[]): void {
-    var reporters = this.reporters;
-    var logMessage = new Message(level, group, data, this.$time.now());
-    var names = __keys(reporters)
+    let reporters = this.reporters;
+    let logMessage = new Message(level, group, data, this.$time.now());
+    let names = OwnKeys(reporters);
     for (let name of names) {
-      var target = reporters[name]
+      let target = reporters[name];
       if (__filter(target, logMessage)) {
-        __send(target, logMessage)
+        __send(target, logMessage);
       }
     }
   }
 
 }
 
-//util
+// util
 function __filter(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): boolean {
   try {
-    return f.filter ? f.filter(m) || false : true
+    return f.filter ? f.filter(m) || false : true;
   } catch (e) {
     __throwAsync(e);
   }
@@ -344,7 +346,7 @@ function __filter(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): b
 
 function __send(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): boolean {
   try {
-    return f.reporter.receive(m)
+    return f.reporter.receive(m);
   } catch (e) {
     __throwAsync(e);
   }
@@ -425,8 +427,8 @@ export module filter {
 
 export module reporter {
   type $ConsoleFormatter = (logMessage: IMessage) => any[];
-  var $consoleFormatterDefault: $ConsoleFormatter = function (logMessage: IMessage) {
-    return ['[' + logMessage.group + ']'].concat(logMessage.data);
+  let $consoleFormatterDefault: $ConsoleFormatter = function (logMessage: IMessage) {
+    return ["[" + logMessage.group + "]"].concat(logMessage.data);
   };
 
   export class Array implements IReporter {
@@ -434,14 +436,14 @@ export module reporter {
     constructor(public logs: IMessage[] = []) { }
 
     receive(logMessage: IMessage) {
-      this.logs.push(logMessage)
+      this.logs.push(logMessage);
     }
 
   }
 
 
   export class Console implements IReporter {
-    //Services
+    // Services
     protected $formatter: $ConsoleFormatter = $consoleFormatterDefault;
     protected $console: $Console = $consoleDefault;
 
@@ -460,19 +462,19 @@ export module reporter {
     }
 
     receive(logMessage: IMessage) {
-      var console = this.$console;
+      let console = this.$console;
       if (console) {
-        var args = this.$formatter(logMessage)
-        var levelValue = logMessage.level.value
+        let args = this.$formatter(logMessage);
+        let levelValue = logMessage.level.value;
 
         if (levelValue >= ERROR.value) {
-          console.error.apply(console, args)
+          console.error.apply(console, args);
         } else if (levelValue >= WARN.value) {
-          console.warn.apply(console, args)
+          console.warn.apply(console, args);
         } else if (levelValue >= INFO.value) {
-          console.info.apply(console, args)
-        } else { //Debug
-          console.debug.apply(console, args)
+          console.info.apply(console, args);
+        } else { // Debug
+          console.debug.apply(console, args);
         }
       }
     }

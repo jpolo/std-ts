@@ -1,6 +1,6 @@
 declare var Symbol: any;
 
-//ECMA like
+// ECMA like
 const SymbolCreate: (s: string) => any = typeof Symbol !== "undefined" ? Symbol : function (s: string) { return "@@" + s; };
 const DefinePropertyOrThrow = Object.defineProperty || function (o: any, k: string, d: PropertyDescriptor): any { o[k] = d.value; };
 const DefineValue = (function () {
@@ -9,34 +9,34 @@ const DefineValue = (function () {
     enumerable: false,
     configurable: true,
     writable: true
-  }
+  };
   function DefineValue(o: any, k: string, v: any): void {
-    __descriptor.value = v
-    DefinePropertyOrThrow(o, k, __descriptor)
+    __descriptor.value = v;
+    DefinePropertyOrThrow(o, k, __descriptor);
   }
-  return DefineValue
-}())
+  return DefineValue;
+}());
 const GenerateId = (function () {
-  //Start from 1, helps not to have falsy values
-  let __currentId = 1
-  
-  function GenerateId() {
-    let returnValue = __currentId
-    __currentId += 1
-    return returnValue
-  }
-  return GenerateId
-}())
+  // Start from 1, helps not to have falsy values
+  let __currentId = 1;
 
-const $$id = SymbolCreate("id")
-const GetOrSetId = function GetOrSetId(o: any): number {
-  let id = o[$$id]
-  if (id === undefined) {
-    id = GenerateId()
-    DefineValue(o, $$id, id)
+  function GenerateId() {
+    let returnValue = __currentId;
+    __currentId += 1;
+    return returnValue;
   }
-  return id
-}
+  return GenerateId;
+}());
+
+const $$id = SymbolCreate("id");
+const GetOrSetId = function GetOrSetId(o: any): number {
+  let id = o[$$id];
+  if (id === undefined) {
+    id = GenerateId();
+    DefineValue(o, $$id, id);
+  }
+  return id;
+};
 
 
 /**
@@ -44,7 +44,7 @@ const GetOrSetId = function GetOrSetId(o: any): number {
  *
  */
 export function generate(): number {
-  return GenerateId()
+  return GenerateId();
 }
 
 /**
@@ -52,8 +52,8 @@ export function generate(): number {
  *
  */
 export function hasId(o: any): boolean {
-  let t = typeof o
-  return t === "function" || (o !== null && t === "object")
+  let t = typeof o;
+  return t === "function" || (o !== null && t === "object");
 }
 
 /**
@@ -61,16 +61,16 @@ export function hasId(o: any): boolean {
  *
  */
 export function getId(o: any): number {
-  let returnValue = NaN
+  let returnValue = NaN;
   switch (typeof o) {
-    case 'object':
+    case "object":
       if (o !== null) {
-        returnValue = GetOrSetId(o)
+        returnValue = GetOrSetId(o);
       }
-      break
-    case 'function':
-      returnValue = GetOrSetId(o)
-      break
+      break;
+    case "function":
+      returnValue = GetOrSetId(o);
+      break;
   }
-  return returnValue
+  return returnValue;
 }

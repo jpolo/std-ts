@@ -1,6 +1,5 @@
-//Util
-const __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-const __empty = {};
+// Util
+const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
 
 type Locals = { [key: string]: any }
 
@@ -9,10 +8,15 @@ type Option = {
   sourceMappingURL?: string
 }
 
+const OptionEmpty = {
+  sourceURL: null,
+  sourceMappingURL: null
+};
+
 /**
  * The global object (either ```window``` or ```global```)
  */
-export const global = __global;
+export const global = Global;
 
 /**
  * Parse ```jscode``` and return a function
@@ -21,15 +25,14 @@ export const global = __global;
  * @param options The options of evaluation
  * @returns The evaluable function
  */
-export function compile(jscode: string, options?: Option): (locals?: Locals) => any {
-  options = options || __empty;
+export function compile(jscode: string, options: Option = OptionEmpty): (locals?: Locals) => any {
   let fnWithContext: Function;
   let fnNoContext: Function;
   let evalCode = jscode;
   const { sourceURL, sourceMappingURL } = options;
 
   if (sourceURL) {
-    //Firebug and Webkit annotation
+    // Firebug and Webkit annotation
     evalCode += "\n//# sourceURL=" + sourceURL;
   }
 
@@ -47,7 +50,7 @@ export function compile(jscode: string, options?: Option): (locals?: Locals) => 
       returnValue = fnNoContext();
     }
     return returnValue;
-  }
+  };
 }
 
 /**
