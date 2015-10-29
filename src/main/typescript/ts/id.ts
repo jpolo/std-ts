@@ -1,8 +1,15 @@
 declare var Symbol: any;
 
 // ECMA like
-const SymbolCreate: (s: string) => any = typeof Symbol !== "undefined" ? Symbol : function (s: string) { return "@@" + s; };
-const DefinePropertyOrThrow = Object.defineProperty || function (o: any, k: string, d: PropertyDescriptor): any { o[k] = d.value; };
+function SymbolCreate(s: string): any { return typeof Symbol !== "undefined" ? Symbol(s) : "@@" + s; }
+function DefinePropertyOrThrow(o: any, k: string, d: PropertyDescriptor) {
+  let def = Object.defineProperty;
+  if (def) {
+    def(o, k, d);
+  } else {
+    o[k] = d.value;
+  }
+}
 const DefineValue = (function () {
   const __descriptor: PropertyDescriptor = {
     value: null,
@@ -29,14 +36,14 @@ const GenerateId = (function () {
 }());
 
 const $$id = SymbolCreate("id");
-const GetOrSetId = function GetOrSetId(o: any): number {
+function GetOrSetId(o: any): number {
   let id = o[$$id];
   if (id === undefined) {
     id = GenerateId();
     DefineValue(o, $$id, id);
   }
   return id;
-};
+}
 
 
 /**

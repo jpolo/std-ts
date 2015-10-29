@@ -1,28 +1,29 @@
-//ECMA like
-const IsEmpty = function (o) { return o === null  || o === undefined; };
-const IsNaN = function (o) { return o !== o; };
-const ToString = function (o) { return "" + o; };
-const ToStringTag = function (o: any) {
-  let s = '';
+// ECMA like
+function IsEmpty(o) { return o === null  || o === undefined; }
+function IsNaN(o) { return o !== o; }
+function ToString(o) { return "" + o; };
+function ToStringTag(o: any) {
+  let s = "";
   if (o === undefined) {
-    s = 'Undefined';
+    s = "Undefined";
   } else if (o === null) {
-    s = 'Null';
+    s = "Null";
   } else {
     let c = o.constructor;
     s = c && c.name || Object.prototype.toString.call(o).slice(8, -1);
   }
   return s;
-};
-const __comparator = function <T>(o: T): (lhs: T, rhs: T) => Ordering {
-  let returnValue: (lhs: any, rhs: any) => Ordering
+}
+
+function Comparator<T>(o: T): (lhs: T, rhs: T) => Ordering {
+  let returnValue: (lhs: any, rhs: any) => Ordering;
   let tag = ToStringTag(o);
   switch (tag) {
-    case 'Undefined': returnValue = null; break;
-    case 'Null': returnValue = null; break;
-    case 'Boolean': returnValue = <any>compareBoolean; break;
-    case 'Number': returnValue = <any>compareNumber; break;
-    case 'String': returnValue = <any>compareString; break;
+    case "Undefined": returnValue = null; break;
+    case "Null": returnValue = null; break;
+    case "Boolean": returnValue = <any>compareBoolean; break;
+    case "Number": returnValue = <any>compareNumber; break;
+    case "String": returnValue = <any>compareString; break;
     default:
       if (isICompare(o)) {
         returnValue = compareICompare;
@@ -55,7 +56,7 @@ export function compare<T>(lhs: T, rhs: T): Ordering {
   let returnValue: Ordering = Ordering.None;
   let l = <any> lhs;
   let r = <any> rhs;
-  let cmpFn = __comparator(lhs) || __comparator(rhs);
+  let cmpFn = Comparator(lhs) || Comparator(rhs);
 
   return (
     cmpFn ? cmpFn(lhs, rhs) :
