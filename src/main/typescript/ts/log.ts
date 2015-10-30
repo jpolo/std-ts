@@ -1,7 +1,5 @@
-import console from "./console";
-
-// Constant
-const ES_COMPAT = 3;
+import * as console from "./console";
+import * as time from "./time";
 
 // ECMA like functions
 const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
@@ -15,11 +13,10 @@ function OwnKeys(o: any) {
   return ks;
 }
 
-function Compare(a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1; };
-const __str = function (o) { return "" + o; };
-const __strCmp = function(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1; };
-const __throwAsync = function(e) { setTimeout(() => { throw e; }, 0); };
-const __arrayCmp = function <T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): number {
+function Compare(a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1; }
+function ThrowAsync(e) { setTimeout(() => { throw e; }, 0); }
+function StringCompare(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1; }
+function ArrayCompare<T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): number {
   let returnValue = 0;
   let al = a.length;
   let bl = b.length;
@@ -33,20 +30,12 @@ const __arrayCmp = function <T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): 
     }
   }
   return returnValue;
-};
+}
 
 
 // Services
-type $Console = {
-  debug(...a: any[]);
-  info(...a: any[]);
-  warn(...a: any[]);
-  error(...a: any[]);
-};
-type $Time = { now: () => number };
-
-const $consoleDefault: $Console = console;
-const $timeDefault: $Time = { now: Date.now || function () { return (new Date()).getTime(); } };
+const $consoleDefault: console.IConsoleModule = console;
+const $timeDefault: time.ITimeModule = time;
 
 export interface IDispatcher {
   isEnabledFor(level: ILevel, group: string): boolean;
@@ -98,7 +87,7 @@ export class Level implements ILevel {
   static create(name: string, level: number): Level {
     name = name.toUpperCase();
     level = level >>> 0;
-    let byName = Level._byValue;
+    let byName = Level._instances;
     let byValue = Level._byValue;
     if (byName[name]) {
       throw new Error(byName[name] + " is already defined");
@@ -168,8 +157,8 @@ export class Message implements IMessage {
   static compare(a: IMessage, b: IMessage): number {
     return (
       Level.compare(a.level, b.level) ||
-      __strCmp(a.group, b.group) ||
-      __arrayCmp(a.data, b.data, Compare)
+      StringCompare(a.group, b.group) ||
+      ArrayCompare(a.data, b.data, Compare)
     );
   }
 
@@ -211,9 +200,6 @@ export class Message implements IMessage {
   }
 }
 
-export function logger(group: string): Logger {
-  return $dispatcher.getLogger(group);
-}
 
 /*
 function loggerFor(o: any): Logger {
@@ -224,74 +210,17 @@ function loggerFor(o: any): Logger {
 }
 */
 
-export class Logger {
-  // static SEPARATOR = '.'
-
-  protected $dispatcher: IDispatcher;
-
-  constructor(
-    public name: string,
-    $dispatcher: IDispatcher
-  ) {
-    this.$dispatcher = $dispatcher;
-  }
-
-  inspect() {
-    return "Logger { name: \"" + this.name + "\ }";
-  }
-
-  log(level: ILevel, ...args: any[]): void {
-    this._dispatch(level, args);
-  }
-
-  debug(...args: any[]): void {
-    this._dispatch(DEBUG, args);
-  }
-
-  info(...args: any[]): void {
-    this._dispatch(INFO, args);
-  }
-
-  warn(...args: any[]): void {
-    this._dispatch(WARN, args);
-  }
-
-  error(...args: any[]): void {
-    this._dispatch(ERROR, args);
-  }
-
-  fatal(...args: any[]): void {
-    this._dispatch(FATAL, args);
-  }
-
-  toString(): string {
-    return this.inspect();
-  }
-
-  protected _dispatch(level: ILevel, args: any[]): void  {
-    let name = this.name;
-    let dispatcher = this.$dispatcher;
-    if (!dispatcher) {
-      throw new Error("dispatcher is required");
-    }
-
-    // if (dispatcher.isEnabledFor(level, name)) {
-    dispatcher.send(level, name, args);
-    // }
-  }
-}
-
 export class Dispatcher implements IDispatcher {
   reporters: { [key: string]: { filter?: IFilter; reporter: IReporter; } } = {};
 
   protected _loggers: { [name: string]: Logger } = {};
 
   // Services
-  protected $time: $Time = $timeDefault;
+  protected $time: time.ITimeModule = $timeDefault;
 
   constructor(
     deps?: {
-      $time?: $Time
+      $time?: time.ITimeModule
     }
   ) {
     if (deps) {
@@ -340,7 +269,7 @@ function __filter(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): b
   try {
     return f.filter ? f.filter(m) || false : true;
   } catch (e) {
-    __throwAsync(e);
+    ThrowAsync(e);
   }
 }
 
@@ -348,15 +277,71 @@ function __send(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): boo
   try {
     return f.reporter.receive(m);
   } catch (e) {
-    __throwAsync(e);
+    ThrowAsync(e);
+  }
+}
+
+// default dispatcher
+let $dispatcherDefault: Dispatcher = new Dispatcher();
+
+export class Logger {
+  // static SEPARATOR = '.'
+
+  protected $dispatcher: IDispatcher;
+
+  constructor(
+    public name: string,
+    $dispatcher: IDispatcher
+  ) {
+    this.$dispatcher = $dispatcher;
+  }
+
+  inspect() {
+    return `Logger { name: "${this.name}" }`;
+  }
+
+  log(level: ILevel, ...args: any[]): void {
+    this._dispatch(level, args);
+  }
+
+  debug(...args: any[]): void {
+    this._dispatch(DEBUG, args);
+  }
+
+  info(...args: any[]): void {
+    this._dispatch(INFO, args);
+  }
+
+  warn(...args: any[]): void {
+    this._dispatch(WARN, args);
+  }
+
+  error(...args: any[]): void {
+    this._dispatch(ERROR, args);
+  }
+
+  fatal(...args: any[]): void {
+    this._dispatch(FATAL, args);
+  }
+
+  toString(): string {
+    return this.inspect();
+  }
+
+  protected _dispatch(level: ILevel, args: any[]): void  {
+    let name = this.name;
+    let dispatcher = this.$dispatcher;
+    if (!dispatcher) {
+      throw new Error("dispatcher is required");
+    }
+
+    // if (dispatcher.isEnabledFor(level, name)) {
+    dispatcher.send(level, name, args);
+    // }
   }
 }
 
 
-/**
- * Default engine
- */
-var $dispatcher: Dispatcher = new Dispatcher();
 
 /*filter.and(
   filter.level("DEBUG", '>'),
@@ -425,6 +410,10 @@ export module filter {
   }
 }*/
 
+export function logger(group: string): Logger {
+  return $dispatcherDefault.getLogger(group);
+}
+
 export module reporter {
   type $ConsoleFormatter = (logMessage: IMessage) => any[];
   let $consoleFormatterDefault: $ConsoleFormatter = function (logMessage: IMessage) {
@@ -445,11 +434,11 @@ export module reporter {
   export class Console implements IReporter {
     // Services
     protected $formatter: $ConsoleFormatter = $consoleFormatterDefault;
-    protected $console: $Console = $consoleDefault;
+    protected $console: console.IConsoleModule = $consoleDefault;
 
     constructor(deps: {
       $formatter?: $ConsoleFormatter;
-      $console?: $Console
+      $console?: console.IConsoleModule
     }) {
       if (deps) {
         if (deps.$formatter !== undefined) {

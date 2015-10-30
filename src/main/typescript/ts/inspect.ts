@@ -1,13 +1,13 @@
 // Constant
-const ES_COMPAT = 3;
 declare var Set: any; // TODO remove
 
 // Util
-const __ostring = Object.prototype.toString;
-const __fstring = Function.prototype.toString;
-
 function FunctionName(f: Function) {
   return (<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]);
+}
+
+function FunctionToString(f: Function) {
+  return Function.prototype.toString.call(f);
 }
 
 function OwnKeys(o: any) {
@@ -28,7 +28,6 @@ function OwnKeys(o: any) {
 function Type(o: any) { return o === null ? "null" : typeof o; }
 
 function ToString(o: any) { return "" + o; }
-
 
 function SetCreate<T>(): { has: (o: T) => boolean; add: (o: T) => void } {
   if (typeof Set !== "undefined") {
@@ -54,7 +53,7 @@ function ToStringTag(o: any) {
     s = "Null";
   } else {
     let c = o.constructor;
-    s = c && c.name || __ostring.call(o).slice(8, -1);
+    s = c && c.name || Object.prototype.toString.call(o).slice(8, -1);
   }
   return s;
 }
@@ -79,9 +78,7 @@ function DumpObject(constructorName: string, content: string) {
 }
 
 export interface IInspect {
-
   inspect(maxDepth?: number): string;
-
 }
 
 export interface IInspector {
@@ -217,7 +214,7 @@ export class Inspector implements IInspector {
   stringifyFunction(o: Function): string {
     let s = DumpEmpty(this, o);
     if (s === null) {
-      s = __fstring.call(o);
+      s = FunctionToString(o);
       let i = s.indexOf("{");
       let head = s.slice(0, i + 1);
       let content = s.slice(i + 1, -1);

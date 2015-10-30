@@ -1,6 +1,8 @@
 declare var Symbol: any;
 
 // ECMA like
+function IsFunction(o: any) { return typeof o === "function"; }
+function IsObject(o: any) { return typeof o === "object" && o !== null; }
 function SymbolCreate(s: string): any { return typeof Symbol !== "undefined" ? Symbol(s) : "@@" + s; }
 function DefinePropertyOrThrow(o: any, k: string, d: PropertyDescriptor) {
   let def = Object.defineProperty;
@@ -48,7 +50,6 @@ function GetOrSetId(o: any): number {
 
 /**
  * Return new generated id
- *
  */
 export function generate(): number {
   return GenerateId();
@@ -56,28 +57,14 @@ export function generate(): number {
 
 /**
  * Return true if o can have and id (object or function)
- *
  */
 export function hasId(o: any): boolean {
-  let t = typeof o;
-  return t === "function" || (o !== null && t === "object");
+  return IsFunction(o) || IsObject(o);
 }
 
 /**
  * Return the corresponding id if able
- *
  */
 export function getId(o: any): number {
-  let returnValue = NaN;
-  switch (typeof o) {
-    case "object":
-      if (o !== null) {
-        returnValue = GetOrSetId(o);
-      }
-      break;
-    case "function":
-      returnValue = GetOrSetId(o);
-      break;
-  }
-  return returnValue;
+  return hasId(o) ? GetOrSetId(o) : NaN;
 }
