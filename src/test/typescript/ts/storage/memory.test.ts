@@ -38,7 +38,7 @@ export default suite("ts/storage/memory", (self) => {
     assert.strictEqual(memoryStorage.size(), 1);
     memoryStorage.setItem("bar", "bar");
     assert.strictEqual(memoryStorage.size(), 2);
-    
+
     memoryStorage.removeItem("bar");
     assert.strictEqual(memoryStorage.size(), 1);
   });
