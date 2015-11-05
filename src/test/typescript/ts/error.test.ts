@@ -1,5 +1,5 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
-import * as error from "../../../main/typescript/ts/error"
+import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit";
+import * as error from "../../../main/typescript/ts/error";
 
 class ChildError extends error.Error {}
 class ChildEvalError extends error.EvalError {}
@@ -17,14 +17,14 @@ const ErrorSuite = suite("ts/error.Error", (self) => {
     assert.instanceOf(err, ChildError);
     assert.instanceOf(err, Error);
     assert.strictEqual(err.name, "ChildError");
-  })
-  
+  });
+
   test("#constructor()", (assert) => {
     assert.strictEqual(error.Error, Error);
     assert.instanceOf(new error.Error(), Error);
-  })
-  
-})
+  });
+
+});
 
 const EvalErrorSuite = suite("ts/error.EvalError", (self) => {
 
@@ -34,14 +34,14 @@ const EvalErrorSuite = suite("ts/error.EvalError", (self) => {
     assert.instanceOf(err, EvalError);
     assert.instanceOf(err, Error);
     assert.strictEqual(err.name, "ChildEvalError");
-  })
-  
+  });
+
   test("#constructor()", (assert) => {
     assert.strictEqual(error.EvalError, EvalError);
     assert.instanceOf(new error.EvalError(), EvalError);
-  })
-  
-})
+  });
+
+});
 
 const RangeErrorSuite = suite("ts/error.RangeError", (self) => {
 
@@ -51,14 +51,14 @@ const RangeErrorSuite = suite("ts/error.RangeError", (self) => {
     assert.instanceOf(err, RangeError);
     assert.instanceOf(err, Error);
     assert.strictEqual(err.name, "ChildRangeError");
-  })
-  
+  });
+
   test("#constructor()", (assert) => {
     assert.strictEqual(error.RangeError, RangeError);
     assert.instanceOf(new error.RangeError(), RangeError);
-  })
-  
-})
+  });
+
+});
 
 const ReferenceErrorSuite = suite("ts/error.ReferenceError", (self) => {
 
@@ -68,14 +68,14 @@ const ReferenceErrorSuite = suite("ts/error.ReferenceError", (self) => {
     assert.instanceOf(err, ReferenceError);
     assert.instanceOf(err, Error);
     assert.strictEqual(err.name, "ChildReferenceError");
-  })
-  
+  });
+
   test("#constructor()", (assert) => {
     assert.strictEqual(error.ReferenceError, ReferenceError);
     assert.instanceOf(new error.ReferenceError(), ReferenceError);
-  })
-  
-})
+  });
+
+});
 
 const TypeErrorSuite = suite("ts/error.TypeError", (self) => {
 
@@ -85,84 +85,83 @@ const TypeErrorSuite = suite("ts/error.TypeError", (self) => {
     assert.instanceOf(err, TypeError);
     assert.instanceOf(err, Error);
     assert.strictEqual(err.name, "ChildTypeError");
-  })
-  
+  });
+
   test("#constructor()", (assert) => {
     assert.strictEqual(error.TypeError, TypeError);
     assert.instanceOf(new error.TypeError(), TypeError);
-  })
-  
-})
+  });
+
+});
 
 const URIErrorSuite = suite("ts/error.URIError", (self) => {
-  
+
   test("<extends>", (assert) => {
     let err = new ChildURIError("my message");
     assert.instanceOf(err, ChildURIError);
     assert.instanceOf(err, URIError);
     assert.instanceOf(err, Error);
     assert.strictEqual(err.name, "ChildURIError");
-  })
-  
+  });
+
   test("#constructor()", (assert) => {
     assert.strictEqual(error.URIError, URIError);
     assert.instanceOf(new error.URIError(), URIError);
-  })
-  
-})
+  });
+
+});
 
 const BaseErrorSuite = suite("ts/error.BaseError", (self) => {
-  
+
   test("<extends>", (assert) => {
     let err = new ChildBaseError("my message");
     assert.instanceOf(err, Error);
     assert.instanceOf(err, error.BaseError);
     assert.instanceOf(err, ChildBaseError);
     assert.strictEqual(err.name, "ChildBaseError");
-  })
-  
+  });
 
   test("#constructor()", (assert) => {
     let err = new error.BaseError("my message");
     assert.instanceOf(err, Error);
     assert.instanceOf(err, error.BaseError);
-  })
-  
+  });
+
   test("#name", (assert) => {
     let err = new error.BaseError("foo");
-    
+
     assert.strictEqual(err.name, "BaseError");
-  })
-  
+  });
+
   test("#stack", (assert) => {
     let err = new error.BaseError("foo");
     let stack = String(err.stack);
     let stackLines = stack.split("\n");
     assert.strictEqual(stackLines[0], "BaseError: foo");
-    
-    //let prefix = "    at file:";
-    //assert.strictEqual(stackLines[1].slice(0, prefix.length), prefix);
-  })
-  
+
+    // let prefix = "    at file:";
+    // assert.strictEqual(stackLines[1].slice(0, prefix.length), prefix);
+  });
+
   /*
   test("#inspect()", (assert) => {
     let err = new BaseError("my message");
     assert.strictEqual(err.inspect(), "BaseError { my message }");
   })
   */
-  
+
   test("#toString()", (assert) => {
     let err = new error.BaseError("my message");
     assert.strictEqual(err.toString(), "BaseError: my message");
-  })
-  
-})
+  });
+
+});
 
 export default ErrorSuite.concat(
-  EvalErrorSuite, 
-  RangeErrorSuite, 
-  ReferenceErrorSuite, 
-  TypeErrorSuite, 
-  URIErrorSuite, 
+  EvalErrorSuite,
+  RangeErrorSuite,
+  ReferenceErrorSuite,
+  TypeErrorSuite,
+  URIErrorSuite,
   BaseErrorSuite
 );

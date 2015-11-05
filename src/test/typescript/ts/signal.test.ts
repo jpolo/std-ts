@@ -47,10 +47,18 @@ export default suite("ts/signal", (self) => {
 
   test(".connect()", (assert) => {
     assert.strictEqual(count(receiver, SIG), 0);
+
+    // Connect
     connect(receiver, SIG, listener1);
     assert.strictEqual(count(receiver, SIG), 1);
     connect(receiver, SIG, listener1);
+    assert.strictEqual(count(receiver, SIG), 1); // must be unique
+
+    // Connect once
+    connect(receiver, SIG, listener1, true);
     assert.strictEqual(count(receiver, SIG), 2);
+    connect(receiver, SIG, listener1, true);
+    assert.strictEqual(count(receiver, SIG), 2); // must be unique
   });
 
   test(".disconnect()", (assert) => {
