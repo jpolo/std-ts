@@ -17,25 +17,31 @@ export const DATE_MAX_MILLISECONDS = 8640000000000000;
 export const DATE_MIN_MILLISECONDS = -DATE_MAX_MILLISECONDS;
 export const EPSILON = 2.220446049250313e-16;
 
-export const IsExtensible = Object.isExtensible || function (o: any) { return true; };
-export const IsFinite = function (o) { return global.isFinite(o); };
-export const IsEmpty = function (o: any) { return o === undefined || o === null; };
-export const IsNaN = function (o: any) { return o !== o; };
-export const IsNumber = function (o: any) { return typeof o === "number"; };
-export const IsFunction = function (o): boolean { return typeof o === "function"; };
-export const IsObject = function (o: any) { return o !== null && (typeof o == "object"); };
-export const SameValue = Object["is"] || function (a: any, b: any) { return a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b); };
-export const OwnKeys = Object.keys || function (o: any): string[] { let keys = []; for (let prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } }; return keys; };
-export const OwnKeysSorted = function (o: any) { return OwnKeys(o).sort(); };
-export const ObjectAssign = function <T, U>(o: T, ext: U): T & U {
-  for (let key of OwnKeys(ext)) {
-    o[key] = ext[key];
+export function IsExtensible(o: any): boolean { return Object.isExtensible ? Object.isExtensible(o) : true; }
+export function IsFinite(o: any): boolean { return global.isFinite(o); };
+export function IsEmpty(o: any): boolean { return o === undefined || o === null; }
+export function IsNaN(o: any): boolean { return o !== o; }
+export function IsNumber(o: any): boolean { return typeof o === "number"; }
+export function IsFunction(o): boolean { return typeof o === "function"; }
+export function IsObject(o: any) { return o !== null && (typeof o == "object"); }
+export function SameValue(a: any, b: any) {
+  return Object["is"] ? Object["is"](a, b) : a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b);
+}
+export function OwnKeys(o: any): string[] {
+  let keys: string[];
+  if (Object.keys) {
+    keys = Object.keys(o);
+  } else {
+    keys = [];
+    for (let prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } };
   }
-  return <any>o;
+  return keys;
 };
-export const ObjectFreeze = Object.freeze || function <T>(o: T): T { return o; };
-export const GetPrototypeOf = Object.getPrototypeOf || function (o: any) { return o.__proto__; };
-export const Type = function (o: any): string {
+export function OwnKeysSorted(o: any) { return OwnKeys(o).sort(); }
+export function ObjectAssign<T, U>(o: T, ext: U): T & U { for (let key of OwnKeys(ext)) { o[key] = ext[key]; } return <any>o; }
+export function ObjectFreeze<T>(o: T): T { return Object.freeze ? Object.freeze(o) : o; }
+export function GetPrototypeOf(o: any) { return Object.getPrototypeOf ? Object.getPrototypeOf(o) : o.__proto__; }
+export function Type(o: any): string {
   let t = typeof o;
   switch (t) {
   case "undefined":
@@ -54,9 +60,9 @@ export const Type = function (o: any): string {
     }
   }
   return t;
-};
-export const ToString = function (o: any) { return "" + o; };
-export const ToStringTag = function (o: any): string {
+}
+export function ToString(o: any) { return "" + o; }
+export function ToStringTag(o: any): string {
   let s = "";
   switch (Type(o)) {
     case "null": s = "Null"; break;
@@ -70,9 +76,9 @@ export const ToStringTag = function (o: any): string {
       s = c && c.name || Object.prototype.toString.call(o).slice(8, -1);
   }
   return s;
-};
+}
 
-/*export const FunctionCall = function (f: Function, thisp: any, args: any[]) {
+/*export function FunctionCall(f: Function, thisp: any, args: any[]) {
   let argc = args && args.length || 0
   switch (argc) {
     case 0: return thisp ? f.call(thisp) : f()
@@ -81,11 +87,11 @@ export const ToStringTag = function (o: any): string {
     default: return f.apply(thisp, args)
   }
 }*/
-export const FunctionToString = function (f: Function): string {
+export function FunctionToString(f: Function): string {
   return Function.prototype.toString.call(f);
-};
-export const FunctionToSource = function (f: Function): string {
+}
+export function FunctionToSource(f: Function): string {
   let src = FunctionToString(f);
   return src.slice(src.indexOf("{"), -1).trim();
-};
-export const Now = Date.now || function () { return new Date().getTime(); };
+}
+export function Now() { return Date.now ? Date.now() : new Date().getTime(); };

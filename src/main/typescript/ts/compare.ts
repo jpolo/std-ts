@@ -54,8 +54,6 @@ export function isICompare(o: any): boolean {
 
 export function compare<T>(lhs: T, rhs: T): Ordering {
   let returnValue: Ordering = Ordering.None;
-  let l = <any> lhs;
-  let r = <any> rhs;
   let cmpFn = Comparator(lhs) || Comparator(rhs);
 
   return (
