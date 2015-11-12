@@ -39,8 +39,6 @@ function IteratorRepeat<T>(length: number, v: T, hint?: string): Iterator<T> {
   );
 }
 
-
-
 export interface IIterator<T> {
   next(): IIteratorResult<T>;
 }
@@ -50,13 +48,11 @@ export interface IIteratorResult<T> {
   done: boolean;
 }
 
-
 export class Iterator<T> implements IIterator<T> {
-
 
   constructor(public next: () => IIteratorResult<T>, public hint = "abstract") { }
 
-  inspect() { return "Iterator { [" + this.hint + "] }"; }
+  inspect() { return `Iterator { [${this.hint}] }`; }
 
   toString() {
     return this.inspect();

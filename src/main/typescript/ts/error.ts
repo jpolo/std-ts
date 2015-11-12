@@ -2,8 +2,9 @@
 const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 const GlobalConsole: Console = typeof console !== "undefined" ? Global.console : null;
 const GlobalError = Global.Error;
-function ToString(o) { return "" + o; }
-function Dump(o) { return ToString(o); }
+function Has(o: any, name: string) { return o && (name in o); }
+function ToString(o: any) { return "" + o; }
+function Dump(o: any) { return ToString(o); }
 function FunctionName(f: Function) {
   return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]));
 }
@@ -19,22 +20,21 @@ function CaptureStackTrace(error, stripPoint) {
   }
 }
 
-module error {
-
-
-
-  function HandleUncaughtError(error, prefix) {
-    if (GlobalConsole) {
-      let str = error && (error instanceof Error) ? ToString(error.stack || error) : Dump(error);
-      GlobalConsole.error(prefix + str);
-    } else { // rethrow so it is catched by global.onerror
-      throw error;
-    }
+function HandleUncaughtError(error, prefix) {
+  if (GlobalConsole) {
+    let str = Has(error, "stack") ? error.stack :
+      error && (error instanceof Error) ? ToString(error.stack || error) :
+      Dump(error);
+    GlobalConsole.error(prefix + str);
+  } else { // rethrow so it is catched by global.onerror
+    throw error;
   }
+}
+
+module error {
 
   // isHandling marker to avoid infinite recursion
   let _isHandling = false;
-
 
   export interface IErrorHandler {
     (e: any): boolean;

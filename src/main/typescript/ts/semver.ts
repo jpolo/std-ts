@@ -1,11 +1,22 @@
-import { IHash, hashString } from "./hash"
+import { IHash, hashString } from "./hash";
 
-//reference: https://github.com/npm/node-semver/blob/master/semver.js
+// reference: https://github.com/npm/node-semver/blob/master/semver.js
 
-//Util
+// Util
 function Has(o: any, prop: string) { return (prop in o) }
 function ToUint32(o: any) { return o >>>0 }
 function ToString(o: any): string { return "" + o }
+function SemVerStringify(v: ISemVer) {
+  let s = "";
+  s += v.major + '.' + v.minor + '.' + v.patch;
+  if (v.prerelease.length) {
+    s += '-' + v.prerelease.join('.');
+  }
+  return s;
+}
+function SemVerCompare(a: ISemVer, b: ISemVer) {
+  return __cmpMain(a, b) || __cmpPre(a, b);
+}
 
 export interface ISemVer {
   major: number;
@@ -65,7 +76,7 @@ export class SemVer implements ISemVer, IHash {
       throw new TypeError('Invalid Version: ' + s);
     }
 
-    //this.raw = version;
+    // this.raw = version;
 
     // these are actually numbers
     let major = +m[1];
@@ -75,12 +86,12 @@ export class SemVer implements ISemVer, IHash {
     // numberify any prerelease numeric ids
     let prerelease = [];
     if (m[4]) {
-      prerelease = m[4].split('.').map(function(id) {
+      prerelease = m[4].split(".").map(function(id) {
         return (/^[0-9]+$/.test(id)) ? +id : id;
       });
     }
 
-    let build = m[5] ? m[5].split('.') : [];
+    let build = m[5] ? m[5].split(".") : [];
     return new SemVer(
       major,
       minor,
@@ -91,7 +102,7 @@ export class SemVer implements ISemVer, IHash {
   }
 
   static stringify(v: ISemVer): string {
-    return __strSemVer(v);
+    return SemVerStringify(v);
   }
 
   major: number;
@@ -110,8 +121,8 @@ export class SemVer implements ISemVer, IHash {
     this.major = ToUint32(major);
     this.minor = ToUint32(minor);
     this.patch = ToUint32(patch);
-    this.prerelease = prerelease ? prerelease.slice() : [];//copy
-    this.build = build ? build.slice() : [];//copy
+    this.prerelease = prerelease ? prerelease.slice() : []; // copy
+    this.build = build ? build.slice() : []; // copy
   }
 
   compare(o: ISemVer): number {
@@ -133,31 +144,21 @@ export class SemVer implements ISemVer, IHash {
   }
 
   inspect() {
-    return 'SemVer { "' +  ToString(this) + '" }'
+    return `SemVer { "${this.toString()}" }`;
   }
 
   toJSON() {
-    return ToString(this)
+    return ToString(this);
   }
 
   toString(): string {
-    return __strSemVer(this)
+    return SemVerStringify(this);
   }
 
 }
 
 
-function __strSemVer(v: ISemVer) {
-  let s = "";
-  s += v.major + '.' + v.minor + '.' + v.patch;
-  if (v.prerelease.length) {
-    s += '-' + v.prerelease.join('.');
-  }
-  return s;
-}
-function SemVerCompare(a: ISemVer, b: ISemVer) {
-  return __cmpMain(a, b) || __cmpPre(a, b);
-}
+
 function __cmpIdentifiers(a: number|string, b: number|string): number {
   return NaN;
   /*let anum = numeric.test(a);
