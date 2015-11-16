@@ -1,4 +1,12 @@
+// Interfaces
+/*export interface IErrorHandler {
+  (e: any): boolean;
+}
+
+export interface IThrowable extends Error {}*/
+
 // Util
+declare var __extends: any; // Typescript __extends
 const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 const GlobalConsole: Console = typeof console !== "undefined" ? Global.console : null;
 const GlobalError = Global.Error;
@@ -31,14 +39,30 @@ function HandleUncaughtError(error, prefix) {
   }
 }
 
+function PatchExtends() {
+  // HACK: augment __extends
+  __extends = (function (__extendsOld) {
+    return function __extends(d, b) {
+      __extendsOld(d, b);
+
+      if (d.prototype instanceof Global.Error) {
+        // class is subclass native Error
+        d.prototype.name = FunctionName(d);
+      }
+    };
+  }(__extends));
+}
+
+
 module error {
-
-  // isHandling marker to avoid infinite recursion
-  let _isHandling = false;
-
   export interface IErrorHandler {
     (e: any): boolean;
   }
+
+  export interface IThrowable extends Error {}
+
+  // isHandling marker to avoid infinite recursion
+  let _isHandling = false;
 
   export let onerror: IErrorHandler = null;
 
@@ -69,20 +93,6 @@ module error {
     return uncaught;
   }
 
-  // HACK: augment __extends
-  declare var __extends: any;
-  __extends = (function (__extendsOld) {
-    return function __extends(d, b) {
-      __extendsOld(d, b);
-
-      if (d.prototype instanceof Global.Error) {
-        // class is subclass native Error
-        d.prototype.name = FunctionName(d);
-      }
-    };
-  }(__extends));
-
-  export interface IThrowable extends Error {}
 
   export declare class Error {
     name: string;
@@ -121,4 +131,13 @@ module error {
   }
 
 }
+
+// Apply path
+PatchExtends();
+
+/*
+const { Error, TypeError, RangeError } = error;
+
+export { Error, TypeError, RangeError };*/
+
 export = error
