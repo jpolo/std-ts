@@ -1,18 +1,26 @@
+import * as iterator from "./iterator";
+
 // Interfaces
-/*export interface IErrorHandler {
-  (e: any): boolean;
+export interface IErrorHandlerResult extends iterator.IIteratorResult<any> {}
+
+export interface IErrorHandler {
+  handleError(e: any): IErrorHandlerResult;
 }
 
-export interface IThrowable extends Error {}*/
+export interface IThrowable extends Error {}
 
 // Util
 declare var __extends: any; // Typescript __extends
 const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 const GlobalConsole: Console = typeof console !== "undefined" ? Global.console : null;
 const GlobalError = Global.Error;
+const GlobalTypeError: any = Global.TypeError;
 function Has(o: any, name: string) { return o && (name in o); }
+function IsError(o: any): boolean { return o instanceof GlobalError; }
 function ToString(o: any) { return "" + o; }
-function Dump(o: any) { return ToString(o); }
+function Dump(o: any) {
+  return IsError(o) && Has(o, "stack") ? ToString(o.stack) : ToString(o);
+}
 function FunctionName(f: Function) {
   return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]));
 }
@@ -30,10 +38,7 @@ function CaptureStackTrace(error, stripPoint) {
 
 function HandleUncaughtError(error, prefix) {
   if (GlobalConsole) {
-    let str = Has(error, "stack") ? error.stack :
-      error && (error instanceof Error) ? ToString(error.stack || error) :
-      Dump(error);
-    GlobalConsole.error(prefix + str);
+    GlobalConsole.error(prefix + Dump(error));
   } else { // rethrow so it is catched by global.onerror
     throw error;
   }
@@ -53,46 +58,91 @@ function PatchExtends() {
   }(__extends));
 }
 
+class ErrorHandler implements IErrorHandler {
 
-module error {
-  export interface IErrorHandler {
-    (e: any): boolean;
-  }
-
-  export interface IThrowable extends Error {}
-
-  // isHandling marker to avoid infinite recursion
-  let _isHandling = false;
-
-  export let onerror: IErrorHandler = null;
-
-  export function handleError(e): boolean {
-    let handler: IErrorHandler = onerror;
-    let uncaught = !handler;
-    let fatalError;
-    if (!_isHandling) {
-      _isHandling = true;
-      if (!uncaught) {
-        try {
-          uncaught = !handler(e);
-        } catch (e) {
-          uncaught = true;
-          fatalError = e;
+  static compose(handlers: IErrorHandler[]) {
+    return new ErrorHandler(function (e: any) {
+      let returnValue: IErrorHandlerResult;
+      for (let handler of handlers) {
+        returnValue = handler.handleError(e);
+        if (returnValue.done) {
+          break;
         }
       }
-      if (uncaught) {
-        HandleUncaughtError(e, "Uncaught ");
-      }
-      _isHandling = false;
-    } else {
-      fatalError = e;
-    }
-    if (fatalError) {
-      HandleUncaughtError(fatalError, "Fatal ");
-    }
-    return uncaught;
+      return returnValue || { done: false, value: e };
+    });
   }
 
+  static uncaught = new ErrorHandler(function (e: any) {
+    if (e && e.name === FatalError.prototype.name) {
+      let fatalError = <FatalError> e;
+      HandleUncaughtError(fatalError.error, "Fatal ");
+    } else {
+      HandleUncaughtError(e, "Uncaught ");
+    }
+    return { done: true, value: undefined };
+  });
+
+  protected _isHandling = false;
+  protected _handler: (e: any) => IErrorHandlerResult;
+
+  constructor(h: (e: any) => IErrorHandlerResult) {
+    this._handler = h;
+  }
+
+  handleError(e: any): IErrorHandlerResult {
+    let returnValue = { done: false, value: e };
+    if (this._handler) {
+      if (!this._isHandling) {
+        this._isHandling = true;
+        try {
+          returnValue = this._handler(e);
+        } catch (e) {
+          returnValue = { done: false, value: new FatalError(e) };
+        }
+        this._isHandling = false;
+      } else {
+        returnValue = { done: false, value: new FatalError(e) };
+      }
+    }
+    return returnValue;
+  }
+}
+
+
+// isHandling marker to avoid infinite recursion
+let _isHandling = false;
+
+export let onerror: (e: any) => boolean = null;
+
+export function handleError(e): boolean {
+  let handler = onerror;
+  let uncaught = !handler;
+  let fatalError;
+  if (!_isHandling) {
+    _isHandling = true;
+    if (!uncaught) {
+      try {
+        uncaught = !handler(e);
+      } catch (e) {
+        uncaught = true;
+        fatalError = e;
+      }
+    }
+    if (uncaught) {
+      HandleUncaughtError(e, "Uncaught ");
+    }
+    _isHandling = false;
+  } else {
+    fatalError = e;
+  }
+  if (fatalError) {
+    HandleUncaughtError(fatalError, "Fatal ");
+  }
+  return uncaught;
+}
+
+namespace error {
 
   export declare class Error {
     name: string;
@@ -120,24 +170,37 @@ module error {
   export declare class URIError extends Error {}
   error["URIError"] = Global.URIError;
 
-  export class BaseError extends Error /*HACK: global reference*/ {
-    stack: string;
-
-    constructor(message?: string) {
-      super(message);
-      this.message = message;
-      CaptureStackTrace(this, this.constructor);
-    }
-  }
-
 }
 
 // Apply path
 PatchExtends();
+const {
+  Error,
+  EvalError,
+  RangeError,
+  ReferenceError,
+  SyntaxError,
+  TypeError,
+  URIError
+} = error;
 
-/*
-const { Error, TypeError, RangeError } = error;
+export class BaseError extends Error /*HACK: global reference*/ {
+  stack: string;
 
-export { Error, TypeError, RangeError };*/
+  constructor(message?: string) {
+    super(message);
+    this.message = message;
+    CaptureStackTrace(this, this.constructor);
+  }
+}
 
-export = error
+class FatalError extends BaseError {
+  error: any = null;
+
+  constructor(e: any) {
+    super(e != undefined ? ToString(e) : "");
+    this.error = e;
+  }
+}
+
+export { Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError, FatalError };
