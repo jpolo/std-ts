@@ -90,6 +90,10 @@ class ErrorHandler implements IErrorHandler {
     this._handler = h;
   }
 
+  orElse(h: (e: any) => IErrorHandlerResult) {
+    return ErrorHandler.compose([this, new ErrorHandler(h)]);
+  }
+
   handleError(e: any): IErrorHandlerResult {
     let returnValue = { done: false, value: e };
     if (this._handler) {
@@ -109,13 +113,19 @@ class ErrorHandler implements IErrorHandler {
   }
 }
 
+let _handler: IErrorHandler = ErrorHandler.uncaught;
 
-// isHandling marker to avoid infinite recursion
-let _isHandling = false;
+export function getHandler() {
+  return _handler;
+}
 
-export let onerror: (e: any) => boolean = null;
+export function setHandler(h: IErrorHandler) {
+  _handler = h;
+}
 
-export function handleError(e): boolean {
+export function handleError(e) {
+  return _handler.handleError(e).done;
+  /*
   let handler = onerror;
   let uncaught = !handler;
   let fatalError;
@@ -139,7 +149,7 @@ export function handleError(e): boolean {
   if (fatalError) {
     HandleUncaughtError(fatalError, "Fatal ");
   }
-  return uncaught;
+  return uncaught;*/
 }
 
 namespace error {
@@ -184,6 +194,8 @@ const {
   URIError
 } = error;
 
+export { Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError };
+
 export class BaseError extends Error /*HACK: global reference*/ {
   stack: string;
 
@@ -194,7 +206,7 @@ export class BaseError extends Error /*HACK: global reference*/ {
   }
 }
 
-class FatalError extends BaseError {
+export class FatalError extends BaseError {
   error: any = null;
 
   constructor(e: any) {
@@ -202,5 +214,3 @@ class FatalError extends BaseError {
     this.error = e;
   }
 }
-
-export { Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError, FatalError };
