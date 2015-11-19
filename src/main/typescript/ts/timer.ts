@@ -93,7 +93,7 @@ export function setTimeout<A, B, C>(fn: (a: A, b: B, c: C) => void, ms: number, 
 export function setTimeout<A, B>(fn: (a: A, b: B) => void, ms: number, a: A, b: B): number
 export function setTimeout<A>(fn: (a: A) => void, ms: number, a: A): number
 export function setTimeout<A>(fn: () => void, ms?: number): number
-export function setTimeout(fn: Function, ms: number = 0, ...args: any[]): number {
+export function setTimeout(fn: Function, ms = 0, ...args: any[]): number {
   return SetTimeout(args.length === 0 ? fn : () => { fn.apply(null, args); }, ms);
 }
 
@@ -123,7 +123,7 @@ export function setInterval<A, B, C>(fn: (a: A, b: B, c: C) => void, ms: number,
 export function setInterval<A, B>(fn: (a: A, b: B) => void, ms: number, a: A, b: B): number
 export function setInterval<A>(fn: (a: A) => void, ms: number, a: A): number
 export function setInterval<A>(fn: () => void, ms: number): number
-export function setInterval(fn: Function, ms: number = 0, ...args: any[]): number {
+export function setInterval(fn: Function, ms = 0, ...args: any[]): number {
   return SetInterval(args.length === 0 ? fn : () => { fn.apply(null, args); }, ms);
 }
 

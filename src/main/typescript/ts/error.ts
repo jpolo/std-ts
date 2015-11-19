@@ -60,7 +60,16 @@ function PatchExtends() {
 
 class ErrorHandler implements IErrorHandler {
 
-  static compose(handlers: IErrorHandler[]) {
+  private static _empty: ErrorHandler;
+  private static _uncaught: ErrorHandler;
+
+  static empty(): ErrorHandler {
+    return ErrorHandler._empty || (ErrorHandler._empty = new ErrorHandler(function () {
+      return { done: true, value: undefined };
+    }));
+  }
+
+  static compose(handlers: IErrorHandler[]): ErrorHandler {
     return new ErrorHandler(function (e: any) {
       let returnValue: IErrorHandlerResult;
       for (let handler of handlers) {
@@ -73,21 +82,31 @@ class ErrorHandler implements IErrorHandler {
     });
   }
 
-  static uncaught = new ErrorHandler(function (e: any) {
-    if (e && e.name === FatalError.prototype.name) {
-      let fatalError = <FatalError> e;
-      HandleUncaughtError(fatalError.error, "Fatal ");
-    } else {
-      HandleUncaughtError(e, "Uncaught ");
-    }
-    return { done: true, value: undefined };
-  });
+  static uncaught(): ErrorHandler {
+    return ErrorHandler._uncaught || (ErrorHandler._uncaught = new ErrorHandler(function (e: any) {
+      if (e && e.name === FatalError.prototype.name) {
+        let fatalError = <FatalError> e;
+        HandleUncaughtError(fatalError.error, "Fatal ");
+      } else {
+        HandleUncaughtError(e, "Uncaught ");
+      }
+      return { done: true, value: undefined };
+    }));
+  }
 
   protected _isHandling = false;
   protected _handler: (e: any) => IErrorHandlerResult;
 
   constructor(h: (e: any) => IErrorHandlerResult) {
     this._handler = h;
+  }
+
+  call(thisp: any, e: any) {
+    return this.handleError(e);
+  }
+
+  apply(thisp: any, args: [e: any]) {
+    return this.handleError(args[0]);
   }
 
   orElse(h: (e: any) => IErrorHandlerResult) {
@@ -125,31 +144,6 @@ export function setHandler(h: IErrorHandler) {
 
 export function handleError(e) {
   return _handler.handleError(e).done;
-  /*
-  let handler = onerror;
-  let uncaught = !handler;
-  let fatalError;
-  if (!_isHandling) {
-    _isHandling = true;
-    if (!uncaught) {
-      try {
-        uncaught = !handler(e);
-      } catch (e) {
-        uncaught = true;
-        fatalError = e;
-      }
-    }
-    if (uncaught) {
-      HandleUncaughtError(e, "Uncaught ");
-    }
-    _isHandling = false;
-  } else {
-    fatalError = e;
-  }
-  if (fatalError) {
-    HandleUncaughtError(fatalError, "Fatal ");
-  }
-  return uncaught;*/
 }
 
 namespace error {

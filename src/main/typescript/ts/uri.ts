@@ -136,55 +136,49 @@ export class URI implements IURI {
   }
 
   static stringify(uri: IURI): string {
+    let reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
+    let reDisallowedInFragment = /#/g;
+    let reDisallowedInAbsolutePath = /[\#\?]/g;
+    let reDisallowedInRelativePath =/[\#\?:]/g;
+
+    let { scheme, userInfo, domain, port, path, query, fragment } = uri;
     let s = "";
 
-    if (s === undefined || s === null) {
-      s += uri;
-    } else {
-      let reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
-      let reDisallowedInFragment = /#/g;
-      let reDisallowedInAbsolutePath = /[\#\?]/g;
-      let reDisallowedInRelativePath =/[\#\?:]/g;
+    if (scheme != null) {
+      s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ":";
+    }
 
-      let { scheme, userInfo, domain, port, path, query, fragment } = uri;
-      let s = "";
+    if (domain != null) {
+      s += "//";
 
-      if (scheme != null) {
-        s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ":";
+      if (userInfo != null) {
+        s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + "@";
       }
 
-      if (domain != null) {
-        s += "//";
-
-        if (userInfo != null) {
-          s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + "@";
-        }
-
-        s += encodeComponent(domain);
-        if (port != null) {
-          s += ":" + port;
-        }
+      s += encodeComponent(domain);
+      if (port != null) {
+        s += ":" + port;
       }
+    }
 
-      if (path != null) {
-        if (domain && path.charAt(0) != "/") {
-          s += "/";
-        }
-        s += encodeSpecialChars(
-          path,
-          path.charAt(0) == "/" ?
-            reDisallowedInAbsolutePath :
-            reDisallowedInRelativePath
-        );
+    if (path != null) {
+      if (domain && path.charAt(0) != "/") {
+        s += "/";
       }
+      s += encodeSpecialChars(
+        path,
+        path.charAt(0) == "/" ?
+          reDisallowedInAbsolutePath :
+          reDisallowedInRelativePath
+      );
+    }
 
-      if (query != null) {
-        s += "?" + encodeQuery(query);
-      }
+    if (query != null) {
+      s += "?" + encodeQuery(query);
+    }
 
-      if (fragment != null) {
-        s += "#" + encodeSpecialChars(fragment, reDisallowedInFragment);
-      }
+    if (fragment != null) {
+      s += "#" + encodeSpecialChars(fragment, reDisallowedInFragment);
     }
     return s;
   }
