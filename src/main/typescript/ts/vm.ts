@@ -8,6 +8,8 @@ type Option = {
   sourceMappingURL?: string
 }
 
+type EvalFunction = (local: Locals) => any;
+
 const OptionEmpty = {
   sourceURL: null,
   sourceMappingURL: null
@@ -25,7 +27,7 @@ export const global = Global;
  * @param options The options of evaluation
  * @returns The evaluable function
  */
-export function compile(jscode: string, options: Option = OptionEmpty): (locals?: Locals) => any {
+export function compile(jscode: string, options: Option = OptionEmpty): EvalFunction {
   let fnWithContext: Function;
   let fnNoContext: Function;
   let evalCode = jscode;

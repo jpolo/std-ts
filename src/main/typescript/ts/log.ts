@@ -414,7 +414,7 @@ export function logger(group: string): Logger {
   return $dispatcherDefault.getLogger(group);
 }
 
-export module reporter {
+export namespace reporter {
   type $ConsoleFormatter = (logMessage: IMessage) => any[];
   let $consoleFormatterDefault: $ConsoleFormatter = function (logMessage: IMessage) {
     return ["[" + logMessage.group + "]"].concat(logMessage.data);

@@ -74,8 +74,15 @@ const $timerDefault: ITestEngineTimer = timer;
 class Context<T> {
 
   static unit = new Context();
+
+  static empty() {
+    return new Context();
+  }
+
   static create<T>(o: T): Context<T> & T {
-    return Context.unit.createChild(o);
+    let returnValue: any = new Context();
+    ObjectAssign(returnValue, o);
+    return returnValue;
   }
 
   createChild<U>(ext: U): Context<T & U> & T & U {
@@ -190,7 +197,7 @@ export class Engine implements ITestEngine {
     let timeoutMs = context.getTimeout();
     let opened = true;
     let timerId: number = null;
-    let stream = {
+    let stream: ITestRunContext = {
       getTest() { return test; },
       getTimeout() { return timeoutMs; },
       getEngine() { return engine; },

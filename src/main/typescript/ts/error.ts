@@ -105,7 +105,7 @@ class ErrorHandler implements IErrorHandler {
     return this.handleError(e);
   }
 
-  apply(thisp: any, args: [e: any]) {
+  apply(thisp: any, args: [any]) {
     return this.handleError(args[0]);
   }
 
@@ -132,7 +132,7 @@ class ErrorHandler implements IErrorHandler {
   }
 }
 
-let _handler: IErrorHandler = ErrorHandler.uncaught;
+let _handler: IErrorHandler = ErrorHandler.uncaught();
 
 export function getHandler() {
   return _handler;
