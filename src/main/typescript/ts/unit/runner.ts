@@ -6,28 +6,30 @@ const $engineDefault = new Engine();
 
 export class Runner {
   // Config
-  protected _timeout = 2000; // ms
+  // protected _timeout = 2000; // ms
 
   // Service
   protected $engine: ITestEngine = $engineDefault;
 
   constructor(
-    private _printers: IReporter[] = []
+    protected _timeout = 2000, // ms
+    protected _reporters: IReporter[] = []
   ) {
   }
 
   config(options: {
     timeout?: number
   }) {
-    if (options.timeout !== undefined) {
-      this._timeout = options.timeout;
-    }
-    return this;
+    return new Runner(
+      this._timeout,
+      this._reporters
+    );
   }
 
   /*
   printers(printers: IPrinter[]) {
     return new Runner(
+      this._timeout,
       this._printers.concat(printers)
     );
   }
