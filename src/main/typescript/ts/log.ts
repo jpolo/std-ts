@@ -134,7 +134,7 @@ export class Level implements ILevel {
   }
 
   inspect(): string {
-    return `Level { name: "${this.name}", value: "${this.value}"}`;
+    return `Level { name: "${this.name}", value: ${this.value} }`;
   }
 
   toJSON() {

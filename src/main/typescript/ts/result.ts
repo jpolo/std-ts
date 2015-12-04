@@ -186,11 +186,11 @@ export default class Result<T> implements IResult<T> {
   }
 
   then<R>(onSuccess?: (value: T) => R | Result<R>, onFailure?: (error: any) => R | Result<R> | void): Result<R> {
-    return ResultTransform(this, onSuccess, onFailure);
+    return null; // ResultTransform(this, onSuccess, onFailure); TODO
   }
 
   catch<R>(onFailure: (error: any) => R | Result<R>): Result<R> {
-    return ResultTransform(this, null, onFailure);
+    return null; // ResultTransform(this, null, onFailure); TODO
   }
 
   inspect() {

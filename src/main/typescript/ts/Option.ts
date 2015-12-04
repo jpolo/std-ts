@@ -2,20 +2,25 @@
 // Util
 let __none: Option<any>;
 
+interface IOption<T> {
+  0?: T;
+  length: number;
+}
+
 // ECMA like spec
 function IsOption(o: any) {
   return o instanceof Option;
 }
 
-function OptionIsNone(o: Option<any>): boolean {
-  return o === __none;
+function OptionIsNone(o: IOption<any>): boolean {
+  return o.length === 0;
 }
 
 function OptionCreate<T>(v: T): Option<T> {
   return new Option(v);
 }
 
-function OptionGet<T>(o: Option<T>): T {
+function OptionGet<T>(o: IOption<T>): T {
   return o[0];
 }
 
@@ -29,7 +34,7 @@ export default class Option<T> {
   static cast<S>(o: S): Option<S>
   static cast<S>(o: any): Option<S> {
     let returnValue: Option<S>;
-    if (o === undefined) {
+    if (o === undefined || o === null) {
       returnValue = __none;
     } else if (o instanceof Option) {
       returnValue = o;

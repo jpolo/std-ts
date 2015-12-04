@@ -1,7 +1,6 @@
+// minimalist assert library
 
-//minimalist assert library
-
-type AssertFn = (b: boolean, message?: string) => void
+type AssertFn = (b: boolean, message?: string) => void;
 
 const hasConsole = typeof console !== "undefined";
 
@@ -17,13 +16,13 @@ export function test(name: string, f: (assert: AssertFn) => void) {
       if (hasConsole) {
         console.error(prefix + (message || " assertion failed"));
       } else {
-        //TODO throw error
+        // TODO throw error
       }
     }
   }
 
   function run() {
-    f(assert)
+    f(assert);
     if (assertionCount === 0) {
       if (hasConsole) {
         console.warn(prefix + "no assertion");

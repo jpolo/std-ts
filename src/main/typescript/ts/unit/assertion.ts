@@ -1,17 +1,17 @@
 import { ICallSite } from "../stacktrace";
 import { ITest } from "../unit";
 
-export const SUCCESS = "SUCCESS";
-export const FAILURE = "FAILURE";
-export const ERROR = "ERROR";
-export const WARNING = "WARNING";
+export const SUCCESS = "AssertionSuccess";
+export const FAILURE = "AssertionFailure";
+export const ERROR = "AssertionError";
+export const WARNING = "AssertionWarning";
 
 export interface IAssertion {
-  type: string;
+  name: string;
   test: ITest;
   message: string;
   position: IAssertionCallSite;
-  stack: string;
+  stack?: string;
 }
 
 export interface IAssertionCallSite extends ICallSite {}
@@ -35,7 +35,7 @@ export class Assertion implements IAssertion {
   }
 
   constructor(
-    public type: string,
+    public name: string,
     public test: ITest,
     public message: string,
     public position?: IAssertionCallSite,
@@ -46,14 +46,14 @@ export class Assertion implements IAssertion {
     return this === o || (
       o &&
       (o instanceof Assertion) &&
-      this.type === o.type &&
+      this.name === o.name &&
       this.test === o.test &&
       this.message === o.message
     );
   }
 
   inspect() {
-    return `${this.type} { ${this.message} }`;
+    return `${this.name} { ${this.message} }`;
   }
 
   toString() {

@@ -8,7 +8,7 @@ type Option = {
   sourceMappingURL?: string
 }
 
-type EvalFunction = (local: Locals) => any;
+type EvalFunction = { (local?: Locals): any };
 
 const OptionEmpty = {
   sourceURL: null,

@@ -110,7 +110,7 @@ function ToSignalBindingQueue<T>(sig: Signal<T>): ISignalBindingQueue<T> {
   return <any> sig;
 }
 
-export class Signal<T> {
+export default class Signal<T> {
 
   protected head = null;
   protected length = 0;

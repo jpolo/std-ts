@@ -1,22 +1,22 @@
 const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-const IsGlobal = function (o: any) { return o === Global; };
-const IsObject = function (o: any) { return o !== null && (typeof o === "object" || typeof o === "function"); }
-const ToStringTag = function (o: any): string {
-  let s = '';
+function IsGlobal(o: any) { return o === Global; }
+function IsObject(o: any) { return o !== null && (typeof o === "object" || typeof o === "function"); }
+function ToStringTag(o: any): string {
+  let s = "";
   if (o === null) {
-    s = 'Null';
+    s = "Null";
   } else {
-    switch(typeof o) {
-      case 'boolean': s = 'Boolean'; break;
-      case 'function': s = 'Function'; break;
-      case 'number': s = 'Number'; break;
-      case 'string': s = 'String'; break;
-      case 'undefined': s = 'Undefined'; break;
+    switch (typeof o) {
+      case "boolean": s = "Boolean"; break;
+      case "function": s = "Function"; break;
+      case "number": s = "Number"; break;
+      case "string": s = "String"; break;
+      case "undefined": s = "Undefined"; break;
       default: /*object*/ s = o.constructor.name || Object.prototype.toString.call(o).slice(8, -1);
     }
   }
   return s;
-};
+}
 const ArraySlice = function <T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
   let returnValue = [];
   let l = returnValue.length;
@@ -32,45 +32,45 @@ enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
 
 const ErrorCreate = function () {
   try {
-    window['$$undef$$']();
+    window["$$undef$$"]();
   } catch (e) {
     return e;
   }
 };
 const ErrorToString = function (name: string, message: string) {
-  let returnValue = '';
+  let returnValue = "";
   if (name !== undefined) {
     returnValue += name;
   }
   if (message !== undefined) {
-    returnValue += ': ' + message;
+    returnValue += ": " + message;
   }
   return returnValue;
 };
 const ErrorParse = (function () {
 
-  //Sniff browser
+  // Sniff browser
   let browser: Browser = (function (e: any) {
-    let returnValue = Browser.Other
-    if (e['arguments'] && e.stack) {
-      returnValue = Browser.Chrome
+    let returnValue = Browser.Other;
+    if (e["arguments"] && e.stack) {
+      returnValue = Browser.Chrome;
     } else if (e.stack && e.sourceURL) {
-      returnValue = Browser.Safari
-    } else if (e.stack && e['number']) {
-      returnValue = Browser.IE
+      returnValue = Browser.Safari;
+    } else if (e.stack && e["number"]) {
+      returnValue = Browser.IE;
     } else if (e.stack && e.fileName) {
-      returnValue = Browser.Firefox
+      returnValue = Browser.Firefox;
     } else if (e.message && e.stack && e.stacktrace) {
-      returnValue = Browser.Opera // use e.stacktrace, format differs from 'opera10a', 'opera10b'
+      returnValue = Browser.Opera; // use e.stacktrace, format differs from "opera10a", "opera10b"
     } else if (e.stack && !e.fileName) {
       // Chrome 27 does not have e.arguments as earlier versions,
       // but still does not have e.fileName as Firefox
-      returnValue = Browser.Chrome
+      returnValue = Browser.Chrome;
     }
-    return returnValue
+    return returnValue;
   }(ErrorCreate()));
 
-  //Parse error line
+  // Parse error line
   let __errorParseLines: (error: Error) => string[] = __errorParseLines_Other;
   switch (browser) {
     case Browser.IE: __errorParseLines = __errorParseLines_IE; break;
@@ -82,128 +82,128 @@ const ErrorParse = (function () {
   }
 
   function __errorParseLines_Chrome(error: any): string[] {
-    return (error.stack + '\n')
-        .replace(/^[\s\S]+?\s+at\s+/, ' at ') // remove message
-        .replace(/^\s+(at eval )?at\s+/gm, '') // remove 'at' and indentation
-        .replace(/^([^\(]+?)([\n$])/gm, '{anonymous}() ($1)$2')
-        .replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}() ($1)')
-        .replace(/^(.+) \((.+)\)$/gm, '$1@$2')
-        .split('\n')
-        .slice(0, -1)
+    return (error.stack + "\n")
+        .replace(/^[\s\S]+?\s+at\s+/, " at ") // remove message
+        .replace(/^\s+(at eval )?at\s+/gm, "") // remove "at" and indentation
+        .replace(/^([^\(]+?)([\n$])/gm, "{anonymous}() ($1)$2")
+        .replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, "{anonymous}() ($1)")
+        .replace(/^(.+) \((.+)\)$/gm, "$1@$2")
+        .split("\n")
+        .slice(0, -1);
   }
 
   function __errorParseLines_Firefox(error: any): string[] {
     return (error.stack)
-      .replace(/(?:\n@:0)?\s+$/m, '')
-      .replace(/^(?:\((\S*)\))?@/gm, '{anonymous}($1)@')
-      .split('\n')
+      .replace(/(?:\n@:0)?\s+$/m, "")
+      .replace(/^(?:\((\S*)\))?@/gm, "{anonymous}($1)@")
+      .split("\n");
   }
 
   function __errorParseLines_IE(error: any): string[] {
     return (error.stack)
-      .replace(/^\s*at\s+(.*)$/gm, '$1')
-      .replace(/^Anonymous function\s+/gm, '{anonymous}() ')
-      .replace(/^(.+)\s+\((.+)\)$/gm, '$1@$2')
-      .split('\n')
-      .slice(1)
+      .replace(/^\s*at\s+(.*)$/gm, "$1")
+      .replace(/^Anonymous function\s+/gm, "{anonymous}() ")
+      .replace(/^(.+)\s+\((.+)\)$/gm, "$1@$2")
+      .split("\n")
+      .slice(1);
   }
 
   function __errorParseLines_Opera(error: any): string[] {
-    let ANON = '{anonymous}'
-    let lineRE = /^.*line (\d+), column (\d+)(?: in (.+))? in (\S+):$/
-    let lines = error.stacktrace.split('\n')
-    let result = []
+    let ANON = "{anonymous}";
+    let lineRE = /^.*line (\d+), column (\d+)(?: in (.+))? in (\S+):$/;
+    let lines = error.stacktrace.split("\n");
+    let result = [];
 
     for (let i = 0, len = lines.length; i < len; i += 2) {
-      let match = lineRE.exec(lines[i])
+      let match = lineRE.exec(lines[i]);
       if (match) {
-        let location = match[4] + ':' + match[1] + ':' + match[2]
-        let fnName = match[3] || "global code"
-        fnName = fnName.replace(/<anonymous function: (\S+)>/, "$1").replace(/<anonymous function>/, ANON)
-        result.push(fnName + '@' + location + ' -- ' + lines[i + 1].replace(/^\s+/, ''))
+        let location = match[4] + ":" + match[1] + ":" + match[2];
+        let fnName = match[3] || "global code";
+        fnName = fnName.replace(/<anonymous function: (\S+)>/, "$1").replace(/<anonymous function>/, ANON);
+        result.push(fnName + "@" + location + " -- " + lines[i + 1].replace(/^\s+/, ""));
       }
     }
-    return result
+    return result;
   }
 
   function __errorParseLines_Safari(error: any): string[] {
     return (error.stack)
-      .replace(/\[native code\]\n/m, '')
-      .replace(/^(?=\w+Error\:).*$\n/m, '')
-      .replace(/^@/gm, '{anonymous}()@')
-      .split('\n')
+      .replace(/\[native code\]\n/m, "")
+      .replace(/^(?=\w+Error\:).*$\n/m, "")
+      .replace(/^@/gm, "{anonymous}()@")
+      .split("\n");
   }
 
   function __errorParseLines_Other(curr): string[] {
-    let ANON = '{anonymous}'
-    let fnRE = /function(?:\s+([\w$]+))?\s*\(/
-    let stack = []
-    let fn, args
-    let maxStackSize = 10
+    let ANON = "{anonymous}";
+    let fnRE = /function(?:\s+([\w$]+))?\s*\(/;
+    let stack = [];
+    let fn, args;
+    let maxStackSize = 10;
     while (curr && stack.length < maxStackSize) {
-      fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON
+      fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON;
       try {
-        args = ArraySlice(curr['arguments'] || [])
+        args = ArraySlice(curr["arguments"] || []);
       } catch (e) {
-        args = ['Cannot access arguments: ' + e]
+        args = ["Cannot access arguments: " + e];
       }
-      stack[stack.length] = fn + '(' + _stringifyArguments(args) + ')'
+      stack[stack.length] = fn + "(" + _stringifyArguments(args) + ")";
       try {
-        curr = curr.caller
+        curr = curr.caller;
       } catch (e) {
-        stack[stack.length] = 'Cannot access caller: ' + e
-        break
+        stack[stack.length] = "Cannot access caller: " + e;
+        break;
       }
     }
-    return stack
+    return stack;
   }
 
   function _stringifyArguments(args: any[]) {
-    let argc = args.length
-    let result = new Array(argc)
+    let argc = args.length;
+    let result = new Array(argc);
     for (let i = 0; i < argc; ++i) {
-      let arg = args[i]
-      switch(ToStringTag(arg)) {
-        case 'Undefined':
-          result[i] = 'undefined'
-          break
-        case 'Null':
-          result[i] = 'null'
-          break
-        case 'Array':
+      let arg = args[i];
+      switch (ToStringTag(arg)) {
+        case "Undefined":
+          result[i] = "undefined";
+          break;
+        case "Null":
+          result[i] = "null";
+          break;
+        case "Array":
           if (arg.length < 3) {
-            result[i] = '[' + _stringifyArguments(arg) + ']'
+            result[i] = "[" + _stringifyArguments(arg) + "]";
           } else {
-            result[i] = '[' +
+            result[i] = "[" +
               _stringifyArguments(ArraySlice(arg, 0, 1)) +
-              '...' +
+              "..." +
               _stringifyArguments(ArraySlice(arg, -1)) +
-              ']'
+              "]";
           }
-          break
-        case 'Object':
-          result[i] = '#object'
-          break
-        case 'Function':
-          result[i] = '#function'
-          break
-        case 'String':
-          result[i] = '"' + arg + '"'
-          break
-        case 'Number':
-          result[i] = arg
-          break
+          break;
+        case "Object":
+          result[i] = "#object";
+          break;
+        case "Function":
+          result[i] = "#function";
+          break;
+        case "String":
+          result[i] = `"${args}"`;
+          break;
+        case "Number":
+          result[i] = arg;
+          break;
         default:
-          result[i] = '?'
+          result[i] = "?";
       }
     }
-    return result.join(',')
+    return result.join(",");
   }
 
   return function ErrorParse(error: any, offset = 0): CallSite[] {
     let items = __errorParseLines(error);
     if (offset > 0) {
-      //shift from offset
+      // shift from offset
       items = items.slice(offset);
     }
 
@@ -227,7 +227,7 @@ const __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorStr
   for (let i = 0, l = frames.length; i < l; i++) {
     frame = frames[i];
     try {
-      line = CallSite.stringify(frame);//__str(frame);
+      line = CallSite.stringify(frame); // __str(frame);
     } catch (e) {
       try {
         line = "<error: " + e + ">";
@@ -238,22 +238,22 @@ const __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorStr
     }
     lines.push("    at " + line);
   }
-  return lines.join('\n');
+  return lines.join("\n");
 };
 const ErrorFrames = (function () {
-  let _Error = (<any>Error);
+  let GlobalError = (<any>Error);
   let __errorFrames: (offset: number) => ICallSite[];
-  if (_Error.captureStackTrace) {
-    //v8
-    let prepareStackTrace = _Error.prepareStackTrace;
+  if (GlobalError.captureStackTrace) {
+    // v8
+    let prepareStackTrace = GlobalError.prepareStackTrace;
     let stackSink = function (_, stack) { return stack; };
     __errorFrames = function (offset) {
-      _Error.prepareStackTrace = stackSink;
-      let stack = (<any>new _Error()).stack.slice(1 + offset);
+      GlobalError.prepareStackTrace = stackSink;
+      let stack = (<any>new GlobalError()).stack.slice(1 + offset);
       if (prepareStackTrace === undefined) {
-        delete _Error.prepareStackTrace;
+        delete GlobalError.prepareStackTrace;
       } else {
-        _Error.prepareStackTrace = prepareStackTrace;
+        GlobalError.prepareStackTrace = prepareStackTrace;
       }
       return stack;
     };
@@ -269,13 +269,13 @@ const __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, 
 
   // Simultaneously traverse the frames in error.stack and the arguments.caller
   // to build a list of CallSite objects
-  //let factory = makeCallSiteFactory(e);
+  // let factory = makeCallSiteFactory(e);
   let frames = ErrorParse(e);
   let errorString = ErrorToString(e.name, e.message);
 
   // Explicitly set back the error.name and error.message
-  //e.name = frames.name;
-  //e.message = frames.message;
+  // e.name = frames.name;
+  // e.message = frames.message;
 
   // Pass the raw callsite objects through and get back a formatted stack trace
   e.stack = __prepareStackTrace(errorString, frames);
@@ -286,24 +286,24 @@ const $$data = "@@data";
 // https://github.com/stacktracejs/stacktrace.js/
 // https://github.com/tj/callsite
 
-//export interface ICallStack extends Array<ICallSite> {}
+// export interface ICallStack extends Array<ICallSite> {}
 
 export interface ICallSite {
-  getThis(): any
+  getThis(): any;
   getTypeName(): string;
-  getFunction(): Function
-  getFunctionName(): string
-  getMethodName(): string
-  getFileName(): string
-  getLineNumber(): number
-  getColumnNumber(): number
-  getEvalOrigin(): any
-  isTopLevel(): boolean
-  isEval(): boolean
-  isNative(): boolean
-  isConstructor(): boolean
-  getArguments(): any // {[key: number]: any; length: number}
-  toString(): string
+  getFunction(): Function;
+  getFunctionName(): string;
+  getMethodName(): string;
+  getFileName(): string;
+  getLineNumber(): number;
+  getColumnNumber(): number;
+  getEvalOrigin(): any;
+  isTopLevel(): boolean;
+  isEval(): boolean;
+  isNative(): boolean;
+  isConstructor(): boolean;
+  getArguments(): any; // {[key: number]: any; length: number}
+  toString(): string;
 }
 
 class CallSite implements ICallSite {
@@ -331,7 +331,7 @@ class CallSite implements ICallSite {
         }
       }
 
-      s = functionName ? functionName + ' (' + s +  ')' : s;
+      s = functionName ? functionName + " (" + s +  ")" : s;
     }
     return s;
   }
@@ -410,7 +410,7 @@ class CallSite implements ICallSite {
 
   getArguments() {
     let d= this._parse();
-    return d._function && d._function['arguments'] || null;
+    return d._function && d._function["arguments"] || null;
   }
 
   toString(): string {
@@ -432,8 +432,8 @@ class CallSite implements ICallSite {
       let location = parts[1] || "";
       let isAnonymous = location.indexOf("{anonymous}") !== -1;
       let isEval = false;
-      let isNative = false; //location.indexOf("native") !== -1;
-      if (location.indexOf(':') !== -1) {
+      let isNative = false; // location.indexOf("native") !== -1;
+      if (location.indexOf(":") !== -1) {
         let locationParts = /(.*):(\d+):(\d+)/.exec(location);
         fileName = locationParts[1];
         lineNumber = parseInt(locationParts[2]);
@@ -443,22 +443,22 @@ class CallSite implements ICallSite {
       }
 
       if (!isAnonymous) {
-        let functionParts = functionName.split('.');
+        let functionParts = functionName.split(".");
         typeName = functionParts[0];
         methodName = functionParts[functionParts.length - 1];
       }
 
-      //isEval
-      //isEval = false;
+      // isEval
+      // isEval = false;
 
-      //isNative
-      //isNative = false;
+      // isNative
+      // isNative = false;
 
-      //isConstructor
+      // isConstructor
       let ctor = IsObject(receiver) ? receiver.constructor : null;
       let isConstructor = !ctor ? false : fun === ctor;
 
-      //isTopLevel
+      // isTopLevel
       let isTopLevel = (receiver == null) || IsGlobal(receiver);
 
       d = this[$$data] = {

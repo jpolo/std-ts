@@ -29,7 +29,7 @@ const math_expm1 = Math["expm1"] || function (n) {
   );
 };
 const math_floor = Math.floor;
-let math_hypot = Math["hypot"];
+const math_hypot = Math["hypot"];
 const math_imul = Math["imul"] || function (a, b) {
   // polyfill from mozilla
   a = a >>> 0;
