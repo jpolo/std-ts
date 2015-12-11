@@ -6,10 +6,10 @@ export const FAILURE = "AssertionFailure";
 export const ERROR = "AssertionError";
 export const WARNING = "AssertionWarning";
 
-export interface IAssertion {
+export interface IAssertion extends Error {
   name: string;
-  test: ITest;
   message: string;
+  test: ITest;
   position: IAssertionCallSite;
   stack?: string;
 }
