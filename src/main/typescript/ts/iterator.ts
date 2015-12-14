@@ -1,4 +1,8 @@
 // Ecma like
+function IsIterator(o: any): boolean {
+  return typeof o === "object" && o !== null && typeof o.next === "function";
+}
+
 function IteratorCreate<T>(next: () => IIteratorResult<T>, hint?) {
   return new Iterator(next, hint);
 }
@@ -99,6 +103,10 @@ export class Iterator<T> implements IIterator<T> {
     }, "concatenated");
   }
 
+  static isIterator(o: any): boolean {
+    return IsIterator(o);
+  }
+
   static iterate<T>(start: T, f: (v: T) => T): Iterator<T> {
     let first = true;
     let acc: T;
@@ -139,7 +147,7 @@ export class Iterator<T> implements IIterator<T> {
 }
 
 export function isIIterator(o: any): boolean {
-  return !!o && typeof o.next === "function";
+  return IsIterator(o);
 }
 
 export function result<T>(value?: T) {

@@ -36,7 +36,7 @@ export function OwnKeys(o: any): string[] {
     for (let prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } };
   }
   return keys;
-};
+}
 export function OwnKeysSorted(o: any) { return OwnKeys(o).sort(); }
 export function ObjectAssign<T, U>(o: T, ext: U): T & U { for (let key of OwnKeys(ext)) { o[key] = ext[key]; } return <any>o; }
 export function ObjectFreeze<T>(o: T): T { return Object.freeze ? Object.freeze(o) : o; }
