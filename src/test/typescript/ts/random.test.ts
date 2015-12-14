@@ -1,38 +1,38 @@
-import { suite, test, Assert, testc } from "../../../main/typescript/ts/unit/qunit"
-import * as random from "../../../main/typescript/ts/random"
+import { suite, test, Assert, testc } from "../../../main/typescript/ts/unit/qunit";
+import * as random from "../../../main/typescript/ts/random";
 
 class AssertCustom extends Assert {
 
   generates<T>(f: () => T, expected: T[]) {
-    var isSuccess = true
-    var message = ""
+    let isSuccess = true;
+    let message = "";
     expected.forEach((expected, index) => {
-      var actual = f()
+      let actual = f();
       if (!this.__engine__().equalsStrict(expected, actual)) {
-        isSuccess = false
-        message += this.__dump__(actual) + ' must be ' + this.__dump__(expected) + '\n'
+        isSuccess = false;
+        message += this.__dump__(actual) + " must be " + this.__dump__(expected) + "\n";
       }
-    })
-    this.__assert__(isSuccess, message, this.__position__())
+    });
+    this.__assert__(isSuccess, message, this.__position__());
   }
 }
 
-export default suite("ts/random", (self) => {
-  var test = testc(AssertCustom)//overload
-  var engineTest = random.engine.pseudo
+export default suite("ts/random.RandomGenerator('rc4')", (self) => {
+  let test = testc(AssertCustom); // overload
+
 
   self.setUp = () => {
-    engineTest.seed("");
-  }
+    // engineTest.seed("");
+  };
 
   self.tearDown = () => {
 
-  }
+  };
 
-  test("engine.RC4", (assert) => {
-    var engine = new random.engine.RC4('Example')
+  test(".generate()", (assert) => {
+    let rc4 = new random.RandomGenerator("rc4", "Example");
     assert.generates(
-      engine.generate.bind(engine),
+      rc4.generate.bind(rc4),
       [
         0.23486116157656023,
         0.7972798995050903,
@@ -41,11 +41,11 @@ export default suite("ts/random", (self) => {
         0.34828409722783166,
         0.0693748445625555
       ]
-    )
-  })
+    );
+  });
 
-  test("engine.Pseudo", (assert) => {
-    var engine = new random.engine.Pseudo("")
+  /*test("engine.Pseudo", (assert) => {
+    let engine = new random.engine.Pseudo("");
 
     assert.generates(
       engine.generate.bind(engine),
@@ -57,12 +57,12 @@ export default suite("ts/random", (self) => {
         0.31325315816067667,
         0.01927975276576525
       ]
-    )
-  })
+    );
+  });*/
 
   /*test("exponential()", (assert) => {
-    var lambda = 1;
-    var gen = random.exponential(lambda, engineSeed);
+    let lambda = 1;
+    let gen = random.exponential(lambda, engineSeed);
 
     [
       0.000005748605117677314,
@@ -73,11 +73,12 @@ export default suite("ts/random", (self) => {
       1.1377528210865933
     ]
     .forEach((expected, index) => {
-      var actual = gen();
-      assert.equal(actual, expected, 'exponential#' + index + ' => ' + expected + ' but had ' + actual);
+      let actual = gen();
+      assert.equal(actual, expected, "exponential#" + index + " => " + expected + " but had " + actual);
     })
   })*/
 
+  /*
   test("nextBoolean()", (assert) => {
     assert.generates(
       () => { return random.nextBoolean(engineTest); },
@@ -89,9 +90,11 @@ export default suite("ts/random", (self) => {
         true,
         false
       ]
-    )
-  })
+    );
+  });
+  */
 
+  /*
   test("nextChar()", (assert) => {
     assert.generates(
       () => { return random.nextChar(undefined, engineTest); },
@@ -105,13 +108,15 @@ export default suite("ts/random", (self) => {
         "k",
         "4"
       ]
-    )
+    );
 
-  })
+  });
+  */
 
+/*
   test("nextInt()", (assert) => {
-    var min = 1;
-    var max = 10;
+    let min = 1;
+    let max = 10;
     assert.generates(
       () => { return random.nextInt(min, max, engineTest); },
       [
@@ -124,13 +129,13 @@ export default suite("ts/random", (self) => {
         3,
         9
       ]
-    )
+    );
 
-  })
+  });
 
   test("nextNumber()", (assert) => {
-    var min = 1;
-    var max = 10;
+    let min = 1;
+    let max = 10;
 
     assert.generates(
       () => { return random.nextNumber(min, max, engineTest); },
@@ -142,12 +147,12 @@ export default suite("ts/random", (self) => {
         7.250694047177509,
         2.774847985862226
       ]
-    )
+    );
 
-  })
+  });*/
 
   /*test("normal()", (assert) => {
-    var gen = random.normal(1, 10, engineSeed);
+    let gen = random.normal(1, 10, engineSeed);
     [
       -13.34248820815906,
       10.735053160829807,
@@ -162,7 +167,7 @@ export default suite("ts/random", (self) => {
   })*/
 
   /*test("triangular()", (assert) => {
-    var gen = random.triangular(0, 10, 5, engineSeed);
+    let gen = random.triangular(0, 10, 5, engineSeed);
 
     [
       0.016953743826203897,
@@ -178,7 +183,7 @@ export default suite("ts/random", (self) => {
   })*/
 
   /*test("weibull()", (assert) => {
-    var gen = random.weibull(2, 2, engineSeed);
+    let gen = random.weibull(2, 2, engineSeed);
 
     [
       0.004795249781889287,

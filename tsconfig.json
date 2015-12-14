@@ -20,6 +20,7 @@
     ],
     "files": [
         "./src/main/typescript/ts/clone.ts",
+        "./src/main/typescript/ts/collection/Dict.ts",
         "./src/main/typescript/ts/collection/List.ts",
         "./src/main/typescript/ts/compare.ts",
         "./src/main/typescript/ts/console.ts",
