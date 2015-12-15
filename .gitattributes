@@ -2,7 +2,13 @@
 * text=auto
 
 # Custom for Visual Studio
-*.cs     diff=csharp
+.gitattributes   text
+.gitignore       text
+*.md             text
+*.js             text
+*.json           text
+*.ts             text
+*.cs             diff=csharp
 
 # Standard to msysgit
 *.doc	 diff=astextplain
