@@ -55,44 +55,57 @@ function GenerateString(rng: IRandomGenerator, length: number, chars: string): s
   return returnValue;
 }
 
+const AdapterRegistry: { [name: string]: IRandomGeneratorConstructor } = {};
 
-export function adapter<F extends Function>(name: string) {
+export function Adapter<F extends Function>(name: string) {
   return function <F extends IRandomGeneratorConstructor>(target: F) {
-    RandomGenerator.adapter[name] = <any>target;
+    if (AdapterRegistry[name]) {
+      throw new Error(`"${name}" is already registered`);
+    }
+    AdapterRegistry[name] = <any>target;
   };
 }
 
-export class RandomGenerator {
+export class RandomGenerator implements IRandomGenerator {
 
-  static adapter: { [name: string]: IRandomGeneratorConstructor } = {};
   static adapterDefault = "rc4";
 
   protected _type: string;
-  protected _adapter: IRandomGenerator;
+  protected _generate: () => number;
 
-  constructor(type: string = RandomGenerator.adapterDefault, seed = "") {
-    let Constructor = RandomGenerator.adapter[type];
-    if (!Constructor) {
-      throw new ReferenceError(type + " is not a valid adapter");
+  constructor(type?: string, seed?: string)
+  constructor(f: () => number)
+  constructor(c: any = RandomGenerator.adapterDefault, seed = "") {
+    if (typeof c === "function") {
+      this._type = "anonymous";
+      this._generate = c;
+    } else {
+      let Constructor = AdapterRegistry[c];
+      if (!Constructor) {
+        throw new ReferenceError(c + " is not a valid adapter");
+      }
+      let adapter = new Constructor(seed);
+      this._type = c;
+      this._generate = function () {
+        return Generate(adapter);
+      };
     }
-
-    let adapter = new Constructor(seed);
-    this._type = type;
-    this._adapter = adapter;
   }
 
-  /*
-  map<U>(f: (v: number) => U) {
-    return new GeneratorRandom(f, this._type);
+  map<U>(f: (v: number) => number): RandomGenerator {
+    return new RandomGenerator(() => {
+      return f(this.generate());
+    });
   }
 
-  flatMap<U>(f: (v: number) => IGenerator<U>) {
-    return new GeneratorRandom(f, this._type);
+  flatMap<U>(f: (v: number) => RandomGenerator): RandomGenerator {
+    return new RandomGenerator(() => {
+      return f(this.generate()).generate();
+    });
   }
-  */
 
-  generate() {
-    return Generate(this._adapter);
+  generate(): number {
+    return this._generate();
   }
 
   inspect() {
@@ -104,11 +117,10 @@ export class RandomGenerator {
   }
 }
 
-@adapter("node")
+@Adapter("node")
 class RandomGeneratorNodeJS {
-  private static _crypto;
   private static _hexString(digits: number) {
-    let crypto = RandomGeneratorNodeJS._crypto || (RandomGeneratorNodeJS._crypto  = typeof require !== "undefined" ? require("crypto") : null);
+    let crypto = require("crypto");
     let numBytes = Ceil(digits / 2);
     let bytes;
     // Try to get cryptographically strong randomness. Fall back to
@@ -131,16 +143,17 @@ class RandomGeneratorNodeJS {
   }
 }
 
-@adapter("browser")
+@Adapter("browser")
 class RandomGeneratorBrowser {
   private static _buffer: Uint32Array;
-  private static _crypto = typeof window !== "undefined" ? window.crypto : null;
-
+  private static _getBuffer() {
+    return RandomGeneratorBrowser._buffer || (RandomGeneratorBrowser._buffer = new Uint32Array(1));
+  }
   generate() {
-    let crypto = RandomGeneratorBrowser._crypto;
+    let crypto = typeof window !== "undefined" ? window.crypto : null;
     let returnValue = NaN;
     if (crypto) {
-      let buffer = RandomGeneratorBrowser._buffer || (RandomGeneratorBrowser._buffer = new Uint32Array(1));
+      let buffer = RandomGeneratorBrowser._getBuffer();
       crypto.getRandomValues(buffer);
       returnValue = buffer[0] * 2.3283064365386963e-10; // 2^-32
     } else {
@@ -154,7 +167,7 @@ const RC4_WIDTH = 256;
 const RC4_MASK = RC4_WIDTH - 1;
 const RC4_BYTES = 7; // 56 bits to make a 53-bit double
 const RC4_DENOM = (Math.pow(2, RC4_BYTES * 8) - 1);
-@adapter("rc4")
+@Adapter("rc4")
 export class RandomGeneratorRC4 implements IRandomGenerator  {
 
   private static _getStringBytes(s: string): number[] {

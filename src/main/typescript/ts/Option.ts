@@ -1,7 +1,4 @@
-
 // Util
-let __none: Option<any>;
-
 interface IOption<T> {
   0?: T;
   length: number;
@@ -24,10 +21,18 @@ function OptionGet<T>(o: IOption<T>): T {
   return o[0];
 }
 
+function OptionMap<T, U>(o: IOption<T>, f: (v: T) => U): Option<U> {
+  return OptionIsNone(o) ? <any>o : OptionCreate(f(OptionGet(o)));
+}
+
+function OptionBind<T, U>(o: IOption<T>, f: (v: T) => Option<U>): Option<U> {
+  return OptionIsNone(o) ? <any>o : f(OptionGet(o));
+}
+
 export default class Option<T> {
 
   static empty(): Option<any> {
-    return __none;
+    return Option.none;
   }
 
   static cast<S>(o: Option<S>): Option<S>
@@ -35,7 +40,7 @@ export default class Option<T> {
   static cast<S>(o: any): Option<S> {
     let returnValue: Option<S>;
     if (o === undefined || o === null) {
-      returnValue = __none;
+      returnValue = Option.none;
     } else if (o instanceof Option) {
       returnValue = o;
     } else {
@@ -102,11 +107,11 @@ export default class Option<T> {
   }
 
   map<U>(f: (v: T) => U): Option<U> {
-    return OptionIsNone(this) ? __none : Option.some(f(OptionGet(this)));
+    return OptionMap(this, f);
   }
 
   flatMap<U>(f: (v: T) => Option<U>): Option<U> {
-    return OptionIsNone(this) ? __none : f(OptionGet(this));
+    return OptionBind(this, f);
   }
 
   reduce<U>(r: (acc: U, v: T) => U, initialValue?: U): U {
@@ -114,7 +119,7 @@ export default class Option<T> {
   }
 
   filter(p: (v: T) => boolean): Option<T> {
-    return OptionIsNone(this) || !p(OptionGet(this)) ? __none : this;
+    return OptionIsNone(this) || !p(OptionGet(this)) ? Option.none : this;
   }
 
   some(p: (v: T) => boolean): boolean {
@@ -133,5 +138,3 @@ export default class Option<T> {
     return this.inspect();
   }
 }
-
-__none = Option.none;
