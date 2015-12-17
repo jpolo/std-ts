@@ -28,6 +28,7 @@
         "./src/main/typescript/ts/dom/classList.ts",
         "./src/main/typescript/ts/dom/node.ts",
         "./src/main/typescript/ts/error.ts",
+        "./src/main/typescript/ts/generator.ts",
         "./src/main/typescript/ts/geometry/matrix2.ts",
         "./src/main/typescript/ts/geometry/matrix3.ts",
         "./src/main/typescript/ts/geometry/matrix4.ts",

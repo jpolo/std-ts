@@ -1,3 +1,19 @@
+// Interface
+export interface IIterator<T> {
+  next(value?: any): IIteratorResult<T>;
+  return?<U>(value?: U): IIteratorResult<U>;
+  throw?(e?: any): IIteratorResult<T>;
+}
+
+export interface IIterableIterator<T> extends IIterator<T> {
+  // TODO: symbol
+}
+
+export interface IIteratorResult<T> {
+  value: T;
+  done: boolean;
+}
+
 // Ecma like
 function IsIterator(o: any): boolean {
   return typeof o === "object" && o !== null && typeof o.next === "function";
@@ -41,15 +57,6 @@ function IteratorRepeat<T>(length: number, v: T, hint?: string): Iterator<T> {
       return IteratorResultCreate(done, value);
     }, hint)
   );
-}
-
-export interface IIterator<T> {
-  next(): IIteratorResult<T>;
-}
-
-export interface IIteratorResult<T> {
-  value: T;
-  done: boolean;
 }
 
 export class Iterator<T> implements IIterator<T> {

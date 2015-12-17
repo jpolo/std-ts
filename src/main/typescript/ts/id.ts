@@ -5,7 +5,7 @@ const idPropertyDescriptor: PropertyDescriptor = {
   value: null,
   enumerable: false,
   configurable: true,
-  writable: true
+  writable: false
 };
 function IsFunction(o: any) { return typeof o === "function"; }
 function IsObject(o: any) { return typeof o === "object" && o !== null; }

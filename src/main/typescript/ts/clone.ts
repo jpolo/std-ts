@@ -15,18 +15,15 @@ function ObjectCreate(proto: any, descriptors: any) {
 function GetPrototypeOf(o: any) {
   return Object.getPrototypeOf ? Object.getPrototypeOf(o) : o.__proto__;
 }
-const __descriptors = Object.getOwnPropertyNames ?
-  function (o: any): { [k: string]: PropertyDescriptor } {
-    let descriptors: any = {};
+function OwnDescriptors(o: any): { [k: string]: PropertyDescriptor } {
+  let descriptors: any = {};
+  if (Object.getOwnPropertyNames) {
     let props = Object.getOwnPropertyNames(o);
     let getDescriptor = Object.getOwnPropertyDescriptor;
     for (let prop of props) {
       descriptors[prop] = getDescriptor(o, prop);
     }
-    return descriptors;
-  } :
-  function (o) {
-    let descriptors: any = {};
+  } else {
     for (let prop in o) {
       if (o.hasOwnProperty(prop)) {
         descriptors[prop] = {
@@ -37,8 +34,9 @@ const __descriptors = Object.getOwnPropertyNames ?
         };
       }
     }
-    return descriptors;
-  };
+  }
+  return descriptors;
+}
 function IsDefined(o) { return o !== undefined && o !== null; }
 function ToStringTag(o: any) {
   let c = o.constructor;
@@ -68,7 +66,7 @@ export function clone<T>(o: T): T {
           // case "Map": returnValue = <any> cloneMap(anyVal); break;
           case "RegExp": returnValue = <any> cloneRegExp(anyVal); break;
           // case "Set": returnValue = <any> cloneSet(anyVal); break;
-          default: returnValue = ObjectCreate(GetPrototypeOf(anyVal), __descriptors(anyVal));
+          default: returnValue = ObjectCreate(GetPrototypeOf(anyVal), OwnDescriptors(anyVal));
         }
       }
     }

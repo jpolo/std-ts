@@ -1,5 +1,4 @@
-
-
+// Interfaces
 export interface IDictLike<T> {
   clear(): void;
   key(i: number): string;
@@ -13,6 +12,7 @@ export interface IDict<T> {
    [key: string]: T;
 }
 
+// ECMA like spec
 function IsObject(o: any) {
   return typeof o === "object";
 }
@@ -209,17 +209,13 @@ export class DictIterator<T> {
   next() {
     let dict = this._dict;
     let index = this._index;
-    return (
-      index < this._length ? {
-        done: false,
-        value: [Dict.key(dict, index), Dict.get(dict, Dict.key(dict, index))]
-      } : {
-        done: true,
-        value: undefined
-      }
-
-    );
-
+    let returnValue = { done: true, value: undefined };
+    if (index < this._length) {
+      let key = Dict.key(dict, index);
+      returnValue.done = false;
+      returnValue.value = [key, Dict.get(dict, key)];
+    }
+    return returnValue;
   }
 
 }

@@ -25,7 +25,7 @@ function OptionMap<T, U>(o: IOption<T>, f: (v: T) => U): Option<U> {
   return OptionIsNone(o) ? <any>o : OptionCreate(f(OptionGet(o)));
 }
 
-function OptionBind<T, U>(o: IOption<T>, f: (v: T) => Option<U>): Option<U> {
+function OptionChain<T, U>(o: IOption<T>, f: (v: T) => Option<U>): Option<U> {
   return OptionIsNone(o) ? <any>o : f(OptionGet(o));
 }
 
@@ -110,8 +110,8 @@ export default class Option<T> {
     return OptionMap(this, f);
   }
 
-  flatMap<U>(f: (v: T) => Option<U>): Option<U> {
-    return OptionBind(this, f);
+  chain<U>(f: (v: T) => Option<U>): Option<U> {
+    return OptionChain(this, f);
   }
 
   reduce<U>(r: (acc: U, v: T) => U, initialValue?: U): U {

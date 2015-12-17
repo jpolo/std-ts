@@ -172,7 +172,7 @@ export default class Result<T> implements IResult<T> {
     return ResultIsSuccess(this) ? ResultCreateSuccess(f(ResultGetValue(this))) : <any>this;
   }
 
-  flatMap<U>(f: (v: T) => Result<U>): Result<U> {
+  chain<U>(f: (v: T) => Result<U>): Result<U> {
     return ResultIsSuccess(this) ? f(ResultGetValue(this)) : <any>this;
   }
 

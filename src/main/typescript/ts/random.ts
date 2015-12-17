@@ -1,3 +1,5 @@
+import { IGenerator } from "./generator";
+
 declare function require(s: string): any; // nodejs
 declare let process: any;
 
@@ -9,17 +11,15 @@ const NODEJS = typeof process !== "undefined";
 const BROWSER = typeof window !== "undefined";
 
 
-export interface IRandomGenerator {
-  generate(): number;
-}
-
-interface IRandomGeneratorConstructor {
-  new(seed: string): IRandomGenerator;
+export interface IRandomGeneratorAdapter {
+  isSupported(): boolean;
+  new(seed: string): IGenerator<number>;
 }
 
 // ECMA like spec
 const Floor = Math.floor;
 const Ceil = Math.ceil;
+const Random = Math.random;
 
 function ArraySwap(array: number[], i: number, j: number) {
   let tmp = array[i];
@@ -27,27 +27,43 @@ function ArraySwap(array: number[], i: number, j: number) {
   array[j] = tmp;
 }
 
-function Generate(rng: IRandomGenerator): number {
-  return rng.generate();
+function GeneratorCreate<T>(f: () => T) {
+  return new Generator(f);
 }
 
-function GenerateBoolean(rng: IRandomGenerator): boolean {
-  return 2 * Generate(rng) > 1;
+function GeneratorGet<T>(rg: IGenerator<T>): T {
+  return rg.next().value;
 }
 
-function GenerateNumber(rng: IRandomGenerator, min: number, max: number): number {
-  return (Generate(rng) * (max - min)) + min;
+function GeneratorMap<T, U>(rg: IGenerator<T>, f: (v: T) => U) {
+  return GeneratorCreate(function () {
+    return f(GeneratorGet(rg));
+  });
 }
 
-function GenerateInt(rng: IRandomGenerator, min: number, max: number): number {
-  return Floor(Generate(rng) * (max - min + 1)) + min;
+function GeneratorChain<T, U>(rg: IGenerator<T>, f: (v: T) => IGenerator<U>) {
+  return GeneratorCreate(function () {
+    return GeneratorGet(f(GeneratorGet(rg)));
+  });
 }
 
-function GenerateChar(rng: IRandomGenerator, chars: string): string {
-  return chars.charAt(Floor(Generate(rng) * (chars.length + 1)));
+function GenerateBoolean(rg: IGenerator<number>): boolean {
+  return 2 * GeneratorGet(rg) > 1;
 }
 
-function GenerateString(rng: IRandomGenerator, length: number, chars: string): string {
+function GenerateNumber(rg: IGenerator<number>, min: number, max: number): number {
+  return (GeneratorGet(rg) * (max - min)) + min;
+}
+
+function GenerateInt(rg: IGenerator<number>, min: number, max: number): number {
+  return Floor(GeneratorGet(rg) * (max - min + 1)) + min;
+}
+
+function GenerateChar(rg: IGenerator<number>, chars: string): string {
+  return chars.charAt(Floor(GeneratorGet(rg) * (chars.length + 1)));
+}
+
+function GenerateString(rng: IGenerator<number>, length: number, chars: string): string {
   let returnValue = "";
   for (let i = 0; i < length; i++) {
     returnValue += GenerateChar(rng, chars);
@@ -55,61 +71,50 @@ function GenerateString(rng: IRandomGenerator, length: number, chars: string): s
   return returnValue;
 }
 
-const AdapterRegistry: { [name: string]: IRandomGeneratorConstructor } = {};
+const AdapterRegistry: { [name: string]: IRandomGeneratorAdapter } = {};
 
-export function Adapter<F extends Function>(name: string) {
-  return function <F extends IRandomGeneratorConstructor>(target: F) {
+export function Adapter<F extends IRandomGeneratorAdapter>(name: string) {
+  return function (target: F) {
     if (AdapterRegistry[name]) {
       throw new Error(`"${name}" is already registered`);
     }
-    AdapterRegistry[name] = <any>target;
+    AdapterRegistry[name] = target;
   };
 }
 
-export class RandomGenerator implements IRandomGenerator {
-
-  static adapterDefault = "rc4";
-
-  protected _type: string;
-  protected _generate: () => number;
-
-  constructor(type?: string, seed?: string)
-  constructor(f: () => number)
-  constructor(c: any = RandomGenerator.adapterDefault, seed = "") {
-    if (typeof c === "function") {
-      this._type = "anonymous";
-      this._generate = c;
-    } else {
-      let Constructor = AdapterRegistry[c];
-      if (!Constructor) {
-        throw new ReferenceError(c + " is not a valid adapter");
-      }
-      let adapter = new Constructor(seed);
-      this._type = c;
-      this._generate = function () {
-        return Generate(adapter);
-      };
-    }
+export class Generator<T> implements IGenerator<T> {
+  constructor(
+    protected _generate?: () => T,
+    protected _hint = "anonymous"
+  ) {
+  }
+/*
+  map<U>(f: (v: T) => U) {
+    return GeneratorMap(this, f);
   }
 
-  map<U>(f: (v: number) => number): RandomGenerator {
-    return new RandomGenerator(() => {
-      return f(this.generate());
-    });
-  }
+  chain<U>(f: (v: T) => IGenerator<T>) {
+    return GeneratorChain(this, f);
+  }*/
 
-  flatMap<U>(f: (v: number) => RandomGenerator): RandomGenerator {
-    return new RandomGenerator(() => {
-      return f(this.generate()).generate();
-    });
-  }
-
-  generate(): number {
+  generate(): T {
     return this._generate();
   }
 
+  next() {
+    return this.return(this.generate());
+  }
+
+  throw(e: any): any {
+    throw e;
+  }
+
+  return<U>(val: U) {
+    return { done: false, value: val };
+  }
+
   inspect() {
-    return `RandomGenerator { [${this._type}] }`;
+    return `Generator { [${this._hint}] }`;
   }
 
   toString() {
@@ -117,58 +122,86 @@ export class RandomGenerator implements IRandomGenerator {
   }
 }
 
-@Adapter("node")
-class RandomGeneratorNodeJS {
-  private static _hexString(digits: number) {
-    let crypto = require("crypto");
-    let numBytes = Ceil(digits / 2);
-    let bytes;
-    // Try to get cryptographically strong randomness. Fall back to
-    // non-cryptographically strong if not available.
-    try {
-      bytes = crypto.randomBytes(numBytes);
-    } catch (e) {
-      // XXX should re-throw any error except insufficient entropy
-      bytes = crypto.pseudoRandomBytes(numBytes);
+export class RandomGenerator extends Generator<number> {
+
+  static adapterDefault = "rc4";
+
+  constructor(type?: string, seed = "") {
+    let Constructor = AdapterRegistry[type];
+    if (!Constructor) {
+      throw new ReferenceError(type + " is not a valid adapter");
     }
-    let result = bytes.toString("hex");
-    // If the number of digits is odd, we'll have generated an extra 4 bits
-    // of randomness, so we need to trim the last digit.
-    return result.substring(0, digits);
+    let adapter = new Constructor(seed);
+
+    super(function () {
+      return GeneratorGet(adapter);
+    }, type);
   }
 
-  generate() {
-    let numerator = parseInt(RandomGeneratorNodeJS._hexString(8), 16);
-    return numerator * 2.3283064365386963e-10; // 2^-32
+}
+
+
+@Adapter("node")
+class RandomGeneratorNodeJS extends Generator<number> {
+  static isSupported(): boolean {
+    try {
+      require("crypto");
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  constructor(seed?: string) {
+    const numBytes = 4;
+    const crypto = require("crypto");
+    super(function () {
+      let returnValue = NaN;
+      if (crypto) {
+        let bytes;
+        // Try to get cryptographically strong randomness. Fall back to
+        // non-cryptographically strong if not available.
+        try {
+          bytes = crypto.randomBytes(numBytes);
+        } catch (e) {
+          // XXX should re-throw any error except insufficient entropy
+          bytes = crypto.pseudoRandomBytes(numBytes);
+        }
+        let result = bytes.toString("hex");
+        // If the number of digits is odd, we'll have generated an extra 4 bits
+        // of randomness, so we need to trim the last digit.
+        returnValue = parseInt(result.substring(0, 8), 16);
+        returnValue *= 2.3283064365386963e-10; // 2^-32
+      }
+      return returnValue;
+    }, "nodejs");
   }
 }
 
 @Adapter("browser")
-class RandomGeneratorBrowser {
-  private static _buffer: Uint32Array;
-  private static _getBuffer() {
-    return RandomGeneratorBrowser._buffer || (RandomGeneratorBrowser._buffer = new Uint32Array(1));
+class RandomGeneratorBrowser extends Generator<number> {
+  static isSupported(): boolean {
+    return !!(typeof window !== "undefined" ? window.crypto : null);
   }
-  generate() {
-    let crypto = typeof window !== "undefined" ? window.crypto : null;
-    let returnValue = NaN;
-    if (crypto) {
-      let buffer = RandomGeneratorBrowser._getBuffer();
-      crypto.getRandomValues(buffer);
-      returnValue = buffer[0] * 2.3283064365386963e-10; // 2^-32
-    } else {
-      returnValue = Math.random();
-    }
-    return returnValue;
+
+  constructor(seed?: string) {
+    const buffer = new Uint32Array(1);
+    const crypto = window.crypto;
+    super(() => {
+      let returnValue = NaN;
+      if (crypto) {
+        crypto.getRandomValues(buffer);
+        returnValue = buffer[0] * 2.3283064365386963e-10; // 2^-32
+      } else {
+        returnValue = Random();
+      }
+      return returnValue;
+    }, "browser");
   }
 }
 
-const RC4_WIDTH = 256;
-const RC4_MASK = RC4_WIDTH - 1;
-const RC4_BYTES = 7; // 56 bits to make a 53-bit double
-const RC4_DENOM = (Math.pow(2, RC4_BYTES * 8) - 1);
 @Adapter("rc4")
-export class RandomGeneratorRC4 implements IRandomGenerator  {
+export class RandomGeneratorRC4 extends Generator<number>  {
 
   private static _getStringBytes(s: string): number[] {
     let output = [];
@@ -184,73 +217,78 @@ export class RandomGeneratorRC4 implements IRandomGenerator  {
     return output;
   }
 
-  private static _createState() {
-    let arr = new Array(RC4_WIDTH);
-    for (let idx = 0; idx < RC4_WIDTH; idx++) {
+  private static _createState(width: number) {
+    let arr = new Array(width);
+    for (let idx = 0; idx < width; idx++) {
       arr[idx] = idx;
     }
     return arr;
   }
 
-  private _s: number[];
-  private _i = 0;
-  private _j = 0;
+  static isSupported(): boolean {
+    return true;
+  }
 
   constructor(seed?: string) {
-    this.seed(seed || Math.random().toString(36));
-  }
+    const RC4_WIDTH = 256;
+    const RC4_MASK = RC4_WIDTH - 1;
+    const RC4_BYTES = 7; // 56 bits to make a 53-bit double
+    const RC4_DENOM = (Math.pow(2, RC4_BYTES * 8) - 1);
+    let _state = RandomGeneratorRC4._createState(RC4_WIDTH);
+    let _i = 0;
+    let _j = 0;
 
-  seed(str: string) {
-    let input = RandomGeneratorRC4._getStringBytes(str);
-    let inputlen = input.length;
-    let j = 0;
-    let s = this._s || (this._s = RandomGeneratorRC4._createState());
-    for (let i = 0; i < RC4_WIDTH; i++) {
-      j += s[i] + input[i % inputlen];
-      j %= RC4_WIDTH;
-      ArraySwap(s, i, j);
+    super(function () {
+      let output = 0;
+      for (let i = 0; i < RC4_BYTES; i++) {
+        output *= RC4_WIDTH;
+        output += _nextByte();
+      }
+      return output / RC4_DENOM;
+    }, "rc4");
+
+    function _nextByte() {
+      _i = (_i + 1) % RC4_WIDTH;
+      _j = (_j + _state[_i]) % RC4_WIDTH;
+      ArraySwap(_state, _i, _j);
+      return _state[(_state[_i] + _state[_j]) % RC4_WIDTH];
     }
-  }
 
-  generate(): number {
-    let output = 0;
-    for (let i = 0; i < RC4_BYTES; i++) {
-      output *= RC4_WIDTH;
-      output += this._nextByte();
+    function _seed(str: string) {
+      let input = RandomGeneratorRC4._getStringBytes(str);
+      let inputlen = input.length;
+      let j = 0;
+      for (let i = 0; i < RC4_WIDTH; i++) {
+        j += _state[i] + input[i % inputlen];
+        j %= RC4_WIDTH;
+        ArraySwap(_state, i, j);
+      }
     }
-    return output / RC4_DENOM;
-  }
 
-  private _nextByte() {
-    let s = this._s;
-    let i = this._i;
-    let j = this._j;
-    i = this._i = (i + 1) % RC4_WIDTH;
-    j = this._j = (j + s[i]) % RC4_WIDTH;
-    ArraySwap(s, i, j);
-    return s[(s[i] + s[j]) % RC4_WIDTH];
+    // init seed
+    _seed(seed || Random().toString(36));
   }
 }
 
 const randomGenerator = new RandomGenerator();
 
-export function next(rng: IRandomGenerator = randomGenerator): number {
-  return Generate(rng);
+export function next(rg: IGenerator<number> = randomGenerator): number {
+  return GeneratorGet(rg);
 }
 
-export function nextBoolean(rng: IRandomGenerator = randomGenerator): boolean {
+export function nextBoolean(rng: IGenerator<number> = randomGenerator): boolean {
   return GenerateBoolean(rng);
 }
 
-export function nextNumber(min = FLOAT_MIN_VALUE, max = FLOAT_MAX_VALUE, rng: IRandomGenerator = randomGenerator): number {
+export function nextNumber(min = FLOAT_MIN_VALUE, max = FLOAT_MAX_VALUE, rng: IGenerator<number> = randomGenerator): number {
   return GenerateNumber(rng, min, max);
 }
 
-export function nextInt(min = INT_MIN_VALUE, max = INT_MAX_VALUE, rng: IRandomGenerator = randomGenerator): number {
+export function nextInt(min = INT_MIN_VALUE, max = INT_MAX_VALUE, rng: IGenerator<number> = randomGenerator): number {
   return GenerateInt(rng, min, max);
 }
 
-export function nextChar(chars?: string, rng: IRandomGenerator = randomGenerator): string {
+export function nextChar(chars?: string, rng: IGenerator<number> = randomGenerator): string {
   return GenerateChar(rng, chars || "abcdefghijklmnopqrstuvwxyz0123456789");
 }
 
