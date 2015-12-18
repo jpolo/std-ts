@@ -31,8 +31,8 @@ function GeneratorCreate<T>(f: () => T) {
   return new Generator(f);
 }
 
-function GeneratorGet<T>(rg: IGenerator<T>): T {
-  return rg.next().value;
+function GeneratorGet<T>(rg: IGenerator<T>, v?: any): T {
+  return rg.next(v).value;
 }
 
 function GeneratorMap<T, U>(rg: IGenerator<T>, f: (v: T) => U) {

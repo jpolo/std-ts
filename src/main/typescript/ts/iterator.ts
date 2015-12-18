@@ -19,9 +19,19 @@ function IsIterator(o: any): boolean {
   return typeof o === "object" && o !== null && typeof o.next === "function";
 }
 
-function IteratorCreate<T>(next: () => IIteratorResult<T>, hint?) {
+function IteratorCreate<T>(next: (v?: any) => IIteratorResult<T>, hint?: string) {
   return new Iterator(next, hint);
 }
+
+function IteratorNext<T>(iter: IIterator<T>, v?: any) {
+  return iter.next(v);
+}
+/*
+function IteratorMap<T, U>(iter: IIterator<T>, f: (v: T) => U) {
+  return IteratorCreate(function (v?: any) {
+    return f(IteratorNext(iter, v));
+  });
+}*/
 
 function IteratorResultCreate<T>(done: boolean, value: T) {
   return { done: done, value: value };
@@ -88,7 +98,7 @@ export class Iterator<T> implements IIterator<T> {
       if (!done) {
         while (true) {
           if (current) {
-            r = current.next();
+            r = IteratorNext(current);
             if (r.done) {
               args[argi] = null; // free reference;
               current = args[++argi];
