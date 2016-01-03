@@ -78,15 +78,16 @@ export function ToStringTag(o: any): string {
   return s;
 }
 
-/*export function FunctionCall(f: Function, thisp: any, args: any[]) {
-  let argc = args && args.length || 0
+export function Call(f: Function, thisp: any, args: any[]) {
+  let argc = args && args.length || 0;
   switch (argc) {
-    case 0: return thisp ? f.call(thisp) : f()
-    case 1: return thisp ? f.call(thisp, args[0]) : f(args[0])
-    case 2: return thisp ? f.call(thisp, args[0], args[1]) : f(args[0], args[1])
-    default: return f.apply(thisp, args)
+    case 0: return thisp ? f.call(thisp) : f();
+    case 1: return thisp ? f.call(thisp, args[0]) : f(args[0]);
+    case 2: return thisp ? f.call(thisp, args[0], args[1]) : f(args[0], args[1]);
+    default: return f.apply(thisp, args);
   }
-}*/
+}
+
 export function FunctionToString(f: Function): string {
   return Function.prototype.toString.call(f);
 }
