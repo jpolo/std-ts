@@ -2,7 +2,7 @@
 export interface IIterator<T> {
   next(value?: any): IIteratorResult<T>;
   return?<U>(value?: U): IIteratorResult<U>;
-  throw?(e?: any): IIteratorResult<T>;
+  throw?(error?: any): IIteratorResult<T>;
 }
 
 export interface IIterableIterator<T> extends IIterator<T> {
@@ -15,23 +15,26 @@ export interface IIteratorResult<T> {
 }
 
 // Ecma like
+type IteratorNext<T> = { (v?: any): IIteratorResult<T> };
+
 function IsIterator(o: any): boolean {
   return typeof o === "object" && o !== null && typeof o.next === "function";
 }
 
-function IteratorCreate<T>(next: (v?: any) => IIteratorResult<T>, hint?: string) {
+function IteratorCreate<T>(next: IteratorNext<T>, hint?: string) {
   return new Iterator(next, hint);
 }
 
 function IteratorNext<T>(iter: IIterator<T>, v?: any) {
   return iter.next(v);
 }
-/*
-function IteratorMap<T, U>(iter: IIterator<T>, f: (v: T) => U) {
+
+function IteratorMap<T, U>(iter: IIterator<T>, f: (v: T) => IIteratorResult<U>) {
   return IteratorCreate(function (v?: any) {
-    return f(IteratorNext(iter, v));
+    let result = IteratorNext(iter, v);
+    return result.done ? <any>result : f(result.value);
   });
-}*/
+}
 
 function IteratorResultCreate<T>(done: boolean, value: T) {
   return { done: done, value: value };
