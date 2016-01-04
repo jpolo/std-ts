@@ -15,13 +15,11 @@ export interface IIteratorResult<T> {
 }
 
 // Ecma like
-type IteratorNext<T> = { (v?: any): IIteratorResult<T> };
-
 function IsIterator(o: any): boolean {
   return typeof o === "object" && o !== null && typeof o.next === "function";
 }
 
-function IteratorCreate<T>(next: IteratorNext<T>, hint?: string) {
+function IteratorCreate<T>(next: { (v?: any): IIteratorResult<T> }, hint?: string) {
   return new Iterator(next, hint);
 }
 
