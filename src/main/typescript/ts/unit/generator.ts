@@ -1,3 +1,6 @@
+import { IIterator, IIteratorResult } from "../iterator";
+import { Call } from "./util";
+
 // Constant
 const SIZE = 100;
 const LN2 = Math.log(2);
@@ -7,24 +10,19 @@ const Round = Math.round;
 const Log = Math.log;
 const Log2 = function (n: number): number { return Log(n) / LN2; };
 const genSize = GeneratorCreate(function (params: Params) {
-  return ParamsRandomInt(params, 0, ParamsSize(params));
+  return IteratorResultCreate(false, ParamsRandomInt(params, 0, ParamsSize(params)));
 });
 
 // helper
+type IGenerator<T> = IIterator<T>;
 type Params = {
-  size: number;
-  random: () => number;
+  size?: number;
+  random?: () => number;
 }
 
 // ECMA like
-function Call(f: Function, thisp: any, args: any[]) {
-  let argc = args && args.length || 0;
-  switch (argc) {
-    case 0: return thisp ? f.call(thisp) : f();
-    case 1: return thisp ? f.call(thisp, args[0]) : f(args[0]);
-    case 2: return thisp ? f.call(thisp, args[0], args[1]) : f(args[0], args[1]);
-    default: return f.apply(thisp, args);
-  }
+function IteratorResultCreate<T>(done: boolean, value: T): IIteratorResult<T> {
+  return { done: done, value: value };
 }
 
 function ParamsCreate(p?: { size?: number; random?: () => number }): Params {
@@ -58,26 +56,13 @@ function IsIGenerator(o: any): boolean {
   return typeof o === "function" && typeof o.next === "function";
 }
 
-function GeneratorCreate<Result>(f: (params: Params) => Result): IGenerator<Result> {
-  const g = <IGenerator<Result>> function (params: Params): Result {
-    return f(params);
+function GeneratorCreate<T>(f: {(params: Params): IIteratorResult<T>}) {
+  return {
+    next(params?: Params): IIteratorResult<T> {
+      params = ParamsCreate(params);
+      return f(params);
+    }
   };
-
-  g.map = function (f) {
-    return GeneratorMap(g, f);
-  };
-
-  g.flatMap = function (f) {
-    return GeneratorCreate(function (params: Params) {
-      return f(GeneratorGet(g, params))(params);
-    });
-  };
-
-  g.next = function (p?: { size?: number; random?: () => number }): Result {
-    return f(ParamsCreate(p));
-  };
-
-  return g;
 }
 
 function GeneratorFrom<T>(o: IGenerator<T>): IGenerator<T>
@@ -88,21 +73,8 @@ function GeneratorFrom(o: any): IGenerator<any> {
   });
 }
 
-function GeneratorGet<T>(gen: IGenerator<T>, p: Params): T {
+function GeneratorNext<T>(gen: IGenerator<T>, p: Params) {
   return gen.next(p);
-}
-
-function GeneratorMap<T, U>(gen: IGenerator<T>, f: (v: T) => U): IGenerator<U> {
-  return GeneratorCreate(function (params: Params) {
-    return f(GeneratorGet(gen, params));
-  });
-}
-
-export interface IGenerator<Result> {
-  (p: Params): Result;
-  map<U>(f: (v: Result) => U): IGenerator<U>;
-  flatMap<U>(f: (v: Result) => IGenerator<U>): IGenerator<U>;
-  next(p?: { size?: number; random?: () => number }): Result;
 }
 
 /**
@@ -112,7 +84,7 @@ export interface IGenerator<Result> {
  * @return the constant generator
  */
 export function constant<T>(k: T): IGenerator<T> {
-  return GeneratorCreate(function (p: Params) { return k; });
+  return GeneratorCreate(function (p: Params) { return IteratorResultCreate(false, k); });
 }
 
 /**
@@ -131,7 +103,7 @@ export function oneOf<T>(choices: any[]): IGenerator<T> {
   }
   return GeneratorCreate(function (params: Params) {
     let index = ParamsRandomInt(params, 0, length);
-    return GeneratorGet(generators[index], params);
+    return GeneratorNext(generators[index], params);
   });
 }
 
@@ -146,12 +118,13 @@ export function array<T>(value: IGenerator<T>, size: number|IGenerator<number>)
 export function array<T>(value: IGenerator<T>, size = genSize): IGenerator<T[]> {
   let _genSize = GeneratorFrom<number>(size);
   return GeneratorCreate(function (params: Params) {
-    let length = GeneratorGet(_genSize, params);
+    let lengthResult = GeneratorNext(_genSize, params);
+    let length = lengthResult.done ? 0 : lengthResult.value;
     let returnValue: T[] = new Array(length);
     for (let i = 0; i < length; i++) {
-      returnValue[i] = GeneratorGet(value, params);
+      returnValue[i] = GeneratorNext(value, params).value;
     }
-    return returnValue;
+    return IteratorResultCreate(false, returnValue);
   });
 }
 
@@ -162,19 +135,21 @@ export function bind<R>(f: () => R, args?: any): IGenerator<R>
 export function bind(f: Function, args: any): any {
   const gentuple = tuple(args);
   return GeneratorCreate(function (p: Params) {
-    return Call(f, this, GeneratorGet(gentuple, p));
+    let iterResult = GeneratorNext(gentuple, p);
+    return Call(f, this, iterResult.value);
   });
 }
 
 export function filter<T>(gen: IGenerator<T>, p: (v: T) => boolean): IGenerator<T> {
   return GeneratorCreate(function (params: Params) {
-    let value = GeneratorGet(gen, params);
-    return p(value) ? value : undefined;
+    let iterResult = GeneratorNext(gen, params);
+    let { done, value} = iterResult;
+    return done ? iterResult : p(value) ? iterResult : { done: true, value: undefined };
   });
 }
 
 export function from<T>(f: (params: Params) => T): IGenerator<T> {
-  return GeneratorCreate(f);
+  return GeneratorCreate(function (params: Params) { return IteratorResultCreate(false, f(params)); });
 }
 
 /*
@@ -209,9 +184,12 @@ export function random(min: number|IGenerator<number> = 0, max: number|IGenerato
   const genMin = GeneratorFrom<number>(<any>min);
   const genMax = GeneratorFrom<number>(<any>max);
   return GeneratorCreate(function (params: Params) {
-    let minValue = GeneratorGet(genMin, params);
-    let maxValue = GeneratorGet(genMax, params);
-    return ParamsRandom(params, minValue, maxValue);
+    let minResult = GeneratorNext(genMin, params);
+    let maxResult = GeneratorNext(genMax, params);
+    return (
+      minResult.done || maxResult.done ? { done: true, value: undefined } :
+      { done: false, value: ParamsRandom(params, minResult.value, maxResult.value) }
+    );
   });
 }
 
@@ -234,9 +212,9 @@ export function tuple(gens: any[]): IGenerator<any> {
   return GeneratorCreate(function (params: Params) {
     let returnValue: any[] = new Array(arity);
     for (let i = 0; i < arity; i++) {
-      returnValue[i] = GeneratorGet(gens[i], params);
+      returnValue[i] = GeneratorNext(gens[i], params).value;
     }
-    return returnValue;
+    return IteratorResultCreate(false, returnValue);
   });
 }
 
@@ -252,11 +230,16 @@ export function object<V>(key: IGenerator<string>, value: IGenerator<V>, size?: 
 export function object<V>(key: IGenerator<any>, value: IGenerator<V>, size = genSize): IGenerator<any> {
   let _genSize = GeneratorFrom(size);
   return GeneratorCreate(function (params: Params) {
-    let keyCount = GeneratorGet(_genSize, params);
+    let keyCountResult = GeneratorNext(_genSize, params);
+    let keyCount = keyCountResult.done ? 0 : keyCountResult.value;
     let returnValue = {};
     for (let i = 0; i < keyCount; i++) {
-      returnValue[GeneratorGet(key, params)] = GeneratorGet(value, params);
+      let keyResult = GeneratorNext(key, params);
+      let valueResult = GeneratorNext(value, params);
+      if (!keyResult.done && !valueResult.done) {
+        returnValue[keyResult.value] = valueResult.value;
+      }
     }
-    return returnValue;
+    return IteratorResultCreate(false, returnValue);
   });
 }

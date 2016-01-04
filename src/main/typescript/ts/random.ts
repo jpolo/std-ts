@@ -1,4 +1,4 @@
-import { IGenerator } from "./generator";
+import { IIteratorResult, IIterator } from "./iterator";
 
 declare function require(s: string): any; // nodejs
 declare let process: any;
@@ -10,6 +10,7 @@ const INT_MAX_VALUE = (INT_MIN_VALUE - 1) | 0;
 const NODEJS = typeof process !== "undefined";
 const BROWSER = typeof window !== "undefined";
 
+type IGenerator<T> = IIterator<T>;
 
 export interface IRandomGeneratorAdapter {
   isSupported(): boolean;
@@ -26,26 +27,32 @@ function ArraySwap(array: number[], i: number, j: number) {
   array[i] = array[j];
   array[j] = tmp;
 }
-
+/*
 function GeneratorCreate<T>(f: () => T) {
-  return new Generator(f);
+  return new Generator(function () {
+    return { done: false, value: f() };
+  });
+}*/
+
+function GeneratorNext<T>(rg: IGenerator<T>, v?: any) {
+  return rg.next(v);
 }
 
-function GeneratorGet<T>(rg: IGenerator<T>, v?: any): T {
-  return rg.next(v).value;
+function GeneratorGet<T>(rg: IGenerator<T>, v?: any) {
+  return GeneratorNext(rg, v).value;
 }
-
+/*
 function GeneratorMap<T, U>(rg: IGenerator<T>, f: (v: T) => U) {
-  return GeneratorCreate(function () {
-    return f(GeneratorGet(rg));
+  return Generator.map(rg, function (v?: T) {
+    return { done: false, value: f(v) };
   });
 }
 
 function GeneratorChain<T, U>(rg: IGenerator<T>, f: (v: T) => IGenerator<U>) {
   return GeneratorCreate(function () {
-    return GeneratorGet(f(GeneratorGet(rg)));
+    return GeneratorNext(f(GeneratorNext(rg).value));
   });
-}
+}*/
 
 function GenerateBoolean(rg: IGenerator<number>): boolean {
   return 2 * GeneratorGet(rg) > 1;
@@ -82,39 +89,23 @@ export function Adapter<F extends IRandomGeneratorAdapter>(name: string) {
   };
 }
 
-export class Generator<T> implements IGenerator<T> {
-  constructor(
-    protected _generate?: () => T,
-    protected _hint = "anonymous"
-  ) {
-  }
-/*
-  map<U>(f: (v: T) => U) {
-    return GeneratorMap(this, f);
+class RandomGeneratorAdapter implements IGenerator<number> {
+  constructor(protected _next: { (v?: any): number }, public hint = "abstract") {}
+
+  next(v?: any) {
+    return { done: false, value: this._next(v) };
   }
 
-  chain<U>(f: (v: T) => IGenerator<T>) {
-    return GeneratorChain(this, f);
-  }*/
-
-  generate(): T {
-    return this._generate();
+  return(v?: any) {
+    return { done: false, value: v };
   }
 
-  next() {
-    return this.return(this.generate());
-  }
-
-  throw(e: any): any {
-    throw e;
-  }
-
-  return<U>(val: U) {
-    return { done: false, value: val };
+  throw(error: any): any {
+    throw error;
   }
 
   inspect() {
-    return `Generator { [${this._hint}] }`;
+    return `RandomGenerator { [${this.hint}] }`;
   }
 
   toString() {
@@ -122,9 +113,11 @@ export class Generator<T> implements IGenerator<T> {
   }
 }
 
-export class RandomGenerator extends Generator<number> {
+export class RandomGenerator extends RandomGeneratorAdapter {
 
   static adapterDefault = "rc4";
+
+  protected _adapter: IGenerator<number>;
 
   constructor(type?: string, seed = "") {
     let Constructor = AdapterRegistry[type];
@@ -132,17 +125,19 @@ export class RandomGenerator extends Generator<number> {
       throw new ReferenceError(type + " is not a valid adapter");
     }
     let adapter = new Constructor(seed);
-
-    super(function () {
-      return GeneratorGet(adapter);
-    }, type);
+    super((v) => {
+      return GeneratorNext(adapter, v).value;
+    });
   }
 
+  generate() {
+    return GeneratorNext(this._adapter).value;
+  }
 }
 
 
-@Adapter("node")
-class RandomGeneratorNodeJS extends Generator<number> {
+@Adapter("nodejs")
+class RandomGeneratorNodeJS extends RandomGeneratorAdapter {
   static isSupported(): boolean {
     try {
       require("crypto");
@@ -179,7 +174,7 @@ class RandomGeneratorNodeJS extends Generator<number> {
 }
 
 @Adapter("browser")
-class RandomGeneratorBrowser extends Generator<number> {
+class RandomGeneratorBrowser extends RandomGeneratorAdapter {
   static isSupported(): boolean {
     return !!(typeof window !== "undefined" ? window.crypto : null);
   }
@@ -201,7 +196,7 @@ class RandomGeneratorBrowser extends Generator<number> {
 }
 
 @Adapter("rc4")
-export class RandomGeneratorRC4 extends Generator<number>  {
+export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
 
   private static _getStringBytes(s: string): number[] {
     let output = [];
@@ -273,7 +268,7 @@ export class RandomGeneratorRC4 extends Generator<number>  {
 const randomGenerator = new RandomGenerator();
 
 export function next(rg: IGenerator<number> = randomGenerator): number {
-  return GeneratorGet(rg);
+  return GeneratorNext(rg).value;
 }
 
 export function nextBoolean(rng: IGenerator<number> = randomGenerator): boolean {
