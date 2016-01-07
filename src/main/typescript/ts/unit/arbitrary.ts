@@ -1,4 +1,5 @@
-import { IGenerator, constant, oneOf, random, from } from "./generator";
+import { IIterator, IIteratorResult } from "../iterator";
+import { constant, oneOf, random, from } from "./generator";
 import {
   Now,
   INT8_MIN_VALUE, INT8_MAX_VALUE,
@@ -14,18 +15,35 @@ const Floor = Math.floor;
 const GeneratorFrom = from;
 const genNow = GeneratorFrom(Now);
 
-function GeneratorMap<A, B>(g: IGenerator<A>, f: (v: A) => B): IGenerator<B> {
-  return g.map(f);
+type IGenerator<T> = IIterator<T>;
+
+function GeneratorCreate<T>(f: {(v?: any): IIteratorResult<T>}) {
+  return {
+    next(v?: any): IIteratorResult<T> {
+      return f(v);
+    }
+  };
+}
+
+function GeneratorMap<T, U>(g: IGenerator<T>, f: (v: T) => U): IGenerator<U> {
+  return GeneratorCreate(function (v?: any) {
+    let iterResult = g.next(v);
+    let iterMapped: IIteratorResult<U> = iterResult.done ? <any>iterResult : { done: false, value: f(iterResult.value) };
+    return iterMapped;
+  });
 }
 
 function GeneratorRandomInt(min: number|IGenerator<number>, max: number|IGenerator<number>) {
   let genMin = GeneratorFrom<number>(<any>min);
   let genMax = GeneratorFrom<number>(<any>max);
   return GeneratorFrom(function (p) {
-    let minValue = genMin.next(p);
-    let maxValue = genMax.next(p);
+    let minResult = genMin.next(p);
+    let maxResult = genMax.next(p);
     let n = p.random();
-    return Floor(n * (maxValue - minValue + 1)) + minValue;
+    let minValue = minResult.value;
+    let maxValue = maxResult.value;
+    return minResult.done || maxResult.done ? NaN :
+      Floor(n * (maxValue - minValue + 1)) + minValue;
   });
 }
 

@@ -1,10 +1,13 @@
 import { IIterableIterator, IIteratorResult } from "./iterator";
 
+export interface IGeneratorResult<T> extends IIteratorResult<T> {
 
-export interface IGenerator<Yield, Next> extends IIterableIterator<Yield> {
-  next(value?: Next): IIteratorResult<Yield>;
-  return(value?: any): IIteratorResult<Yield>;
-  throw(error: any): IIteratorResult<Yield>;
+}
+
+export interface IGenerator<Yield> extends IIterableIterator<Yield> {
+  next(value?: any): IGeneratorResult<Yield>;
+  return(value?: any): IGeneratorResult<Yield>;
+  throw(error: any): IGeneratorResult<Yield>;
 }
 
 function IteratorResultCreate<T>(done: boolean, value: T): IIteratorResult<T> {
@@ -21,18 +24,18 @@ function IsGenerator(o: any): boolean {
   );
 }
 
-function GeneratorCreate<T, Next>(f: { (v?: Next): IIteratorResult<T> }): Generator<T, Next> {
+function GeneratorCreate<T>(f: { (v?: any): IIteratorResult<T> }): Generator<T> {
   return new Generator(f);
 }
 
-function GeneratorNext<T, Next>(gen: IGenerator<T, Next>, v?: Next): IIteratorResult<T> {
+function GeneratorNext<T, Next>(gen: IGenerator<T>, v?: any): IIteratorResult<T> {
   return gen.next(v);
 }
 
-function GeneratorMap<T, U, Next>(gen: IGenerator<T, Next>, f: (v: T) => IIteratorResult<U>): Generator<U, Next> {
-  return GeneratorCreate(function (v?: Next) {
+function GeneratorMap<T, U>(gen: IGenerator<T>, f: (v: T) => U): Generator<U> {
+  return GeneratorCreate(function (v?: any) {
     let iterResult = GeneratorNext(gen, v);
-    let iterMapped: IIteratorResult<U> = iterResult.done ? <any>iterResult : f(iterResult.value);
+    let iterMapped: IIteratorResult<U> = iterResult.done ? <any>iterResult : IteratorResultCreate(false, f(iterResult.value));
     return iterMapped;
   });
 }
@@ -45,14 +48,14 @@ function GeneratorChain<T, U, Next>(gen: IGenerator<T>, f: (v: T) => IGenerator<
   });
 }*/
 
-export class Generator<Yield, Next> implements IGenerator<Yield, Next> {
+export class Generator<Yield> implements IGenerator<Yield> {
   protected _done = false;
 
   static isGenerator(o: any): boolean {
     return IsGenerator(o);
   }
 
-  static map<T, U, Next>(gen: IGenerator<T, Next>, f: (v: T) => IIteratorResult<U>): Generator<U, Next> {
+  static map<T, U>(gen: IGenerator<T>, f: (v: T) => U): Generator<U> {
     return GeneratorMap(gen, f);
   }
 /*
@@ -61,12 +64,12 @@ export class Generator<Yield, Next> implements IGenerator<Yield, Next> {
   }*/
 
   constructor(
-    protected _next: { (v?: Next): IIteratorResult<Yield> }
+    protected _next: { (v?: any): IIteratorResult<Yield> }
   ) {
 
   }
 
-  next(v?: Next): IIteratorResult<Yield> {
+  next(v?: any): IIteratorResult<Yield> {
     let done = this._done;
     return IteratorResultCreate(done, done ? undefined : this._next(v).value);
   }
