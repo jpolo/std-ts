@@ -2,34 +2,34 @@
 const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 // const Process = Global.process
 // const IsNodeJS = {}.toString.call(Process) === "[object process]"
-const SetTimeout = function (f: Function, ms: number) { return Global.setTimeout(f, ms); };
-const ClearTimeout = function (id: number) { return Global.clearTimeout(id); };
-const SetInterval = function (f: Function, ms: number) { return Global.setInterval(f, ms); };
-const ClearInterval = function (id: number) { return Global.clearInterval(id); };
+function SetTimeout(f: Function, ms: number) { return Global.setTimeout(f, ms); }
+function ClearTimeout(id: number) { return Global.clearTimeout(id); }
+function SetInterval(f: Function, ms: number) { return Global.setInterval(f, ms); }
+function ClearInterval(id: number) { return Global.clearInterval(id); }
 
 // Task
 let TaskCurrentId = 1;
 const TaskRegistry: { [k: number]: any } = {};
-const TaskGenerateId = function () {
+function TaskGenerateId() {
   let returnValue = TaskCurrentId;
   TaskCurrentId += 1;
   return TaskCurrentId;
-};
-const TaskCreate = function (f: any): number {
+}
+function TaskCreate(f: any): number {
   let id = TaskGenerateId();
   TaskRegistry[id] = f;
   return id;
-};
-const TaskRemove = function (id: number): void {
+}
+function TaskRemove(id: number): void {
   delete TaskRegistry[id];
-};
-const TaskRun = function (id: number) {
+}
+function TaskRun(id: number) {
   let task = TaskRegistry[id];
   if (task) {
     delete TaskRegistry[id];
     task();
   }
-};
+}
 const SetImmediate: (f: any) => number =
   Global.setImmediate ? Global.setImmediate :
   Global.postMessage ? (function () {

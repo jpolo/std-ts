@@ -24,7 +24,7 @@ function IsGenerator(o: any): boolean {
   );
 }
 
-function GeneratorCreate<T>(f: { (v?: any): IIteratorResult<T> }): Generator<T> {
+function GeneratorCreate<T>(f: (v?: any) => IIteratorResult<T>): Generator<T> {
   return new Generator(f);
 }
 
@@ -64,7 +64,7 @@ export class Generator<Yield> implements IGenerator<Yield> {
   }*/
 
   constructor(
-    protected _next: { (v?: any): IIteratorResult<Yield> }
+    protected _next: (v?: any) => IIteratorResult<Yield>
   ) {
 
   }

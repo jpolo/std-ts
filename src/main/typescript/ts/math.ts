@@ -99,14 +99,14 @@ const math_atanh = Math["atanh"] || function (n) {
     0.5 * math_log((1 + n) / (1 - n))
   );
 };
-let math_sinh = Math["sinh"] || function (n) {
+const math_sinh = Math["sinh"] || function (n) {
   n = ToNumber(n);
   return (
     !IsFinite(n) || n === 0 ? n :
     (math_exp(n) - math_exp(-n)) / 2
   );
 };
-let math_tanh = Math["tanh"] || function (n) {
+const math_tanh = Math["tanh"] || function (n) {
   n = ToNumber(n);
   let exp, nexp;
   return (

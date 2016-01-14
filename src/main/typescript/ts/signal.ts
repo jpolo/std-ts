@@ -125,8 +125,7 @@ export default class Signal<T> {
   }
 
   has(f: ISignalHandler<T>, once = false): boolean {
-    let bindings = ToSignalBindingQueue(this);
-    return !!SignalBindingQueueFind(bindings, f, once);
+    return !!SignalBindingQueueFind(ToSignalBindingQueue(this), f, once);
   }
 
   add(f: ISignalHandler<T>, once = false): void {

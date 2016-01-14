@@ -19,7 +19,7 @@ function IsIterator(o: any): boolean {
   return typeof o === "object" && o !== null && typeof o.next === "function";
 }
 
-function IteratorCreate<T>(next: { (v?: any): IIteratorResult<T> }, hint?: string) {
+function IteratorCreate<T>(next: (v?: any) => IIteratorResult<T>, hint?: string) {
   return new Iterator(next, hint);
 }
 
