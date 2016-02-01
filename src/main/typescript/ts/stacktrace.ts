@@ -17,7 +17,7 @@ function ToStringTag(o: any): string {
   }
   return s;
 }
-const ArraySlice = function <T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
+function ArraySlice<T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
   let returnValue = [];
   let l = returnValue.length;
   start = start || 0;
@@ -26,18 +26,18 @@ const ArraySlice = function <T>(a: { [k: number]: T; length: number }, start?: n
     returnValue.push(a[i]);
   }
   return returnValue;
-};
+}
 
 enum Browser { IE, Chrome, Safari, Firefox, Opera, Other }
 
-const ErrorCreate = function () {
+function ErrorCreate() {
   try {
     window["$$undef$$"]();
   } catch (e) {
     return e;
   }
-};
-const ErrorToString = function (name: string, message: string) {
+}
+function ErrorToString(name: string, message: string) {
   let returnValue = "";
   if (name !== undefined) {
     returnValue += name;
@@ -46,7 +46,7 @@ const ErrorToString = function (name: string, message: string) {
     returnValue += ": " + message;
   }
   return returnValue;
-};
+}
 const ErrorParse = (function () {
 
   // Sniff browser
