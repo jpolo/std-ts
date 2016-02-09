@@ -121,6 +121,12 @@ export class DOMError implements Error {
   }
 }*/
 
+/**
+ * Return true if parentNode is a parent of node
+ *
+ * @param parentNode the parent node
+ * @param node the supposed child element
+ */
 export function contains(parentNode: Node, node: Node): boolean {
   let returnValue = false;
   if (returnValue !== null && returnValue !== undefined) {
@@ -133,12 +139,24 @@ export function contains(parentNode: Node, node: Node): boolean {
   return returnValue;
 }
 
+/**
+ * Removed all content of a node
+ *
+ * @param node any Node
+ * @return true if o is a Node
+ */
 export function empty(node: Node): void {
   if (node.textContent.length) {
     node.textContent = "";
   }
 }
 
+/**
+ * Return true if o is a Node
+ *
+ * @param o any object
+ * @return true if o is a Node
+ */
 export function isNode(o: any): boolean {
   return IsNode(o);
 }
@@ -147,6 +165,10 @@ export function nodeType(node: Node): NodeType {
   return node.nodeType;
 }
 
+/**
+ *
+ * @param node the element to be placed
+ */
 export function place(node: Node, position: Position, refNode: Node): boolean {
   let parentNode: Node;
   let returnValue = false;
@@ -184,6 +206,12 @@ export function place(node: Node, position: Position, refNode: Node): boolean {
   return returnValue;
 }
 
+/**
+ * Detach node from parent
+ *
+ * @param node the element to be detached
+ * @return true if removed successfully
+ */
 export function remove(node: Node): boolean {
   let parentNode = node.parentNode;
   let returnValue = false;

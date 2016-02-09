@@ -46,6 +46,8 @@ function GetOrSetId(o: any): number {
 
 /**
  * Return new generated id
+ *
+ * @return a new identifier
  */
 export function generate(): number {
   return idGenerator();
@@ -53,6 +55,9 @@ export function generate(): number {
 
 /**
  * Return true if o can have and id (object or function)
+ *
+ * @param o the object
+ * @return
  */
 export function hasId(o: any): boolean {
   return IsFunction(o) || IsObject(o);
@@ -60,6 +65,9 @@ export function hasId(o: any): boolean {
 
 /**
  * Return the corresponding id if able
+ *
+ * @param o the object
+ * @return the o identifier
  */
 export function getId(o: any): number {
   return hasId(o) ? GetOrSetId(o) : NaN;
