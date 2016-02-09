@@ -94,7 +94,7 @@ function flatMap<T, U>(r: IResult<T>, f: (v: T) => IResult<U>): Result<U> {
 
 function ResultTransform<T, R>(r: IResult<T>, onSuccess?: (v: T) => R | Result<R>, onFailure?: (e: any) => R | Result<R> | void): Result<R> {
   let returnValue = <any>r;
-  if (ResultIsSuccess(this)) {
+  if (ResultIsSuccess(r)) {
     try {
       returnValue = ResultCreateSuccess(onSuccess(ResultGetValue(r)));
     } catch (e) {
