@@ -1,44 +1,46 @@
 {
+  "rulesDirectory": ["node_modules/ng2lint/dist/src"],
   "rules": {
     "class-name": true,
-    "comment-format": [true,
-      "check-space"
+    "curly": false,
+    "eofline": true,
+    "indent": ["spaces"],
+    "max-line-length": [true, 140],
+    "member-ordering": [true,
+      "public-before-private",
+      "static-before-instance",
+      "variables-before-functions"
     ],
-    "indent": [true,
-      "spaces"
-    ],
+    "no-arg": true,
+    "no-construct": true,
+    "no-duplicate-key": true,
+    "no-duplicate-variable": true,
+    "no-empty": true,
+    "no-eval": true,
+    "no-trailing-whitespace": true,
+    "no-unused-expression": true,
+    "no-unused-variable": true,
+    "no-unreachable": true,
+    "no-use-before-declare": true,
     "one-line": [true,
       "check-open-brace",
+      "check-catch",
+      "check-else",
       "check-whitespace"
     ],
-    "no-var-keyword": true,
-    "quotemark": [true,
-      "double"
-    ],
+    "quotemark": [true, "single"],
     "semicolon": true,
-    "whitespace": [true,
-      "check-branch",
-      "check-operator",
-      "check-separator",
-      "check-type",
-      "check-module"
-    ],
-    "typedef-whitespace": [true, {
-      "call-signature": "nospace",
-      "index-signature": "nospace",
-      "parameter": "nospace",
-      "property-declaration": "nospace",
-      "variable-declaration": "nospace"
-      }],
-      "next-line": [true,
-        "check-catch",
-        "check-else"
-      ],
-      "no-internal-module": true,
-      "no-trailing-whitespace": true,
-      "no-inferrable-types": true,
-      "no-null": true,
-      "boolean-trivia": true,
-      "type-operator-spacing": true
-    }
+    "trailing-comma": true,
+    "triple-equals": true,
+    "variable-name": false,
+
+    "component-selector-name": [true, "kebab-case"],
+    "component-selector-type": [true, "element"],
+    "host-parameter-decorator": true,
+    "input-parameter-decorator": true,
+    "output-parameter-decorator": true,
+    "attribute-parameter-decorator": true,
+    "input-property-directive": true,
+    "output-property-directive": true
   }
+}
