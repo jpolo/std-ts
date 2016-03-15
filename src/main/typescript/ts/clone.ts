@@ -1,26 +1,29 @@
-//Util
-const __create: (proto: any, descriptors?: any) => any  = Object.create || function (proto, descs) {
-  let ctor = proto.constructor;
-  function P() {}
-  P.prototype = proto;
-  let o = new P();
-
-  //TODO defineproperties
-  return o;
-};
-const __protoOf = Object.getPrototypeOf || function (o: any) { return o.__proto__; };
-const __descriptors = Object.getOwnPropertyNames ?
-  function (o: any): { [k: string]: PropertyDescriptor } {
-    let descriptors: any = {};
+// Util
+function ObjectCreate(proto: any, descriptors: any) {
+  let returnValue;
+  if (Object.create) {
+    returnValue = Object.create(proto, descriptors);
+  } else {
+    let ctor = proto.constructor;
+    let P = function () {};
+    P.prototype = proto;
+    let o = new P();
+    returnValue = o;
+  }
+  return returnValue;
+}
+function GetPrototypeOf(o: any) {
+  return Object.getPrototypeOf ? Object.getPrototypeOf(o) : o.__proto__;
+}
+function OwnDescriptors(o: any): { [k: string]: PropertyDescriptor } {
+  let descriptors: any = {};
+  if (Object.getOwnPropertyNames) {
     let props = Object.getOwnPropertyNames(o);
     let getDescriptor = Object.getOwnPropertyDescriptor;
     for (let prop of props) {
       descriptors[prop] = getDescriptor(o, prop);
     }
-    return descriptors;
-  } :
-  function (o) {
-    let descriptors: any = {};
+  } else {
     for (let prop in o) {
       if (o.hasOwnProperty(prop)) {
         descriptors[prop] = {
@@ -31,17 +34,17 @@ const __descriptors = Object.getOwnPropertyNames ?
         };
       }
     }
-    return descriptors;
-  };
-const __isDefined = function (o) { return o !== undefined && o !== null; };
-const __ostring = {}.toString;
-const __stringTag = function (o: any) {
+  }
+  return descriptors;
+}
+function IsDefined(o) { return o !== undefined && o !== null; }
+function ToStringTag(o: any) {
   let c = o.constructor;
-  return c && c.name || __ostring.call(o).slice(8, -1);
-};
+  return c && c.name || Object.prototype.toString.call(o).slice(8, -1);
+}
 
 export interface IClone {
-  clone(): any
+  clone(): any;
 }
 
 export function isIClone(o: any): boolean {
@@ -57,13 +60,13 @@ export function clone<T>(o: T): T {
       if (isIClone(anyVal)) {
         returnValue = anyVal.clone();
       } else {
-        switch (__stringTag(anyVal)) {
+        switch (ToStringTag(anyVal)) {
           case "Array": returnValue = <any> cloneArray(anyVal); break;
           case "Date": returnValue = <any> cloneDate(anyVal); break;
-          //case "Map": returnValue = <any> cloneMap(anyVal); break;
+          // case "Map": returnValue = <any> cloneMap(anyVal); break;
           case "RegExp": returnValue = <any> cloneRegExp(anyVal); break;
-          //case "Set": returnValue = <any> cloneSet(anyVal); break;
-          default: returnValue = __create(__protoOf(anyVal), __descriptors(anyVal));
+          // case "Set": returnValue = <any> cloneSet(anyVal); break;
+          default: returnValue = ObjectCreate(GetPrototypeOf(anyVal), OwnDescriptors(anyVal));
         }
       }
     }
@@ -77,17 +80,17 @@ export function clone<T>(o: T): T {
 
       switch (argc) {
         case 0: r = t ? f() : f.call(t); break;
-        case 1: r = t ? f(arguments[0]): f.call(t, arguments[0]); break;
-        case 2: r = t ? f(arguments[0], arguments[1]): f.call(t, arguments[0], arguments[1]); break;
-        case 3: r = t ? f(arguments[0], arguments[1], arguments[2]): f.call(t, arguments[0], arguments[1], arguments[2]); break;
-        case 4: r = t ? f(arguments[0], arguments[1], arguments[2], arguments[3]): f.call(t, arguments[0], arguments[1], arguments[2], arguments[3]); break;
+        case 1: r = t ? f(arguments[0]) : f.call(t, arguments[0]); break;
+        case 2: r = t ? f(arguments[0], arguments[1]) : f.call(t, arguments[0], arguments[1]); break;
+        case 3: r = t ? f(arguments[0], arguments[1], arguments[2]) : f.call(t, arguments[0], arguments[1], arguments[2]); break;
+        case 4: r = t ? f(arguments[0], arguments[1], arguments[2], arguments[3]) : f.call(t, arguments[0], arguments[1], arguments[2], arguments[3]); break;
         default: r = f.apply(t, arguments);
       }
       return r;
     };
 
     break;
-  default://keep value
+  default: // keep value
   }
   return returnValue;
 }
@@ -106,7 +109,7 @@ export function cloneString(s: string): string {
 
 export function cloneArray<T>(a: T[]): T[] {
   let returnValue = a;
-  if (__isDefined(a)) {
+  if (IsDefined(a)) {
     let length = a.length;
     returnValue = new Array(length);
     for (let i = 0; i < length; i++) {
@@ -117,12 +120,12 @@ export function cloneArray<T>(a: T[]): T[] {
 }
 
 export function cloneDate(d: Date): Date {
-  return __isDefined(d) ? new Date(d.getTime()) : d;
+  return IsDefined(d) ? new Date(d.getTime()) : d;
 }
 
 export function cloneRegExp(re: RegExp): RegExp {
   let returnValue = re;
-  if (__isDefined(re)) {
+  if (IsDefined(re)) {
     let flags = "";
     if (re.global) {
       flags += "g";
@@ -134,10 +137,10 @@ export function cloneRegExp(re: RegExp): RegExp {
       flags += "m";
     }
     if ((<any> re).sticky) {
-      flags += 'y';
+      flags += "y";
     }
     if ((<any> re).unicode) {
-      flags += 'u';
+      flags += "u";
     }
     returnValue = new RegExp(re.source, flags);
   }

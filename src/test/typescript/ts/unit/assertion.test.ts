@@ -1,8 +1,8 @@
-import { test } from "./_boot.test"
-import { IAssertionCallSite, Assertion } from "../../../../main/typescript/ts/unit/assertion"
+import { test } from "./_boot.test";
+import { IAssertionCallSite, Assertion } from "../../../../main/typescript/ts/unit/assertion";
 
 export default test("ts/unit/assertion", (assert) => {
-  
+
   let assertionType = "SUCCESS";
   let message = "my message";
   let position: IAssertionCallSite = {
@@ -23,10 +23,10 @@ export default test("ts/unit/assertion", (assert) => {
     toString() { return ""; }
   };
   let a = new Assertion(assertionType, null, message, position, "my stack");
-  
-  assert(a.type === assertionType, "assertion.type failure")
-  assert(a.test ===  null, "assertion.test failure")
-  assert(a.message === message, "assertion.message failure")
-  assert(a.position === position, "assertion.position failure")  
-  
+
+  assert(a.name === assertionType, "assertion.type failure");
+  assert(a.test ===  null, "assertion.test failure");
+  assert(a.message === message, "assertion.message failure");
+  assert(a.position === position, "assertion.position failure");
+
 });

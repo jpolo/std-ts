@@ -1,80 +1,82 @@
-import { ITestEngine, IPrinter, ITest, ITestReport, ITestHandlers } from "../unit"
-import { instance as $engineDefault } from "./engine"
+import { ITestEngine, IReporter, ITest, ITestReport, ITestRunContext, IAssertion } from "../unit";
+import { Engine, ITestEngineRunContext } from "./engine";
 
-//Constant
-const FLOAT_EPSILON = 1e-5;
+// Constant
+const $engineDefault = new Engine();
 
 export class Runner {
-  //Config
-  protected _epsilon = FLOAT_EPSILON;
-  protected _timeout = 2000;//ms
-  protected _includeDefault = true;
+  // Config
+  // protected _timeout = 2000; // ms
 
-  //Service
+  // Service
   protected $engine: ITestEngine = $engineDefault;
 
   constructor(
-    private _printers: IPrinter[] = [],
-    deps?: {
-      $engine: ITestEngine
-    }
+    protected _timeout = 2000, // ms
+    protected _reporters: IReporter[] = []
   ) {
-    if (deps) {
-      if (deps.$engine !== undefined) {
-        this.$engine = deps.$engine;
-      }
-    }
   }
 
   config(options: {
-    epsilon?: number
-    //includeDefault?: boolean
     timeout?: number
   }) {
-    if (options.epsilon !== undefined) {
-      this._epsilon = options.epsilon;
-    }
-    //if (options.includeDefault !== undefined) {
-    //  this._includeDefault = options.includeDefault;
-    //}
-    if (options.timeout !== undefined) {
-      this._timeout = options.timeout;
-    }
-    return this;
+    return new Runner(
+      this._timeout,
+      this._reporters
+    );
   }
 
   /*
   printers(printers: IPrinter[]) {
     return new Runner(
-      this._printers.concat(printers), {
-        $engine: this.$engine
-      }
+      this._timeout,
+      this._printers.concat(printers)
     );
   }
   */
 
-  run(testCases: ITest[], onComplete?: (report: ITestReport[]) => void): void {
-    //if (this._includeDefault) {
-    //  testCases = testCases.concat(suiteDefault.tests)
-    //}
+  run(tests: ITest[], onComplete?: (report: ITestReport[]) => void): void {
+    let { $engine, _timeout } = this;
     let reports: ITestReport[] = [];
-    let config = {
-      epsilon: this._epsilon,
-      timeout: this._timeout
-    };
-    let handlers: ITestHandlers = {
-      onStart: (tests) => { },
-      onTestStart: (tests, test) => { },
-      onTestEnd: (tests, test, report) => {
-        reports.push(report);
-      },
-      onEnd: (tests) => {
-        if (onComplete) {
-          onComplete(reports);
-        }
-      },
-    };
 
-    this.$engine.run(testCases, config, handlers)
+    function runTest(test: ITest, onComplete: (r: ITestReport) => void) {
+      let report: ITestReport = {
+        startDate: null,
+        elapsedMilliseconds: NaN,
+        assertions: []
+      };
+      let context: ITestEngineRunContext = {
+        getTimeout() { return _timeout; },
+        getTest() { return test; },
+        onStart() {
+          report.startDate = new Date($engine.now());
+        },
+        onAssertion(assertion: IAssertion) {
+          report.assertions.push(assertion);
+        },
+        onError(e: any) {
+
+        },
+        onEnd() {
+          if (onComplete) {
+            onComplete(report);
+          }
+        }
+      };
+      $engine.run(context);
+    }
+
+    let testPending = tests.length;
+    function onTestComplete(r: ITestReport) {
+      reports.push(r);
+      testPending -= 1;
+      if (testPending === 0) {
+        onComplete(reports);
+      }
+    }
+
+    for (let test of tests) {
+      runTest(test, onTestComplete);
+    }
   }
 }

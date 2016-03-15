@@ -1,18 +1,50 @@
-
-//Util
-const __ostring = {}.toString;
-const __isArray = Array.isArray || function (o) { return __ostring.call(o) === "[object Array]"; };
-const __isString = function (o: any): boolean { return typeof o === 'string'; }
-const __keys = Object.keys || function (o: any): string[] { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+// Util
+function IsArray(o: any) {
+  return Array.isArray ? Array.isArray(o) : Object.prototype.toString.call(o) === "[object Array]";
+}
+function IsString(o: any) { return typeof o === "string"; }
+function IsIURI(o: any) {
+  return (o &&
+    ("scheme" in o) &&
+    ("userInfo" in o) &&
+    ("domain" in o) &&
+    ("port" in o) &&
+    ("path" in o) &&
+    ("query" in o) &&
+    ("fragment" in o)
+  );
+}
+function OwnKeys(o: any) {
+  let ks: string[];
+  if (Object.keys) {
+    ks = Object.keys(o);
+  } else {
+    for (let k in o) {
+      if (o.hasOwnProperty(k)) {
+        ks.push(k);
+      }
+    }
+  }
+  return ks;
+}
 const __strIsEmpty = function (o: string) { return !o || o.length === 0; };
-
-export function parse(s: string): URI {
-  return URI.parse(s);
-}
-
-export function stringify(uri: IURI): string {
-  return URI.stringify(uri);
-}
+const reParser = new RegExp(
+  "^" +
+  "(?:" +
+  "([^:/?#.]+)" +                     // scheme - ignore special characters
+  // used by other URL parts such as :,
+  // ?, /, #, and .
+  ":)?" +
+  "(?://" +
+  "(?:([^/?#]*)@)?" +                 // userInfo
+  "([^/#?]*?)" +                      // domain
+  "(?::([0-9]+))?" +                  // port
+  "(?=[/#?]|$)" +                     // authority-terminating character
+  ")?" +
+  "([^?#]+)?" +                         // path
+  "(?:\\?([^#]*))?" +                   // query
+  "(?:#(.*))?" +                        // fragment
+  "$");
 
 export interface IQueryString { [s: string]: string; }
 
@@ -29,15 +61,15 @@ export interface IURI {
 export class URI implements IURI {
 
   static cast(o: any): URI {
-    var returnValue;
+    let returnValue;
     if (o) {
       if (o instanceof URI) {
         returnValue = o;
-      } else if (__isString(o)) {
+      } else if (IsString(o)) {
         returnValue = URI.fromString(o);
-      } else if ('toURI' in o) {
+      } else if ("toURI" in o) {
         returnValue = URI.cast(o.toURI());
-      } else if (__isArray(o)) {
+      } else if (IsArray(o)) {
         returnValue = URI.fromArray(o);
       } else {
         returnValue = URI.fromObject(o);
@@ -45,19 +77,19 @@ export class URI implements IURI {
     }
 
     /*if (!returnValue) {
-      throw new TypeError(o + ' cannot be coerced to URI');
+      throw new TypeError(o + " cannot be coerced to URI");
     }*/
     return returnValue;
   }
 
   static compare(a: IURI, b: IURI): number {
-    var aStr = URI.stringify(a)
-    var bStr = URI.stringify(b)
+    let aStr = URI.stringify(a);
+    let bStr = URI.stringify(b);
     return (
       aStr === bStr ? 0 :
       aStr > bStr ? 1 :
       -1
-    )
+    );
   }
 
   static fromArray(a: any[]): URI {
@@ -65,8 +97,8 @@ export class URI implements IURI {
   }
 
   static fromString(s: string): URI {
-    var returnValue: URI;
-    var parts: Array<any> = s.match(reParser);
+    let returnValue: URI;
+    let parts: Array<any> = s.match(reParser);
     if (parts) {
       returnValue = URI.fromArray([
         decodeComponent(parts[1]),
@@ -78,7 +110,7 @@ export class URI implements IURI {
         decodeComponent(parts[7])
       ]);
     } else {
-      throw new Error(s + ' is not a valid URI');
+      throw new Error(s + " is not a valid URI");
     }
     return returnValue;
   }
@@ -96,18 +128,7 @@ export class URI implements IURI {
   }
 
   static isURI(o: any): boolean {
-    return (
-      o &&
-      (o instanceof URI || (
-        ('scheme' in o) &&
-        ('userInfo' in o) &&
-        ('domain' in o) &&
-        ('port' in o) &&
-        ('path' in o) &&
-        ('query' in o) &&
-        ('fragment' in o)
-      ))
-    );
+    return (o instanceof URI) || IsIURI(o);
   }
 
   static parse(s: string): URI {
@@ -115,62 +136,49 @@ export class URI implements IURI {
   }
 
   static stringify(uri: IURI): string {
-    var s = "";
+    let reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
+    let reDisallowedInFragment = /#/g;
+    let reDisallowedInAbsolutePath = /[\#\?]/g;
+    let reDisallowedInRelativePath =/[\#\?:]/g;
 
-    if (s === undefined || s === null) {
-      s += uri;
-    } else {
-      var reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
-      var reDisallowedInFragment = /#/g;
-      var reDisallowedInAbsolutePath = /[\#\?]/g;
-      var reDisallowedInRelativePath =/[\#\?:]/g;
+    let { scheme, userInfo, domain, port, path, query, fragment } = uri;
+    let s = "";
 
-      var scheme = uri.scheme;
-      var userInfo = uri.userInfo;
-      var domain = uri.domain;
-      var port = uri.port;
-      var path = uri.path;
-      var query = uri.query;
-      var fragment = uri.fragment;
+    if (scheme != null) {
+      s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ":";
+    }
 
-      var s = '';
+    if (domain != null) {
+      s += "//";
 
-      if (scheme != null) {
-        s += encodeSpecialChars(scheme, reDisallowedInSchemeOrUserInfo) + ':';
+      if (userInfo != null) {
+        s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + "@";
       }
 
-      if (domain != null) {
-        s += '//';
-
-        if (userInfo != null) {
-          s += encodeSpecialChars(userInfo, reDisallowedInSchemeOrUserInfo) + '@';
-        }
-
-        s += encodeComponent(domain);
-        if (port != null) {
-          s += ':' + port;
-        }
+      s += encodeComponent(domain);
+      if (port != null) {
+        s += ":" + port;
       }
+    }
 
-      if (path != null) {
-        if (domain && path.charAt(0) != '/') {
-          s += '/';
-        }
-        s += encodeSpecialChars(
-          path,
-          path.charAt(0) == '/' ?
-            reDisallowedInAbsolutePath :
-            reDisallowedInRelativePath
-        );
+    if (path != null) {
+      if (domain && path.charAt(0) != "/") {
+        s += "/";
       }
+      s += encodeSpecialChars(
+        path,
+        path.charAt(0) == "/" ?
+          reDisallowedInAbsolutePath :
+          reDisallowedInRelativePath
+      );
+    }
 
-      if (query != null) {
-        s += '?' + encodeQuery(query);
-      }
+    if (query != null) {
+      s += "?" + encodeQuery(query);
+    }
 
-      if (fragment != null) {
-        s += '#' + encodeSpecialChars(fragment, reDisallowedInFragment);
-      }
+    if (fragment != null) {
+      s += "#" + encodeSpecialChars(fragment, reDisallowedInFragment);
     }
     return s;
   }
@@ -186,12 +194,11 @@ export class URI implements IURI {
     public query: IQueryString,
     public fragment: string
   ) {
-    //make non mutable
-    //Object.freeze(this);
+
   }
 
   compare(u: IURI): number {
-    return URI.compare(this, u)
+    return URI.compare(this, u);
   }
 
   equals(o: any): boolean {
@@ -206,29 +213,25 @@ export class URI implements IURI {
         this.path === o.path &&
         _queryEquals(this.query, o.query)
       )
-    )
+    );
   }
-
-  //hashCode() {
-  //
-  //}
 
   inspect(): string {
     let s = "" + this;
-    let sep = s.length > 0 ? ' ' : ''
-    return 'URI {' + sep + s + sep + '}'
+    let sep = s.length > 0 ? " " : "";
+    return "URI {" + sep + s + sep + "}";
   }
 
   isAbsolute(): boolean {
     return (
       !__strIsEmpty(this.scheme) &&
-      !__strIsEmpty(this.domain) && //port?
+      !__strIsEmpty(this.domain) && // port?
       !__strIsEmpty(this.path)
-    )
+    );
   }
 
   isRelative(): boolean {
-    return !this.isAbsolute()
+    return !this.isAbsolute();
   }
 
   toJSON(): string {
@@ -248,101 +251,62 @@ export class URI implements IURI {
   }
 
   toString(): string {
-    return stringify(this);
+    return URI.stringify(this);
   }
-
-  /*unapply<T>(fn: (
-    scheme: string,
-    userInfo: string,
-    domain: string,
-    port: number,
-    path: string,
-    query: IQueryString,
-    fragment: string
-    ) => T
-  ): T {
-    return fn(
-      this.scheme,
-      this.userInfo,
-      this.domain,
-      this.port,
-      this.path,
-      this.query,
-      this.fragment
-    );
-  }*/
 
   valueOf() {
     return this.toString();
   }
 }
 
-var reParser = new RegExp(
-  '^' +
-  '(?:' +
-  '([^:/?#.]+)' +                     // scheme - ignore special characters
-  // used by other URL parts such as :,
-  // ?, /, #, and .
-  ':)?' +
-  '(?://' +
-  '(?:([^/?#]*)@)?' +                 // userInfo
-  '([^/#?]*?)' +                      // domain
-  '(?::([0-9]+))?' +                  // port
-  '(?=[/#?]|$)' +                     // authority-terminating character
-  ')?' +
-  '([^?#]+)?' +                         // path
-  '(?:\\?([^#]*))?' +                   // query
-  '(?:#(.*))?' +                        // fragment
-  '$');
-
 export function encodeComponent(s: string): string {
-  return s == null ? '' : encodeURIComponent(s)
+  return s == null ? "" : encodeURIComponent(s);
 }
 
 export function decodeComponent(s: string): string {
-  return s == null ? null : decodeURIComponent(s)
+  return s == null ? null : decodeURIComponent(s);
 }
 
 function encodeSpecialChars(unescapedPart: string, extra) {
   return (
-    __isString(unescapedPart) ?
+    IsString(unescapedPart) ?
     encodeURI(unescapedPart).replace(extra, encodeChar) :
     null
-  )
+  );
 }
 
 function encodeChar(ch: string): string {
-  var n = ch.charCodeAt(0);
-  return '%' + ((n >> 4) & 0xf).toString(16) + (n & 0xf).toString(16);
+  let n = ch.charCodeAt(0);
+  return "%" + ((n >> 4) & 0xf).toString(16) + (n & 0xf).toString(16);
 }
 
 export function encodeQuery(qs: IQueryString): string {
-  var s = null, okeys, i, l, key, val;
+  let s = null, okeys, i, l, key, val;
   if (qs) {
-    okeys = __keys(qs);
+    okeys = OwnKeys(qs);
 
     for (i = 0, l = okeys.length; i < l; ++i) {
       if (i === 0) {
-        s = '';
+        s = "";
       } else {
-        s += '&';
+        s += "&";
       }
       key = okeys[i];
       val = qs[key];
 
-      if (__isArray(val) && !__isString(val)) {
+      if (IsArray(val) && !IsString(val)) {
         for (i = 0, l = val.length; i < l; ++i) {
           if (s.length > 0) {
-            s += '&';
+            s += "&";
           }
-          s += encodeComponent(key /*+ '[' + i + ']'*/);
-          s += '=';
+          s += encodeComponent(key /*+ "[" + i + "]"*/);
+          s += "=";
           s += encodeComponent(val[i]);
         }
 
       } else {
         s += encodeComponent(key);
-        s += '=';
+        s += "=";
         s += encodeComponent(val);
       }
     }
@@ -351,14 +315,14 @@ export function encodeQuery(qs: IQueryString): string {
 }
 
 export function decodeQuery(s: string): IQueryString {
-  var qs = null;
+  let qs = null;
   if (s) {
     qs = {};
-    var pairs = s.split('&');
-    var indexOfEquals, pair, key, val, qsval;
-    for (var i = 0, l = pairs.length; i < l; ++i) {
+    let pairs = s.split("&");
+    let indexOfEquals, pair, key, val, qsval;
+    for (let i = 0, l = pairs.length; i < l; ++i) {
       pair = pairs[i];
-      indexOfEquals = pair.indexOf('=');
+      indexOfEquals = pair.indexOf("=");
       key = pair;
       val = null;
       if (indexOfEquals >= 0) {
@@ -366,12 +330,12 @@ export function decodeQuery(s: string): IQueryString {
         val = pair.substring(indexOfEquals + 1);
       }
 
-      //decode
+      // decode
       key = decodeComponent(key);
       val = decodeComponent(val);
       qsval = qs[key];
       if (qsval) {
-        if (!__isArray(qsval)) {
+        if (!IsArray(qsval)) {
           qs[key] = [qsval, val];
         } else {
           qs[key].push(val);
@@ -389,8 +353,8 @@ export function decodeQuery(s: string): IQueryString {
 function _queryEquals(l: any, r: any): boolean {
   let returnValue = true;
   if (l !== r) {
-    let lkeys = __keys(l);
-    let rkeys = __keys(r);
+    let lkeys = OwnKeys(l);
+    let rkeys = OwnKeys(r);
     let lkeyc: number = lkeys.length;
     let rkeyc: number = rkeys.length;
 
@@ -400,7 +364,7 @@ function _queryEquals(l: any, r: any): boolean {
       lkeys.sort();
       rkeys.sort();
 
-      for (var i = 0, key; i < lkeyc; ++i) {
+      for (let i = 0, key; i < lkeyc; ++i) {
         key = lkeys[i];
         if (key !== rkeys[i] || l[key] !== r[key]) {
           returnValue = false;

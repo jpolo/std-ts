@@ -1,4 +1,4 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit"
+import { suite, test, testc, Assert } from "../../../main/typescript/ts/unit/qunit";
 import {
   Ordering,
   isICompare,
@@ -11,39 +11,34 @@ import {
   min, max,
   equals,
   notEquals
-} from "../../../main/typescript/ts/compare"
+} from "../../../main/typescript/ts/compare";
 
+class AssertCustom extends Assert {
 
-export default suite("ts/compare", (self) => {
-
-  function data<T, R>(d: Array<[[T, T], R]>) {
-    return d;
-  }
-
-  function generator<A, R>(assert: Assert, f: (a: A) => R): (d: Array<[[A], R]>) => void
-  function generator<A, B, R>(assert: Assert, f: (a: A, b: B) => R): (d: Array<[[A, B], R]>) => void
-  function generator<A, B, C, R>(assert: Assert, f: (a: A, b: B, c: C) => R): (d: Array<[[A, B, C], R]>) => void
-  function generator(assert: Assert, f: any): any {
-    return function (d: any[]) {
-      function dump(args) {
-        return args.map((arg) => assert.__dump__(arg)).join(", ");
-      }
-
-      for (var i = 0, l = d.length; i < l; ++i) {
-        var r = d[i];
-        var args = r[0];
-        var expected = r[1];
-        var message = "(" + dump(args) + ") => " + assert.__dump__(expected);
-        assert.strictEqual(f.apply(null, args), expected, message);
-      }
+  generate<A, R>(f: (a: A) => R, d: Array<[[A], R]>): void
+  generate<A, B, R>(f: (a: A, b: B) => R, d: Array<[[A, B], R]>): void
+  generate<A, B, C, R>(f: (a: A, b: B, c: C) => R, d: Array<[[A, B, C], R]>): void
+  generate(f: any, d: any[]): any {
+    for (let r of d) {
+      let [args, expected] = r;
+      let message = "(" +
+        args.map((arg) => this.__dump__(arg)).join(", ") +
+        ") => " +
+        this.__dump__(expected);
+      this.strictEqual(f.apply(null, args), expected, message);
     }
   }
+}
+
+export default suite("ts/compare", (self) => {
+  const test = testc(AssertCustom);
+  const data = function <T, R>(d: Array<[[T, T], R]>) { return d; };
 
   const EMPTY = data([
     [[undefined, null], Ordering.None],
     [[undefined, undefined], Ordering.Equal],
     [[null, null], Ordering.Equal]
-  ])
+  ]);
   const BOOLEANS = data([
     [[true, true], Ordering.Equal],
     [[false, false], Ordering.Equal],
@@ -96,56 +91,56 @@ export default suite("ts/compare", (self) => {
     assert.strictEqual(isICompare(undefined), false);
     assert.strictEqual(isICompare(null), false);
     assert.strictEqual(isICompare({ compare: () => { } }), true);
-  })
+  });
 
   test(".compare()", (assert) => {
-    generator(assert, compare)(EMPTY.concat(<any>STRINGS, BOOLEANS, NUMBERS, DATES))
-  })
+    assert.generate(compare, EMPTY.concat(<any>STRINGS, BOOLEANS, NUMBERS, DATES));
+  });
 
   test(".compareBoolean()", (assert) => {
-    generator(assert, compareBoolean)(BOOLEANS.concat(EMPTY))
-  })
+    assert.generate(compareBoolean, BOOLEANS.concat(EMPTY));
+  });
 
   test(".compareString()", (assert) => {
-    generator(assert, compareString)(STRINGS.concat(EMPTY))
-  })
+    assert.generate(compareString, STRINGS.concat(EMPTY));
+  });
 
   test(".compareNumber()", (assert) => {
-    generator(assert, compareNumber)(NUMBERS.concat(EMPTY))
-  })
+    assert.generate(compareNumber, NUMBERS.concat(EMPTY));
+  });
 
   test(".compareDate()", (assert) => {
-    generator(assert, compareDate)(DATES.concat(EMPTY))
-  })
+    assert.generate(compareDate, DATES.concat(EMPTY));
+  });
 
   test(".compareRegExp()", (assert) => {
-    generator(assert, compareRegExp)(REGEXPS.concat(EMPTY))
-  })
+    assert.generate(compareRegExp, REGEXPS.concat(EMPTY));
+  });
 
   test(".min()", (assert) => {
-    assert.strictEqual(min(0, 0, compareNumber), 0)
-    assert.strictEqual(min(0, 1, compareNumber), 0)
-    assert.strictEqual(min(-1, 1, compareNumber), -1)
-    assert.strictEqual(min("a", "b", compareString), "a")
-  })
+    assert.strictEqual(min(0, 0, compareNumber), 0);
+    assert.strictEqual(min(0, 1, compareNumber), 0);
+    assert.strictEqual(min(-1, 1, compareNumber), -1);
+    assert.strictEqual(min("a", "b", compareString), "a");
+  });
 
   test(".max()", (assert) => {
-    assert.strictEqual(max(0, 1, compareNumber), 1)
-    assert.strictEqual(max(-1, 1, compareNumber), 1)
-    assert.strictEqual(max("a", "b", compareString), "b")
-  })
+    assert.strictEqual(max(0, 1, compareNumber), 1);
+    assert.strictEqual(max(-1, 1, compareNumber), 1);
+    assert.strictEqual(max("a", "b", compareString), "b");
+  });
 
   test(".equals()", (assert) => {
-    assert.strictEqual(equals(0, 1, compareNumber), false)
-    assert.strictEqual(equals(-1, 1, compareNumber), false)
-    assert.strictEqual(equals("a", "b", compareString), false)
-    assert.strictEqual(equals("a", "a", compareString), true)
-  })
+    assert.strictEqual(equals(0, 1, compareNumber), false);
+    assert.strictEqual(equals(-1, 1, compareNumber), false);
+    assert.strictEqual(equals("a", "b", compareString), false);
+    assert.strictEqual(equals("a", "a", compareString), true);
+  });
 
   test(".notEquals()", (assert) => {
-    assert.strictEqual(notEquals(0, 1, compareNumber), true)
-    assert.strictEqual(notEquals(-1, 1, compareNumber), true)
-    assert.strictEqual(notEquals("a", "b", compareString), true)
-    assert.strictEqual(notEquals("a", "a", compareString), false)
-  })
+    assert.strictEqual(notEquals(0, 1, compareNumber), true);
+    assert.strictEqual(notEquals(-1, 1, compareNumber), true);
+    assert.strictEqual(notEquals("a", "b", compareString), true);
+    assert.strictEqual(notEquals("a", "a", compareString), false);
+  });
 })

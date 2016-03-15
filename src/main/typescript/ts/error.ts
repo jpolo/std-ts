@@ -1,115 +1,210 @@
-module error {
+import * as iterator from "./iterator";
 
-  //Util
-  const __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-  const __str = function (o) { return "" + o; };
-  const __inspect = __str;
-  const __console: Console = typeof console !== "undefined" ? __global.console : null;
-  const __name = function (f: Function) {
-    return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(__str(f))[1]))
-  };
-  const __captureStackTrace = (<any>Error).captureStackTrace || function (error, stripPoint) {
-    let stackString = (<any>new Error()).stack;    
-    //Remove first calls
-    let stack = stackString.split("\n").slice(1);//first is Error string, second is __captureStackTrace
-    error.stack = __str(error) + "\n" + stack.join("\n");
-  };
-  const __handleUncaughtError = function (error, prefix) {
-    if (__console) {      
-      let str = error && (error instanceof Error) ? __str(error.stack || error) : __inspect(error);
-      __console.error(prefix + str);
-    } else {//rethrow so it is catched by global.onerror
-      throw error;
-    }
-  };
-  
-  //isHandling marker to avoid infinite recursion
-  let _isHandling = false;
-  
-  
-  export interface IErrorHandler {
-    (e: any): boolean  
-  }
-  
-  export let onerror: IErrorHandler = null;
+// Interfaces
+export interface IErrorHandlerResult extends iterator.IIteratorResult<any> {}
 
-  export function handleError(e): boolean {
-    let handler: IErrorHandler = onerror;
-    let uncaught = !handler; 
-    let fatalError;
-    if (!_isHandling) {
-      _isHandling = true;
-      if (!uncaught) {
-        try {
-          uncaught = !handler(e);
-        } catch (e) {
-          uncaught = true;
-          fatalError = e;
-        }
-      }
-      if (uncaught) {
-        __handleUncaughtError(e, 'Uncaught ');
-      }
-      _isHandling = false;
-    } else {
-      fatalError = e;
-    }
-    if (fatalError) {
-      __handleUncaughtError(fatalError, 'Fatal ');
-    }
-    return uncaught;
+export interface IErrorHandler {
+  handleError(e: any): IErrorHandlerResult;
+}
+
+export interface IThrowable extends Error {}
+
+// Util
+declare var __extends: any; // Typescript __extends
+const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+const GlobalConsole: Console = typeof console !== "undefined" ? Global.console : null;
+const GlobalError = Global.Error;
+const GlobalTypeError: any = Global.TypeError;
+function Has(o: any, name: string) { return o && (name in o); }
+function IsError(o: any): boolean { return o instanceof GlobalError; }
+function ToString(o: any) { return "" + o; }
+function Dump(o: any) {
+  return IsError(o) && Has(o, "stack") ? ToString(o.stack) : ToString(o);
+}
+function FunctionName(f: Function) {
+  return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]));
+}
+
+function CaptureStackTrace(error, stripPoint) {
+  if (GlobalError.captureStackTrace) {
+    GlobalError.captureStackTrace(error, stripPoint);
+  } else {
+    let stackString = (<any>new GlobalError()).stack;
+    // Remove first calls
+    let stack = stackString.split("\n").slice(1); // first is Error string, second is __captureStackTrace
+    error.stack = ToString(error) + "\n" + stack.join("\n");
   }
-  
-  //HACK: augment __extends
-  declare var __extends: any;
+}
+
+function HandleUncaughtError(error, prefix) {
+  if (GlobalConsole) {
+    GlobalConsole.error(prefix + Dump(error));
+  } else { // rethrow so it is catched by global.onerror
+    throw error;
+  }
+}
+
+function PatchExtends() {
+  // HACK: augment __extends
   __extends = (function (__extendsOld) {
     return function __extends(d, b) {
       __extendsOld(d, b);
-      
-      if (d.prototype instanceof __global.Error) {
-        //class is subclass native Error
-        d.prototype.name = __name(d);
+
+      if (d.prototype instanceof Global.Error) {
+        // class is subclass native Error
+        d.prototype.name = FunctionName(d);
       }
     };
   }(__extends));
-  
-  export interface IThrowable extends Error {}
-  
+}
+
+class ErrorHandler implements IErrorHandler {
+
+  private static _empty: ErrorHandler;
+  private static _uncaught: ErrorHandler;
+
+  static empty(): ErrorHandler {
+    return ErrorHandler._empty || (ErrorHandler._empty = new ErrorHandler(function () {
+      return { done: true, value: undefined };
+    }));
+  }
+
+  static compose(handlers: IErrorHandler[]): ErrorHandler {
+    return new ErrorHandler(function (e: any) {
+      let returnValue: IErrorHandlerResult;
+      for (let handler of handlers) {
+        returnValue = handler.handleError(e);
+        if (returnValue.done) {
+          break;
+        }
+      }
+      return returnValue || { done: false, value: e };
+    });
+  }
+
+  static uncaught(): ErrorHandler {
+    return ErrorHandler._uncaught || (ErrorHandler._uncaught = new ErrorHandler(function (e: any) {
+      if (e && e.name === FatalError.prototype.name) {
+        let fatalError = <FatalError> e;
+        HandleUncaughtError(fatalError.error, "Fatal ");
+      } else {
+        HandleUncaughtError(e, "Uncaught ");
+      }
+      return { done: true, value: undefined };
+    }));
+  }
+
+  protected _isHandling = false;
+  protected _handler: (e: any) => IErrorHandlerResult;
+
+  constructor(h: (e: any) => IErrorHandlerResult) {
+    this._handler = h;
+  }
+
+  call(thisp: any, e: any) {
+    return this.handleError(e);
+  }
+
+  apply(thisp: any, args: [any]) {
+    return this.handleError(args[0]);
+  }
+
+  orElse(h: (e: any) => IErrorHandlerResult) {
+    return ErrorHandler.compose([this, new ErrorHandler(h)]);
+  }
+
+  handleError(e: any): IErrorHandlerResult {
+    let returnValue = { done: false, value: e };
+    if (this._handler) {
+      if (!this._isHandling) {
+        this._isHandling = true;
+        try {
+          returnValue = this._handler(e);
+        } catch (e) {
+          returnValue = { done: false, value: new FatalError(e) };
+        }
+        this._isHandling = false;
+      } else {
+        returnValue = { done: false, value: new FatalError(e) };
+      }
+    }
+    return returnValue;
+  }
+}
+
+let _handler: IErrorHandler = ErrorHandler.uncaught();
+
+export function getHandler() {
+  return _handler;
+}
+
+export function setHandler(h: IErrorHandler) {
+  _handler = h;
+}
+
+export function handleError(e) {
+  return _handler.handleError(e).done;
+}
+
+namespace error {
+
   export declare class Error {
     name: string;
     message: string;
-    
+
     constructor(message?: string);
   }
-  error['Error'] = __global.Error;
-  
-  export declare class EvalError extends Error {}
-  error['EvalError'] = __global.EvalError;
-  
-  export declare class RangeError extends Error {}
-  error['RangeError'] = __global.RangeError;
-  
-  export declare class ReferenceError extends Error {}
-  error['ReferenceError'] = __global.ReferenceError;
-  
-  export declare class SyntaxError extends Error {}
-  error['SyntaxError'] = __global.SyntaxError;
-  
-  export declare class TypeError extends Error {}
-  error['TypeError'] = __global.TypeError;
-  
-  export declare class URIError extends Error {}
-  error['URIError'] = __global.URIError;
+  error["Error"] = Global.Error;
 
-  export class BaseError extends Error /*HACK: global reference*/ {
-    stack: string;
-    
-    constructor(message?: string) {
-      super(message);
-      this.message = message;
-      __captureStackTrace(this, this.constructor);
-    }
-  }
+  export declare class EvalError extends Error {}
+  error["EvalError"] = Global.EvalError;
+
+  export declare class RangeError extends Error {}
+  error["RangeError"] = Global.RangeError;
+
+  export declare class ReferenceError extends Error {}
+  error["ReferenceError"] = Global.ReferenceError;
+
+  export declare class SyntaxError extends Error {}
+  error["SyntaxError"] = Global.SyntaxError;
+
+  export declare class TypeError extends Error {}
+  error["TypeError"] = Global.TypeError;
+
+  export declare class URIError extends Error {}
+  error["URIError"] = Global.URIError;
 
 }
-export = error
+
+// Apply path
+PatchExtends();
+const {
+  Error,
+  EvalError,
+  RangeError,
+  ReferenceError,
+  SyntaxError,
+  TypeError,
+  URIError
+} = error;
+
+export { Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError };
+
+export class BaseError extends Error /*HACK: global reference*/ {
+  stack: string;
+
+  constructor(message?: string) {
+    super(message);
+    this.message = message;
+    CaptureStackTrace(this, this.constructor);
+  }
+}
+
+export class FatalError extends BaseError {
+  error: any = null;
+
+  constructor(e: any) {
+    super(e != undefined ? ToString(e) : "");
+    this.error = e;
+  }
+}

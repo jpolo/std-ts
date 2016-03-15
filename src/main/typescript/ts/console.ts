@@ -1,77 +1,150 @@
-//Constant
-var ES_COMPAT = 3;
-
-//Util
-var __void = function () {};
-var __now = Date.now;
-var __global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-var __console: Console = __global.console ? __global.console : null;
-var __forEach = function <T>(a: T[], f: (v: T, i?: number, a?: T[]) => void) {
-  for (var i = 0, l = a.length; i < l; ++i) {
-    f(a[i], i, a);
-  }
-};
-
-//COMPAT
-if (ES_COMPAT <= 3) {
-  __now = __now || function () { return new Date().getTime(); };
-  __console = __console || <any>{};
-  
-  if (!__console.log) __console.log = __void;
-
-  // Implement other log levels to console.log if missing
-  __forEach([
-    "debug", 
-    "info", 
-    "warn", 
-    "error",
-    
-    "dir",
-    "dirxml"
-  ], (v) => {
-    if (!__console[v]) {
-      __console[v] = __console.log;
-    }
-  });
-
-  // Implement console.assert if missing
-  if (!__console.assert) {
-    __console.assert = function (expr, ...args: any[]) {
-      if (!expr) {
-        __console.error.apply(__console, [ "Assertion failed:" ].concat(args));
-      }
-    };
-  }
-  
-  // Implement console.time and console.timeEnd if one of them is missing
-  if (!__console.time || !__console.timeEnd) {
-    var timers = {};
-    __console.time = function(id) {
-      timers[id] = __now();
-    };
-    __console.timeEnd = function(id) {
-      var start = timers[id];
+// Util
+const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
+const GlobalConsole: Console = Global.console ? Global.console : <any>{};
+const Timer = (function () {
+  let timers = {};
+  return {
+    time(timerName: string) {
+      timers[timerName] = Now();
+    },
+    timeEnd(timerName: string) {
+      let start = timers[timerName];
       if (start) {
-        __console.log(id + ": " + (__now() - start) + "ms");
-        delete timers[id];
+        Log("log", timerName + ": " + (Now() - start) + "ms");
+        delete timers[timerName];
       }
-    };
-  }
-  
-  // Dummy implementations of other console features to prevent error messages
-  // in browsers not supporting it.
-  __forEach([
-    "clear", 
-    "trace", 
-    "group", 
-    "groupEnd", 
-    "profile",
-    "profileEnd",
-    "count"
-  ], (v, i) => {
-    if (!__console[v]) {
-      __console[v] = __void;
     }
-  });
+  };
+}());
+function Void() {}
+function Now() { return Date.now ? Date.now() : (new Date()).getTime(); }
+
+function FunctionApply(f: Function, thisp: any, args: any) {
+  let argc = args && args.length || 0;
+  switch (argc) {
+    case 0: return f.call(thisp);
+    case 1: return f.call(thisp, args[0]);
+    default: return f.apply(thisp, args);
+  }
 }
-export default __console;
+
+function Log(level: string, args: any) {
+  let console = Global.console;
+  if (console) {
+    if (console[level]) {
+      FunctionApply(console[level], console, args);
+    } else if (console.log) {
+      FunctionApply(console.log, console, args);
+    }
+  }
+}
+
+export interface IConsoleModule {
+  assert(test?: boolean, message?: string, ...args: any[]): void;
+  clear(): void;
+  count(countTitle?: string): void;
+  dir(object: any): void;
+  dirxml(object: any): void;
+  log(message?: any, ...args: any[]): void;
+  debug(message?: any, ...args: any[]): void;
+  warn(message?: any, ...args: any[]): void;
+  info(message?: any, ...args: any[]): void;
+  error(message?: any, ...args: any[]): void;
+  group(groupTitle?: string): void;
+  groupEnd(): void;
+  profile(reportName?: string): void;
+  profileEnd(): void;
+  time(timerName: string): void;
+  timeEnd(timerName: string): void;
+}
+
+export function assert(test?: boolean, message?: string, ...args: any[]): void {
+  if (GlobalConsole.assert) {
+    FunctionApply(GlobalConsole.assert, GlobalConsole, [message].concat(args));
+  } else {
+    if (!test) {
+      Log("error", [ "Assertion failed:", message ].concat(args));
+    }
+  }
+}
+
+export function clear(): void {
+  (GlobalConsole.clear || Void)();
+}
+
+export function count(countTitle?: string): void {
+  (GlobalConsole.count || Void)(countTitle);
+}
+
+export function dir(object: any): void {
+  if (GlobalConsole.dir) {
+    GlobalConsole.dir(object);
+  } else {
+    Log("log", [object]);
+  }
+}
+
+export function dirxml(object: any): void {
+  if (GlobalConsole.dirxml) {
+    GlobalConsole.dirxml(object);
+  } else {
+    Log("log", [object]);
+  }
+}
+
+export function log(message?: any, ...args: any[]): void
+export function log(...args: any[]): void {
+  Log("log", args);
+}
+
+export function debug(message?: any, ...args: any[]): void
+export function debug(...args: any[]): void {
+  Log("debug", args);
+}
+
+export function info(message?: any, ...args: any[]): void
+export function info(...args: any[]): void {
+  Log("info", args);
+}
+
+export function warn(message?: any, ...args: any[]): void
+export function warn(...args: any[]): void {
+  Log("warn", args);
+}
+
+export function error(message?: any, ...args: any[]): void
+export function error(...args: any[]): void {
+  Log("error", args);
+}
+
+export function groupCollapsed(groupTitle?: string): void {
+  (GlobalConsole.groupCollapsed || Void)(groupTitle);
+}
+
+export function group(groupTitle?: string): void {
+  (GlobalConsole.group || Void)(groupTitle);
+}
+
+export function groupEnd(): void {
+  (GlobalConsole.groupEnd || Void)();
+}
+
+export function profile(reportName?: string): void {
+  (GlobalConsole.profile || Void)(reportName);
+}
+
+export function profileEnd(): void {
+  (GlobalConsole.profileEnd || Void)();
+}
+
+export function time(timerName: string): void {
+  (GlobalConsole.time || Timer.time)(timerName);
+}
+
+export function timeEnd(timerName: string): void {
+  (GlobalConsole.timeEnd || Timer.timeEnd)(timerName);
+}
+
+export function trace(): void {
+  (GlobalConsole.trace || Void)();
+}

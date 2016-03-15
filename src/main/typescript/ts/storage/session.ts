@@ -1,4 +1,4 @@
-import { IStorage, Storage } from "./storage"
+import { IStorage, Storage } from "./storage";
 
 class SessionStorage extends Storage {
   protected _getStorage() {

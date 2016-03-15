@@ -1,20 +1,19 @@
-import * as vector4 from "./vector4"
+import * as vector4 from "./vector4";
 
-//Constant
-const IDENTITY: Quaternion = [0, 0, 0, 1]
+// Constant
+const IDENTITY: Quaternion = [0, 0, 0, 1];
 
-//Util
+// Util
 type Quaternion = [number, number, number, number]
-const F64Array: any = (typeof Float64Array !== 'undefined') ? Float64Array : Array
-const __sqrt = Math.sqrt;
-const __arrayCreate = function (): any {
-  return new F64Array(4) 
+const F64Array: any = (typeof Float64Array !== "undefined") ? Float64Array : Array;
+function ArrayCreate(): any {
+  return new F64Array(4);
 };
 
 export const add = vector4.add;
 
 export function conjugate(q: Quaternion, dest?: Quaternion): Quaternion {
-  var r = dest || __arrayCreate();
+  let r = dest || ArrayCreate();
   r[0] = -q[0];
   r[1] = -q[1];
   r[2] = -q[2];
@@ -33,10 +32,10 @@ export function identity(dest?: Quaternion): Quaternion {
 }
 
 export function invert(q: Quaternion, dest?: Quaternion): Quaternion {
-  var q0 = q[0], q1 = q[1], q2 = q[2], q3 = q[3];
-  var dot = q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3;
-  var invDot = dot ? 1.0 / dot : 0;
-  var r = dest || __arrayCreate();
+  let q0 = q[0], q1 = q[1], q2 = q[2], q3 = q[3];
+  let dot = q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3;
+  let invDot = dot ? 1.0 / dot : 0;
+  let r = dest || ArrayCreate();
   r[0] = -q0 * invDot;
   r[1] = -q1 * invDot;
   r[2] = -q2 * invDot;
@@ -57,4 +56,3 @@ export const normalize = vector4.normalize;
 export const scale = vector4.scale;
 
 export const subtract = vector4.subtract;
-

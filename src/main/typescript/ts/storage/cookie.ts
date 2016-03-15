@@ -1,6 +1,6 @@
-import { IStorage } from "./storage"
+import { IStorage } from "./storage";
 
-//Util
+// Util
 const __now = Date.now || function () { return (new Date()).getTime(); };
 const __keys = Object.keys || function (o) {
   let keys = [];
@@ -18,24 +18,24 @@ const __defineGetter = Object.defineProperty ?
   } :
   function (o, name, getter) {
     o.__defineGetter__(name, getter);
-  };;
+  };
 
 const __cookieRead = (function () {
-  let __cookiesStr = '';
+  let __cookiesStr = "";
   let __cookies: { [key: string]: string } = {};
   const __document = typeof document !== "undefined" ? document : null;
   const __decode = decodeURIComponent;
   const __read = function () {
-    let currentCookieString = __document.cookie || '';
+    let currentCookieString = __document.cookie || "";
 
     if (currentCookieString !== __cookiesStr) {
       __cookiesStr = currentCookieString;
-      let cookieArray = __cookiesStr.split('; ');
+      let cookieArray = __cookiesStr.split("; ");
       __cookies = {};
 
       for (let cookie of cookieArray) {
-        let index = cookie.indexOf('=');
-        if (index > 0) { //ignore nameless cookies
+        let index = cookie.indexOf("=");
+        if (index > 0) { // ignore nameless cookies
           let name = __decode(cookie.substring(0, index));
           // the first value that is seen for a cookie is the most
           // specific one.  values for the same cookie name that
@@ -58,7 +58,7 @@ const __cookieWrite = (function () {
     if (r.length) {
       r = encodeURIComponent(r);
       r = r.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
-      r = r.replace(/[\(\)]/g, encodeURIComponent);//escape
+      r = r.replace(/[\(\)]/g, encodeURIComponent); // escape
     }
     return r;
   };
@@ -71,7 +71,7 @@ const __cookieWrite = (function () {
     return r;
   };
   const __write = function (key: string, value: string, options: WriteOptions = {}) {
-    //options = __extend({ path: '/' }, options);
+    // options = __extend({ path: "/" }, options);
     let now = __now();
     let domain = options.domain;
     let path = options.path || "/";
@@ -81,7 +81,7 @@ const __cookieWrite = (function () {
     let expirationDate = null;
     let cookieDelete = false;
 
-    //Expiration
+    // Expiration
     if (expires !== undefined) {
       expirationDate = new Date(+expires);
     } else if (maxAge !== undefined) {
@@ -90,27 +90,27 @@ const __cookieWrite = (function () {
     }
     cookieDelete = +now >= +expirationDate;
 
-    //Encode
+    // Encode
     let s = "";
     s += __encodeKey(__str(key));
-    s += '=' + (cookieDelete ? "" : __encodeValue(__str(value)));
+    s += "=" + (cookieDelete ? "" : __encodeValue(__str(value)));
     if (expirationDate) {
-      s += '; expires=' + expirationDate.toUTCString();
+      s += "; expires=" + expirationDate.toUTCString();
     }
     if (path) {
-      s += '; path=' + path;
+      s += "; path=" + path;
     }
     if (domain) {
-      s += '; domain=' + domain;
+      s += "; domain=" + domain;
     }
     if (secure) {
-      s += '; secure';
+      s += "; secure";
     }
 
     let cookieOld = __document.cookie;
     __document.cookie = s;
     return (cookieOld !== __document.cookie);
-  }
+  };
   return __write;
 }());
 const __cookieClear = function () {

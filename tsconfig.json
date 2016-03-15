@@ -1,14 +1,14 @@
 {
-    "version": "1.5.3",
+    "version": "1.6.2",
     "compilerOptions": {
         "target": "es5",
         "module": "umd",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
         "declaration": false,
         "noImplicitAny": false,
-        "noLib": false,
         "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "noLib": false,
         "inlineSources": false,
         "inlineSourceMap": false,
         "rootDir": "./src",
@@ -20,13 +20,15 @@
     ],
     "files": [
         "./src/main/typescript/ts/clone.ts",
-        "./src/main/typescript/ts/collection/list.ts",
+        "./src/main/typescript/ts/collection/Dict.ts",
+        "./src/main/typescript/ts/collection/List.ts",
         "./src/main/typescript/ts/compare.ts",
         "./src/main/typescript/ts/console.ts",
         "./src/main/typescript/ts/date.ts",
         "./src/main/typescript/ts/dom/classList.ts",
         "./src/main/typescript/ts/dom/node.ts",
         "./src/main/typescript/ts/error.ts",
+        "./src/main/typescript/ts/generator.ts",
         "./src/main/typescript/ts/geometry/matrix2.ts",
         "./src/main/typescript/ts/geometry/matrix3.ts",
         "./src/main/typescript/ts/geometry/matrix4.ts",
@@ -41,7 +43,7 @@
         "./src/main/typescript/ts/log.ts",
         "./src/main/typescript/ts/math.ts",
         "./src/main/typescript/ts/observe.ts",
-        "./src/main/typescript/ts/option.ts",
+        "./src/main/typescript/ts/Option.ts",
         "./src/main/typescript/ts/random.ts",
         "./src/main/typescript/ts/reflect.ts",
         "./src/main/typescript/ts/result.ts",
@@ -53,6 +55,7 @@
         "./src/main/typescript/ts/storage/memory.ts",
         "./src/main/typescript/ts/storage/session.ts",
         "./src/main/typescript/ts/storage/storage.ts",
+        "./src/main/typescript/ts/time.ts",
         "./src/main/typescript/ts/timer.ts",
         "./src/main/typescript/ts/unit.ts",
         "./src/main/typescript/ts/unit/arbitrary.ts",
@@ -61,9 +64,9 @@
         "./src/main/typescript/ts/unit/equal.ts",
         "./src/main/typescript/ts/unit/generator.ts",
         "./src/main/typescript/ts/unit/mocha.ts",
-        "./src/main/typescript/ts/unit/printer/html.ts",
-        "./src/main/typescript/ts/unit/printer/junit.ts",
         "./src/main/typescript/ts/unit/qunit.ts",
+        "./src/main/typescript/ts/unit/reporter/html.ts",
+        "./src/main/typescript/ts/unit/reporter/junit.ts",
         "./src/main/typescript/ts/unit/runner.ts",
         "./src/main/typescript/ts/unit/util.ts",
         "./src/main/typescript/ts/uri.ts",
@@ -74,7 +77,7 @@
         "./src/test/typescript/ts/_all.test.ts",
         "./src/test/typescript/ts/clone.test.ts",
         "./src/test/typescript/ts/collection/_all.test.ts",
-        "./src/test/typescript/ts/collection/list.test.ts",
+        "./src/test/typescript/ts/collection/List.test.ts",
         "./src/test/typescript/ts/compare.test.ts",
         "./src/test/typescript/ts/date.test.ts",
         "./src/test/typescript/ts/error.test.ts",
@@ -110,5 +113,11 @@
         "./src/test/typescript/ts/uuid.test.ts",
         "./src/test/typescript/ts/vm.test.ts",
         "./src/test/typescript/ts/yaml.test.ts"
-    ]
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+    "atom": {
+        "rewriteTsconfig": true
+    }
 }

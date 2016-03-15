@@ -1,5 +1,5 @@
-//Util
-const __isNode = function (o) {
+// Util
+function IsNode(o) {
   return (
     typeof Node === "object" ? o instanceof Node :
     o &&
@@ -7,24 +7,28 @@ const __isNode = function (o) {
     typeof o.nodeType === "number" &&
     typeof o.nodeName === "string"
   );
-};
-const __isElement = function (o) {
+}
+
+function IsElement(o) {
   return o.nodeType === NodeType.ELEMENT_NODE;
-};
-const __isElementOrDocument = function (n: Node) {
+}
+
+function IsElementOrDocument(n: Node) {
   let nodeType = n.nodeType;
   return (
     nodeType === NodeType.ELEMENT_NODE ||
     nodeType === NodeType.DOCUMENT_FRAGMENT_NODE ||
     nodeType === NodeType.DOCUMENT_NODE
   );
-};
-const __setText = function (n: Node, text: string) {
-  if (__isElementOrDocument(n)) {
+}
+
+function SetText(n: Node, text: string) {
+  if (IsElementOrDocument(n)) {
     n.textContent = text;
   }
-};
-const __getText = function (n: Node) {
+}
+
+function GetText(n: Node) {
   let returnValue = "";
   let nodeType = n.nodeType;
 
@@ -40,7 +44,7 @@ const __getText = function (n: Node) {
       returnValue = "";
       // Traverse its children
       for (n = n.firstChild; n; n = n.nextSibling) {
-        returnValue += __getText(n);
+        returnValue += GetText(n);
       }
     }
   } else if (
@@ -50,7 +54,7 @@ const __getText = function (n: Node) {
     returnValue = n.nodeValue;
   }
   return returnValue;
-};
+}
 
 export enum NodeType {
   ELEMENT_NODE = 1,
@@ -117,6 +121,12 @@ export class DOMError implements Error {
   }
 }*/
 
+/**
+ * Return true if parentNode is a parent of node
+ *
+ * @param parentNode the parent node
+ * @param node the supposed child element
+ */
 export function contains(parentNode: Node, node: Node): boolean {
   let returnValue = false;
   if (returnValue !== null && returnValue !== undefined) {
@@ -129,20 +139,36 @@ export function contains(parentNode: Node, node: Node): boolean {
   return returnValue;
 }
 
+/**
+ * Removed all content of a node
+ *
+ * @param node any Node
+ * @return true if o is a Node
+ */
 export function empty(node: Node): void {
   if (node.textContent.length) {
     node.textContent = "";
   }
 }
 
+/**
+ * Return true if o is a Node
+ *
+ * @param o any object
+ * @return true if o is a Node
+ */
 export function isNode(o: any): boolean {
-  return __isNode(o);
+  return IsNode(o);
 }
 
 export function nodeType(node: Node): NodeType {
   return node.nodeType;
 }
 
+/**
+ *
+ * @param node the element to be placed
+ */
 export function place(node: Node, position: Position, refNode: Node): boolean {
   let parentNode: Node;
   let returnValue = false;
@@ -180,6 +206,12 @@ export function place(node: Node, position: Position, refNode: Node): boolean {
   return returnValue;
 }
 
+/**
+ * Detach node from parent
+ *
+ * @param node the element to be detached
+ * @return true if removed successfully
+ */
 export function remove(node: Node): boolean {
   let parentNode = node.parentNode;
   let returnValue = false;

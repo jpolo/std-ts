@@ -1,9 +1,22 @@
-import { IHash, hashString } from "ts/hash"
+import { IHash, hashString } from "./hash";
 
-//reference: https://github.com/npm/node-semver/blob/master/semver.js
+// reference: https://github.com/npm/node-semver/blob/master/semver.js
 
-//Util
-const ToString = function (o: any): string { return "" + o; };
+// Util
+function Has(o: any, prop: string) { return (prop in o) }
+function ToUint32(o: any) { return o >>>0 }
+function ToString(o: any): string { return "" + o }
+function SemVerStringify(v: ISemVer) {
+  let s = "";
+  s += v.major + '.' + v.minor + '.' + v.patch;
+  if (v.prerelease.length) {
+    s += '-' + v.prerelease.join('.');
+  }
+  return s;
+}
+function SemVerCompare(a: ISemVer, b: ISemVer) {
+  return __cmpMain(a, b) || __cmpPre(a, b);
+}
 
 export interface ISemVer {
   major: number;
@@ -16,7 +29,7 @@ export interface ISemVer {
 export class SemVer implements ISemVer, IHash {
 
   static cast(o: any): SemVer {
-    var returnValue: SemVer = null;
+    let returnValue: SemVer = null;
     if (o) {
       if (o instanceof SemVer) {
         returnValue = o;
@@ -41,9 +54,9 @@ export class SemVer implements ISemVer, IHash {
     return (o && (
       o instanceof SemVer ||
       (
-        ("major" in o) &&
-        ("minor" in o) &&
-        ("patch" in o)
+        Has(o, "major") &&
+        Has(o, "minor") &&
+        Has(o, "patch")
       )
     ));
   }
@@ -57,28 +70,28 @@ export class SemVer implements ISemVer, IHash {
   }*/
 
   static parse(s: string, loose = false): SemVer {
-    var m = s.trim().match(loose ? re[LOOSE] : re[FULL]);
+    let m = s.trim().match(loose ? re[LOOSE] : re[FULL]);
 
     if (!m) {
       throw new TypeError('Invalid Version: ' + s);
     }
 
-    //this.raw = version;
+    // this.raw = version;
 
     // these are actually numbers
-    var major = +m[1];
-    var minor = +m[2];
-    var patch = +m[3];
+    let major = +m[1];
+    let minor = +m[2];
+    let patch = +m[3];
 
     // numberify any prerelease numeric ids
-    var prerelease = [];
+    let prerelease = [];
     if (m[4]) {
-      prerelease = m[4].split('.').map(function(id) {
+      prerelease = m[4].split(".").map(function(id) {
         return (/^[0-9]+$/.test(id)) ? +id : id;
       });
     }
 
-    var build = m[5] ? m[5].split('.') : [];
+    let build = m[5] ? m[5].split(".") : [];
     return new SemVer(
       major,
       minor,
@@ -89,7 +102,7 @@ export class SemVer implements ISemVer, IHash {
   }
 
   static stringify(v: ISemVer): string {
-    return __strSemVer(v);
+    return SemVerStringify(v);
   }
 
   major: number;
@@ -105,21 +118,11 @@ export class SemVer implements ISemVer, IHash {
     prerelease?: Array<number|string>,
     build?: Array<string>
   ) {
-    this.major = major >>> 0;
-    this.minor = minor >>> 0;
-    this.patch = patch >>> 0;
-    this.prerelease = prerelease ? prerelease.slice() : [];//copy
-    this.build = build ? build.slice() : [];//copy
-  }
-
-  clone(): SemVer {
-    return new SemVer(
-      this.major,
-      this.minor,
-      this.patch,
-      this.prerelease,
-      this.build
-    );
+    this.major = ToUint32(major);
+    this.minor = ToUint32(minor);
+    this.patch = ToUint32(patch);
+    this.prerelease = prerelease ? prerelease.slice() : []; // copy
+    this.build = build ? build.slice() : []; // copy
   }
 
   compare(o: ISemVer): number {
@@ -141,10 +144,7 @@ export class SemVer implements ISemVer, IHash {
   }
 
   inspect() {
-    var s = 'SemVer { "';
-    s += ToString(this);
-    s += '" }';
-    return s;
+    return `SemVer { "${this.toString()}" }`;
   }
 
   toJSON() {
@@ -152,27 +152,17 @@ export class SemVer implements ISemVer, IHash {
   }
 
   toString(): string {
-    return __strSemVer(this);
+    return SemVerStringify(this);
   }
 
 }
 
 
-function __strSemVer(v: ISemVer) {
-  var s = "";
-  s += v.major + '.' + v.minor + '.' + v.patch;
-  if (v.prerelease.length) {
-    s += '-' + v.prerelease.join('.');
-  }
-  return s;
-}
-function SemVerCompare(a: ISemVer, b: ISemVer) {
-  return __cmpMain(a, b) || __cmpPre(a, b);
-}
+
 function __cmpIdentifiers(a: number|string, b: number|string): number {
   return NaN;
-  /*var anum = numeric.test(a);
-  var bnum = numeric.test(b);
+  /*let anum = numeric.test(a);
+  let bnum = numeric.test(b);
 
   if (anum && bnum) {
     a = +a;
@@ -195,8 +185,8 @@ function __cmpMain(a: ISemVer, b: ISemVer): number {
 }
 
 function __cmpPre(a: ISemVer, b: ISemVer): number {
-  var apre = a.prerelease;
-  var bpre = b.prerelease;
+  let apre = a.prerelease;
+  let bpre = b.prerelease;
 
   // NOT having a prerelease is > having one
   if (apre.length && !bpre.length) {
@@ -207,12 +197,12 @@ function __cmpPre(a: ISemVer, b: ISemVer): number {
     return 0;
   }
 
-  var i = 0;
+  let i = 0;
   do {
-    var av = apre[i];
-    var avundef = av === undefined;
-    var bv = bpre[i];
-    var bvundef = bv === undefined;
+    let av = apre[i];
+    let avundef = av === undefined;
+    let bv = bpre[i];
+    let bvundef = bv === undefined;
 
     if (avundef && bvundef) {
       return 0;
@@ -229,9 +219,9 @@ function __cmpPre(a: ISemVer, b: ISemVer): number {
 }
 
 // The actual regexps go on exports.re
-var re: RegExp[] = [];
-var src: string[] = [];
-var R = 0;
+let re: RegExp[] = [];
+let src: string[] = [];
+let R = 0;
 
 // The following Regular Expressions can be used for tokenizing,
 // validating, and parsing SemVer version strings.
@@ -239,29 +229,29 @@ var R = 0;
 // ## Numeric Identifier
 // A single `0`, or a non-zero digit followed by zero or more digits.
 
-var NUMERICIDENTIFIER = R++;
-src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
-var NUMERICIDENTIFIERLOOSE = R++;
-src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
+let NUMERICIDENTIFIER = R++;
+src[NUMERICIDENTIFIER] = "0|[1-9]\\d*";
+let NUMERICIDENTIFIERLOOSE = R++;
+src[NUMERICIDENTIFIERLOOSE] = "[0-9]+";
 
 
 // ## Non-numeric Identifier
 // Zero or more digits, followed by a letter or hyphen, and then zero or
 // more letters, digits, or hyphens.
 
-var NONNUMERICIDENTIFIER = R++;
-src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
+let NONNUMERICIDENTIFIER = R++;
+src[NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-][a-zA-Z0-9-]*";
 
 
 // ## Main Version
 // Three dot-separated numeric identifiers.
 
-var MAINVERSION = R++;
+let MAINVERSION = R++;
 src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
                    '(' + src[NUMERICIDENTIFIER] + ')\\.' +
                    '(' + src[NUMERICIDENTIFIER] + ')';
 
-var MAINVERSIONLOOSE = R++;
+let MAINVERSIONLOOSE = R++;
 src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
@@ -269,11 +259,11 @@ src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
 
-var PRERELEASEIDENTIFIER = R++;
+let PRERELEASEIDENTIFIER = R++;
 src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
                             '|' + src[NONNUMERICIDENTIFIER] + ')';
 
-var PRERELEASEIDENTIFIERLOOSE = R++;
+let PRERELEASEIDENTIFIERLOOSE = R++;
 src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
                                  '|' + src[NONNUMERICIDENTIFIER] + ')';
 
@@ -282,25 +272,25 @@ src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
 // Hyphen, followed by one or more dot-separated pre-release version
 // identifiers.
 
-var PRERELEASE = R++;
+let PRERELEASE = R++;
 src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
                   '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))';
 
-var PRERELEASELOOSE = R++;
+let PRERELEASELOOSE = R++;
 src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
                        '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
 
 // ## Build Metadata Identifier
 // Any combination of digits, letters, or hyphens.
 
-var BUILDIDENTIFIER = R++;
+let BUILDIDENTIFIER = R++;
 src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
 
 // ## Build Metadata
 // Plus sign, followed by one or more period-separated build metadata
 // identifiers.
 
-var BUILD = R++;
+let BUILD = R++;
 src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
              '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
 
@@ -314,8 +304,8 @@ src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
 // capturing group, because it should not ever be used in version
 // comparison.
 
-var FULL = R++;
-var FULLPLAIN = 'v?' + src[MAINVERSION] +
+let FULL = R++;
+let FULLPLAIN = 'v?' + src[MAINVERSION] +
                 src[PRERELEASE] + '?' +
                 src[BUILD] + '?';
 
@@ -324,25 +314,25 @@ src[FULL] = '^' + FULLPLAIN + '$';
 // like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
 // also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
 // common in the npm registry.
-var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
+let LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
                  src[PRERELEASELOOSE] + '?' +
                  src[BUILD] + '?';
 
-var LOOSE = R++;
+let LOOSE = R++;
 src[LOOSE] = '^' + LOOSEPLAIN + '$';
 
-var GTLT = R++;
+let GTLT = R++;
 src[GTLT] = '((?:<|>)?=?)';
 
 // Something like "2.*" or "1.2.x".
 // Note that "x.x" is a valid xRange identifer, meaning "any version"
 // Only the first item is strictly required.
-var XRANGEIDENTIFIERLOOSE = R++;
-src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*';
-var XRANGEIDENTIFIER = R++;
-src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*';
+let XRANGEIDENTIFIERLOOSE = R++;
+src[XRANGEIDENTIFIERLOOSE] = `${src[NUMERICIDENTIFIERLOOSE]}|x|X|\\*`;
+let XRANGEIDENTIFIER = R++;
+src[XRANGEIDENTIFIER] = `${src[NUMERICIDENTIFIER]}|x|X|\\*`;
 
-var XRANGEPLAIN = R++;
+let XRANGEPLAIN = R++;
 src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
@@ -350,7 +340,7 @@ src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
                    src[BUILD] + '?' +
                    ')?)?';
 
-var XRANGEPLAINLOOSE = R++;
+let XRANGEPLAINLOOSE = R++;
 src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
@@ -358,82 +348,82 @@ src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         src[BUILD] + '?' +
                         ')?)?';
 
-var XRANGE = R++;
+let XRANGE = R++;
 src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
-var XRANGELOOSE = R++;
+let XRANGELOOSE = R++;
 src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"
-var LONETILDE = R++;
+let LONETILDE = R++;
 src[LONETILDE] = '(?:~>?)';
 
-var TILDETRIM = R++;
+let TILDETRIM = R++;
 src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
 re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
-var tildeTrimReplace = '$1~';
+let tildeTrimReplace = '$1~';
 
-var TILDE = R++;
+let TILDE = R++;
 src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
-var TILDELOOSE = R++;
+let TILDELOOSE = R++;
 src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
 
 // Caret ranges.
 // Meaning is "at least and backwards compatible with"
-var LONECARET = R++;
+let LONECARET = R++;
 src[LONECARET] = '(?:\\^)';
 
-var CARETTRIM = R++;
+let CARETTRIM = R++;
 src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
 re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
-var caretTrimReplace = '$1^';
+let caretTrimReplace = '$1^';
 
-var CARET = R++;
+let CARET = R++;
 src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
-var CARETLOOSE = R++;
+let CARETLOOSE = R++;
 src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
 
 // A simple gt/lt/eq thing, or just "" to indicate "any version"
-var COMPARATORLOOSE = R++;
+let COMPARATORLOOSE = R++;
 src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
-var COMPARATOR = R++;
+let COMPARATOR = R++;
 src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
 
 
 // An expression to strip any whitespace between the gtlt and the thing
 // it modifies, so that `> 1.2.3` ==> `>1.2.3`
-var COMPARATORTRIM = R++;
+let COMPARATORTRIM = R++;
 src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
                       '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
 
 // this one has to use the /g flag
 re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
-var comparatorTrimReplace = '$1$2$3';
+let comparatorTrimReplace = '$1$2$3';
 
 
 // Something like `1.2.3 - 1.2.4`
 // Note that these all use the loose form, because they'll be
 // checked against either the strict or loose comparator form
 // later.
-var HYPHENRANGE = R++;
+let HYPHENRANGE = R++;
 src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
                    '\\s+-\\s+' +
                    '(' + src[XRANGEPLAIN] + ')' +
                    '\\s*$';
 
-var HYPHENRANGELOOSE = R++;
+let HYPHENRANGELOOSE = R++;
 src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
                         '\\s+-\\s+' +
                         '(' + src[XRANGEPLAINLOOSE] + ')' +
                         '\\s*$';
 
 // Star ranges basically just allow anything at all.
-var STAR = R++;
+let STAR = R++;
 src[STAR] = '(<|>)?=?\\s*\\*';
 
 // Compile to actual regexp objects.
 // All are flag-free, unless they were created above with a flag.
-for (var i = 0; i < R; i++) {
+for (let i = 0; i < R; i++) {
   //debug(i, src[i]);
   if (!re[i])
     re[i] = new RegExp(src[i]);
