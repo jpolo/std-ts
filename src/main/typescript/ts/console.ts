@@ -16,7 +16,7 @@ const Timer = (function () {
     }
   };
 }());
-function Void() {}
+function Void() { return undefined; }
 function Now() { return Date.now ? Date.now() : (new Date()).getTime(); }
 
 function FunctionApply(f: Function, thisp: any, args: any) {

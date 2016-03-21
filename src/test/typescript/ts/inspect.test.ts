@@ -1,4 +1,5 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit";
+/* tslint:disable:no-empty no-construct quotemark */
+import { suite, test } from "../../../main/typescript/ts/unit/qunit";
 import { isIInspect, Inspector } from "../../../main/typescript/ts/inspect";
 
 class TestClass {
@@ -15,7 +16,7 @@ const inspectSuite = suite("ts/inspect", (self) => {
     assert.ok(!isIInspect(undefined));
     assert.ok(!isIInspect(null));
     assert.ok(!isIInspect({}));
-    assert.ok(isIInspect({ inspect: () => {  } }));
+    assert.ok(isIInspect({ inspect: () => { } }));
   });
 
 });
@@ -45,7 +46,7 @@ const InspectorSuite = suite("ts/inspect.Inspector", (self) => {
     [new Boolean(true), "Boolean { true }"],
     [new Boolean(false), "Boolean { false }"]
   );
-  const NUMBERS = inspectResults(
+  const NUMBERS = inspectResults<number|Number>(
     [NaN, "NaN"],
     [0, "0"],
     [1, "1"],
@@ -57,7 +58,7 @@ const InspectorSuite = suite("ts/inspect.Inspector", (self) => {
     [new Number(0), "Number { 0 }"],
     [new Number(123), "Number { 123 }"]
   );
-  const STRINGS = inspectResults(
+  const STRINGS = inspectResults<string|String>(
     ["", "\"\""],
     ["foobar", "\"foobar\""],
     ["lorem ipsum \"sorem\" foo bar", "\"lorem ipsum \\\"so...\""]

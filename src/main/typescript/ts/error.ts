@@ -14,7 +14,7 @@ declare var __extends: any; // Typescript __extends
 const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 const GlobalConsole: Console = typeof console !== "undefined" ? Global.console : null;
 const GlobalError = Global.Error;
-const GlobalTypeError: any = Global.TypeError;
+//const GlobalTypeError: any = Global.TypeError;
 function Has(o: any, name: string) { return o && (name in o); }
 function IsError(o: any): boolean { return o instanceof GlobalError; }
 function ToString(o: any) { return "" + o; }
@@ -59,9 +59,11 @@ function PatchExtends() {
 }
 
 class ErrorHandler implements IErrorHandler {
-
   private static _empty: ErrorHandler;
   private static _uncaught: ErrorHandler;
+
+  protected _isHandling = false;
+  protected _handler: (e: any) => IErrorHandlerResult;
 
   static empty(): ErrorHandler {
     return ErrorHandler._empty || (ErrorHandler._empty = new ErrorHandler(function () {
@@ -93,9 +95,6 @@ class ErrorHandler implements IErrorHandler {
       return { done: true, value: undefined };
     }));
   }
-
-  protected _isHandling = false;
-  protected _handler: (e: any) => IErrorHandlerResult;
 
   constructor(h: (e: any) => IErrorHandlerResult) {
     this._handler = h;
@@ -204,7 +203,7 @@ export class FatalError extends BaseError {
   error: any = null;
 
   constructor(e: any) {
-    super(e != undefined ? ToString(e) : "");
+    super(e !== undefined && e !== null ? ToString(e) : "");
     this.error = e;
   }
 }

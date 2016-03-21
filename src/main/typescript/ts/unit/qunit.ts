@@ -1,23 +1,12 @@
-import * as reflect from "../reflect";
 import * as stacktrace from "../stacktrace";
 import { SUCCESS, FAILURE, IAssertionCallSite, IAssertion, Assertion } from "./assertion";
-import { ITestEngine, ITest, ITestRunContext, IStreamController } from "../unit";
+import { ITestEngine, ITest, ITestRunContext } from "../unit";
 import {
-  IsExtensible,
   IsFinite,
-  IsEmpty,
-  IsNaN,
-  IsNumber,
-  IsObject,
   GetPrototypeOf,
-  SameValue,
-  OwnKeys,
-  OwnKeysSorted,
-  ObjectFreeze,
   ToString,
   ToStringTag,
   Type,
-  FunctionToString,
   FunctionToSource
 } from "./util";
 
@@ -44,9 +33,9 @@ interface IAssertConstructor<T> {
 }
 
 interface ITestBlock<IAssert> {
+  disabled: boolean;
   block(assert: IAssert, complete?: () => void): void;
   assertFactory(context: IAssertContext): IAssert;
-  disabled: boolean;
 }
 
 /**
@@ -57,7 +46,6 @@ let _suiteCurrent = _suiteDefault;
 
 const AssertContextCreate = function (context: ITestRunContext): IAssertContext {
   let _async = false;
-  let _expected: number = null;
   let _closed = false;
   return {
     /**
@@ -258,7 +246,7 @@ export class Assert {
         switch (ToStringTag(expected)) {
           case "String":
             let actualStr = ToString(actual);
-            isSuccess = actualStr == expected;
+            isSuccess = actualStr === expected;
             message = this.__dump__(actualStr) + " thrown must be " + this.__dump__(expected);
             break;
           case "Function":

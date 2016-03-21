@@ -1,9 +1,9 @@
 // Interfaces
 export interface IDictLike<T> {
+  length: number;
   clear(): void;
   key(i: number): string;
   getItem(key: string): T;
-  length: number;
   setItem(key: string, value: T): void;
   removeItem(key: string): void;
 }
@@ -45,6 +45,7 @@ function HasOwn(o: {}, property: string) {
 }
 
 export default class Dict<T> {
+  protected _dict = {};
 
   static clear<S>(d: IDictLike<S>): void
   static clear<S>(d: IDict<S>): void
@@ -153,10 +154,6 @@ export default class Dict<T> {
     }
     return returnValue;
   }
-
-  // [key: string]: T
-
-  protected _dict = {};
 
   clear() {
     this._dict = {};

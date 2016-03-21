@@ -1,3 +1,4 @@
+/*tslint:disable:max-line-length */
 import { IIterator, IIteratorResult } from "../iterator";
 import { Call } from "./util";
 
@@ -26,21 +27,22 @@ function IteratorResultCreate<T>(done: boolean, value: T): IIteratorResult<T> {
 }
 
 function ParamsCreate(p?: { size?: number; random?: () => number }): Params {
-  let random = p && p.random;
-  let size = p && p.size;
+  let hasRandom = p && p.random;
+  let hasSize = p && p.size;
   return {
-    size: size === undefined ? SIZE : size,
-    random: random === undefined ? Math.random : random
+    size: hasSize ? p.size : SIZE,
+    random() {
+      return hasRandom ? p.random() : Math.random();
+    }
   };
 }
 
 function ParamsRandom(p: Params, min = 0, max = 1): number {
   let n = p.random();
-  if (n < 0 || n >= 1) {
-    throw new RangeError("Params.random() must belongs to [0, 1)");
+  if (typeof n !== "number" || n < 0 || n >= 1 || n !== n) {
+    throw new RangeError("Params.random() must belongs to [0, 1) but got " + n);
   }
-  let clamped = (n * (max - min)) + min;
-  return clamped;
+  return (n * (max - min)) + min;
 }
 
 function ParamsRandomInt(p: Params, min: number, max: number): number {
@@ -53,10 +55,10 @@ function ParamsSize(p: Params): number {
 }
 
 function IsIGenerator(o: any): boolean {
-  return typeof o === "function" && typeof o.next === "function";
+  return o !== null && typeof o === "object" && typeof o.next === "function";
 }
 
-function GeneratorCreate<T>(f: {(params: Params): IIteratorResult<T>}) {
+function GeneratorCreate<T>(f: {(params: Params): IIteratorResult<T>}): IGenerator<T> {
   return {
     next(params?: Params): IIteratorResult<T> {
       params = ParamsCreate(params);
@@ -69,7 +71,7 @@ function GeneratorFrom<T>(o: IGenerator<T>): IGenerator<T>
 function GeneratorFrom<T>(o: T): IGenerator<T>
 function GeneratorFrom(o: any): IGenerator<any> {
   return IsIGenerator(o) ? o : GeneratorCreate(function (params: Params) {
-    return o;
+    return IteratorResultCreate(false, o);
   });
 }
 
@@ -114,7 +116,7 @@ export function oneOf<T>(choices: any[]): IGenerator<T> {
  * @param size the size value or generator of the array
  * @return the array generator
  */
-export function array<T>(value: IGenerator<T>, size: number|IGenerator<number>)
+export function array<T>(value: IGenerator<T>, size: number|IGenerator<number>): IGenerator<T[]>
 export function array<T>(value: IGenerator<T>, size = genSize): IGenerator<T[]> {
   let _genSize = GeneratorFrom<number>(size);
   return GeneratorCreate(function (params: Params) {

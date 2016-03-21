@@ -109,11 +109,14 @@ function Identity<T>(o: T): T {
 }
 
 export default class List<T> {
+  protected _length: number = 0;
+  protected _head: INode<T> = null;
 
-  static from<A>(list: List<A>): List<A>
-  static from<A, B>(list: List<A>, mapFn: (v: A) => B, thisp?: any): List<B>
-  static from<A>(array: A[]): List<A>
-  static from<A, B>(array: A[], mapFn: (v: A) => B, thisp?: any): List<B>
+
+  static from<A>(list: List<A>): List<A>;
+  static from<A, B>(list: List<A>, mapFn: (v: A) => B, thisp?: any): List<B>;
+  static from<A>(array: A[]): List<A>;
+  static from<A, B>(array: A[], mapFn: (v: A) => B, thisp?: any): List<B>;
   static from(o: any, mapFn = Identity, thisp = null): List<any>  {
     return new List(o);
   }
@@ -127,9 +130,6 @@ export default class List<T> {
     ListEnqueue(ListData(list), values, Identity);
     return list;
   }
-
-  protected _length: number = 0;
-  protected _head: INode<T> = null;
 
   constructor(a?: List<T>)
   constructor(a?: T[])

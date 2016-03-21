@@ -1,4 +1,4 @@
-import { ITestEngine, IReporter, ITest, ITestReport, ITestRunContext, IAssertion } from "../unit";
+import { ITestEngine, IReporter, ITest, ITestReport, IAssertion } from "../unit";
 import { Engine, ITestEngineRunContext } from "./engine";
 
 // Constant
@@ -55,7 +55,7 @@ export class Runner {
           report.assertions.push(assertion);
         },
         onError(e: any) {
-
+          return undefined;
         },
         onEnd() {
           if (onComplete) {

@@ -1,4 +1,4 @@
-import { IIteratorResult, IIterator } from "./iterator";
+import { /*IIteratorResult,*/ IIterator } from "./iterator";
 
 declare function require(s: string): any; // nodejs
 declare let process: any;
@@ -7,8 +7,8 @@ const FLOAT_MIN_VALUE = Number.MIN_VALUE;
 const FLOAT_MAX_VALUE = Number.MAX_VALUE;
 const INT_MIN_VALUE = Math.pow(2, 31) | 0;
 const INT_MAX_VALUE = (INT_MIN_VALUE - 1) | 0;
-const NODEJS = typeof process !== "undefined";
-const BROWSER = typeof window !== "undefined";
+//const NODEJS = typeof process !== "undefined";
+//const BROWSER = typeof window !== "undefined";
 
 type IGenerator<T> = IIterator<T>;
 
@@ -19,7 +19,6 @@ export interface IRandomGeneratorAdapter {
 
 // ECMA like spec
 const Floor = Math.floor;
-const Ceil = Math.ceil;
 const Random = Math.random;
 
 function ArraySwap(array: number[], i: number, j: number) {
@@ -70,14 +69,6 @@ function GenerateChar(rg: IGenerator<number>, chars: string): string {
   return chars.charAt(Floor(GeneratorGet(rg) * (chars.length + 1)));
 }
 
-function GenerateString(rng: IGenerator<number>, length: number, chars: string): string {
-  let returnValue = "";
-  for (let i = 0; i < length; i++) {
-    returnValue += GenerateChar(rng, chars);
-  }
-  return returnValue;
-}
-
 const AdapterRegistry: { [name: string]: IRandomGeneratorAdapter } = {};
 
 export function Adapter<F extends IRandomGeneratorAdapter>(name: string) {
@@ -119,7 +110,7 @@ export class RandomGenerator extends RandomGeneratorAdapter {
 
   protected _adapter: IGenerator<number>;
 
-  constructor(type?: string, seed = "") {
+  constructor(type: string = RandomGenerator.adapterDefault, seed = "") {
     let Constructor = AdapterRegistry[type];
     if (!Constructor) {
       throw new ReferenceError(type + " is not a valid adapter");
@@ -198,6 +189,10 @@ class RandomGeneratorBrowser extends RandomGeneratorAdapter {
 @Adapter("rc4")
 export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
 
+  static isSupported(): boolean {
+    return true;
+  }
+
   private static _getStringBytes(s: string): number[] {
     let output = [];
     for (let i = 0; i < s.length; i++) {
@@ -220,13 +215,10 @@ export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
     return arr;
   }
 
-  static isSupported(): boolean {
-    return true;
-  }
 
   constructor(seed?: string) {
     const RC4_WIDTH = 256;
-    const RC4_MASK = RC4_WIDTH - 1;
+    //const RC4_MASK = RC4_WIDTH - 1;
     const RC4_BYTES = 7; // 56 bits to make a 53-bit double
     const RC4_DENOM = (Math.pow(2, RC4_BYTES * 8) - 1);
     let _state = RandomGeneratorRC4._createState(RC4_WIDTH);

@@ -23,7 +23,7 @@ export function IsEmpty(o: any): boolean { return o === undefined || o === null;
 export function IsNaN(o: any): boolean { return o !== o; }
 export function IsNumber(o: any): boolean { return typeof o === "number"; }
 export function IsFunction(o): boolean { return typeof o === "function"; }
-export function IsObject(o: any) { return o !== null && (typeof o == "object"); }
+export function IsObject(o: any) { return o !== null && (typeof o === "object"); }
 export function SameValue(a: any, b: any) {
   return Object["is"] ? Object["is"](a, b) : a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b);
 }

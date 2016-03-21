@@ -29,7 +29,6 @@
     "gulp-tslint-stylish": "^1.1.1",
     "gulp-typescript": "^2.8.0",
     "merge2": "^1.0.1",
-    "ng2lint": "^0.0.10",
     "requirejs": "~2.1.19",
     "tslint": "^3.6.0",
     "typescript": "^1.8.7"

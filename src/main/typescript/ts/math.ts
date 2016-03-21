@@ -1,3 +1,16 @@
+// Constants
+export const E = Math.E;
+export const LN10 = Math.LN10;
+export const LN2 = Math.LN2;
+export const LOG2E = Math.LOG2E;
+export const LOG10E = Math.LOG10E;
+export const PI = Math.PI;
+export const TAU = PI * 2;
+export const PHI = (1 + Math.sqrt(5)) / 2;
+export const SQRT1_2 = Math.SQRT1_2;
+export const SQRT2 = Math.SQRT2;
+// export const Infinity = window.Infinity;
+
 // Util
 const global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 const ONE_THIRD = 1 / 3;
@@ -117,17 +130,7 @@ const math_tanh = Math["tanh"] || function (n) {
   );
 };
 
-export const E = Math.E;
-export const LN10 = Math.LN10;
-export const LN2 = Math.LN2;
-export const LOG2E = Math.LOG2E;
-export const LOG10E = Math.LOG10E;
-export const PI = Math.PI;
-export const TAU = PI * 2;
-export const PHI = (1 + math_sqrt(5)) / 2;
-export const SQRT1_2 = Math.SQRT1_2;
-export const SQRT2 = Math.SQRT2;
-// export const Infinity = window.Infinity;
+
 
 export function abs(n: number): number {
   return math_abs(n);

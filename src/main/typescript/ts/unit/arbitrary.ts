@@ -1,5 +1,5 @@
 import { IIterator, IIteratorResult } from "../iterator";
-import { constant, oneOf, random, from } from "./generator";
+import { oneOf, random, from } from "./generator";
 import {
   Now,
   INT8_MIN_VALUE, INT8_MAX_VALUE,
@@ -82,6 +82,6 @@ export const char = ArbitraryCreate(GeneratorRandomChar(0, 0xff));
 export const charASCII = ArbitraryCreate(GeneratorRandomChar(0x20, 0x7e));
 
 // Date
-const date = ArbitraryCreate(random(DATE_MIN_MILLISECONDS, DATE_MAX_MILLISECONDS));
-const datePast = ArbitraryCreate(random(DATE_MIN_MILLISECONDS, genNow));
-const dateFuture = ArbitraryCreate(random(genNow, DATE_MAX_MILLISECONDS));
+export const date = ArbitraryCreate(GeneratorRandomDate(DATE_MIN_MILLISECONDS, DATE_MAX_MILLISECONDS));
+export const datePast = ArbitraryCreate(GeneratorRandomDate(DATE_MIN_MILLISECONDS, genNow));
+export const dateFuture = ArbitraryCreate(GeneratorRandomDate(genNow, DATE_MAX_MILLISECONDS));

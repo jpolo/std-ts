@@ -17,7 +17,7 @@ export default suite("ts/unit/generator", (self) => {
 
   self.setUp = () => {
     params.randomValue = 0;
-  }
+  };
 
   test(".constant()", (assert) => {
     let genStr = constant("foo");
@@ -67,7 +67,7 @@ export default suite("ts/unit/generator", (self) => {
     let gen = array(constant("foo"), genSize);
     params.randomValue = 1;
 
-    let arr = gen(params);
+    let arr = gen.next(params).value;
     assert.strictEqual(arr.length, length);
     for (let gen of arr) {
       assert.strictEqual(gen, "foo");

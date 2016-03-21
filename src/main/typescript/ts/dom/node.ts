@@ -8,11 +8,7 @@ function IsNode(o) {
     typeof o.nodeName === "string"
   );
 }
-
-function IsElement(o) {
-  return o.nodeType === NodeType.ELEMENT_NODE;
-}
-
+/*
 function IsElementOrDocument(n: Node) {
   let nodeType = n.nodeType;
   return (
@@ -21,12 +17,14 @@ function IsElementOrDocument(n: Node) {
     nodeType === NodeType.DOCUMENT_NODE
   );
 }
-
+*/
+/*
 function SetText(n: Node, text: string) {
   if (IsElementOrDocument(n)) {
     n.textContent = text;
   }
 }
+*/
 
 function GetText(n: Node) {
   let returnValue = "";

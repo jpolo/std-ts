@@ -1,11 +1,8 @@
 import {
-  IsFinite,
   IsEmpty,
   IsNaN,
   IsNumber,
-  IsObject,
   SameValue,
-  OwnKeys,
   OwnKeysSorted,
   ToStringTag
 } from "./util";
