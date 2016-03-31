@@ -20,8 +20,8 @@ function ToStringTag(o: any): string {
 function ArraySlice<T>(a: { [k: number]: T; length: number }, start?: number, end?: number): T[] {
   let returnValue = [];
   let l = returnValue.length;
-  start = start || 0;
-  end = end == null || l < end ? l : end;
+  start = start === undefined ? 0 : start;
+  end = end === undefined || l < end ? l : end;
   for (let i = start; i < end; ++i) {
     returnValue.push(a[i]);
   }
@@ -47,6 +47,85 @@ function ErrorToString(name: string, message: string) {
   }
   return returnValue;
 }
+
+/*
+namespace errorParser {
+  const FIREFOX_SAFARI_STACK_REGEXP = /(^|@)\S+\:\d+/;
+  const SAFARI_NATIVE_CODE_REGEXP = /^(eval@)?(\[native code\])?$/;
+
+  interface IParserData {
+
+  }
+
+  interface IParser {
+    test(e: any): boolean;
+    parse(e: any): CallSite;
+  }
+
+  function parseLocation(urlLike: string): [string, string, string] {
+    // Fail-fast but return locations like "(native)"
+    if (urlLike.indexOf(":") === -1) {
+      return [urlLike, undefined, undefined];
+    }
+
+    let locationParts = urlLike.replace(/[\(\)\s]/g, "").split(":");
+    let lastNumber = locationParts.pop();
+    let possibleNumber = parseFloat(locationParts[locationParts.length - 1]);
+    if (!isNaN(possibleNumber) && isFinite(possibleNumber)) {
+        let lineNumber = locationParts.pop();
+        return [locationParts.join(":"), lineNumber, lastNumber];
+    } else {
+        return [locationParts.join(":"), lastNumber, undefined];
+    }
+  }
+
+  const parser_Opera: IParser = {
+    test(e: any) {
+      return typeof e.stacktrace !== "undefined" || typeof e["opera#sourceloc"] !== "undefined";
+    },
+    parse(e: any) {
+      return null;
+    }
+  };
+
+  const parser_V8_IE = {
+    REGEXP: /^\s*at .*(\S+\:\d+|\(native\))/m,
+    test(e: any) {
+      return !!(e.stack && e.stack.match(parser_V8_IE.REGEXP));
+    },
+    parse(e: any) {
+      let filtered = _filter(e.stack.split('\n'), function(line) {
+        return !!line.match(parser_V8_IE.REGEXP);
+      });
+
+      return _map(filtered, function (line) {
+          if (line.indexOf('(eval ') > -1) {
+            line = line.replace(/eval code/g, 'eval').replace(/(\(eval at [^\()]*)|(\)\,.*$)/g, '');
+          }
+          var tokens = line.replace(/^\s+/, '').replace(/\(eval code/g, '(').split(/\s+/).slice(1);
+          var locationParts = this.extractLocation(tokens.pop());
+          var functionName = tokens.join(' ') || undefined;
+          var fileName = ['eval', '<anonymous>'].indexOf(locationParts[0]) > -1 ? undefined : locationParts[0];
+
+          return {
+            functionName: functionName,
+            fileName: fileName
+          }; locationParts[1], locationParts[2], line);
+      });
+    }
+  };
+
+  const parser_FF_Safari: IParser = {
+    test(e: any) {
+      return !!e.stack;
+    },
+    parse(e: any) {
+      return null;
+    }
+  };
+
+}*/
+
 const ErrorParse = (function () {
 
   // Sniff browser
@@ -83,6 +162,8 @@ const ErrorParse = (function () {
 
   function __errorParseLines_Chrome(error: any): string[] {
     return (error.stack + "\n")
+        .replace(/eval code/g, "eval")
+        .replace(/(\(eval at [^\()]*)|(\)\,.*$)/g, "")
         .replace(/^[\s\S]+?\s+at\s+/, " at ") // remove message
         .replace(/^\s+(at eval )?at\s+/gm, "") // remove "at" and indentation
         .replace(/^([^\(]+?)([\n$])/gm, "{anonymous}() ($1)$2")
@@ -280,7 +361,6 @@ const __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, 
   // Pass the raw callsite objects through and get back a formatted stack trace
   e.stack = __prepareStackTrace(errorString, frames);
 };
-const $$data = "@@data";
 
 // https://github.com/mattrobenolt/callsite-shim/blob/master/src/callsite.js
 // https://github.com/stacktracejs/stacktrace.js/
@@ -306,121 +386,28 @@ export interface ICallSite {
   toString(): string;
 }
 
+type CallSiteData = {
+  this: any;
+  typeName: string;
+  function: any;
+  functionName: string;
+  methodName: string;
+  fileName: string;
+  lineNumber: number;
+  columnNumber: number;
+  isTopLevel: boolean;
+  isEval: boolean;
+  isNative: boolean;
+  isConstructor: boolean;
+};
+
 class CallSite implements ICallSite {
 
+  protected "@@data": CallSiteData;
+
   static parse(s: string): CallSite {
-    return new CallSite(s);
-  }
-
-  static stringify(o: ICallSite): string {
-    let s = "";
-    if (s === undefined) {
-      s = "undefined";
-    } else if (s === null) {
-      s = "null";
-    } else {
-      let functionName = o.getFunctionName();
-      let lineNumber = o.getLineNumber();
-      let columnNumber = o.getColumnNumber();
-
-      s += o.getFileName();
-      if (lineNumber) {
-        s += ":" + lineNumber;
-        if (columnNumber) {
-          s += ":" + columnNumber;
-        }
-      }
-
-      s = functionName ? functionName + " (" + s +  ")" : s;
-    }
-    return s;
-  }
-
-  "@@data": {
-    _this: any;
-    _typeName: string;
-    _function: any;
-    _functionName: string;
-    _methodName: string;
-    _fileName: string;
-    _lineNumber: number;
-    _columnNumber: number;
-    _isTopLevel: boolean;
-    _isEval: boolean;
-    _isNative: boolean;
-    _isConstructor: boolean;
-  };
-
-  constructor(private _s: string) {
-  }
-
-  getThis(): any {
-    return this._parse()._this;
-  }
-
-  getTypeName(): string {
-    return this._parse()._typeName;
-  }
-
-  getFunction(): Function {
-    return this._parse()._function;
-  }
-
-  getFunctionName(): string {
-    return this._parse()._functionName;
-  }
-
-  getMethodName(): string {
-    return this._parse()._methodName;
-  }
-
-  getFileName(): string {
-    return this._parse()._fileName;
-  }
-
-  getLineNumber(): number {
-    let d = this._parse();
-    return d._lineNumber > 0 ? d._lineNumber : null;
-  }
-
-  getColumnNumber(): number {
-    let d = this._parse();
-    return d._columnNumber > 0 ? d._columnNumber : null;
-  }
-
-  getEvalOrigin(): any {
-    //
-  }
-
-  isTopLevel(): boolean {
-    return this._parse()._isTopLevel;
-  }
-
-  isEval(): boolean {
-    return this._parse()._isEval;
-  }
-
-  isNative(): boolean {
-    return this._parse()._isNative;
-  }
-
-  isConstructor(): boolean {
-    return this._parse()._isConstructor;
-  }
-
-  getArguments() {
-    let d= this._parse();
-    return d._function && d._function["arguments"] || null;
-  }
-
-  toString(): string {
-    return CallSite.stringify(this);
-  }
-
-  private _parse() {
-    let d = this[$$data];
-    if (!d) {
-      let parts = this._s.split("@", 2);
+    return new CallSite(() => {
+      let parts = s.split("@", 2);
       let receiver = Global;
       let fun = null;
       let functionName = parts[0] || "";
@@ -447,7 +434,6 @@ class CallSite implements ICallSite {
         typeName = functionParts[0];
         methodName = functionParts[functionParts.length - 1];
       }
-
       // isEval
       // isEval = false;
 
@@ -461,23 +447,121 @@ class CallSite implements ICallSite {
       // isTopLevel
       let isTopLevel = (receiver == null) || IsGlobal(receiver);
 
-      d = this[$$data] = {
-        _this: receiver,
-        _typeName: typeName,
-        _function: fun,
-        _functionName: functionName,
-        _methodName: methodName,
-        _fileName: fileName,
-        _lineNumber: lineNumber,
-        _columnNumber: columnNumber,
-        _isTopLevel: isTopLevel,
-        _isEval: isEval,
-        _isNative: isNative,
-        _isConstructor: isConstructor
+      return {
+        this: receiver,
+        typeName: typeName,
+        function: fun,
+        functionName: functionName,
+        methodName: methodName,
+        fileName: fileName,
+        lineNumber: lineNumber,
+        columnNumber: columnNumber,
+        isTopLevel: isTopLevel,
+        isEval: isEval,
+        isNative: isNative,
+        isConstructor: isConstructor
       };
-    }
-    return d;
+    });
   }
+
+  static stringify(o: ICallSite): string {
+    let s = "";
+    if (s === undefined) {
+      s = "undefined";
+    } else if (s === null) {
+      s = "null";
+    } else {
+      let functionName = o.getFunctionName() || "{anonymous}";
+      let lineNumber = o.getLineNumber();
+      let columnNumber = o.getColumnNumber();
+
+      s += o.getFileName();
+      if (lineNumber) {
+        s += ":" + lineNumber;
+        if (columnNumber) {
+          s += ":" + columnNumber;
+        }
+      }
+
+      s = functionName ? functionName + " (" + s +  ")" : s;
+    }
+    return s;
+  }
+
+  constructor(private _parse: () => CallSiteData) {
+  }
+
+  getThis(): any {
+    return this.getData().this;
+  }
+
+  getTypeName(): string {
+    return this.getData().typeName;
+  }
+
+  getFunction(): Function {
+    return this.getData().function;
+  }
+
+  getFunctionName(): string {
+    return this.getData().functionName;
+  }
+
+  getMethodName(): string {
+    return this.getData().methodName;
+  }
+
+  getFileName(): string {
+    return this.getData().fileName;
+  }
+
+  getLineNumber(): number {
+    let d = this.getData();
+    return d.lineNumber > 0 ? d.lineNumber : null;
+  }
+
+  getColumnNumber(): number {
+    let d = this.getData();
+    return d.columnNumber > 0 ? d.columnNumber : null;
+  }
+
+  getEvalOrigin(): any {
+    //
+  }
+
+  isTopLevel(): boolean {
+    return this.getData().isTopLevel;
+  }
+
+  isEval(): boolean {
+    return this.getData().isEval;
+  }
+
+  isNative(): boolean {
+    return this.getData().isNative;
+  }
+
+  isConstructor(): boolean {
+    return this.getData().isConstructor;
+  }
+
+  getArguments() {
+    let d = this.getData();
+    return d.function && d.function["arguments"] || null;
+  }
+
+  toString(): string {
+    return CallSite.stringify(this);
+  }
+
+  protected getData() {
+    let returnValue = this["@@data"];
+    if (!returnValue) {
+      returnValue = this["@@data"] = this._parse();
+    }
+    return returnValue;
+  }
+
 }
 
 export function prepare(errorString: string, frames: ICallSite[]): string {

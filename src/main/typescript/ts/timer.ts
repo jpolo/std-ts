@@ -1,3 +1,4 @@
+/*tslint:disable:max-line-length */
 // Util
 const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 // const Process = Global.process
@@ -13,7 +14,7 @@ const TaskRegistry: { [k: number]: any } = {};
 function TaskGenerateId() {
   let returnValue = TaskCurrentId;
   TaskCurrentId += 1;
-  return TaskCurrentId;
+  return returnValue;
 }
 function TaskCreate(f: any): number {
   let id = TaskGenerateId();

@@ -318,7 +318,7 @@ export class Assert {
   }
 
   protected __position__(): IAssertionCallSite {
-    return this._context.getPosition(1);
+    return this._context.getPosition(2);
   }
 
   protected __engine__() {

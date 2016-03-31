@@ -3,10 +3,6 @@ import * as stacktrace from "../../../main/typescript/ts/stacktrace";
 
 export default suite("ts/stacktrace", (self) => {
   const FILENAME = "stacktrace.test.js";
-  const DATA = {
-    error: null,
-    callstack:null
-  };
 
   let errorEval: Error;
   let callstackEval: stacktrace.ICallSite[];
@@ -15,6 +11,18 @@ export default suite("ts/stacktrace", (self) => {
   let callstackLocal: stacktrace.ICallSite[];
 
   let errorNative: Error;
+
+  function createStacktrace(): { error: Error, callstack: stacktrace.ICallSite[] } {
+    let data = { error: null, callstack: null };
+    //put in eval block so we can test line number
+    (new Function(
+      "stacktrace", "exports",
+      //pseudo script
+      "exports.error = new Error();\n" +
+      "exports.callstack = stacktrace.create();\n"
+    ))(stacktrace, data);
+    return data;
+  }
 
   self.setUp = () => {
     errorLocal = new Error();
@@ -27,14 +35,9 @@ export default suite("ts/stacktrace", (self) => {
     }
 
     //put in eval block so we can test line number
-    (new Function(
-      "stacktrace", "exports",
-      //pseudo script
-      "exports.error = new Error();\n" +
-      "exports.callstack = stacktrace.create();\n"
-    ))(stacktrace, DATA);
-    errorEval = DATA.error;
-    callstackEval = DATA.callstack;
+    let d = createStacktrace();
+    errorEval = d.error;
+    callstackEval = d.callstack;
   };
 
   test(".get()", (assert) => {
