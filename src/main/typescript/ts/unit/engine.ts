@@ -1,4 +1,4 @@
-import { IInspector, Inspector } from "../inspect";
+import { Inspector } from "../inspect";
 import * as equal from "./equal";
 import * as stacktrace from "../stacktrace";
 import * as time from "../time";

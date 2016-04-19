@@ -2,7 +2,7 @@ import * as console from "./console";
 import * as time from "./time";
 
 // ECMA like functions
-const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
+// const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
 function OwnKeys(o: any) {
   let ks: string[];
   if (Object.keys) {
@@ -64,6 +64,10 @@ export interface IReporter {
 
 export class Level implements ILevel {
 
+  private static _instances: {[key: string]: Level} = {};
+  private static _byValue: {[key: number]: Level} = {};
+  private static _constructorKey = {};
+
   static cast(o: any): Level {
     if (o instanceof Level) {
       return o;
@@ -106,10 +110,6 @@ export class Level implements ILevel {
   static fromString(s: string): Level {
     return Level._instances[s.toUpperCase()];
   }
-
-  private static _instances: {[key: string]: Level} = {};
-  private static _byValue: {[key: number]: Level} = {};
-  private static _constructorKey = {};
 
   constructor(
     public name: string,

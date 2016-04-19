@@ -26,6 +26,7 @@
         "./src/main/typescript/ts/console.ts",
         "./src/main/typescript/ts/date.ts",
         "./src/main/typescript/ts/dom/classList.ts",
+        "./src/main/typescript/ts/dom/fullScreen.ts",
         "./src/main/typescript/ts/dom/node.ts",
         "./src/main/typescript/ts/error.ts",
         "./src/main/typescript/ts/generator.ts",

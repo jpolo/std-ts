@@ -42,7 +42,6 @@ const math_expm1 = Math["expm1"] || function (n) {
   );
 };
 const math_floor = Math.floor;
-const math_hypot = Math["hypot"];
 const math_imul = Math["imul"] || function (a, b) {
   // polyfill from mozilla
   a = a >>> 0;
@@ -154,6 +153,10 @@ export function asinh(n: number): number {
 
 export function atan(n: number): number {
   return math_atan(n);
+}
+
+export function atan2(y: number, x: number): number {
+  return math_atan2(y, x);
 }
 
 export function atanh(n: number): number {
