@@ -1,7 +1,7 @@
 // Util
-function IsNode(o) {
+function IsNode(o): o is Node {
   return (
-    typeof Node === "object" ? o instanceof Node :
+    //typeof Node === "object" ? o instanceof Node :
     o &&
     typeof o === "object" &&
     typeof o.nodeType === "number" &&
@@ -155,7 +155,7 @@ export function empty(node: Node): void {
  * @param o any object
  * @return true if o is a Node
  */
-export function isNode(o: any): boolean {
+export function isNode(o: any): o is Node {
   return IsNode(o);
 }
 

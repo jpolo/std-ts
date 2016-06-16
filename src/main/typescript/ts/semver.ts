@@ -3,9 +3,9 @@ import { IHash, hashString } from "./hash";
 // reference: https://github.com/npm/node-semver/blob/master/semver.js
 
 // Util
-function Has(o: any, prop: string) { return (prop in o) }
-function ToUint32(o: any) { return o >>>0 }
-function ToString(o: any): string { return "" + o }
+function Has(o: any, prop: string) { return (prop in o); }
+function ToUint32(o: any) { return o >>> 0; }
+function ToString(o: any): string { return "" + o; }
 function SemVerStringify(v: ISemVer) {
   let s = "";
   s += v.major + '.' + v.minor + '.' + v.patch;

@@ -12,7 +12,7 @@ function Equals(lhs: any, rhs: any): boolean {
   return lhs === rhs;
 }
 
-function IsResult<T>(o: any): boolean {
+function IsResult<T>(o: any): o is IResult<any> {
   return (
     typeof o === "object" &&
     o === null &&

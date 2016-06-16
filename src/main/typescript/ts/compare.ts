@@ -48,12 +48,11 @@ export interface ICompare {
   compare(o: any): Ordering;
 }
 
-export function isICompare(o: any): boolean {
+export function isICompare(o: any): o is ICompare {
   return (!!o && typeof o.compare === "function");
 }
 
 export function compare<T>(lhs: T, rhs: T): Ordering {
-  let returnValue: Ordering = Ordering.None;
   let cmpFn = Comparator(lhs) || Comparator(rhs);
 
   return (

@@ -8,11 +8,11 @@ const STRING_HASH_CACHE_MIN_STRLEN = 16;
 
 // ECMA Like
 function ObjectCreate(proto: any) {
-  let create = Object.create;
+  const create = Object.create;
   if (create) {
     return create(proto);
   } else {
-    let P = function () {};
+    const P = function () {};
     P.prototype = proto;
     return new P();
   }
@@ -125,6 +125,6 @@ function hashObject(o: any): number {
   return returnValue;
 }
 
-export function isIHash(o: any): boolean {
+export function isIHash(o: any): o is IHash {
   return o && typeof o.hashCode === "function";
 }
