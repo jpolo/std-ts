@@ -1,6 +1,3 @@
-import { SUCCESS, FAILURE, IAssertionCallSite, Assertion } from "./assertion";
-import { ITestEngine, ITest, ITestReport } from "../unit";
-
 class Suite {
   protected _suites: { [k: string]: Suite } = {};
   protected _tests: { [k: string]: Test } = {};
@@ -42,7 +39,7 @@ let currentDisabled = false;
 let currentSuite: Suite = rootSuite;
 let currentTest: Test = null;
 
-export function describe(description: string, f?: () => void) {
+export function describe(description: string, f?: () => void): void {
   let previousSuite = currentSuite;
   currentSuite = currentSuite.getSuite(description);
   if (f) {
@@ -51,7 +48,7 @@ export function describe(description: string, f?: () => void) {
   }
 }
 
-export function xdescribe(description: string, f?: () => void) {
+export function xdescribe(description: string, f?: () => void): void {
   let previousDisabled = currentDisabled;
   let previousSuite = currentSuite;
   currentSuite = currentSuite.getSuite(description);
@@ -63,7 +60,7 @@ export function xdescribe(description: string, f?: () => void) {
   }
 }
 
-export function it(description: string, f?: () => void) {
+export function it(description: string, f?: () => void): void {
   if (currentSuite === null) {
     throw SyntaxError("it() must be called inside describe() block");
   }
@@ -75,22 +72,22 @@ export function it(description: string, f?: () => void) {
   }
 }
 
-export function xit(description: string, f?: () => void) {
-
+export function xit(description: string, f?: () => void): void {
+   return undefined;
 }
 
-export function before(f: () => void) {
-
+export function before(f: () => void): void {
+  return undefined;
 }
 
-export function after(f: () => void) {
-
+export function after(f: () => void): void {
+  return undefined;
 }
 
-export function beforeEach(f: () => void) {
-
+export function beforeEach(f: () => void): void {
+  return undefined;
 }
 
-export function afterEach(f: () => void) {
-
+export function afterEach(f: () => void): void {
+  return undefined;
 }

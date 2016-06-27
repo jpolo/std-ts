@@ -28,14 +28,14 @@ function GeneratorCreate<T>(f: {(v?: any): IIteratorResult<T>}) {
 function GeneratorMap<T, U>(g: IGenerator<T>, f: (v: T) => U): IGenerator<U> {
   return GeneratorCreate(function (v?: any) {
     let iterResult = g.next(v);
-    let iterMapped: IIteratorResult<U> = iterResult.done ? <any>iterResult : { done: false, value: f(iterResult.value) };
+    let iterMapped: IIteratorResult<U> = iterResult.done ? <any> iterResult : { done: false, value: f(iterResult.value) };
     return iterMapped;
   });
 }
 
 function GeneratorRandomInt(min: number|IGenerator<number>, max: number|IGenerator<number>) {
-  let genMin = GeneratorFrom<number>(<any>min);
-  let genMax = GeneratorFrom<number>(<any>max);
+  let genMin = GeneratorFrom<number>(<any> min);
+  let genMax = GeneratorFrom<number>(<any> max);
   return GeneratorFrom(function (p) {
     let minResult = genMin.next(p);
     let maxResult = genMax.next(p);

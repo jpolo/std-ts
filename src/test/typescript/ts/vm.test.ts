@@ -10,14 +10,14 @@ export default suite("ts/vm", (self) => {
 
   test(".compile()", (assert) => {
     // simple
-    let fn = compile(`return "abc";`);
+    const fn = compile(`return "abc";`);
     assert.strictEqual(typeof fn, "function");
     assert.strictEqual(fn(), "abc");
 
     // with context
-    let context: {[key: string]: any} = {a: 1, b: 2, c: null};
-    let fnCtx = compile("c = a + b; this.d = c;return c;");
-    let returnValue = fnCtx(context);
+    const context: {[key: string]: any} = {a: 1, b: 2, c: null};
+    const fnCtx = compile("c = a + b; this.d = c;return c;");
+    const returnValue = fnCtx(context);
     assert.strictEqual(returnValue, 3);
     assert.strictEqual(context["c"], 3);
     assert.strictEqual(context["d"], 3);
@@ -26,13 +26,11 @@ export default suite("ts/vm", (self) => {
   test(".run()", (assert) => {
 
     // simple
-    let returnValue = run(`return "abc";`);
-    assert.strictEqual(returnValue, "abc");
+    assert.strictEqual(run(`return "abc";`), "abc");
 
     // with context
-    let context: {[key: string]: any} = {a: 1, b: 2, c: null};
-    returnValue = run("c = a + b; this.d = c;return c;", context);
-    assert.strictEqual(returnValue, 3);
+    const context: {[key: string]: any} = {a: 1, b: 2, c: null};
+    assert.strictEqual(run("c = a + b; this.d = c;return c;", context), 3);
     assert.strictEqual(context["c"], 3);
     assert.strictEqual(context["d"], 3);
   });

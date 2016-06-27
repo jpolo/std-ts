@@ -9,8 +9,8 @@ type Option = {
 }
 
 const OptionEmpty = {
-  sourceURL: null,
-  sourceMappingURL: null
+  sourceMappingURL: null,
+  sourceURL: null
 };
 
 /**
@@ -28,17 +28,12 @@ export const global = Global;
 export function compile(jscode: string, options: Option = OptionEmpty): (local?: Locals) => any {
   let fnWithContext: Function;
   let fnNoContext: Function;
-  let evalCode = jscode;
   const { sourceURL, sourceMappingURL } = options;
-
-  if (sourceURL) {
-    // Firebug and Webkit annotation
-    evalCode += "\n//# sourceURL=" + sourceURL;
-  }
-
-  if (sourceURL) {
-    evalCode += "\n//# sourceMappingURL=" + sourceMappingURL;
-  }
+  const evalCode = (
+    jscode +
+    (sourceURL ? "\n//# sourceURL=" + sourceURL : "") +
+    (sourceMappingURL ? "\n//# sourceMappingURL=" + sourceMappingURL : "")
+  );
 
   return function (locals) {
     let returnValue;

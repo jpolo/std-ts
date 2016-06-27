@@ -1,4 +1,4 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit";
+import { suite, test } from "../../../main/typescript/ts/unit/qunit";
 import { getId, hasId, generate } from "../../../main/typescript/ts/id";
 
 export default suite("ts/id", (self) => {
@@ -22,16 +22,34 @@ export default suite("ts/id", (self) => {
     assert.strictEqual(getId("abc"), NaN);
 
     // Date
-    let odate = new Date();
-    let iddate = getId(odate);
+    const odate = new Date();
+    const iddate = getId(odate);
     assert.strictEqual(getId(odate), iddate);
     assert.ok(getId(odate) > 0);
 
     // Object
-    let oplain = {};
-    let idplain = getId(oplain);
+    const oplain = {};
+    const idplain = getId(oplain);
     assert.strictEqual(getId(oplain), idplain);
     assert.strictEqual(getId(oplain), iddate + 1);
+
+  });
+
+  test(".hasId()", (assert) => {
+    // var hasWeakMap = !!WeakMap;
+
+    // null, undefined, string, number
+    assert.strictEqual(hasId(undefined), false);
+    assert.strictEqual(hasId(null), false);
+    assert.strictEqual(hasId(NaN), false);
+    assert.strictEqual(hasId(123), false);
+    assert.strictEqual(hasId("abc"), false);
+
+    // Date
+    assert.strictEqual(hasId(new Date()), true);
+
+    // Object
+    assert.strictEqual(hasId({}), true);
 
   });
 

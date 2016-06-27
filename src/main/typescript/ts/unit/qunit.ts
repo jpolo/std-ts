@@ -379,9 +379,9 @@ export class Test implements ITest {
     disabled = false
   ): Test {
     this.blocks.push({
-      block: block,
-      assertFactory: assertFactory,
-      disabled: disabled
+      assertFactory,
+      block,
+      disabled
     });
     return this;
   }

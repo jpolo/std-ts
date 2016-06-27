@@ -39,11 +39,11 @@ export class Runner {
     let { $engine, _timeout } = this;
     let reports: ITestReport[] = [];
 
-    function runTest(test: ITest, onComplete: (r: ITestReport) => void) {
+    function runTest(test: ITest, onTestComplete: (r: ITestReport) => void) {
       let report: ITestReport = {
-        startDate: null,
+        assertions: [],
         elapsedMilliseconds: NaN,
-        assertions: []
+        startDate: null
       };
       let context: ITestEngineRunContext = {
         getTimeout() { return _timeout; },
@@ -59,7 +59,7 @@ export class Runner {
         },
         onEnd() {
           if (onComplete) {
-            onComplete(report);
+            onTestComplete(report);
           }
         }
       };

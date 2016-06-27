@@ -1,5 +1,6 @@
 // Avoid import here
 const global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+const $$is = "is";
 
 export const INT8_MIN_VALUE = -0x80;
 export const INT8_MAX_VALUE = 0x7f;
@@ -25,7 +26,7 @@ export function IsNumber(o: any): boolean { return typeof o === "number"; }
 export function IsFunction(o): boolean { return typeof o === "function"; }
 export function IsObject(o: any) { return o !== null && (typeof o === "object"); }
 export function SameValue(a: any, b: any) {
-  return Object["is"] ? Object["is"](a, b) : a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b);
+  return Object[$$is] ? Object[$$is](a, b) : a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b);
 }
 export function OwnKeys(o: any): string[] {
   let keys: string[];
@@ -38,7 +39,7 @@ export function OwnKeys(o: any): string[] {
   return keys;
 }
 export function OwnKeysSorted(o: any) { return OwnKeys(o).sort(); }
-export function ObjectAssign<T, U>(o: T, ext: U): T & U { for (let key of OwnKeys(ext)) { o[key] = ext[key]; } return <any>o; }
+export function ObjectAssign<T, U>(o: T, ext: U): T & U { for (let key of OwnKeys(ext)) { o[key] = ext[key]; } return <any> o; }
 export function ObjectFreeze<T>(o: T): T { return Object.freeze ? Object.freeze(o) : o; }
 export function GetPrototypeOf(o: any) { return Object.getPrototypeOf ? Object.getPrototypeOf(o) : o.__proto__; }
 export function Type(o: any): string {

@@ -3,11 +3,9 @@ import {
   IAssertion, IReporter, ITestReport
 } from "../../unit";
 import {
-  OwnKeys,
   OwnKeysSorted,
   ToString
 } from "../util";
-
 
 export class HTMLReporter implements IReporter {
 
@@ -22,7 +20,7 @@ export class HTMLReporter implements IReporter {
 
     function push(sectionName: string, a: IAssertion) {
       let array = sections[sectionName];
-      if (array == null) {
+      if (array === undefined || array === null) {
         array = [];
         sections[sectionName] = array;
       }
@@ -36,10 +34,7 @@ export class HTMLReporter implements IReporter {
         (+report.startDate + report.elapsedMilliseconds) :
         Math.max(endTime, +report.startDate + report.elapsedMilliseconds);
 
-
       report.assertions.forEach((assertion) =>  {
-
-        let position = assertion.position;
         let category = assertion.test.category + "" + assertion.test.name;
 
         switch (assertion.name) {
@@ -74,10 +69,9 @@ export class HTMLReporter implements IReporter {
       let section = sections[sectionName];
 
       section.forEach((assertion) => {
-        let message = assertion.message;
-        let position = assertion.position;
+        const { message, name, position } = assertion;
         let positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : "";
-        let typeName = ToString(assertion.name);
+        let typeName = ToString(name);
 
         switch (assertion.name) {
           case SUCCESS:

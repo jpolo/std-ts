@@ -2,9 +2,9 @@ declare var Symbol: any;
 
 // ECMA like
 const idPropertyDescriptor: PropertyDescriptor = {
-  value: null,
-  enumerable: false,
   configurable: true,
+  enumerable: false,
+  value: null,
   writable: false
 };
 function IsFunction(o: any) { return typeof o === "function"; }
@@ -42,7 +42,6 @@ function GetOrSetId(o: any): number {
   }
   return id;
 }
-
 
 /**
  * Return new generated id

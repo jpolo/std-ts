@@ -152,9 +152,9 @@ function equalsMap(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boole
 function equalsSet(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
   let returnValue = false;
   function SetToArray(o): any[] {
-    let a = [];
-    o.forEach((v) => a.push(v));
-    return a;
+    const arr = [];
+    o.forEach((v) => arr.push(v));
+    return arr;
   }
 
   if (a.size() === b.size()) {
