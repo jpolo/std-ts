@@ -1,3 +1,5 @@
+/* tslint:disable:no-bitwise */
+
 import { getId, hasId } from "./id";
 
 // see https://github.com/facebook/immutable-js/blob/master/src/Hash.js
@@ -7,15 +9,18 @@ const INT32_MASK = 0xffffffff;
 const STRING_HASH_CACHE_MIN_STRLEN = 16;
 
 // ECMA Like
-function ObjectCreate(proto: any) {
-  const create = Object.create;
-  if (create) {
-    return create(proto);
+class ObjectConstructor {}
+function ObjectCreate(proto?: any) {
+  let returnValue;
+  if (Object.create) {
+    returnValue = Object.create(proto);
   } else {
-    const P = function () {};
-    P.prototype = proto;
-    return new P();
+    ObjectConstructor.prototype = proto;
+    let o: any = new ObjectConstructor();
+    ObjectConstructor.prototype = null;
+    returnValue = o;
   }
+  return returnValue;
 }
 function DictCreate() {
   let _data = ObjectCreate(null);
@@ -32,7 +37,6 @@ function Int32SMI(i32: number) {
   return ((i32 >>> 1) & 0x40000000) | (i32 & 0xbfffffff);
 }
 const stringHashCache = DictCreate();
-
 
 export interface IHash {
 
@@ -118,11 +122,15 @@ export function hashNumber(n: number): number {
 function hashObject(o: any): number {
   let returnValue = 0;
   if (isIHash(o)) {
-    returnValue = +(<IHash>o).hashCode();
+    returnValue = hashIHash(o);
   } else if (hasId(o)) {
     returnValue = getId(o);
   }
   return returnValue;
+}
+
+function hashIHash(o: IHash) {
+  return +o.hashCode();
 }
 
 export function isIHash(o: any): o is IHash {

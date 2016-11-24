@@ -1,5 +1,5 @@
-/* tslint:disable:max-line-length */
-function TokenCreate(t: Token, re: RegExp): {0: Token; 1: RegExp} { return <any>[t, re]; }
+/* tslint:disable:max-line-length no-namespace */
+function TokenCreate(t: Token, re: RegExp): [Token, RegExp] { return [t, re]; }
 function StringCount(str: string, needle: string, toIndex: number): number {
   let n = 0;
   let i = str.indexOf(needle);
@@ -72,21 +72,20 @@ const TOKENS: {0: Token; 1: RegExp}[] = [
   TokenCreate(Token.ID, /^([\w][\w -]*)/)
 ];
 
+export interface IYAMLObject { [key: string]: YAMLValue; }
+export interface IYAMLArray extends Array<YAMLValue> {}
+export type YAMLValue = number | string | boolean | IYAMLArray | IYAMLObject | Date;
 
-
-export function parse(s: string, options?: IParserOption) {
+export function parse(s: string, options?: IParserOption): YAMLValue {
   return parser.parse(parser.tokenize(s, options || {}));
 }
 
-
-export function stringify(o: any) {
-  return undefined;
+export function stringify(o: any): string {
+  return "TODO";
 }
 
-
-
-module parser {
-  let FILE_ANONYMOUS = "<anonymous>";
+namespace parser {
+  const FILE_ANONYMOUS = "<anonymous>";
 
   interface IState extends Array<ITokenMatch> { }
 
@@ -163,8 +162,9 @@ module parser {
    * | false
    * | null
    */
-  export function parse(state: IState) {
-    switch (peek(state).token) {
+  export function parse(state: IState): YAMLValue {
+    const token = peek(state).token;
+    switch (token) {
       case Token.DOC:
         return parseDoc(state);
       case Token.DASH:
@@ -182,7 +182,7 @@ module parser {
       case Token.FLOAT:
         return parseFloat(advanceValue(state));
       case Token.INT:
-        return parseInt(advanceValue(state));
+        return parseInt(advanceValue(state), 10);
       case Token.TRUE:
         advanceValue(state);
         return true;
@@ -192,13 +192,15 @@ module parser {
       case Token.NULL:
         advanceValue(state);
         return null;
+      default:
+        throw new Error(`Unknown token ${token}`);
     }
   }
 
-  function parseDoc(state: IState) {
+  function parseDoc(state: IState): any {
     accept(state, Token.DOC);
     expect(state, Token.INDENT, "expected indent after document");
-    let val = parse(state);
+    const val = parse(state);
     expect(state, Token.DEDENT, "document not properly dedented");
     return val;
   }
@@ -255,7 +257,7 @@ module parser {
    *  | '-' - indent expr dedent
    *  )+
    */
-  function parseList(state: IState) {
+  function parseList(state: IState): any[] {
     let list = [];
     while (accept(state, Token.DASH)) {
       ignoreSpace(state);
@@ -273,7 +275,7 @@ module parser {
   /**
    * '[' (- ','? - expr -)* ']'
    */
-  function parseInlineList(state: IState) {
+  function parseInlineList(state: IState): any[] {
     let list = [];
     let i = 0;
     accept(state, Token.SQUARED_BRACKET_OPEN);
@@ -298,12 +300,12 @@ module parser {
   function parseTimestamp(state: IState) {
     let matches = advance(state).matches;
     let date = new Date("");
-    let year = parseInt(matches[2]);
-    let month = parseInt(matches[3]);
-    let day = parseInt(matches[4]);
-    let hour = parseInt(matches[5]) || 0;
-    let min = parseInt(matches[6]) || 0;
-    let sec = parseInt(matches[7]) || 0;
+    const year = parseInt(matches[2], 10);
+    const month = parseInt(matches[3], 10);
+    const day = parseInt(matches[4], 10);
+    const hour = parseInt(matches[5], 10) || 0;
+    let min = parseInt(matches[6], 10) || 0;
+    let sec = parseInt(matches[7], 10) || 0;
 
     date.setUTCFullYear(year, month - 1, day);
     date.setUTCHours(hour);
@@ -339,18 +341,18 @@ module parser {
         let tokenType = matcher[0];
         let re = matcher[1];
         if (captures = re.exec(buffer)) {
-          //consume
+          // consume
           buffer = buffer.replace(re, "");
           strConsumedLength = (strLength - buffer.length);
 
           lineNumber = StringCount(str, "\n", strConsumedLength) + 1;
           columnNumber = strConsumedLength - str.lastIndexOf("\n", strConsumedLength);
           tokenMatch = {
-            token: tokenType,
+            columnNumber: columnNumber,
+            lineNumber: lineNumber,
             matches: captures,
             sourceURL: sourceURL,
-            lineNumber: lineNumber,
-            columnNumber: columnNumber
+            token: tokenType
           };
 
           switch (tokenMatch.token) {
@@ -372,13 +374,13 @@ module parser {
               } else if (indents < lastIndents) {
                 input = captures.input;
                 tokenMatch = {
-                  token: Token.DEDENT,
+                  columnNumber: columnNumber,
+                  lineNumber: lineNumber,
                   matches: null,
                   sourceURL: sourceURL,
-                  lineNumber: lineNumber,
-                  columnNumber: columnNumber
+                  token: Token.DEDENT
                 };
-                //tokenMatch['input'] = input
+                // tokenMatch['input'] = input
                 while (--lastIndents > indents) {
                   stack.push(tokenMatch);
                 }
@@ -405,11 +407,7 @@ module parser {
     return (
       typeof str !== "string" ? "" :
       "near \"" +
-      (str
-        .slice(0, 25)
-        .replace(/\n/g, '\\n')
-        .replace(/"/g, '\\\"')) +
-      "\""
+      (str.slice(0, 25).replace(/\n/g, '\\n')  .replace(/"/g, '\\\"')) + "\""
     );
   }
 }

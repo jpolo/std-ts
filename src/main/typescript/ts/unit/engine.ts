@@ -6,9 +6,8 @@ import * as timer from "../timer";
 import { IAssertion, IAssertionCallSite } from "./assertion";
 import { IsFinite, ObjectAssign } from "./util";
 
-
 // Service
-interface ITestEngineEqual {
+export interface ITestEngineEqual {
   equalsSame(lhs: any, rhs: any): boolean;
   equalsSimple(lhs: any, rhs: any): boolean;
   equalsStrict(lhs: any, rhs: any): boolean;
@@ -16,16 +15,16 @@ interface ITestEngineEqual {
   equalsProperties(lhs: any, rhs: any, equalsFn: (a: any, b: any) => boolean): boolean;
   equalsDeep(lhs: any, rhs: any): boolean;
 }
-interface ITestEngineDump {
+export interface ITestEngineDump {
   dump(o: any): string;
 }
-interface ITestEngineStacktrace {
+export interface ITestEngineStacktrace {
   callstack(): IAssertionCallSite[];
 }
-interface ITestEngineTime extends time.ITimeModule {}
-interface ITestEngineTimer extends timer.ITimerModule {}
-interface ITestEngineRun {
-  run(context: ITestEngineRunContext);
+export interface ITestEngineTime extends time.ITimeModule {}
+export interface ITestEngineTimer extends timer.ITimerModule {}
+export interface ITestEngineRun {
+  run(context: ITestEngineRunContext): void;
 }
 
 export interface ITestEngineRunContext {
@@ -57,7 +56,7 @@ export interface ITestRunContext extends ITestEngineRunContext {
 
 const $equalDefault: ITestEngineEqual = equal;
 const $dumpDefault: ITestEngineDump = (function () {
-  let inspector = new Inspector({ maxString: 70 });
+  const inspector = new Inspector({ maxString: 70 });
   return {
     dump(o: any) {
       return inspector.stringify(o);
@@ -70,7 +69,6 @@ const $stacktraceDefault: ITestEngineStacktrace = {
 };
 const $timerDefault: ITestEngineTimer = timer;
 
-
 class Context<T> {
 
   static unit = new Context();
@@ -80,13 +78,13 @@ class Context<T> {
   }
 
   static create<T>(o: T): Context<T> & T {
-    let returnValue: any = new Context();
+    const returnValue: any = new Context();
     ObjectAssign(returnValue, o);
     return returnValue;
   }
 
   createChild<U>(ext: U): Context<T & U> & T & U {
-    let returnValue: any = new Context();
+    const returnValue: any = new Context();
     ObjectAssign(ObjectAssign(returnValue, this), ext);
     return returnValue;
   }
@@ -111,7 +109,7 @@ export class Engine implements ITestEngine {
     }
   ) {
     if (deps) {
-      let { $equal, $dump, $stacktrace, $time, $timer } = deps;
+      const { $equal, $dump, $stacktrace, $time, $timer } = deps;
 
       if ($equal !== undefined) {
         this.$equal = $equal;
@@ -192,12 +190,12 @@ export class Engine implements ITestEngine {
   }
 
   run(context: ITestEngineRunContext) {
-    let engine = this;
-    let test = context.getTest();
-    let timeoutMs = context.getTimeout();
+    const engine = this;
+    const test = context.getTest();
+    const timeoutMs = context.getTimeout();
     let opened = true;
     let timerId: number = null;
-    let stream: ITestRunContext = {
+    const stream: ITestRunContext = {
       getTest() { return test; },
       getTimeout() { return timeoutMs; },
       getEngine() { return engine; },

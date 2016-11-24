@@ -27,21 +27,21 @@ function GeneratorCreate<T>(f: {(v?: any): IIteratorResult<T>}) {
 
 function GeneratorMap<T, U>(g: IGenerator<T>, f: (v: T) => U): IGenerator<U> {
   return GeneratorCreate(function (v?: any) {
-    let iterResult = g.next(v);
-    let iterMapped: IIteratorResult<U> = iterResult.done ? <any> iterResult : { done: false, value: f(iterResult.value) };
+    const iterResult = g.next(v);
+    const iterMapped: IIteratorResult<U> = iterResult.done ? <any> iterResult : { done: false, value: f(iterResult.value) };
     return iterMapped;
   });
 }
 
 function GeneratorRandomInt(min: number|IGenerator<number>, max: number|IGenerator<number>) {
-  let genMin = GeneratorFrom<number>(<any> min);
-  let genMax = GeneratorFrom<number>(<any> max);
+  const genMin = GeneratorFrom<number>(<any> min);
+  const genMax = GeneratorFrom<number>(<any> max);
   return GeneratorFrom(function (p) {
-    let minResult = genMin.next(p);
-    let maxResult = genMax.next(p);
-    let n = p.random();
-    let minValue = minResult.value;
-    let maxValue = maxResult.value;
+    const minResult = genMin.next(p);
+    const maxResult = genMax.next(p);
+    const n = p.random();
+    const minValue = minResult.value;
+    const maxValue = maxResult.value;
     return minResult.done || maxResult.done ? NaN :
       Floor(n * (maxValue - minValue + 1)) + minValue;
   });

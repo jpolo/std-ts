@@ -49,8 +49,8 @@ export function equalsStrict(a: any, b: any): boolean {
  * @return the equal near difference
  */
 export function equalsNear(a: any, b: any, epsilon: number): boolean {
-  let isnum1 = IsNumber(a);
-  let isnum2 = IsNumber(b);
+  const isnum1 = IsNumber(a);
+  const isnum2 = IsNumber(b);
   return (
     (isnum1 || isnum2) ? (isnum1 === isnum2) && (a == b || equalsFloat(a, b, epsilon)) :
     (!IsEmpty(a) && a.equalsNear) ? a.equalsNear(b) :
@@ -111,8 +111,8 @@ function equalsRegExp(a: RegExp, b: RegExp): boolean {
 
 function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean) {
   let returnValue = true;
-  let al = a.length;
-  let bl = b.length;
+  const al = a.length;
+  const bl = b.length;
 
   if (al === bl) {
     for (let i = 0, l = al; i < l; ++i) {
@@ -126,15 +126,15 @@ function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean)
 }
 
 function equalsObject(a: any, b: any, equalsFn: (av: any, bv: any) => boolean): boolean {
-  let akeys = OwnKeysSorted(a);
-  let bkeys = OwnKeysSorted(b);
+  const akeys = OwnKeysSorted(a);
+  const bkeys = OwnKeysSorted(b);
   let returnValue = false;
   // Compare keys first to deep value
   if (equalsArray(akeys, bkeys, equalsStrict)) {
     returnValue = true;
     for (let i = 0, l = akeys.length; i < l; ++i) {
-      let akey = akeys[i];
-      let bkey = bkeys[i];
+      const akey = akeys[i];
+      const bkey = bkeys[i];
       if (akey !== bkey || !equalsFn(a[akey], b[bkey])) {
         returnValue = false;
         break;
@@ -149,26 +149,31 @@ function equalsMap(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boole
   return true;
 }
 
-function equalsSet(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
-  let returnValue = false;
-  function SetToArray(o): any[] {
-    const arr = [];
-    o.forEach((v) => arr.push(v));
-    return arr;
+function equalsSet(a: Set<any>, b: Set<any>, equalsFn: (a: any, b: any) => boolean): boolean {
+  function SetHasValue<V>(s: Set<V>, value: V): boolean {
+    for (const iterValue of s.values()) {
+      if (equalsFn(iterValue, value)) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  if (a.size() === b.size()) {
-    let avalues = SetToArray(a);
-    let bvalues = SetToArray(b);
-    returnValue = equalsArray(avalues, bvalues, equalsFn);
+  if (a.size === b.size) {
+    for (const avalue of a.values()) {
+      if (!SetHasValue(b, avalue)) {
+        return false;
+      }
+    }
+    return true;
   }
-  return returnValue;
+  return false;
 }
 
 function equalsAny(a: any, b: any, equalsFn: (a: any, b: any) => boolean) {
   if (!SameValue(a, b)) {
-    let atag = ToStringTag(a);
-    let btag = ToStringTag(b);
+    const atag = ToStringTag(a);
+    const btag = ToStringTag(b);
     switch (atag) {
       case "Undefined":
       case "Null":

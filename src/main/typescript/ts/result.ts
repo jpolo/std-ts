@@ -2,7 +2,7 @@
 const $$result = "result";
 const $$error = "error";
 
-interface IResult<T> {
+export interface IResult<T> {
   result?: T;
   error?: any;
 }

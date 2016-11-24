@@ -1,13 +1,13 @@
 import { IStorage } from "./storage";
 
 // Util
-function ToString(o) { return "" + o; }
-function OwnKeys(o) {
+function ToString(o: any) { return "" + o; }
+function OwnKeys(o: any) {
   let keys: string[];
   if (Object.keys) {
     keys = Object.keys(o);
   } else {
-    for (let key in o) {
+    for (const key in o) {
       if (o.hasOwnProperty(key)) {
         keys.push(key);
       }
@@ -15,12 +15,10 @@ function OwnKeys(o) {
   }
   return keys;
 }
-function GetData(o): { [k: string]: string } { return o.__data__ || (o.__data__ = {}); }
-function ClearData(o): void { o.__data__ = {}; }
+function GetData(o: any): { [k: string]: string } { return o.__data__ || (o.__data__ = {}); }
+function ClearData(o: any): void { o.__data__ = {}; }
 
-class MemoryStorage implements IStorage {
-
-  constructor() { }
+export class MemoryStorage implements IStorage {
 
   isAvailable(): boolean {
     return true;
@@ -31,17 +29,17 @@ class MemoryStorage implements IStorage {
   }
 
   getItem(k: string): string {
-    let data = GetData(this);
+    const data = GetData(this);
     return data.hasOwnProperty(k) ? data[k] : null;
   }
 
   setItem(k: string, v: string): void {
-    let data = GetData(this);
+    const data = GetData(this);
     data[k] = ToString(v);
   }
 
   removeItem(k: string): void {
-    let data = GetData(this);
+    const data = GetData(this);
     delete data[k];
   }
 

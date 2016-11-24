@@ -1,7 +1,7 @@
 // Util
-function IsNode(o): o is Node {
+function IsNode(o: any): o is Node {
   return (
-    //typeof Node === "object" ? o instanceof Node :
+    // typeof Node === "object" ? o instanceof Node :
     o &&
     typeof o === "object" &&
     typeof o.nodeType === "number" &&
@@ -28,7 +28,7 @@ function SetText(n: Node, text: string) {
 
 function GetText(n: Node) {
   let returnValue = "";
-  let nodeType = n.nodeType;
+  const nodeType = n.nodeType;
 
   if (
     nodeType === NodeType.ELEMENT_NODE ||
@@ -211,7 +211,7 @@ export function place(node: Node, position: Position, refNode: Node): boolean {
  * @return true if removed successfully
  */
 export function remove(node: Node): boolean {
-  let parentNode = node.parentNode;
+  const parentNode = node.parentNode;
   let returnValue = false;
   if (parentNode) {
     parentNode.removeChild(node);

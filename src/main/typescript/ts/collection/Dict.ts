@@ -25,7 +25,7 @@ function IsFunction(o: any) {
   return typeof o === "function";
 }
 
-function IsDictLike(o) {
+function IsDictLike(o: any) {
   return IsObject(o) && IsFunction(o.getItem) && IsFunction(o.setItem) && IsNumber(o.length);
 }
 
@@ -35,7 +35,7 @@ function OwnKeys(o: any): string[] {
     keys = Object.keys(o);
   } else {
     keys = [];
-    for (let prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } };
+    for (const prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } };
   }
   return keys;
 }
@@ -53,8 +53,8 @@ export default class Dict<T> {
     if (IsDictLike(d)) {
       d.clear();
     } else {
-      let keys = OwnKeys(d);
-      for (let key of keys) {
+      const keys = OwnKeys(d);
+      for (const key of keys) {
         delete d[key];
       }
     }
@@ -79,7 +79,7 @@ export default class Dict<T> {
   static iterator<S>(d: IDictLike<S>): DictIterator<S>
   static iterator<S>(d: IDict<S>): DictIterator<S>
   static iterator<S>(d: any): DictIterator<S> {
-    return new DictIterator(d);
+    return new DictIterator<S>(d);
   }
 
   static key<S>(d: IDictLike<S>, index: number): string
@@ -135,10 +135,10 @@ export default class Dict<T> {
 
   static update<S>(d: IDict<S>|IDictLike<S>, ext: IDict<S>|IDictLike<S>): void
   static update<S>(d: any, ext: any): void {
-    let iter = Dict.iterator(ext);
+    const iter = Dict.iterator(ext);
     let iterResult;
     while (!(iterResult = iter.next()).done) {
-      let [key, value] = iterResult.value;
+      const [key, value] = iterResult.value;
       Dict.set(d, key, value);
     }
   }
@@ -146,8 +146,8 @@ export default class Dict<T> {
   static toArray<S>(d: IDictLike<S>): [string, S][]
   static toArray<S>(d: IDict<S>): [string, S][]
   static toArray<S>(d: any): [string, S][] {
-    let returnValue = [];
-    let iter = Dict.iterator(d);
+    const returnValue = [];
+    const iter = Dict.iterator(d);
     let iterResult;
     while (!(iterResult = iter.next()).done) {
       returnValue.push(iterResult.value);
@@ -183,7 +183,6 @@ export default class Dict<T> {
     return Dict.has(this, key);
   }*/
 
-
   toArray() {
     return Dict.toArray(this);
   }
@@ -203,16 +202,16 @@ export class DictIterator<T> {
     this._length = Dict.size(_d);
   }
 
-  next() {
-    let dict = this._dict;
-    let index = this._index;
-    let returnValue = { done: true, value: undefined };
+  next(): { done: true, value?: any } | { done: false, value: [string, T] } {
+    const dict = this._dict;
+    const index = this._index;
     if (index < this._length) {
-      let key = Dict.key(dict, index);
-      returnValue.done = false;
-      returnValue.value = [key, Dict.get(dict, key)];
+      const key = Dict.key(dict, index);
+      const value: [string, T] = [key, Dict.get<T>(dict, key)];
+      return { done: false, value };
+    } else {
+      return { done: true, value: undefined };
     }
-    return returnValue;
   }
 
 }

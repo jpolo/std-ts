@@ -22,14 +22,14 @@ function IsList(o: any): boolean {
 
 function NodeCreate<T>(v: T): INode<T> {
   return {
-    value: v,
+    next: null,
     previous: null,
-    next: null
+    value: v
   };
 }
 
 function ListData<T>(list: List<T>): IListData<T> {
-  return (<any>list);
+  return (<any> list);
 }
 
 function ListClear<T>(list: IListData<T>) {
@@ -76,10 +76,10 @@ function ListEnqueue<A, B>(list: IListData<B>, values: any, mapFn: (v: A) => B):
     ListEnqueueIterator(list, new ListIterator<A>(values), mapFn);
   } else if (IsArray(values)) {
     let index = 0;
-    let length = values.length;
+    const length = values.length;
     ListEnqueueIterator(list, {
       next() {
-        let currentIndex = index;
+        const currentIndex = index;
         index += 1;
         return (
           currentIndex < length ?
@@ -110,14 +110,13 @@ function Identity<T>(o: T): T {
 
 export default class List<T> {
   protected _length: number = 0;
-  protected _head: INode<T> = null;
-
+  private _head: INode<T> = null;
 
   static from<A>(list: List<A>): List<A>;
   static from<A, B>(list: List<A>, mapFn: (v: A) => B, thisp?: any): List<B>;
   static from<A>(array: A[]): List<A>;
   static from<A, B>(array: A[], mapFn: (v: A) => B, thisp?: any): List<B>;
-  static from(o: any, mapFn = Identity, thisp = null): List<any>  {
+  static from(o: any, mapFn = Identity, thisp: any = null): List<any>  {
     return new List(o);
   }
 
@@ -126,7 +125,7 @@ export default class List<T> {
   }
 
   static of<S>(...values: S[]): List<S> {
-    let list = new List<S>();
+    const list = new List<S>();
     ListEnqueue(ListData(list), values, Identity);
     return list;
   }
@@ -134,14 +133,14 @@ export default class List<T> {
   constructor(a?: List<T>)
   constructor(a?: T[])
   constructor(a?: any) {
-    let data = ListData(this);
+    const data = ListData(this);
     ListClear(data);
     if (a) {
       ListEnqueue(data, a, Identity);
     }
   }
 
-  get length() {
+  get length(): number {
     return ListData(this)._length;
   }
 
@@ -151,9 +150,9 @@ export default class List<T> {
 
   item(i: number): T {
     let returnValue: T;
-    let data = ListData(this);
+    const data = ListData(this);
     if (i >= 0) {
-      let head = data._head;
+      const head = data._head;
       let current = head;
       let index = 0;
       if (current !== null) {
@@ -171,17 +170,17 @@ export default class List<T> {
   }
 
   push(...values: T[]): number {
-    let data = ListData(this);
+    const data = ListData(this);
     ListEnqueue(data, values, Identity);
     return data._length;
   }
 
   pop(): T {
     let returnValue: T;
-    let data = ListData(this);
-    let head = data._head;
+    const data = ListData(this);
+    const head = data._head;
     if (head !== null) {
-      let last = head.previous;
+      const last = head.previous;
       returnValue = last.value;
       ListDisconnect(data, last);
       data._length -= 1;
@@ -191,8 +190,8 @@ export default class List<T> {
 
   shift(): T {
     let returnValue: T;
-    let data = ListData(this);
-    let head = data._head;
+    const data = ListData(this);
+    const head = data._head;
     if (head !== null) {
       returnValue = head.value;
       ListDisconnect(data, head);
@@ -202,9 +201,9 @@ export default class List<T> {
   }
 
   unshift(...values: T[]): number {
-    let data = ListData(this);
-    let head = data._head;
-    let lastNode = head && head.previous;
+    const data = ListData(this);
+    const head = data._head;
+    const lastNode = head && head.previous;
     // ListEnqueue(data, values)
     if (lastNode) {
       data._head = lastNode.next;
@@ -214,7 +213,7 @@ export default class List<T> {
 
   toString() {
     let s = "";
-    let iterator = new ListIterator(this);
+    const iterator = new ListIterator(this);
     let iteratorResult = iterator.next();
     if (!iteratorResult.done) {
       s += " ";
@@ -239,12 +238,12 @@ class ListIterator<T> {
   }
 
   next() {
-    let data = this._data;
-    let current = this._current;
+    const data = this._data;
+    const current = this._current;
     let done = true;
     let value: T;
     if (current) {
-      let next = current.next;
+      const next = current.next;
       this._current = (next !== data._head) ? next : null;
       done = false;
       value = current.value;

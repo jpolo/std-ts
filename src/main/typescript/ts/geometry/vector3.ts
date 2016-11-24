@@ -1,5 +1,5 @@
 // Util
-type Vector3 = [number, number, number];
+export type Vector3 = [number, number, number];
 type Vector3Constructor =  { new(n: number): Vector3 };
 
 // let Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array
@@ -20,7 +20,7 @@ function ArrayCopy(src: Vector3, dest: Vector3) {
     dest[2] = src[2];
   }
 }
-function ArrayFill(a, v: number) {
+function ArrayFill(a: Array<number>, v: number) {
   a[0] = v;
   a[1] = v;
   a[2] = v;

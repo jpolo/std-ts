@@ -3,20 +3,20 @@ import { IStorage } from "./storage";
 // Util
 const __now = Date.now || function () { return (new Date()).getTime(); };
 const __keys = Object.keys || function (o) {
-  let keys = [];
-  for (let key in o) {
+  const keys = [];
+  for (const key in o) {
     if (o.hasOwnProperty(key)) {
       keys.push(key);
     }
   }
   return keys;
 };
-const __str = function (o) { return "" + o; };
+const __str = function (o: string) { return "" + o; };
 const __defineGetter = Object.defineProperty ?
-  function (o, name, getter) {
+  function (o: any, name: string, getter: () => any) {
     Object.defineProperty(o, name, {get: getter});
   } :
-  function (o, name, getter) {
+  function (o: any, name: string, getter: () => any) {
     o.__defineGetter__(name, getter);
   };
 
@@ -26,17 +26,17 @@ const __cookieRead = (function () {
   const __document = typeof document !== "undefined" ? document : null;
   const __decode = decodeURIComponent;
   const __read = function () {
-    let currentCookieString = __document.cookie || "";
+    const currentCookieString = __document.cookie || "";
 
     if (currentCookieString !== __cookiesStr) {
       __cookiesStr = currentCookieString;
-      let cookieArray = __cookiesStr.split("; ");
+      const cookieArray = __cookiesStr.split("; ");
       __cookies = {};
 
-      for (let cookie of cookieArray) {
-        let index = cookie.indexOf("=");
+      for (const cookie of cookieArray) {
+        const index = cookie.indexOf("=");
         if (index > 0) { // ignore nameless cookies
-          let name = __decode(cookie.substring(0, index));
+          const name = __decode(cookie.substring(0, index));
           // the first value that is seen for a cookie is the most
           // specific one.  values for the same cookie name that
           // follow are for less specific paths.
@@ -72,12 +72,12 @@ const __cookieWrite = (function () {
   };
   const __write = function (key: string, value: string, options: WriteOptions = {}) {
     // options = __extend({ path: "/" }, options);
-    let now = __now();
-    let domain = options.domain;
-    let path = options.path || "/";
-    let maxAge = options.maxAge;
-    let expires = options.expires;
-    let secure = options.secure;
+    const now = __now();
+    const domain = options.domain;
+    const path = options.path || "/";
+    const maxAge = options.maxAge;
+    const expires = options.expires;
+    const secure = options.secure;
     let expirationDate = null;
     let cookieDelete = false;
 
@@ -107,7 +107,7 @@ const __cookieWrite = (function () {
       s += "; secure";
     }
 
-    let cookieOld = __document.cookie;
+    const cookieOld = __document.cookie;
     __document.cookie = s;
     return (cookieOld !== __document.cookie);
   };
@@ -117,24 +117,24 @@ const __cookieClear = function () {
   document.cookie = "";
 };
 const __extends = function <T>(dest: T, ...exts: T[]) {
-  for (let ext of exts) {
-    let extKeys = __keys(ext);
-    for (let key of extKeys) {
+  for (const ext of exts) {
+    const extKeys = __keys(ext);
+    for (const key of extKeys) {
       dest[key] = ext[key];
     }
   }
   return dest;
 };
 
-type WriteOptions = {
+export type WriteOptions = {
   domain?: string
   path?: string
   maxAge?: number
-  expires?: number|Date
+  expires?: number | Date
   secure?: boolean
 }
 
-class CookieStorage implements IStorage {
+export class CookieStorage implements IStorage {
 
   length: number;
 
@@ -166,7 +166,7 @@ class CookieStorage implements IStorage {
   }
 
   removeItem(k: string, options?: WriteOptions): void {
-    let optionsRemove = { maxAge: -1 };
+    const optionsRemove = { maxAge: -1 };
     __cookieWrite(k, null, options ? __extends({}, options, optionsRemove) : optionsRemove);
   }
 

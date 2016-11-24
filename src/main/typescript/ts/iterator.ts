@@ -30,7 +30,7 @@ function IteratorNext<T>(iter: IIterator<T>, v?: any) {
 function IteratorMap<T, U>(iter: IIterator<T>, f: (v: T) => IIteratorResult<U>) {
   return IteratorCreate(function (v?: any) {
     let result = IteratorNext(iter, v);
-    return result.done ? <any>result : f(result.value);
+    return result.done ? <any> result : f(result.value);
   });
 }
 

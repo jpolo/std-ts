@@ -2,8 +2,8 @@
 declare var Set: any; // TODO remove
 
 // Util
-function FunctionName(f: Function) {
-  return (<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]);
+function FunctionName(f: Function): string {
+  return (<any> f).displayName || (<any> f).name || ((<any> f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]);
 }
 
 function FunctionToString(f: Function) {
@@ -33,29 +33,16 @@ function SetCreate<T>(): { has: (o: T) => boolean; add: (o: T) => void } {
   if (typeof Set !== "undefined") {
     return new Set();
   } else {
-    let d = [];
+    let d: T[] = [];
     return {
-      has: function (o) { return d.indexOf(o) !== -1; },
-      add: function (o) { if (d.indexOf(o) !== -1) { d.push(o); } }
+      add(o) { if (d.indexOf(o) !== -1) { d.push(o); } },
+      has(o) { return d.indexOf(o) !== -1; },
     };
   }
 }
 
 function StringTruncate(s: string, maxLength: number, ellipsis = "...") {
   return (s.length > maxLength ? s.slice(0, maxLength) + ellipsis : s);
-}
-
-function ToStringTag(o: any) {
-  let s = "";
-  if (o === undefined) {
-    s = "Undefined";
-  } else if (o === null) {
-    s = "Null";
-  } else {
-    let c = o.constructor;
-    s = c && c.name || Object.prototype.toString.call(o).slice(8, -1);
-  }
-  return s;
 }
 
 function DumpEmpty<T>(i: Inspector, o: T, orElse?: (o: T) => string): string {
@@ -84,7 +71,6 @@ export interface IInspect {
 export interface IInspector {
   stringify(o: any, maxDepth?: number): string;
 }
-
 
 export class Inspector implements IInspector {
   public maxDepth = 6;

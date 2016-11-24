@@ -4,7 +4,7 @@ import * as vector4 from "./vector4";
 const IDENTITY: Quaternion = [0, 0, 0, 1];
 
 // Util
-type Quaternion = [number, number, number, number]
+export type Quaternion = [number, number, number, number]
 const F64Array: any = (typeof Float64Array !== "undefined") ? Float64Array : Array;
 function ArrayCreate(): any {
   return new F64Array(4);

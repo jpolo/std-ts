@@ -1,6 +1,6 @@
 import { IStorage, Storage } from "./storage";
 
-class LocalStorage extends Storage {
+export class LocalStorage extends Storage {
   protected _getStorage() {
     return localStorage;
   }

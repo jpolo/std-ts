@@ -1,11 +1,14 @@
-type ByteArray = { [k: number]: number; length: number; }
+/* tslint:disable:no-bitwise */
+export interface IByteArray {
+  [k: number]: number;
+  length: number;
+}
 
-//Constant
+// Constant
 const LENGTH = 16;
-
-//Util
+// Util
 const __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-const __buffer: ByteArray = ArrayCreate(16);
+const __buffer: IByteArray = ArrayCreate(16);
 const __rng: () => number[] = (function () {
   let __rng;
 
@@ -21,9 +24,9 @@ const __rng: () => number[] = (function () {
   }
 
   // Allow for MSIE11 msCrypto
-  let __crypto = __global.crypto || __global.msCrypto;
+  const __crypto = __global.crypto || __global.msCrypto;
   if (!__rng && __crypto && __crypto.getRandomValues) {
-    let _rnds8 = ArrayCreate(16);
+    const _rnds8 = ArrayCreate(16);
     __rng = function () {
       __crypto.getRandomValues(_rnds8);
       return _rnds8;
@@ -31,8 +34,8 @@ const __rng: () => number[] = (function () {
   }
 
   if (!__rng) {
-    let _rnds = ArrayCreate(16);
-    let __random = Math.random;
+    const _rnds = ArrayCreate(16);
+    const __random = Math.random;
     __rng = function () {
       for (let i = 0, r; i < LENGTH; i++) {
         if ((i & 0x03) === 0) r = __random() * 0x100000000;
@@ -50,25 +53,25 @@ function Compare(a: number, b: number) {
   return a === b ? 0 : a < b ? -1 : 1;
 }
 
-function ArrayCreate(length: number): ByteArray {
+function ArrayCreate(length: number): IByteArray {
   let returnValue;
   if (typeof Uint8Array !== "undefined") {
     returnValue = new Uint8Array(length);
   } else {
     returnValue = new Array(length);
-    returnValue[0] = 0;/*v8 optim*/
+    returnValue[0] = 0; /*v8 optim*/
   }
   return returnValue;
 }
 
-function Array16Fill(a: ByteArray, k: number): void {
+function Array16Fill(a: IByteArray, k: number): void {
   a[0] = a[1] = a[2] = a[3] =
   a[4] = a[5] = a[6] = a[7] =
   a[8] = a[9] = a[10] = a[11] =
   a[12] = a[13] = a[14] = a[15] = k;
 }
 
-function Array16Compare(a: ByteArray, b: ByteArray): number {
+function Array16Compare(a: IByteArray, b: IByteArray): number {
   return (
     Compare(a[0], b[0]) ||
     Compare(a[1], b[1]) ||
@@ -89,7 +92,7 @@ function Array16Compare(a: ByteArray, b: ByteArray): number {
   );
 }
 
-function Array16Copy(src: ByteArray, dest: ByteArray, offset: number) {
+function Array16Copy(src: IByteArray, dest: IByteArray, offset: number) {
   if (src !== dest) {
     dest[0] = src[0 + offset] & 0xff;
     dest[1] = src[1 + offset] & 0xff;
@@ -111,18 +114,17 @@ function Array16Copy(src: ByteArray, dest: ByteArray, offset: number) {
 }
 
 const __uint8ToHex: string[] = [];
-function Array16ToString(a: ByteArray) {
-  let f = __uint8ToHex;
+function Array16ToString(a: IByteArray) {
+  const f = __uint8ToHex;
   return f[a[0]] + f[a[1]] +
-    f[a[2]] + f[a[3]] + '-' +
-    f[a[4]] + f[a[5]] + '-' +
-    f[a[6]] + f[a[7]] + '-' +
-    f[a[8]] + f[a[9]] + '-' +
+    f[a[2]] + f[a[3]] + "-" +
+    f[a[4]] + f[a[5]] + "-" +
+    f[a[6]] + f[a[7]] + "-" +
+    f[a[8]] + f[a[9]] + "-" +
     f[a[10]] + f[a[11]] +
     f[a[12]] + f[a[13]] +
     f[a[14]] + f[a[15]];
 }
-
 
 const __hexToUint8: { [k: string]: number } = {};
 for (let i = 0; i < 256; i++) {
@@ -136,23 +138,23 @@ function isUUID(o: any): boolean {
 }
 
 function getRandomBytes(): number[] {
-  let byteArray = new Array(LENGTH);
+  const byteArray = new Array(LENGTH);
   setRandomBytes(byteArray);
   return byteArray;
 }
 
-function setRandomBytes(a: ByteArray): void {
-  let randomBytes = __rng();
+function setRandomBytes(a: IByteArray): void {
+  const randomBytes = __rng();
   randomBytes[6] = (randomBytes[6] & 0x0f) | 0x40;
   randomBytes[8] = (randomBytes[8] & 0x3f) | 0x80;
-  //a.length = LENGTH;
+  // a.length = LENGTH;
   Array16Copy(randomBytes, a, 0);
 }
 
 function parse(s: string): number[] {
-  let byteArray = new Array(LENGTH);
+  const byteArray = new Array(LENGTH);
   let i = 0;
-  s.toLowerCase().replace(/[0-9a-f]{2}/g, <any>function (oct: string) {
+  s.toLowerCase().replace(/[0-9a-f]{2}/g, <any> function (oct: string) {
     if (i < LENGTH) { // Don't overflow!
       byteArray[i] = __hexToUint8[oct] & 0xff;
       i += 1;
@@ -165,10 +167,6 @@ function parse(s: string): number[] {
     i += 1;
   }
   return byteArray;
-}
-
-function stringify(a: ByteArray): string {
-  return Array16ToString(a);
 }
 
 export class UUID {
@@ -185,8 +183,6 @@ export class UUID {
         id = o;
       } else if (typeof o === "string") {
         id = UUID.parse(o);
-      } else {
-
       }
     }
     return id;
@@ -197,7 +193,7 @@ export class UUID {
   }
 
   static generate(): UUID {
-    let a = __rng();
+    const a = __rng();
     a[6] = (a[6] & 0x0f) | 0x40;
     a[8] = (a[8] & 0x3f) | 0x80;
     return new UUID(a);
@@ -207,7 +203,11 @@ export class UUID {
     return new UUID(parse(s));
   }
 
-  constructor(byteArray?: ByteArray) {
+  static stringify(a: IByteArray): string {
+    return Array16ToString(a);
+  }
+
+  constructor(byteArray?: IByteArray) {
     if (byteArray !== undefined) {
       Array16Copy(byteArray, this, 0);
     } else {
@@ -231,7 +231,7 @@ export class UUID {
     return this[index];
   }
 
-  set(byteArray: ByteArray, offset = 0): void {
+  set(byteArray: IByteArray, offset = 0): void {
     Array16Copy(byteArray, this, offset);
   }
 

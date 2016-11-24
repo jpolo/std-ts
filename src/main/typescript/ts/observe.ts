@@ -2,7 +2,7 @@
 //ECMA spec is here :
 // https://arv.github.io/ecmascript-object-observe
 
-declare var Symbol: any;
+declare const Symbol: any;
 //TODO remove
 declare class Map<K, V> {
   get(k: K): V;
@@ -27,7 +27,7 @@ const ALL = [ADD, UPDATE, DELETE, RECONFIGURE, SET_PROTOTYPE, PREVENT_EXTENSIONS
 
 //Util
 let O = (<any>Object);
-const __keys = Object.keys || function (o: any): string[] { var ks = []; for (var k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
+const __keys = Object.keys || function (o: any): string[] { const ks = []; for (const k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
 let __observerDeliver = O.deliverChangeRecords;
 let __observe = O.observe;
 let __unobserve = O.unobserve;
@@ -44,24 +44,20 @@ const __preventExtensions = Object.preventExtensions || function <T>(o: T) { ret
 if (ES_COMPAT <= 5) {
   __map = typeof Map !== "undefined" ?
     function () { return new Map(); } :
-    <any> function () {
-      var _keys = [];
-      var _values = [];
+    function <K, V>() {
+      const _keys: K[] = [];
+      const _values: V[] = [];
 
       return {
-        has: function (k) {
+        has: function (k: K) {
           return _keys.indexOf(k) !== -1;
         },
-        get: function (k) {
-          var i = _keys.indexOf(k);
-          var r;
-          if (i !== -1) {
-            r = _values[i];
-          }
-          return r;
+        get: function (k: K) {
+          const i = _keys.indexOf(k);
+          return i !== -1 ? _values[i] : undefined;
         },
-        set: function (k, v) {
-          var i = _keys.indexOf(k);
+        set: function (k: K, v: V) {
+          let i = _keys.indexOf(k);
           if (i !== -1) {
             i = _keys.length;
             _keys[i] = k;
@@ -70,8 +66,8 @@ if (ES_COMPAT <= 5) {
             _values[i] = v;
           }
         },
-        delete: function (k) {
-          var i = _keys.indexOf(k);
+        delete: function (k: K) {
+          const i = _keys.indexOf(k);
           if (i !== -1) {
             _keys.splice(i, 1);
             _values.splice(i, 1);
@@ -81,54 +77,54 @@ if (ES_COMPAT <= 5) {
     };
   __weakMap = typeof WeakMap !== "undefined" ?
     function () { return new WeakMap(); } :
-    <any>__map;
+    <any> __map;
 }
 
 if (!__observe) {
-  var __option = function (o, name) {
+  const __option = function (o: any, name: string) {
     return o ? o[name] : undefined;
   };
-  var __assertObject = function (o: any) {
+  const __assertObject = function (o: any) {
     if (typeof o !== "object" || o === null) {
       throw new TypeError(o + " must be a object");
     }
   };
-  var __assertNotFrozen = function (o: any) {
+  const __assertNotFrozen = function (o: any) {
     if (__isFrozen(o)) {
       throw new TypeError(o + " must not be frozen");
     }
   };
-  var __assertCallable = function (o: any) {
+  const __assertCallable = function (o: any) {
     if (typeof o !== "function") {
       throw new TypeError(o + " must be a callable");
     }
   };
-  var $$notifier = __sym("notifier");
-  var $$target = __sym("target");
-  var $$pendingChangeRecords = __sym("pendingChangeRecords");
-  var $$changeObservers = __sym("changeObservers");
-  var $$activeChanges = __sym("activeChanges");
+  const $$notifier = __sym("notifier");
+  const $$target = __sym("target");
+  const $$pendingChangeRecords = __sym("pendingChangeRecords");
+  const $$changeObservers = __sym("changeObservers");
+  const $$activeChanges = __sym("activeChanges");
 
-  var __enqueueChangeRecord = function (o: any, changeRecord: IChangeRecord<any>) {
-    var notifier = __notifier(o);
-    var changeType = changeRecord.type;
-    var activeChanges = notifier[$$activeChanges];
-    var changeObservers = notifier[$$changeObservers];
+  const __enqueueChangeRecord = function (o: any, changeRecord: IChangeRecord<any>) {
+    const notifier = __notifier(o);
+    const changeType = changeRecord.type;
+    const activeChanges = notifier[$$activeChanges];
+    const changeObservers = notifier[$$changeObservers];
   };
 
-  var Notifier: any = (function () {
+  const Notifier: any = (function () {
 
-    function Notifier(o) {
+    function Notifier(o: any) {
       this[$$target] = o;
       this[$$changeObservers] = [];
       this[$$activeChanges] = {};
     }
 
     Notifier.prototype.notify = function (changeRecord: IChangeRecord<any>) {
-      var o = this;
-      var target = o[$$target];
-      var changeType = changeRecord.type;
-      var newRecord: IChangeRecord<any> = {
+      const o = this;
+      const target = o[$$target];
+      const changeType = changeRecord.type;
+      const newRecord: IChangeRecord<any> = {
         object: target,
         type: changeRecord.type,
         name: changeRecord.name,
@@ -139,26 +135,26 @@ if (!__observe) {
     };
 
 
-    Notifier.prototype.performChange = function (changeType, changeFn) {
+    /*Notifier.prototype.performChange = function (changeType, changeFn) {
 
-    };
+    };*/
 
     return Notifier;
   }());
 
 
   __observerDeliver = function (callback: IObserver<any>) {
-    var changeRecords: IChangeRecord<any>[] = callback[$$pendingChangeRecords];
+    const changeRecords: IChangeRecord<any>[] = callback[$$pendingChangeRecords];
     callback[$$pendingChangeRecords] = [];
-    var returnValue = false;
+    const returnValue = false;
 
-    var l = changeRecords.length;
+    const l = changeRecords.length;
     if (l > 0) {
-      var array = [];
-      var n = 0;
-      var anyRecords = false;
-      for (var i = 0; i < l; i++) {
-        var record = changeRecords[i];
+      const array = [];
+      let n = 0;
+      let anyRecords = false;
+      for (let i = 0; i < l; i++) {
+        const record = changeRecords[i];
         if (record !== undefined) {
           anyRecords = true;
           array[n] = record;
@@ -170,23 +166,23 @@ if (!__observe) {
     return returnValue;
   };
 
-  var __beginChange = function (o: any, changeType: string) {
-    var notifier = __notifier(o);
-    var activeChanges = notifier[$$activeChanges];
+  const __beginChange = function (o: any, changeType: string) {
+    const notifier = __notifier(o);
+    const activeChanges = notifier[$$activeChanges];
   };
 
-  var __endChange = function (o: any, changeType: string) {
-
-  };
-
-  var __observerClean = function (callback: IObserver<any>) {
+  const __endChange = function (o: any, changeType: string) {
 
   };
 
-  var __notifiers = __weakMap<any, INotifier<any>>();
+  const __observerClean = function (callback: IObserver<any>) {
+
+  };
+
+  const __notifiers = __weakMap<any, INotifier<any>>();
   __notifier = function <T>(o: T): INotifier<T> {
     __assertObject(o);
-    var notifier: INotifier<T> = null;
+    let notifier: INotifier<T> = null;
     if (!__isFrozen(o)) {
       notifier = __notifiers.get(o);
       if (notifier === undefined) {
@@ -196,23 +192,23 @@ if (!__observe) {
     return notifier;
   };
 
-  __observe = function (o, callback, options?: Options) {
+  __observe = function (o: any, callback: () => void, options?: IObserverOptions) {
     __assertObject(o);
     __assertCallable(callback);
     __assertNotFrozen(callback);
-    var notifier = __notifier(o);
+    const notifier = __notifier(o);
     if (notifier) {
-      var acceptTypes = options && options.acceptTypes || ALL;
-      var skipRecords = !!(options && options.skipRecords);
+      const acceptTypes = options && options.acceptTypes || ALL;
+      const skipRecords = !!(options && options.skipRecords);
 
     }
   };
 
-  __unobserve = function (o, callback) {
+  __unobserve = function (o: any, callback: () => void) {
     __assertObject(o);
     __assertCallable(callback);
 
-    var notifier = __notifiers.get(o);
+    const notifier = __notifiers.get(o);
     if (notifier) {
       /*notifier.removeListener(callback);
       if (notifier.listeners().length === 0) {
@@ -224,31 +220,28 @@ if (!__observe) {
   };
 }
 
-
-interface INotifier<T> {
-
-  notify(c: IChangeRecord<T>)
-  performChange(changeType, changeFn)
-
+export interface INotifier<T> {
+  notify(c: IChangeRecord<T>): void;
+  performChange(changeType: string, changeFn: () => void): void;
 }
 
-interface IObserver<T> {
-  (a: IChangeRecord<T>[]): void
+export interface IObserver<T> {
+  (a: IChangeRecord<T>[]): void;
 }
 
-interface IChangeRecord<T> {
-  type: string
-  object: T
-  name: string
-  oldValue: any
+export interface IChangeRecord<T> {
+  type: string;
+  object: T;
+  name: string;
+  oldValue: any;
 }
 
-type Options = {
+export interface IObserverOptions {
   acceptTypes?: string[];
-  skipRecords?: boolean
+  skipRecords?: boolean;
 };
 
-export function add<T>(o: T, callback: IObserver<T>, options?: Options) {
+export function add<T>(o: T, callback: IObserver<T>, options?: IObserverOptions) {
   return __observe(o, callback, options);
 }
 

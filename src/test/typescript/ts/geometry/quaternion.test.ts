@@ -3,7 +3,11 @@ import * as quaternion from "../../../../main/typescript/ts/geometry/quaternion"
 
 export default suite("ts/geometry/quaternion", (self) => {
 
-  let quatZ, quatA, quatB, quatID, quatTmp: [number, number, number, number];
+  let quatZ: [number, number, number, number];
+  let quatA: [number, number, number, number];
+  let quatB: [number, number, number, number];
+  let quatID: [number, number, number, number];
+  let quatTmp: [number, number, number, number];
   // var vec3: geometry.IVector3
   let deg90 = Math.PI / 2;
 
@@ -24,7 +28,7 @@ export default suite("ts/geometry/quaternion", (self) => {
   test(".conjugate(a)", (assert) => {
     assert.deepEqual(quaternion.conjugate(quatA), [-1, -2, -3, 4]);
 
-    let quatCopy = quaternion.copy(quatA);
+    const quatCopy = quaternion.copy(quatA);
     assert.deepEqual(quaternion.conjugate(quatCopy, quatCopy), [-1, -2, -3, 4]);
   });
 
@@ -37,7 +41,7 @@ export default suite("ts/geometry/quaternion", (self) => {
   });
 
   test(".copy(a)", (assert) => {
-    let quat = quaternion.create(0, 0, 0, 0);
+    const quat = quaternion.create(0, 0, 0, 0);
     quaternion.copy(quatA, quat);
     assert.deepEqual(quat, [1, 2, 3, 4]);
   });
@@ -51,7 +55,7 @@ export default suite("ts/geometry/quaternion", (self) => {
   });
 
   test(".multiply(a, b)", (assert) => {
-    let quatAmulB = [24, 48, 48, -6];
+    const quatAmulB = [24, 48, 48, -6];
     assert.deepEqual(quaternion.multiply(quatA, quatB), quatAmulB);
     assert.deepEqual(quatA, [1, 2, 3, 4]); // not modified
     assert.deepEqual(quatB, [5, 6, 7, 8]); // not modified
@@ -72,4 +76,4 @@ export default suite("ts/geometry/quaternion", (self) => {
 
   });
 
-})
+});

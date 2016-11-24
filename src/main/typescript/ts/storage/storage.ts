@@ -1,42 +1,77 @@
 // Util
-const __str = function (o) { return "" + o; };
-const __keys = Object.keys || function (o) {
-  let keys = [];
-  for (let key in o) {
-    if (o.hasOwnProperty(key)) {
-      keys.push(key);
-    }
+function ToString(o: any) { return "" + o; };
+function OwnKeys(o: any): string[] {
+  let keys: string[];
+  if (Object.keys) {
+    keys = Object.keys(o);
+  } else {
+    keys = [];
+    for (const prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } };
   }
   return keys;
-};
-const __check = function (storage: WebStorage) {
-  let testKey = "storageTest" + Math.random();
-  let returnValue = false;
+}
+function CheckStorage(storage: IWebStorage) {
+  const testKey = "storageTest" + Math.random();
   try {
     // Safari in private mode can throw error
     storage.setItem(testKey, "1");
     storage.removeItem(testKey);
-    returnValue = true;
+    return true;
   } catch (e) {
+    return false;
   }
-  return returnValue;
-};
-const __defineGetter = Object.defineProperty ?
-  function (o, name, getter) {
-    Object.defineProperty(o, name, {get: getter});
-  } :
-  function (o, name, getter) {
-    o.__defineGetter__(name, getter);
+}
+function CreateMemoryStorage() {
+  const memoryStorage: IWebStorage = <any> {};
+  const _data = {};
+
+  function _onchange() {
+    memoryStorage.length = OwnKeys(_data).length;
+  }
+
+  memoryStorage.length = 0;
+
+  memoryStorage.getItem = function (k: string): any {
+    return _data[k];
   };
 
+  memoryStorage.setItem = function (k: string, v: any) {
+    _data[k] = ToString(v);
+    _onchange();
+  };
 
-interface WebStorage {
+  memoryStorage.removeItem = function (k: string) {
+    if (_data.hasOwnProperty(k)) {
+      delete _data[k];
+      _onchange();
+    }
+  };
+
+  memoryStorage.clear = function () {
+    const keys = OwnKeys(_data);
+    for (let i = 0, l = keys.length; i < l; i++) {
+      delete _data[keys[i]];
+    }
+    _onchange();
+  };
+  return memoryStorage;
+}
+function DefineGetter<V>(o: any, k: string, getter: () => V) {
+  const def = Object.defineProperty;
+  if (def) {
+    def(o, k, { get: getter });
+  } else {
+    o.__defineGetter__(name, getter);
+  }
+}
+
+export interface IWebStorage {
   length: number;
   clear(): void;
   key(i: number): string;
-  getItem(key: string);
+  getItem(key: string): string;
   setItem(key: string, value: any): void;
-  removeItem(key: string);
+  removeItem(key: string): void;
 };
 
 export interface IStorage {
@@ -49,57 +84,19 @@ export interface IStorage {
   size(): number;
 }
 
-const __memoryStorage = function () {
-  let memoryStorage: WebStorage = <any>{};
-  let _data = {};
-
-  function _onchange() {
-    memoryStorage.length = __keys(_data).length;
-  }
-
-  memoryStorage.length = 0;
-
-  memoryStorage.getItem = function (k: string): any {
-    return _data[k];
-  };
-
-  memoryStorage.setItem = function (k: string, v: any) {
-    _data[k] = __str(v);
-    _onchange();
-  };
-
-  memoryStorage.removeItem = function (k: string) {
-    if (_data.hasOwnProperty(k)) {
-      delete _data[k];
-      _onchange();
-    }
-  };
-
-  memoryStorage.clear = function () {
-    let keys = __keys(_data);
-    for (let i = 0, l = keys.length; i < l; i++) {
-      delete _data[keys[i]];
-    }
-    _onchange();
-  };
-  return memoryStorage;
-};
-
-
-
 export class Storage implements IStorage {
 
   length: number;
 
-  private _storage: WebStorage;
+  private _storage: IWebStorage;
   private _isAvailable = true;
 
   constructor() {
     let isAvailable: boolean;
-    let storage: WebStorage;
+    let storage: IWebStorage;
     try {
       storage = this._getStorage();
-      isAvailable = __check(storage);
+      isAvailable = CheckStorage(storage);
     } catch (e) {
       isAvailable = false;
     }
@@ -107,7 +104,7 @@ export class Storage implements IStorage {
 
     this._isAvailable = isAvailable;
     this._storage = storage;
-    __defineGetter(this, "length", () => {
+    DefineGetter(this, "length", () => {
       return this.size();
     });
   }
@@ -140,11 +137,11 @@ export class Storage implements IStorage {
     this._storage.clear();
   }
 
-  protected _getStorage(): WebStorage {
-    return null;
+  protected _getStorage(): IWebStorage {
+    return this._getStorageFallback();
   }
 
-  protected _getStorageFallback(): WebStorage {
-    return __memoryStorage();
+  protected _getStorageFallback(): IWebStorage {
+    return CreateMemoryStorage();
   }
 }

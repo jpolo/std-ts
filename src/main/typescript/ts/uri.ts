@@ -83,8 +83,8 @@ export class URI implements IURI {
   }
 
   static compare(a: IURI, b: IURI): number {
-    let aStr = URI.stringify(a);
-    let bStr = URI.stringify(b);
+    const aStr = URI.stringify(a);
+    const bStr = URI.stringify(b);
     return (
       aStr === bStr ? 0 :
       aStr > bStr ? 1 :
@@ -93,12 +93,12 @@ export class URI implements IURI {
   }
 
   static fromArray(a: any[]): URI {
-    return new URI(a[0], a[1], a[2], a[3] != null ? parseInt(a[3]) : null, a[4], a[5], a[6]);
+    return new URI(a[0], a[1], a[2], a[3] != null ? parseInt(a[3], 10) : null, a[4], a[5], a[6]);
   }
 
   static fromString(s: string): URI {
     let returnValue: URI;
-    let parts: Array<any> = s.match(reParser);
+    const parts: Array<any> = s.match(reParser);
     if (parts) {
       returnValue = URI.fromArray([
         decodeComponent(parts[1]),
@@ -136,12 +136,12 @@ export class URI implements IURI {
   }
 
   static stringify(uri: IURI): string {
-    let reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
-    let reDisallowedInFragment = /#/g;
-    let reDisallowedInAbsolutePath = /[\#\?]/g;
-    let reDisallowedInRelativePath =/[\#\?:]/g;
+    const reDisallowedInSchemeOrUserInfo = /[#\/\?@]/g;
+    const reDisallowedInFragment = /#/g;
+    const reDisallowedInAbsolutePath = /[\#\?]/g;
+    const reDisallowedInRelativePath = /[\#\?:]/g;
 
-    let { scheme, userInfo, domain, port, path, query, fragment } = uri;
+    const { scheme, userInfo, domain, port, path, query, fragment } = uri;
     let s = "";
 
     if (scheme != null) {
@@ -167,7 +167,7 @@ export class URI implements IURI {
       }
       s += encodeSpecialChars(
         path,
-        path.charAt(0) == "/" ?
+        path.charAt(0) === "/" ?
           reDisallowedInAbsolutePath :
           reDisallowedInRelativePath
       );
@@ -182,8 +182,6 @@ export class URI implements IURI {
     }
     return s;
   }
-
-  private _href = null;
 
   constructor(
     public scheme: string,
@@ -217,8 +215,8 @@ export class URI implements IURI {
   }
 
   inspect(): string {
-    let s = "" + this;
-    let sep = s.length > 0 ? " " : "";
+    const s = "" + this;
+    const sep = s.length > 0 ? " " : "";
     return "URI {" + sep + s + sep + "}";
   }
 
@@ -267,7 +265,7 @@ export function decodeComponent(s: string): string {
   return s == null ? null : decodeURIComponent(s);
 }
 
-function encodeSpecialChars(unescapedPart: string, extra) {
+function encodeSpecialChars(unescapedPart: string, extra: RegExp) {
   return (
     IsString(unescapedPart) ?
     encodeURI(unescapedPart).replace(extra, encodeChar) :
@@ -276,7 +274,7 @@ function encodeSpecialChars(unescapedPart: string, extra) {
 }
 
 function encodeChar(ch: string): string {
-  let n = ch.charCodeAt(0);
+  const n = ch.charCodeAt(0);
   return "%" + ((n >> 4) & 0xf).toString(16) + (n & 0xf).toString(16);
 }
 
@@ -318,7 +316,7 @@ export function decodeQuery(s: string): IQueryString {
   let qs = null;
   if (s) {
     qs = {};
-    let pairs = s.split("&");
+    const pairs = s.split("&");
     let indexOfEquals, pair, key, val, qsval;
     for (let i = 0, l = pairs.length; i < l; ++i) {
       pair = pairs[i];
@@ -348,15 +346,13 @@ export function decodeQuery(s: string): IQueryString {
   return qs;
 }
 
-
-
 function _queryEquals(l: any, r: any): boolean {
   let returnValue = true;
   if (l !== r) {
-    let lkeys = OwnKeys(l);
-    let rkeys = OwnKeys(r);
-    let lkeyc: number = lkeys.length;
-    let rkeyc: number = rkeys.length;
+    const lkeys = OwnKeys(l);
+    const rkeys = OwnKeys(r);
+    const lkeyc: number = lkeys.length;
+    const rkeyc: number = rkeys.length;
 
     if (lkeyc !== rkeyc) {
       returnValue = false;

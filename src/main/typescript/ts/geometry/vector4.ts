@@ -1,5 +1,5 @@
 // Util
-type Vector4 = [number, number, number, number]
+export type Vector4 = [number, number, number, number]
 type Vector4Constructor = { new(n: number): Vector4 }
 
 // let Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array

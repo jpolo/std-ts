@@ -1,3 +1,5 @@
+/* tslint:disable:no-bitwise */
+
 import { IHash, hashString } from "./hash";
 
 // reference: https://github.com/npm/node-semver/blob/master/semver.js
@@ -8,9 +10,9 @@ function ToUint32(o: any) { return o >>> 0; }
 function ToString(o: any): string { return "" + o; }
 function SemVerStringify(v: ISemVer) {
   let s = "";
-  s += v.major + '.' + v.minor + '.' + v.patch;
+  s += v.major + "." + v.minor + "." + v.patch;
   if (v.prerelease.length) {
-    s += '-' + v.prerelease.join('.');
+    s += "-" + v.prerelease.join(".");
   }
   return s;
 }
@@ -70,7 +72,7 @@ export class SemVer implements ISemVer, IHash {
   }*/
 
   static parse(s: string, loose = false): SemVer {
-    let m = s.trim().match(loose ? re[LOOSE] : re[FULL]);
+    const m = s.trim().match(loose ? re[LOOSE] : re[FULL]);
 
     if (!m) {
       throw new TypeError('Invalid Version: ' + s);
@@ -79,19 +81,19 @@ export class SemVer implements ISemVer, IHash {
     // this.raw = version;
 
     // these are actually numbers
-    let major = +m[1];
-    let minor = +m[2];
-    let patch = +m[3];
+    const major = +m[1];
+    const minor = +m[2];
+    const patch = +m[3];
 
     // numberify any prerelease numeric ids
-    let prerelease = [];
+    let prerelease: Array<number|string> = [];
     if (m[4]) {
       prerelease = m[4].split(".").map(function(id) {
         return (/^[0-9]+$/.test(id)) ? +id : id;
       });
     }
 
-    let build = m[5] ? m[5].split(".") : [];
+    const build = m[5] ? m[5].split(".") : [];
     return new SemVer(
       major,
       minor,
@@ -156,7 +158,6 @@ export class SemVer implements ISemVer, IHash {
   }
 
 }
-
 
 
 function __cmpIdentifiers(a: number|string, b: number|string): number {

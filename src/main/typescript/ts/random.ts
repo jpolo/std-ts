@@ -1,20 +1,20 @@
+/* tslint:disable:no-bitwise */
+
 import { /*IIteratorResult,*/ IIterator } from "./iterator";
 
 declare function require(s: string): any; // nodejs
-declare let process: any;
+declare const process: any;
 
 const FLOAT_MIN_VALUE = Number.MIN_VALUE;
 const FLOAT_MAX_VALUE = Number.MAX_VALUE;
 const INT_MIN_VALUE = Math.pow(2, 31) | 0;
 const INT_MAX_VALUE = (INT_MIN_VALUE - 1) | 0;
-//const NODEJS = typeof process !== "undefined";
-//const BROWSER = typeof window !== "undefined";
 
-type IGenerator<T> = IIterator<T>;
+export interface IRandomGenerator<T> extends IIterator<T> {};
 
 export interface IRandomGeneratorAdapter {
   isSupported(): boolean;
-  new(seed: string): IGenerator<number>;
+  new(seed: string): IRandomGenerator<number>;
 }
 
 // ECMA like spec
@@ -22,7 +22,7 @@ const Floor = Math.floor;
 const Random = Math.random;
 
 function ArraySwap(array: number[], i: number, j: number) {
-  let tmp = array[i];
+  const tmp = array[i];
   array[i] = array[j];
   array[j] = tmp;
 }
@@ -33,39 +33,39 @@ function GeneratorCreate<T>(f: () => T) {
   });
 }*/
 
-function GeneratorNext<T>(rg: IGenerator<T>, v?: any) {
+function GeneratorNext<T>(rg: IRandomGenerator<T>, v?: any) {
   return rg.next(v);
 }
 
-function GeneratorGet<T>(rg: IGenerator<T>, v?: any) {
+function GeneratorGet<T>(rg: IRandomGenerator<T>, v?: any) {
   return GeneratorNext(rg, v).value;
 }
 /*
-function GeneratorMap<T, U>(rg: IGenerator<T>, f: (v: T) => U) {
+function GeneratorMap<T, U>(rg: IRandomGenerator<T>, f: (v: T) => U) {
   return Generator.map(rg, function (v?: T) {
     return { done: false, value: f(v) };
   });
 }
 
-function GeneratorChain<T, U>(rg: IGenerator<T>, f: (v: T) => IGenerator<U>) {
+function GeneratorChain<T, U>(rg: IRandomGenerator<T>, f: (v: T) => IRandomGenerator<U>) {
   return GeneratorCreate(function () {
     return GeneratorNext(f(GeneratorNext(rg).value));
   });
 }*/
 
-function GenerateBoolean(rg: IGenerator<number>): boolean {
+function GenerateBoolean(rg: IRandomGenerator<number>): boolean {
   return 2 * GeneratorGet(rg) > 1;
 }
 
-function GenerateNumber(rg: IGenerator<number>, min: number, max: number): number {
+function GenerateNumber(rg: IRandomGenerator<number>, min: number, max: number): number {
   return (GeneratorGet(rg) * (max - min)) + min;
 }
 
-function GenerateInt(rg: IGenerator<number>, min: number, max: number): number {
+function GenerateInt(rg: IRandomGenerator<number>, min: number, max: number): number {
   return Floor(GeneratorGet(rg) * (max - min + 1)) + min;
 }
 
-function GenerateChar(rg: IGenerator<number>, chars: string): string {
+function GenerateChar(rg: IRandomGenerator<number>, chars: string): string {
   return chars.charAt(Floor(GeneratorGet(rg) * (chars.length + 1)));
 }
 
@@ -80,7 +80,7 @@ export function Adapter<F extends IRandomGeneratorAdapter>(name: string) {
   };
 }
 
-class RandomGeneratorAdapter implements IGenerator<number> {
+export class RandomGeneratorAdapter implements IRandomGenerator<number> {
   constructor(protected _next: { (v?: any): number }, public hint = "abstract") {}
 
   next(v?: any) {
@@ -108,14 +108,14 @@ export class RandomGenerator extends RandomGeneratorAdapter {
 
   static adapterDefault = "rc4";
 
-  protected _adapter: IGenerator<number>;
+  protected _adapter: IRandomGenerator<number>;
 
   constructor(type: string = RandomGenerator.adapterDefault, seed = "") {
-    let Constructor = AdapterRegistry[type];
+    const Constructor = AdapterRegistry[type];
     if (!Constructor) {
       throw new ReferenceError(type + " is not a valid adapter");
     }
-    let adapter = new Constructor(seed);
+    const adapter = new Constructor(seed);
     super((v) => {
       return GeneratorNext(adapter, v).value;
     });
@@ -125,7 +125,6 @@ export class RandomGenerator extends RandomGeneratorAdapter {
     return GeneratorNext(this._adapter).value;
   }
 }
-
 
 @Adapter("nodejs")
 class RandomGeneratorNodeJS extends RandomGeneratorAdapter {
@@ -153,7 +152,7 @@ class RandomGeneratorNodeJS extends RandomGeneratorAdapter {
           // XXX should re-throw any error except insufficient entropy
           bytes = crypto.pseudoRandomBytes(numBytes);
         }
-        let result = bytes.toString("hex");
+        const result = bytes.toString("hex");
         // If the number of digits is odd, we'll have generated an extra 4 bits
         // of randomness, so we need to trim the last digit.
         returnValue = parseInt(result.substring(0, 8), 16);
@@ -194,10 +193,10 @@ export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
   }
 
   private static _getStringBytes(s: string): number[] {
-    let output = [];
+    let output: number[] = [];
     for (let i = 0; i < s.length; i++) {
       let c = s.charCodeAt(i);
-      let bytes = [];
+      const bytes = [];
       do {
         bytes.push(c & 0xFF);
         c = c >> 8;
@@ -208,20 +207,19 @@ export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
   }
 
   private static _createState(width: number) {
-    let arr = new Array(width);
+    const arr = new Array(width);
     for (let idx = 0; idx < width; idx++) {
       arr[idx] = idx;
     }
     return arr;
   }
 
-
   constructor(seed?: string) {
     const RC4_WIDTH = 256;
-    //const RC4_MASK = RC4_WIDTH - 1;
+    // const RC4_MASK = RC4_WIDTH - 1;
     const RC4_BYTES = 7; // 56 bits to make a 53-bit double
     const RC4_DENOM = (Math.pow(2, RC4_BYTES * 8) - 1);
-    let _state = RandomGeneratorRC4._createState(RC4_WIDTH);
+    const _state = RandomGeneratorRC4._createState(RC4_WIDTH);
     let _i = 0;
     let _j = 0;
 
@@ -242,8 +240,8 @@ export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
     }
 
     function _seed(str: string) {
-      let input = RandomGeneratorRC4._getStringBytes(str);
-      let inputlen = input.length;
+      const input = RandomGeneratorRC4._getStringBytes(str);
+      const inputlen = input.length;
       let j = 0;
       for (let i = 0; i < RC4_WIDTH; i++) {
         j += _state[i] + input[i % inputlen];
@@ -259,23 +257,23 @@ export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
 
 const randomGenerator = new RandomGenerator();
 
-export function next(rg: IGenerator<number> = randomGenerator): number {
+export function next(rg: IRandomGenerator<number> = randomGenerator): number {
   return GeneratorNext(rg).value;
 }
 
-export function nextBoolean(rng: IGenerator<number> = randomGenerator): boolean {
+export function nextBoolean(rng: IRandomGenerator<number> = randomGenerator): boolean {
   return GenerateBoolean(rng);
 }
 
-export function nextNumber(min = FLOAT_MIN_VALUE, max = FLOAT_MAX_VALUE, rng: IGenerator<number> = randomGenerator): number {
+export function nextNumber(min = FLOAT_MIN_VALUE, max = FLOAT_MAX_VALUE, rng: IRandomGenerator<number> = randomGenerator): number {
   return GenerateNumber(rng, min, max);
 }
 
-export function nextInt(min = INT_MIN_VALUE, max = INT_MAX_VALUE, rng: IGenerator<number> = randomGenerator): number {
+export function nextInt(min = INT_MIN_VALUE, max = INT_MAX_VALUE, rng: IRandomGenerator<number> = randomGenerator): number {
   return GenerateInt(rng, min, max);
 }
 
-export function nextChar(chars?: string, rng: IGenerator<number> = randomGenerator): string {
+export function nextChar(chars?: string, rng: IRandomGenerator<number> = randomGenerator): string {
   return GenerateChar(rng, chars || "abcdefghijklmnopqrstuvwxyz0123456789");
 }
 
@@ -285,7 +283,6 @@ export function nextChar(chars?: string, rng: IGenerator<number> = randomGenerat
 /*
 export module engine {
   let math_random = Math.random
-
 
   export class Engine implements IEngine {
 
@@ -367,18 +364,14 @@ export module engine {
     }
   }
 
-
-
-
-
 /*
-export interface IGenerator<T> {
+export interface IRandomGenerator<T> {
   (): T
   next(): { done: boolean; value?: T }
 }
 
 export let generator = (function () {
-  function generator<T>(f: () => T): IGenerator<T> {
+  function generator<T>(f: () => T): IRandomGenerator<T> {
     let o = <any>f
     o.next = next
     return o

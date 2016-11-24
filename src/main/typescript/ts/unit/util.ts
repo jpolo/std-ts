@@ -22,8 +22,8 @@ export function IsExtensible(o: any): boolean { return Object.isExtensible ? Obj
 export function IsFinite(o: any): boolean { return global.isFinite(o); };
 export function IsEmpty(o: any): boolean { return o === undefined || o === null; }
 export function IsNaN(o: any): boolean { return o !== o; }
-export function IsNumber(o: any): boolean { return typeof o === "number"; }
-export function IsFunction(o): boolean { return typeof o === "function"; }
+export function IsNumber(o: any): o is number { return typeof o === "number"; }
+export function IsFunction(o: any): o is Function { return typeof o === "function"; }
 export function IsObject(o: any) { return o !== null && (typeof o === "object"); }
 export function SameValue(a: any, b: any) {
   return Object[$$is] ? Object[$$is](a, b) : a === b ? (a !== 0 || 1 / a === 1 / b) : IsNaN(a) && IsNaN(b);
@@ -34,12 +34,12 @@ export function OwnKeys(o: any): string[] {
     keys = Object.keys(o);
   } else {
     keys = [];
-    for (let prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } };
+    for (const prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } };
   }
   return keys;
 }
 export function OwnKeysSorted(o: any) { return OwnKeys(o).sort(); }
-export function ObjectAssign<T, U>(o: T, ext: U): T & U { for (let key of OwnKeys(ext)) { o[key] = ext[key]; } return <any> o; }
+export function ObjectAssign<T, U>(o: T, ext: U): T & U { for (const key of OwnKeys(ext)) { o[key] = ext[key]; } return <any> o; }
 export function ObjectFreeze<T>(o: T): T { return Object.freeze ? Object.freeze(o) : o; }
 export function GetPrototypeOf(o: any) { return Object.getPrototypeOf ? Object.getPrototypeOf(o) : o.__proto__; }
 export function Type(o: any): string {
@@ -80,7 +80,7 @@ export function ToStringTag(o: any): string {
 }
 
 export function Call(f: Function, thisp: any, args: any[]) {
-  let argc = args && args.length || 0;
+  const argc = args && args.length || 0;
   switch (argc) {
     case 0: return thisp ? f.call(thisp) : f();
     case 1: return thisp ? f.call(thisp, args[0]) : f(args[0]);
@@ -93,7 +93,7 @@ export function FunctionToString(f: Function): string {
   return Function.prototype.toString.call(f);
 }
 export function FunctionToSource(f: Function): string {
-  let src = FunctionToString(f);
+  const src = FunctionToString(f);
   return src.slice(src.indexOf("{"), -1).trim();
 }
 export function Now() { return Date.now ? Date.now() : new Date().getTime(); };

@@ -1,7 +1,7 @@
 
 
 // Util
-type Matrix3 = [number, number, number, number]
+export type Matrix3 = [number, number, number, number]
 type Matrix3Constructor =  { new(n: number): Matrix3 }
 
 const Float64Array: any = Array;

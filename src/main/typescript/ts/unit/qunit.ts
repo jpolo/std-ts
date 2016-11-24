@@ -12,7 +12,7 @@ import {
 
 // TODO: be more compliant with http://qunitjs.com/upgrade-guide-2.x/
 
-interface IAssertContext {
+export interface IAssertContext {
   isAsync(): boolean;
   setAsync(b: boolean): void;
   getTest(): ITest;
@@ -24,15 +24,15 @@ interface IAssertContext {
   dump(o: any): string;
 }
 
-interface IAssertFactory<T> {
+export interface IAssertFactory<T> {
   (context: IAssertContext): T;
 }
 
-interface IAssertConstructor<T> {
+export interface IAssertConstructor<T> {
   new (context: IAssertContext): T;
 }
 
-interface ITestBlock<IAssert> {
+export interface ITestBlock<IAssert> {
   disabled: boolean;
   block(assert: IAssert, complete?: () => void): void;
   assertFactory(context: IAssertContext): IAssert;
@@ -41,7 +41,7 @@ interface ITestBlock<IAssert> {
 /**
  * Default suite
  */
-let _suiteDefault: TestSuite = null;
+const _suiteDefault: null | TestSuite = null;
 let _suiteCurrent = _suiteDefault;
 
 const AssertContextCreate = function (context: ITestRunContext): IAssertContext {
@@ -228,7 +228,7 @@ export class Assert {
    */
   throws(block: () => void, expected?: any, message?: string): boolean {
     let isSuccess = false;
-    let position = this.__position__();
+    const position = this.__position__();
     let actual;
     message = message || ("`" + FunctionToSource(block) + "` must throw an error");
     try {
@@ -286,8 +286,8 @@ export class Assert {
    */
   async(): () => void {
     // mark as asynchronous test
-    let assert = this;
-    let context = this._context;
+    const assert = this;
+    const context = this._context;
     context.setAsync(true);
     assert._asyncCount++;
 
@@ -336,10 +336,10 @@ export class Assert {
   }
 
   protected _propEqual(o1: any, o2: any, not: boolean, message: string, position: IAssertionCallSite) {
-    let engine = this.__engine__();
+    const engine = this.__engine__();
     message = message || (this.__dump__(o1) + (" must have same properties as ") + this.__dump__(o2));
 
-    let isSuccess = engine.equalsProperties(o1, o2, engine.equalsSame);
+    const isSuccess = engine.equalsProperties(o1, o2, engine.equalsSame);
     return this.__assert__(isSuccess, message, position);
   }
 
@@ -360,14 +360,14 @@ export class Test implements ITest {
   ) { }
 
   protected _beforeRun() {
-    let suite = this.suite;
+    const suite = this.suite;
     if (suite.setUp) {
       suite.setUp(this);
     }
   }
 
   protected _afterRun() {
-    let suite = this.suite;
+    const suite = this.suite;
     if (suite.tearDown) {
       suite.tearDown(this);
     }
@@ -387,10 +387,10 @@ export class Test implements ITest {
   }
 
   run(context: ITestRunContext) {
-    let test = this;
-    let blocks = this.blocks;
+    const test = this;
+    const blocks = this.blocks;
     let blockc = blocks.length;
-    let timeoutMs = context.getTimeout() || Infinity; // no timeout
+    const timeoutMs = context.getTimeout() || Infinity; // no timeout
     let assertionCount = 0;
 
     context.onAssertion = (function (_) {
@@ -413,15 +413,15 @@ export class Test implements ITest {
     }
 
     function runBlock(testBlock: ITestBlock<any>, complete: () => void) {
-      let block = testBlock.block;
-      let assertContext = AssertContextCreate(context);
-      let assert = testBlock.assertFactory(assertContext);
+      const block = testBlock.block;
+      const assertContext = AssertContextCreate(context);
+      const assert = testBlock.assertFactory(assertContext);
       if (block.length >= 2) {
         // asynchronous
         assertContext.setAsync(true);
       }
       let isFinished = false;
-      let timerId = null;
+      let timerId: null | number = null;
 
       function onTimeout() {
         timerId = null;
@@ -458,7 +458,7 @@ export class Test implements ITest {
         }
       } catch (e) {
         // TODO get stacktrace from engine
-        let parsed = e ? stacktrace.get(e) : null;
+        const parsed = e ? stacktrace.get(e) : null;
         write(Assertion.error(test, e.message, parsed && parsed[0], e.stack || e.message || null));
       } finally {
         if (!assertContext.isAsync()) {
@@ -467,7 +467,7 @@ export class Test implements ITest {
       }
     }
 
-    for (let block of blocks) {
+    for (const block of blocks) {
       runBlock(block, onBlockComplete);
     }
   }
@@ -477,7 +477,7 @@ export class Test implements ITest {
   }
 
   toString() {
-    let category = this.category;
+    const category = this.category;
     return (category ? category : "") + this.name;
   }
 }
@@ -493,7 +493,7 @@ export class TestSuite {
   ) { }
 
   getTest(name: string) {
-    let byNames = this._byNames;
+    const byNames = this._byNames;
     let test = byNames[name];
     if (!test) {
       test = byNames[name] = new Test(this, name);
@@ -521,8 +521,8 @@ export function testc<IAssert>(AssertClass: IAssertConstructor<IAssert>) {
  * suite("my suite", (self) => { //put test declaration here })
  */
 export function suite(name: string, f: (self?: TestSuite) => void): ITest[]  {
-  let suitePrevious = _suiteCurrent;
-  let suiteNew = new TestSuite(name);
+  const suitePrevious = _suiteCurrent;
+  const suiteNew = new TestSuite(name);
 
   _suiteCurrent = suiteNew;
   try {

@@ -1,6 +1,6 @@
 // Util
 const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-const GlobalConsole: Console = Global.console ? Global.console : <any>{};
+const GlobalConsole: Console = Global.console ? Global.console : <any> {};
 const Timer = (function () {
   let timers = {};
   return {
@@ -16,7 +16,7 @@ const Timer = (function () {
     }
   };
 }());
-function Void() { return undefined; }
+function Void(...args: any[]): void { return undefined; }
 function Now() { return Date.now ? Date.now() : (new Date()).getTime(); }
 
 function FunctionApply(f: Function, thisp: any, args: any) {

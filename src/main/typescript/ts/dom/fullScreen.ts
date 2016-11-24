@@ -1,5 +1,4 @@
 
-
 interface IFullScreenModule {
   isEnabled(): boolean;
   getElement(): HTMLElement;
@@ -7,7 +6,7 @@ interface IFullScreenModule {
   exit(): void;
 }
 
-function fullScreenProvider(document): IFullScreenModule {
+function fullScreenProvider(document: Document): IFullScreenModule {
 
   const ELEMENT = _findProperty(document, [
     "fullscreenElement",
@@ -39,8 +38,9 @@ function fullScreenProvider(document): IFullScreenModule {
     "msFullscreenEnabled"
   ]);
 
-  function _findProperty(o, propNames) {
-    let returnValue, propName;
+  function _findProperty(o: any, propNames: Array<string>) {
+    let returnValue: string;
+    let propName: string;
     for (let i = 0, l = propNames.length; i < l; ++i) {
       propName = propNames[i];
       if (propName in o) {
@@ -92,7 +92,6 @@ function fullScreenProvider(document): IFullScreenModule {
     return fullScreen.isEnabled();
   }
 
-
   /**
    * Returns the element that is displayed fullscreen, or null if there is no such element
    *
@@ -102,17 +101,17 @@ function fullScreenProvider(document): IFullScreenModule {
   }
 
   /**
-  * Displays opt_element fullscreen.
-  *
-  * @param element
-  */
+   * Displays element fullscreen.
+   *
+   * @param element
+   */
   export function request(element: HTMLElement) {
     fullScreen.request(element);
   }
 
   /**
-  * Exit fullScreen mode
-  */
+   * Exit fullScreen mode
+   */
   export function exit() {
     fullScreen.exit();
   }

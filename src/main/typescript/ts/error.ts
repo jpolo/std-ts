@@ -1,3 +1,5 @@
+/* tslint:disable: no-namespace */
+
 import * as iterator from "./iterator";
 
 // Interfaces
@@ -14,7 +16,7 @@ declare var __extends: any; // Typescript __extends
 const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
 const GlobalConsole: Console = typeof console !== "undefined" ? Global.console : null;
 const GlobalError = Global.Error;
-//const GlobalTypeError: any = Global.TypeError;
+// const GlobalTypeError: any = Global.TypeError;
 function Has(o: any, name: string) { return o && (name in o); }
 function IsError(o: any): boolean { return o instanceof GlobalError; }
 function ToString(o: any) { return "" + o; }
@@ -22,21 +24,21 @@ function Dump(o: any) {
   return IsError(o) && Has(o, "stack") ? ToString(o.stack) : ToString(o);
 }
 function FunctionName(f: Function) {
-  return ((<any>f).displayName || (<any>f).name || ((<any>f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]));
+  return ((<any> f).displayName || (<any> f).name || ((<any> f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]));
 }
 
-function CaptureStackTrace(error, stripPoint) {
+function CaptureStackTrace(error: Error, stripPoint: any) {
   if (GlobalError.captureStackTrace) {
     GlobalError.captureStackTrace(error, stripPoint);
   } else {
-    let stackString = (<any>new GlobalError()).stack;
+    let stackString = (<any> new GlobalError()).stack;
     // Remove first calls
     let stack = stackString.split("\n").slice(1); // first is Error string, second is __captureStackTrace
     error.stack = ToString(error) + "\n" + stack.join("\n");
   }
 }
 
-function HandleUncaughtError(error, prefix) {
+function HandleUncaughtError(error: Error, prefix: string) {
   if (GlobalConsole) {
     GlobalConsole.error(prefix + Dump(error));
   } else { // rethrow so it is catched by global.onerror
@@ -47,7 +49,7 @@ function HandleUncaughtError(error, prefix) {
 function PatchExtends() {
   // HACK: augment __extends
   __extends = (function (__extendsOld) {
-    return function __extends(d, b) {
+    return function __extends(d: any, b: any) {
       __extendsOld(d, b);
 
       if (d.prototype instanceof Global.Error) {
@@ -141,7 +143,7 @@ export function setHandler(h: IErrorHandler) {
   _handler = h;
 }
 
-export function handleError(e) {
+export function handleError(e: any) {
   return _handler.handleError(e).done;
 }
 
@@ -153,25 +155,25 @@ namespace error {
 
     constructor(message?: string);
   }
-  error["Error"] = Global.Error;
+  error.Error = Global.Error;
 
   export declare class EvalError extends Error {}
-  error["EvalError"] = Global.EvalError;
+  error.EvalError = Global.EvalError;
 
   export declare class RangeError extends Error {}
-  error["RangeError"] = Global.RangeError;
+  error.RangeError = Global.RangeError;
 
   export declare class ReferenceError extends Error {}
-  error["ReferenceError"] = Global.ReferenceError;
+  error.ReferenceError = Global.ReferenceError;
 
   export declare class SyntaxError extends Error {}
-  error["SyntaxError"] = Global.SyntaxError;
+  error.SyntaxError = Global.SyntaxError;
 
   export declare class TypeError extends Error {}
-  error["TypeError"] = Global.TypeError;
+  error.TypeError = Global.TypeError;
 
   export declare class URIError extends Error {}
-  error["URIError"] = Global.URIError;
+  error.URIError = Global.URIError;
 
 }
 

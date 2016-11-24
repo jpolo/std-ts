@@ -28,9 +28,9 @@ function Put(o: any, k: string, v: any) {
   let defineProperty = Object.defineProperty;
   if (defineProperty) {
     defineProperty(o, k, {
-      value: v,
-      enumerable: false,
       configurable: true,
+      enumerable: false,
+      value: v,
       writable: true
     });
   } else {
@@ -112,7 +112,7 @@ function ToSignalBindingQueue<T>(sig: Signal<T>): ISignalBindingQueue<T> {
 
 export default class Signal<T> {
 
-  protected head = null;
+  protected head: any = null;
   protected length = 0;
 
   size(): number {
@@ -132,7 +132,7 @@ export default class Signal<T> {
     let bindings = ToSignalBindingQueue(this);
     let binding = SignalBindingQueueFind(bindings, f, once);
     if (!binding) {
-      binding = { f: f, once: once, next: null, prev: null };
+      binding = { f: f, next: null, once: once, prev: null };
       SignalBindingQueuePush(bindings, binding);
     }
   }

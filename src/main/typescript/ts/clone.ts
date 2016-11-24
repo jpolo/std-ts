@@ -1,13 +1,13 @@
 // Util
+class ObjectConstructor {}
 function ObjectCreate(proto: any, descriptors: any) {
   let returnValue;
   if (Object.create) {
     returnValue = Object.create(proto, descriptors);
   } else {
-    let ctor = proto.constructor;
-    let P = function () {};
-    P.prototype = proto;
-    let o = new P();
+    ObjectConstructor.prototype = proto;
+    let o: any = new ObjectConstructor();
+    ObjectConstructor.prototype = null;
     returnValue = o;
   }
   return returnValue;
@@ -27,9 +27,9 @@ function OwnDescriptors(o: any): { [k: string]: PropertyDescriptor } {
     for (let prop in o) {
       if (o.hasOwnProperty(prop)) {
         descriptors[prop] = {
-          value: o[prop],
           configurable: true,
           enumerable: true,
+          value: o[prop],
           writable: true
         };
       }
@@ -37,7 +37,7 @@ function OwnDescriptors(o: any): { [k: string]: PropertyDescriptor } {
   }
   return descriptors;
 }
-function IsDefined(o) { return o !== undefined && o !== null; }
+function IsDefined(o: any) { return o !== undefined && o !== null; }
 function ToStringTag(o: any) {
   let c = o.constructor;
   return c && c.name || Object.prototype.toString.call(o).slice(8, -1);
@@ -83,7 +83,18 @@ export function clone<T>(o: T): T {
         case 1: r = t ? f(arguments[0]) : f.call(t, arguments[0]); break;
         case 2: r = t ? f(arguments[0], arguments[1]) : f.call(t, arguments[0], arguments[1]); break;
         case 3: r = t ? f(arguments[0], arguments[1], arguments[2]) : f.call(t, arguments[0], arguments[1], arguments[2]); break;
-        case 4: r = t ? f(arguments[0], arguments[1], arguments[2], arguments[3]) : f.call(t, arguments[0], arguments[1], arguments[2], arguments[3]); break;
+        case 4: r = t ? f(
+          arguments[0],
+          arguments[1],
+          arguments[2],
+          arguments[3]) :
+          f.call(t,
+           arguments[0],
+           arguments[1],
+           arguments[2],
+           arguments[3]
+         );
+         break;
         default: r = f.apply(t, arguments);
       }
       return r;
@@ -108,19 +119,16 @@ export function cloneString(s: string): string {
 }
 
 export function cloneArray<T>(a: T[]): T[] {
-  let returnValue = a;
-  if (IsDefined(a)) {
-    let length = a.length;
-    returnValue = new Array(length);
-    for (let i = 0; i < length; i++) {
-      returnValue[i] = a[i];
-    }
+  const length = a.length;
+  const returnValue = new Array(length);
+  for (let i = 0; i < length; i++) {
+    returnValue[i] = a[i];
   }
   return returnValue;
 }
 
 export function cloneDate(d: Date): Date {
-  return IsDefined(d) ? new Date(d.getTime()) : d;
+  return new Date(d.getTime());
 }
 
 export function cloneRegExp(re: RegExp): RegExp {

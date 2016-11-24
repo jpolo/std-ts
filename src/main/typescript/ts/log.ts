@@ -1,3 +1,5 @@
+/* tslint:disable:no-namespace no-bitwise */
+
 import * as console from "./console";
 import * as time from "./time";
 
@@ -8,21 +10,21 @@ function OwnKeys(o: any) {
   if (Object.keys) {
     ks = Object.keys(o);
   } else {
-    for (let k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } }
+    for (const k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } }
   }
   return ks;
 }
 
 function Compare(a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1; }
-function ThrowAsync(e) { setTimeout(() => { throw e; }, 0); }
+function ThrowAsync(e: any) { setTimeout(() => { throw e; }, 0); }
 function StringCompare(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1; }
 function ArrayCompare<T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): number {
   let returnValue = 0;
-  let al = a.length;
-  let bl = b.length;
+  const al = a.length;
+  const bl = b.length;
   if (al === bl) {
     for (let i = 0, l = al; i < l; ++i) {
-      let r = cmpFn(a[i], b[i]);
+      const r = cmpFn(a[i], b[i]);
       if (r !== 0) {
         returnValue = r;
         break;
@@ -32,14 +34,13 @@ function ArrayCompare<T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): number 
   return returnValue;
 }
 
-
 // Services
 const $consoleDefault: console.IConsoleModule = console;
 const $timeDefault: time.ITimeModule = time;
 
 export interface IDispatcher {
   isEnabledFor(level: ILevel, group: string): boolean;
-  send(level: ILevel, group: string, data: any[]);
+  send(level: ILevel, group: string, data: any[]): void;
 }
 
 export interface ILevel {
@@ -59,7 +60,7 @@ export interface IFilter {
 }
 
 export interface IReporter {
-  receive(message: IMessage);
+  receive(message: IMessage): void;
 }
 
 export class Level implements ILevel {
@@ -81,8 +82,8 @@ export class Level implements ILevel {
   static compare(lhs: ILevel, rhs: ILevel): number {
     let returnValue = NaN;
     if (lhs != null && rhs != null) {
-      let lv = lhs.value;
-      let rv = rhs.value;
+      const lv = lhs.value;
+      const rv = rhs.value;
       returnValue = lv === rv ? 0 : lv < rv ? -1 : 1;
     }
     return returnValue;
@@ -91,15 +92,15 @@ export class Level implements ILevel {
   static create(name: string, level: number): Level {
     name = name.toUpperCase();
     level = level >>> 0;
-    let byName = Level._instances;
-    let byValue = Level._byValue;
+    const byName = Level._instances;
+    const byValue = Level._byValue;
     if (byName[name]) {
       throw new Error(byName[name] + " is already defined");
     }
     if (byValue[level]) {
       throw new Error(byValue[level] + " is already defined");
     }
-    let levelObj = byName[name] = byValue[level] = new Level(name, level, Level._constructorKey);
+    const levelObj = byName[name] = byValue[level] = new Level(name, level, Level._constructorKey);
     return levelObj;
   }
 
@@ -188,9 +189,9 @@ export class Message implements IMessage {
 
   toJSON() {
     return {
-      level: this.level.value,
-      group: this.group,
       data: this.data,
+      group: this.group,
+      level: this.level.value,
       timestamp: this.timestamp
     };
   }
@@ -199,7 +200,6 @@ export class Message implements IMessage {
     return `[${this.level.name}|${this.group}] ${this.data.join(" ")}`;
   }
 }
-
 
 /*
 function loggerFor(o: any): Logger {
@@ -231,17 +231,17 @@ export class Dispatcher implements IDispatcher {
   }
 
   getLogger(name: string): Logger {
-    let loggers = this._loggers;
+    const loggers = this._loggers;
     return loggers[name] || (loggers[name] = new Logger(name, this));
   }
 
   isEnabledFor(level: ILevel, group: string): boolean {
     let returnValue = false;
-    let reporters = this.reporters;
-    let logMessage = new Message(level, group, null);
-    let names = OwnKeys(reporters);
-    for (let name of names) {
-      let target = reporters[name];
+    const reporters = this.reporters;
+    const logMessage = new Message(level, group, null);
+    const names = OwnKeys(reporters);
+    for (const name of names) {
+      const target = reporters[name];
       if (__filter(target, logMessage)) {
         returnValue = true;
         break;
@@ -251,11 +251,11 @@ export class Dispatcher implements IDispatcher {
   }
 
   send(level: ILevel, group: string, data: any[]): void {
-    let reporters = this.reporters;
-    let logMessage = new Message(level, group, data, this.$time.now());
-    let names = OwnKeys(reporters);
-    for (let name of names) {
-      let target = reporters[name];
+    const reporters = this.reporters;
+    const logMessage = new Message(level, group, data, this.$time.now());
+    const names = OwnKeys(reporters);
+    for (const name of names) {
+      const target = reporters[name];
       if (__filter(target, logMessage)) {
         __send(target, logMessage);
       }
@@ -273,16 +273,16 @@ function __filter(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): b
   }
 }
 
-function __send(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): boolean {
+function __send(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): void {
   try {
-    return f.reporter.receive(m);
+    f.reporter.receive(m);
   } catch (e) {
     ThrowAsync(e);
   }
 }
 
 // default dispatcher
-let $dispatcherDefault: Dispatcher = new Dispatcher();
+const $dispatcherDefault: Dispatcher = new Dispatcher();
 
 export class Logger {
   // static SEPARATOR = '.'
@@ -329,19 +329,16 @@ export class Logger {
   }
 
   protected _dispatch(level: ILevel, args: any[]): void  {
-    let name = this.name;
-    let dispatcher = this.$dispatcher;
-    if (!dispatcher) {
+    const { name, $dispatcher } = this;
+    if (!$dispatcher) {
       throw new Error("dispatcher is required");
     }
 
     // if (dispatcher.isEnabledFor(level, name)) {
-    dispatcher.send(level, name, args);
+    $dispatcher.send(level, name, args);
     // }
   }
 }
-
-
 
 /*filter.and(
   filter.level("DEBUG", '>'),
@@ -415,8 +412,11 @@ export function logger(group: string): Logger {
 }
 
 export namespace reporter {
-  type $ConsoleFormatter = (logMessage: IMessage) => any[];
-  let $consoleFormatterDefault: $ConsoleFormatter = function (logMessage: IMessage) {
+  export interface IConsoleFormatter {
+    (logMessage: IMessage): any[];
+  }
+
+  const $consoleFormatterDefault: IConsoleFormatter = function (logMessage: IMessage) {
     return ["[" + logMessage.group + "]"].concat(logMessage.data);
   };
 
@@ -427,17 +427,15 @@ export namespace reporter {
     receive(logMessage: IMessage) {
       this.logs.push(logMessage);
     }
-
   }
-
 
   export class Console implements IReporter {
     // Services
-    protected $formatter: $ConsoleFormatter = $consoleFormatterDefault;
+    protected $formatter: IConsoleFormatter = $consoleFormatterDefault;
     protected $console: console.IConsoleModule = $consoleDefault;
 
     constructor(deps: {
-      $formatter?: $ConsoleFormatter;
+      $formatter?: IConsoleFormatter;
       $console?: console.IConsoleModule
     }) {
       if (deps) {
@@ -451,10 +449,10 @@ export namespace reporter {
     }
 
     receive(logMessage: IMessage) {
-      let console = this.$console;
-      if (console) {
-        let args = this.$formatter(logMessage);
-        let levelValue = logMessage.level.value;
+      const { $console, $formatter } = this;
+      if ($console) {
+        const args = $formatter(logMessage);
+        const levelValue = logMessage.level.value;
 
         if (levelValue >= ERROR.value) {
           console.error.apply(console, args);

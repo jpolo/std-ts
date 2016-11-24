@@ -129,13 +129,13 @@ namespace errorParser {
 const ErrorParse = (function () {
 
   // Sniff browser
-  let browser: Browser = (function (e: any) {
+  const browser: Browser = (function (e: any) {
     let returnValue = Browser.Other;
-    if (e["arguments"] && e.stack) {
+    if (e.arguments && e.stack) {
       returnValue = Browser.Chrome;
     } else if (e.stack && e.sourceURL) {
       returnValue = Browser.Safari;
-    } else if (e.stack && e["number"]) {
+    } else if (e.stack && e.number) {
       returnValue = Browser.IE;
     } else if (e.stack && e.fileName) {
       returnValue = Browser.Firefox;
@@ -190,17 +190,18 @@ const ErrorParse = (function () {
   }
 
   function __errorParseLines_Opera(error: any): string[] {
-    let ANON = "{anonymous}";
-    let lineRE = /^.*line (\d+), column (\d+)(?: in (.+))? in (\S+):$/;
-    let lines = error.stacktrace.split("\n");
-    let result = [];
+    const ANON = "{anonymous}";
+    const lineRE = /^.*line (\d+), column (\d+)(?: in (.+))? in (\S+):$/;
+    const lines = error.stacktrace.split("\n");
+    const result = [];
 
     for (let i = 0, len = lines.length; i < len; i += 2) {
-      let match = lineRE.exec(lines[i]);
+      const match = lineRE.exec(lines[i]);
       if (match) {
-        let location = match[4] + ":" + match[1] + ":" + match[2];
-        let fnName = match[3] || "global code";
-        fnName = fnName.replace(/<anonymous function: (\S+)>/, "$1").replace(/<anonymous function>/, ANON);
+        const location = match[4] + ":" + match[1] + ":" + match[2];
+        const fnName = (match[3] || "global code")
+          .replace(/<anonymous function: (\S+)>/, "$1")
+          .replace(/<anonymous function>/, ANON);
         result.push(fnName + "@" + location + " -- " + lines[i + 1].replace(/^\s+/, ""));
       }
     }
@@ -215,16 +216,16 @@ const ErrorParse = (function () {
       .split("\n");
   }
 
-  function __errorParseLines_Other(curr): string[] {
-    let ANON = "{anonymous}";
-    let fnRE = /function(?:\s+([\w$]+))?\s*\(/;
-    let stack = [];
+  function __errorParseLines_Other(curr: any): string[] {
+    const ANON = "{anonymous}";
+    const fnRE = /function(?:\s+([\w$]+))?\s*\(/;
+    const stack = [];
     let fn, args;
-    let maxStackSize = 10;
+    const maxStackSize = 10;
     while (curr && stack.length < maxStackSize) {
       fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON;
       try {
-        args = ArraySlice(curr["arguments"] || []);
+        args = ArraySlice(curr.arguments || []);
       } catch (e) {
         args = ["Cannot access arguments: " + e];
       }
@@ -240,10 +241,10 @@ const ErrorParse = (function () {
   }
 
   function _stringifyArguments(args: any[]) {
-    let argc = args.length;
-    let result = new Array(argc);
+    const argc = args.length;
+    const result = new Array(argc);
     for (let i = 0; i < argc; ++i) {
-      let arg = args[i];
+      const arg = args[i];
       switch (ToStringTag(arg)) {
         case "Undefined":
           result[i] = "undefined";
@@ -288,20 +289,20 @@ const ErrorParse = (function () {
       items = items.slice(offset);
     }
 
-    let itemc = items.length;
-    let parsed = new Array(itemc);
-    let parseCallSite = CallSite.parse;
+    const itemc = items.length;
+    const parsed = new Array(itemc);
+    const parseCallSite = CallSite.parse;
     for (let i = 0; i < itemc; ++i) {
       parsed[i] = parseCallSite(items[i]);
     }
     return parsed;
   };
 }());
-const __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorString: string, frames: ICallSite[]): string {
+const __prepareStackTrace = (<any> Error).prepareStackTrace || function (errorString: string, frames: ICallSite[]): string {
 
   // Adapted from V8 source:
   // https://github.com/v8/v8/blob/1613b7/src/messages.js#L1051-L1070
-  let lines = [];
+  const lines = [];
   let frame: ICallSite;
   let line;
   lines.push(errorString);
@@ -322,37 +323,33 @@ const __prepareStackTrace = (<any>Error).prepareStackTrace || function (errorStr
   return lines.join("\n");
 };
 const ErrorFrames = (function () {
-  let GlobalError = (<any>Error);
-  let __errorFrames: (offset: number) => ICallSite[];
-  if (GlobalError.captureStackTrace) {
+  const GlobalError = (<any> Error);
+  const prepareStackTrace = GlobalError.prepareStackTrace;
+  const stackSink = function (_: any, stack: any) { return stack; };
+  return <(offset: number) => ICallSite[]> (GlobalError.captureStackTrace ?
     // v8
-    let prepareStackTrace = GlobalError.prepareStackTrace;
-    let stackSink = function (_, stack) { return stack; };
-    __errorFrames = function (offset) {
+    function (offset) {
       GlobalError.prepareStackTrace = stackSink;
-      let stack = (<any>new GlobalError()).stack.slice(1 + offset);
+      const stack = (<any> new GlobalError()).stack.slice(1 + offset);
       if (prepareStackTrace === undefined) {
         delete GlobalError.prepareStackTrace;
       } else {
         GlobalError.prepareStackTrace = prepareStackTrace;
       }
       return stack;
-    };
-  } else {
-    __errorFrames = function (offset) {
+    } :
+    function (offset) {
       return ErrorParse(ErrorCreate(), offset + 2);
-    };
-  }
-
-  return __errorFrames;
+    }
+  );
 }());
-const __captureStackTrace = (<any>Error).captureStackTrace || function (e: any, topLevel?: Function): void {
+const __captureStackTrace = (<any> Error).captureStackTrace || function (e: any, topLevel?: Function): void {
 
   // Simultaneously traverse the frames in error.stack and the arguments.caller
   // to build a list of CallSite objects
   // let factory = makeCallSiteFactory(e);
-  let frames = ErrorParse(e);
-  let errorString = ErrorToString(e.name, e.message);
+  const frames = ErrorParse(e);
+  const errorString = ErrorToString(e.name, e.message);
 
   // Explicitly set back the error.name and error.message
   // e.name = frames.name;
@@ -407,30 +404,30 @@ class CallSite implements ICallSite {
 
   static parse(s: string): CallSite {
     return new CallSite(() => {
-      let parts = s.split("@", 2);
-      let receiver = Global;
+      const parts = s.split("@", 2);
+      const receiver = Global;
       let fun = null;
-      let functionName = parts[0] || "";
+      const functionName = parts[0] || "";
       let fileName = "";
       let typeName = "";
       let methodName = "";
       let lineNumber = NaN;
       let columnNumber = NaN;
-      let location = parts[1] || "";
-      let isAnonymous = location.indexOf("{anonymous}") !== -1;
-      let isEval = false;
-      let isNative = false; // location.indexOf("native") !== -1;
+      const location = parts[1] || "";
+      const isAnonymous = location.indexOf("{anonymous}") !== -1;
+      const isEval = false;
+      const isNative = false; // location.indexOf("native") !== -1;
       if (location.indexOf(":") !== -1) {
-        let locationParts = /(.*):(\d+):(\d+)/.exec(location);
+        const locationParts = /(.*):(\d+):(\d+)/.exec(location);
         fileName = locationParts[1];
-        lineNumber = parseInt(locationParts[2]);
-        columnNumber = parseInt(locationParts[3]);
+        lineNumber = parseInt(locationParts[2], 10);
+        columnNumber = parseInt(locationParts[3], 10);
       } else {
         fileName = location;
       }
 
       if (!isAnonymous) {
-        let functionParts = functionName.split(".");
+        const functionParts = functionName.split(".");
         typeName = functionParts[0];
         methodName = functionParts[functionParts.length - 1];
       }
@@ -441,25 +438,25 @@ class CallSite implements ICallSite {
       // isNative = false;
 
       // isConstructor
-      let ctor = IsObject(receiver) ? receiver.constructor : null;
-      let isConstructor = !ctor ? false : fun === ctor;
+      const ctor = IsObject(receiver) ? receiver.constructor : null;
+      const isConstructor = !ctor ? false : fun === ctor;
 
       // isTopLevel
-      let isTopLevel = (receiver == null) || IsGlobal(receiver);
+      const isTopLevel = (receiver == null) || IsGlobal(receiver);
 
       return {
-        this: receiver,
-        typeName: typeName,
+        columnNumber: columnNumber,
+        fileName: fileName,
         function: fun,
         functionName: functionName,
-        methodName: methodName,
-        fileName: fileName,
-        lineNumber: lineNumber,
-        columnNumber: columnNumber,
-        isTopLevel: isTopLevel,
+        isConstructor: isConstructor,
         isEval: isEval,
         isNative: isNative,
-        isConstructor: isConstructor
+        isTopLevel: isTopLevel,
+        lineNumber: lineNumber,
+        methodName: methodName,
+        this: receiver,
+        typeName: typeName
       };
     });
   }
@@ -471,9 +468,9 @@ class CallSite implements ICallSite {
     } else if (s === null) {
       s = "null";
     } else {
-      let functionName = o.getFunctionName() || "{anonymous}";
-      let lineNumber = o.getLineNumber();
-      let columnNumber = o.getColumnNumber();
+      const functionName = o.getFunctionName() || "{anonymous}";
+      const lineNumber = o.getLineNumber();
+      const columnNumber = o.getColumnNumber();
 
       s += o.getFileName();
       if (lineNumber) {
@@ -516,12 +513,12 @@ class CallSite implements ICallSite {
   }
 
   getLineNumber(): number {
-    let d = this.getData();
+    const d = this.getData();
     return d.lineNumber > 0 ? d.lineNumber : null;
   }
 
   getColumnNumber(): number {
-    let d = this.getData();
+    const d = this.getData();
     return d.columnNumber > 0 ? d.columnNumber : null;
   }
 
@@ -546,8 +543,8 @@ class CallSite implements ICallSite {
   }
 
   getArguments() {
-    let d = this.getData();
-    return d.function && d.function["arguments"] || null;
+    const d = this.getData();
+    return d.function && d.function.arguments || null;
   }
 
   toString(): string {

@@ -4,7 +4,7 @@ import { IClone, clone, isIClone, cloneNumber, cloneBoolean, cloneString } from 
 class TestObject {
   bool = true;
   str = "foo";
-  arr = [];
+  arr: any[] = [];
 }
 
 class TestIClone implements IClone {
@@ -18,7 +18,7 @@ class TestIClone implements IClone {
 }
 
 export default suite("ts/clone", (self) => {
-  let now = new Date();
+  const now = new Date();
 
   test(".isIClone()", (assert) => {
     assert.strictEqual(isIClone(undefined), false);
@@ -33,16 +33,16 @@ export default suite("ts/clone", (self) => {
     assert.strictEqual(clone(1), 1);
     assert.strictEqual(clone("foo"), "foo");
 
-    let dateCloned = clone(now);
+    const dateCloned = clone(now);
     assert.strictEqual(+dateCloned, +now);
     assert.notStrictEqual(dateCloned, now);
 
-    let iclone = new TestIClone();
-    let icloned = clone(iclone);
+    const iclone = new TestIClone();
+    const icloned = clone(iclone);
     assert.strictEqual(icloned.foo, true);
 
-    let object = new TestObject();
-    let objectCloned = clone(object);
+    const object = new TestObject();
+    const objectCloned = clone(object);
     assert.instanceOf(objectCloned, TestObject);
     assert.strictEqual(objectCloned.bool, true);
     assert.strictEqual(objectCloned.str, "foo");
@@ -68,4 +68,4 @@ export default suite("ts/clone", (self) => {
     assert.strictEqual(cloneNumber(123), 123);
   });
 
-})
+});

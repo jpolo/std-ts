@@ -13,3 +13,7 @@ max_line_length = 120
 [*.md]
 insert_final_newline = false
 trim_trailing_whitespace = false
+
+# 2 space indentation
+[*.{js,jsx,ts,tsx,css,scss,less}]
+quote_type = single

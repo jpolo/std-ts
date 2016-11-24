@@ -1,5 +1,5 @@
 // Util
-type Matrix2 = [number, number, number, number]
+export type Matrix2 = [number, number, number, number]
 type Matrix2Constructor = { new(n: number): Matrix2 }
 
 const NumberArray: any = Array;
@@ -25,9 +25,8 @@ function ArrayFill(a: Matrix2, v: number) {
   a[3] = v;
 }
 
-
 export function copy(m: Matrix2, dest?: Matrix2): Matrix2 {
-  let r = dest === undefined ? ArrayCreateFrom(m) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(m) : dest;
   ArrayCopy(m, r);
   return r;
 }
@@ -36,7 +35,7 @@ export function create(
   m00: number, m01: number,
   m10: number, m11: number
 ): Matrix2 {
-  let m = ArrayCreate(NumberArray);
+  const m = ArrayCreate(NumberArray);
   m[0] = m00;
   m[1] = m01;
   m[2] = m10;
@@ -49,7 +48,7 @@ export function determinant(m: Matrix2): number {
 }
 
 export function identity(dest?: Matrix2): Matrix2 {
-  let r = dest === undefined ? ArrayCreate(NumberArray) : dest;
+  const r = dest === undefined ? ArrayCreate(NumberArray) : dest;
   r[0] = 1;
   r[1] = 0;
   r[2] = 0;
@@ -58,9 +57,9 @@ export function identity(dest?: Matrix2): Matrix2 {
 }
 
 export function transpose(m: Matrix2, dest?: Matrix2): Matrix2 {
-  let r = dest === undefined ? ArrayCreateFrom(m) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(m) : dest;
   if (dest === m) {
-    let m1 = m[1];
+    const m1 = m[1];
     r[1] = m[2];
     r[2] = m1;
   } else {

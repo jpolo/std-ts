@@ -4,19 +4,19 @@ class Suite {
 
   constructor(protected _name: string, protected _parent: Suite = null) {}
 
-  getName() {
+  getName(): string {
     return this._name;
   }
 
-  getFullName() {
+  getFullName(): string {
     return this._parent ? this._parent.getFullName() + this._name : this._name;
   }
 
-  getSuite(name: string) {
+  getSuite(name: string): Suite {
     return this._suites[name] || (this._suites[name] = new Suite(name, this));
   }
 
-  getTest(name: string) {
+  getTest(name: string): Test {
     return this._tests[name] || (this._tests[name] = new Test(name, this));
   }
 }
@@ -33,14 +33,14 @@ class Test {
   }
 }
 
-let rootSuite: Suite = new Suite("");
+const rootSuite: Suite = new Suite("");
 
 let currentDisabled = false;
 let currentSuite: Suite = rootSuite;
 let currentTest: Test = null;
 
 export function describe(description: string, f?: () => void): void {
-  let previousSuite = currentSuite;
+  const previousSuite = currentSuite;
   currentSuite = currentSuite.getSuite(description);
   if (f) {
     f();
@@ -49,8 +49,8 @@ export function describe(description: string, f?: () => void): void {
 }
 
 export function xdescribe(description: string, f?: () => void): void {
-  let previousDisabled = currentDisabled;
-  let previousSuite = currentSuite;
+  const previousDisabled = currentDisabled;
+  const previousSuite = currentSuite;
   currentSuite = currentSuite.getSuite(description);
   if (f) {
     currentDisabled = true;
@@ -64,7 +64,7 @@ export function it(description: string, f?: () => void): void {
   if (currentSuite === null) {
     throw SyntaxError("it() must be called inside describe() block");
   }
-  let previousTest = currentTest;
+  const previousTest = currentTest;
   currentTest = currentSuite.getTest(description);
   if (f) {
     f();

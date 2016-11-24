@@ -10,7 +10,7 @@ export interface IAssertion extends Error {
   name: string;
   message: string;
   test: ITest;
-  position: IAssertionCallSite;
+  position?: IAssertionCallSite;
   stack?: string;
 }
 

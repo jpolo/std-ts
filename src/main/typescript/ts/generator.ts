@@ -34,8 +34,8 @@ function GeneratorNext<T, Next>(gen: IGenerator<T>, v?: any): IIteratorResult<T>
 
 function GeneratorMap<T, U>(gen: IGenerator<T>, f: (v: T) => U): Generator<U> {
   return GeneratorCreate(function (v?: any) {
-    let iterResult = GeneratorNext(gen, v);
-    let iterMapped: IIteratorResult<U> = iterResult.done ? <any>iterResult : IteratorResultCreate(false, f(iterResult.value));
+    const iterResult = GeneratorNext(gen, v);
+    const iterMapped: IIteratorResult<U> = iterResult.done ? <any> iterResult : IteratorResultCreate(false, f(iterResult.value));
     return iterMapped;
   });
 }
@@ -70,12 +70,12 @@ export class Generator<Yield> implements IGenerator<Yield> {
   }
 
   next(v?: any): IIteratorResult<Yield> {
-    let done = this._done;
+    const done = this._done;
     return IteratorResultCreate(done, done ? undefined : this._next(v).value);
   }
 
   return(v: Yield): IIteratorResult<Yield> {
-    let done = this._done;
+    const done = this._done;
     let value: Yield;
     if (!done) {
       this._done = true;

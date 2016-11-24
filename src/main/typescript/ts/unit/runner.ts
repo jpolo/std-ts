@@ -36,8 +36,8 @@ export class Runner {
   */
 
   run(tests: ITest[], onComplete?: (report: ITestReport[]) => void): void {
-    let { $engine, _timeout } = this;
-    let reports: ITestReport[] = [];
+    const { $engine, _timeout } = this;
+    const reports: ITestReport[] = [];
 
     function runTest(test: ITest, onTestComplete: (r: ITestReport) => void) {
       let report: ITestReport = {
@@ -45,7 +45,7 @@ export class Runner {
         elapsedMilliseconds: NaN,
         startDate: null
       };
-      let context: ITestEngineRunContext = {
+      const context: ITestEngineRunContext = {
         getTimeout() { return _timeout; },
         getTest() { return test; },
         onStart() {
@@ -75,7 +75,7 @@ export class Runner {
       }
     }
 
-    for (let test of tests) {
+    for (const test of tests) {
       runTest(test, onTestComplete);
     }
   }

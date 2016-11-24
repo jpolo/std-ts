@@ -66,12 +66,12 @@ export class HTMLReporter implements IReporter {
     OwnKeysSorted(sections).forEach((sectionName) => {
       let matrix = "";
       let messages = "";
-      let section = sections[sectionName];
+      const section = sections[sectionName];
 
       section.forEach((assertion) => {
         const { message, name, position } = assertion;
-        let positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : "";
-        let typeName = ToString(name);
+        const positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : "";
+        const typeName = ToString(name);
 
         switch (assertion.name) {
           case SUCCESS:
@@ -117,14 +117,14 @@ export class HTMLReporter implements IReporter {
   }
 
   private _print(s: string) {
-    let id = "ts:trace";
+    const id = "ts:trace";
     let element = document.getElementById(id);
     if (!element) {
       element = document.createElement("div");
       element.id = id;
       document.body.appendChild(element);
     }
-    let html = s
+    const html = s
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/\n/g, "<br>")

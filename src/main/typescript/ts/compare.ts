@@ -1,7 +1,7 @@
 // ECMA like
-function IsEmpty(o) { return o === null  || o === undefined; }
-function IsNaN(o) { return o !== o; }
-function ToString(o) { return "" + o; };
+function IsEmpty(o: any) { return o === null  || o === undefined; }
+function IsNaN(o: any) { return o !== o; }
+function ToString(o: any) { return "" + o; };
 function ToStringTag(o: any) {
   let s = "";
   if (o === undefined) {
@@ -21,16 +21,16 @@ function Comparator<T>(o: T): (lhs: T, rhs: T) => Ordering {
   switch (tag) {
     case "Undefined": returnValue = null; break;
     case "Null": returnValue = null; break;
-    case "Boolean": returnValue = <any>compareBoolean; break;
-    case "Number": returnValue = <any>compareNumber; break;
-    case "String": returnValue = <any>compareString; break;
+    case "Boolean": returnValue = <any> compareBoolean; break;
+    case "Number": returnValue = <any> compareNumber; break;
+    case "String": returnValue = <any> compareString; break;
     default:
       if (isICompare(o)) {
         returnValue = compareICompare;
       } else {
         switch (tag) {
-          case "Date": returnValue = <any>compareDate; break;
-          case "RegExp": returnValue = <any>compareRegExp; break;
+          case "Date": returnValue = <any> compareDate; break;
+          case "RegExp": returnValue = <any> compareRegExp; break;
         }
       }
   }
