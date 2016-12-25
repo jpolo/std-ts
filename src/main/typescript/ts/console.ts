@@ -2,13 +2,13 @@
 const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
 const GlobalConsole: Console = Global.console ? Global.console : <any> {};
 const Timer = (function () {
-  let timers = {};
+  const timers = {};
   return {
     time(timerName: string) {
       timers[timerName] = Now();
     },
     timeEnd(timerName: string) {
-      let start = timers[timerName];
+      const start = timers[timerName];
       if (start) {
         Log("log", timerName + ": " + (Now() - start) + "ms");
         delete timers[timerName];
@@ -20,7 +20,7 @@ function Void(...args: any[]): void { return undefined; }
 function Now() { return Date.now ? Date.now() : (new Date()).getTime(); }
 
 function FunctionApply(f: Function, thisp: any, args: any) {
-  let argc = args && args.length || 0;
+  const argc = args && args.length || 0;
   switch (argc) {
     case 0: return f.call(thisp);
     case 1: return f.call(thisp, args[0]);
@@ -29,7 +29,7 @@ function FunctionApply(f: Function, thisp: any, args: any) {
 }
 
 function Log(level: string, args: any) {
-  let console = Global.console;
+  const console = Global.console;
   if (console) {
     if (console[level]) {
       FunctionApply(console[level], console, args);

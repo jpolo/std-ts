@@ -1,5 +1,5 @@
 // ECMA like
-function IsEmpty(o: any) { return o === null  || o === undefined; }
+function IsEmpty(o: any): o is (null | undefined) { return o === null  || o === undefined; }
 function IsNaN(o: any) { return o !== o; }
 function ToString(o: any) { return "" + o; };
 function ToStringTag(o: any) {
@@ -9,32 +9,31 @@ function ToStringTag(o: any) {
   } else if (o === null) {
     s = "Null";
   } else {
-    let c = o.constructor;
+    const c = o.constructor;
     s = c && c.name || Object.prototype.toString.call(o).slice(8, -1);
   }
   return s;
 }
 
 function Comparator<T>(o: T): (lhs: T, rhs: T) => Ordering {
-  let returnValue: (lhs: any, rhs: any) => Ordering;
-  let tag = ToStringTag(o);
+  const tag = ToStringTag(o);
   switch (tag) {
-    case "Undefined": returnValue = null; break;
-    case "Null": returnValue = null; break;
-    case "Boolean": returnValue = <any> compareBoolean; break;
-    case "Number": returnValue = <any> compareNumber; break;
-    case "String": returnValue = <any> compareString; break;
+    case "Undefined": return null;
+    case "Null": return null;
+    case "Boolean": return <any> compareBoolean;
+    case "Number": return <any> compareNumber;
+    case "String": return <any> compareString;
     default:
       if (isICompare(o)) {
-        returnValue = compareICompare;
+        return <any> compareICompare;
       } else {
         switch (tag) {
-          case "Date": returnValue = <any> compareDate; break;
-          case "RegExp": returnValue = <any> compareRegExp; break;
+          case "Date": return <any> compareDate;
+          case "RegExp": return <any> compareRegExp;
+          default: return null;
         }
       }
   }
-  return returnValue;
 };
 
 export enum Ordering {
@@ -53,7 +52,7 @@ export function isICompare(o: any): o is ICompare {
 }
 
 export function compare<T>(lhs: T, rhs: T): Ordering {
-  let cmpFn = Comparator(lhs) || Comparator(rhs);
+  const cmpFn = Comparator(lhs) || Comparator(rhs);
 
   return (
     cmpFn ? cmpFn(lhs, rhs) :
@@ -99,8 +98,8 @@ export function compareICompare(lhs: ICompare, rhs: ICompare): Ordering {
 
 export function compareArray(lhs: Array<any>, rhs: Array<any>, compareFn = compare) {
   let returnValue = Ordering.Equal;
-  let lhslen = lhs.length;
-  let rhslen = rhs.length;
+  const lhslen = lhs.length;
+  const rhslen = rhs.length;
 
   for (let i = 0, l = lhslen < rhslen ? lhslen : rhslen; i < l; ++i) {
     returnValue = compareFn(lhs[i], rhs[i]);
@@ -147,7 +146,7 @@ export function lessThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
 }
 
 export function lessOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
-  let result = compareFn(lhs, rhs);
+  const result = compareFn(lhs, rhs);
   return (result === Ordering.Less || result === Ordering.Equal);
 }
 
@@ -156,6 +155,6 @@ export function greaterThan<T>(lhs: T, rhs: T, compareFn = compare): boolean {
 }
 
 export function greaterOrEquals<T>(lhs: T, rhs: T, compareFn = compare): boolean {
-  let result = compareFn(lhs, rhs);
+  const result = compareFn(lhs, rhs);
   return (result === Ordering.Greater || result === Ordering.Equal);
 }

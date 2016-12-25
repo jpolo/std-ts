@@ -27,12 +27,14 @@ function IteratorNext<T>(iter: IIterator<T>, v?: any) {
   return iter.next(v);
 }
 
+/*
 function IteratorMap<T, U>(iter: IIterator<T>, f: (v: T) => IIteratorResult<U>) {
   return IteratorCreate(function (v?: any) {
-    let result = IteratorNext(iter, v);
+    const result = IteratorNext(iter, v);
     return result.done ? <any> result : f(result.value);
   });
 }
+*/
 
 function IteratorResultCreate<T>(done: boolean, value: T) {
   return { done: done, value: value };
@@ -90,7 +92,7 @@ export class Iterator<T> implements IIterator<T> {
 
   static concat<T>(...args: IIterator<T>[]): Iterator<T> {
     let argi = 0;
-    let argc = args.length;
+    const argc = args.length;
     let current = args[argi];
     let done = false;
 

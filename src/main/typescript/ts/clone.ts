@@ -6,7 +6,7 @@ function ObjectCreate(proto: any, descriptors: any) {
     returnValue = Object.create(proto, descriptors);
   } else {
     ObjectConstructor.prototype = proto;
-    let o: any = new ObjectConstructor();
+    const o: any = new ObjectConstructor();
     ObjectConstructor.prototype = null;
     returnValue = o;
   }
@@ -16,15 +16,15 @@ function GetPrototypeOf(o: any) {
   return Object.getPrototypeOf ? Object.getPrototypeOf(o) : o.__proto__;
 }
 function OwnDescriptors(o: any): { [k: string]: PropertyDescriptor } {
-  let descriptors: any = {};
+  const descriptors: any = {};
   if (Object.getOwnPropertyNames) {
-    let props = Object.getOwnPropertyNames(o);
-    let getDescriptor = Object.getOwnPropertyDescriptor;
-    for (let prop of props) {
+    const props = Object.getOwnPropertyNames(o);
+    const getDescriptor = Object.getOwnPropertyDescriptor;
+    for (const prop of props) {
       descriptors[prop] = getDescriptor(o, prop);
     }
   } else {
-    for (let prop in o) {
+    for (const prop in o) {
       if (o.hasOwnProperty(prop)) {
         descriptors[prop] = {
           configurable: true,
@@ -39,7 +39,7 @@ function OwnDescriptors(o: any): { [k: string]: PropertyDescriptor } {
 }
 function IsDefined(o: any) { return o !== undefined && o !== null; }
 function ToStringTag(o: any) {
-  let c = o.constructor;
+  const c = o.constructor;
   return c && c.name || Object.prototype.toString.call(o).slice(8, -1);
 }
 
@@ -52,7 +52,7 @@ export function isIClone(o: any): boolean {
 }
 
 export function clone<T>(o: T): T {
-  let anyVal = <any> o;
+  const anyVal = <any> o;
   let returnValue: T = o;
   switch (typeof anyVal) {
   case "object":
@@ -75,8 +75,8 @@ export function clone<T>(o: T): T {
     let f: any = (<any> returnValue).__cloned__ = anyVal.__cloned__ || o;
     returnValue = <any> function () {
       let r: any;
-      let t = this;
-      let argc = arguments.length;
+      const t = this;
+      const argc = arguments.length;
 
       switch (argc) {
         case 0: r = t ? f() : f.call(t); break;

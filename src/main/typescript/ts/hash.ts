@@ -16,14 +16,14 @@ function ObjectCreate(proto?: any) {
     returnValue = Object.create(proto);
   } else {
     ObjectConstructor.prototype = proto;
-    let o: any = new ObjectConstructor();
+    const o: any = new ObjectConstructor();
     ObjectConstructor.prototype = null;
     returnValue = o;
   }
   return returnValue;
 }
 function DictCreate() {
-  let _data = ObjectCreate(null);
+  const _data = ObjectCreate(null);
   return {
     get(k: string) {
       return _data[k];

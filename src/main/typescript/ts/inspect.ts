@@ -16,7 +16,7 @@ function OwnKeys(o: any) {
     keys = Object.keys(o);
   } else {
     keys = [];
-    for (let prop in o) {
+    for (const prop in o) {
       if (o.hasOwnProperty(prop)) {
         keys.push(prop);
       }
@@ -33,7 +33,7 @@ function SetCreate<T>(): { has: (o: T) => boolean; add: (o: T) => void } {
   if (typeof Set !== "undefined") {
     return new Set();
   } else {
-    let d: T[] = [];
+    const d: T[] = [];
     return {
       add(o) { if (d.indexOf(o) !== -1) { d.push(o); } },
       has(o) { return d.indexOf(o) !== -1; },
@@ -56,7 +56,7 @@ function DumpEmpty<T>(i: Inspector, o: T, orElse?: (o: T) => string): string {
 
 function DumpObject(constructorName: string, content: string) {
   content = ToString(content);
-  let sep = content.length ? " " : "";
+  const sep = content.length ? " " : "";
   return (
     "" +
     (constructorName && constructorName !== "Object" ? constructorName + " " : "") +
@@ -88,8 +88,8 @@ export class Inspector implements IInspector {
     }
   ) {
     if (conf) {
-      let keys = OwnKeys(conf);
-      for (let key of keys) {
+      const keys = OwnKeys(conf);
+      for (const key of keys) {
         if (this.hasOwnProperty(key)) {
           this[key] = conf[key];
         }
@@ -111,7 +111,7 @@ export class Inspector implements IInspector {
         case "function": s = this.stringifyFunction(o); break;
         default:
           let init = !this._refs;
-          let refs = init ? (this._refs = SetCreate()) : this._refs;
+          // let refs = init ? (this._refs = SetCreate()) : this._refs;
           let strTag = o.constructor ? FunctionName(o.constructor) : "Object";
           switch (strTag) {
             // Special
@@ -162,7 +162,7 @@ export class Inspector implements IInspector {
   }
 
   stringifyDate(o: Date): string {
-    let s = DumpEmpty(this, o);
+    const s = DumpEmpty(this, o);
     return s === null ? DumpObject("Date", o.toISOString()) : s;
   }
 
@@ -178,7 +178,7 @@ export class Inspector implements IInspector {
   }
 
   stringifyRegExp(o: RegExp): string {
-    let s = DumpEmpty(this, o);
+    const s = DumpEmpty(this, o);
     return s === null ? ToString(o) : s;
   }
 
@@ -201,9 +201,9 @@ export class Inspector implements IInspector {
     let s = DumpEmpty(this, o);
     if (s === null) {
       s = FunctionToString(o);
-      let i = s.indexOf("{");
-      let head = s.slice(0, i + 1);
-      let content = s.slice(i + 1, -1);
+      const i = s.indexOf("{");
+      const head = s.slice(0, i + 1);
+      const content = s.slice(i + 1, -1);
       s = head + StringTruncate(content, 0, this.ellipsis) + "}";
     }
     return s;
@@ -212,9 +212,9 @@ export class Inspector implements IInspector {
   stringifyArray(a: any[], maxDepth: number = this.maxDepth): string {
     let s = DumpEmpty(this, a);
     if (s === null) {
-      let { maxElements, ellipsis } = this;
-      let length = a.length;
-      let truncate = length > maxElements;
+      const { maxElements, ellipsis } = this;
+      const length = a.length;
+      const truncate = length > maxElements;
 
       s = (
         maxDepth <= 0 && length ? ellipsis :
@@ -296,8 +296,8 @@ export class Inspector implements IInspector {
     let s = DumpEmpty(this, o);
     if (s === null) {
       s = "";
-      let ctor = o.constructor;
-      let ctorName = FunctionName(ctor);
+      const ctor = o.constructor;
+      const ctorName = FunctionName(ctor);
       switch (ctorName) {
         // Boxed primitives
         case "Boolean": s = this.stringifyBoolean(o); break;
@@ -316,8 +316,8 @@ export class Inspector implements IInspector {
             truncate = true;
           }
           for (let i = 0; i < keyc; ++i) {
-            let key = keys[i];
-            let val = o[key];
+            const key = keys[i];
+            const val = o[key];
 
             if (i !== 0) {
               s += ", ";
@@ -338,7 +338,7 @@ export function isIInspect(o: any): boolean {
   return (o && typeof o.inspect === "function");
 }
 
-let $inspectorDefault = new Inspector();
+const $inspectorDefault = new Inspector();
 export function stringify(o: any): string {
   return $inspectorDefault.stringify(o);
 }

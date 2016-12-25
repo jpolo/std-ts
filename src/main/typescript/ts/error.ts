@@ -31,9 +31,9 @@ function CaptureStackTrace(error: Error, stripPoint: any) {
   if (GlobalError.captureStackTrace) {
     GlobalError.captureStackTrace(error, stripPoint);
   } else {
-    let stackString = (<any> new GlobalError()).stack;
+    const stackString = (<any> new GlobalError()).stack;
     // Remove first calls
-    let stack = stackString.split("\n").slice(1); // first is Error string, second is __captureStackTrace
+    const stack = stackString.split("\n").slice(1); // first is Error string, second is __captureStackTrace
     error.stack = ToString(error) + "\n" + stack.join("\n");
   }
 }
@@ -76,7 +76,7 @@ class ErrorHandler implements IErrorHandler {
   static compose(handlers: IErrorHandler[]): ErrorHandler {
     return new ErrorHandler(function (e: any) {
       let returnValue: IErrorHandlerResult;
-      for (let handler of handlers) {
+      for (const handler of handlers) {
         returnValue = handler.handleError(e);
         if (returnValue.done) {
           break;
@@ -89,7 +89,7 @@ class ErrorHandler implements IErrorHandler {
   static uncaught(): ErrorHandler {
     return ErrorHandler._uncaught || (ErrorHandler._uncaught = new ErrorHandler(function (e: any) {
       if (e && e.name === FatalError.prototype.name) {
-        let fatalError = <FatalError> e;
+        const fatalError = <FatalError> e;
         HandleUncaughtError(fatalError.error, "Fatal ");
       } else {
         HandleUncaughtError(e, "Uncaught ");
