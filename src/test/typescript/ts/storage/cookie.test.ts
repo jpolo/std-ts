@@ -1,8 +1,5 @@
-import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit";
-import * as cookie from "../../../../main/typescript/ts/storage/cookie";
+import { suite } from '../../../../main/typescript/ts/unit/qunit';
 
+export default suite('ts/storage/cookie', (self) => {
 
-export default suite("ts/storage/cookie", (self) => {
-
-
-})
+});

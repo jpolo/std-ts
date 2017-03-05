@@ -1,4 +1,4 @@
-import { suite, test, testc, Assert } from "../../../main/typescript/ts/unit/qunit";
+import { suite, testc, Assert } from '../../../main/typescript/ts/unit/qunit';
 import {
   Ordering,
   isICompare,
@@ -11,7 +11,7 @@ import {
   min, max,
   equals,
   notEquals
-} from "../../../main/typescript/ts/compare";
+} from '../../../main/typescript/ts/compare';
 
 class AssertCustom extends Assert {
 
@@ -19,20 +19,20 @@ class AssertCustom extends Assert {
   generate<A, B, R>(f: (a: A, b: B) => R, d: Array<[[A, B], R]>): void
   generate<A, B, C, R>(f: (a: A, b: B, c: C) => R, d: Array<[[A, B, C], R]>): void
   generate(f: any, d: any[]): any {
-    for (let r of d) {
-      let [args, expected] = r;
-      let message = "(" +
-        args.map((arg) => this.__dump__(arg)).join(", ") +
-        ") => " +
+    for (const r of d) {
+      const [args, expected] = r;
+      const message = '(' +
+        args.map((arg) => this.__dump__(arg)).join(', ') +
+        ') => ' +
         this.__dump__(expected);
       this.strictEqual(f.apply(null, args), expected, message);
     }
   }
 }
 
-export default suite("ts/compare", (self) => {
+export default suite('ts/compare', (self) => {
   const test = testc(AssertCustom);
-  const data = function <T, R>(d: Array<[[T, T], R]>) { return d; };
+  const data = function <T, R> (d: Array<[[T, T], R]>) { return d; };
 
   const EMPTY = data([
     [[undefined, null], Ordering.None],
@@ -47,16 +47,16 @@ export default suite("ts/compare", (self) => {
     [[false, undefined], Ordering.None],
     [[undefined, false], Ordering.None],
     [[false, null], Ordering.None],
-    [[null, false], Ordering.None],
+    [[null, false], Ordering.None]
   ]);
   const STRINGS = data([
-    [["foo", "foo"], Ordering.Equal],
-    [["a", "b"], Ordering.Less],
-    [["b", "a"], Ordering.Greater],
-    [["a", undefined], Ordering.None],
-    [[undefined, "a"], Ordering.None],
-    [["a", null], Ordering.None],
-    [[null, "a"], Ordering.None],
+    [['foo', 'foo'], Ordering.Equal],
+    [['a', 'b'], Ordering.Less],
+    [['b', 'a'], Ordering.Greater],
+    [['a', undefined], Ordering.None],
+    [[undefined, 'a'], Ordering.None],
+    [['a', null], Ordering.None],
+    [[null, 'a'], Ordering.None]
   ]);
   const NUMBERS = data([
     [[0, 0], Ordering.Equal],
@@ -86,61 +86,60 @@ export default suite("ts/compare", (self) => {
     [[/abc/gi, /bac/gi], Ordering.Less]
   ]);
 
-
-  test(".isICompare()", (assert) => {
+  test('.isICompare()', (assert) => {
     assert.strictEqual(isICompare(undefined), false);
     assert.strictEqual(isICompare(null), false);
     assert.strictEqual(isICompare({ compare: () => { } }), true);
   });
 
-  test(".compare()", (assert) => {
-    assert.generate(compare, EMPTY.concat(<any>STRINGS, BOOLEANS, NUMBERS, DATES));
+  test('.compare()', (assert) => {
+    assert.generate(compare, EMPTY.concat(STRINGS as any, BOOLEANS, NUMBERS, DATES));
   });
 
-  test(".compareBoolean()", (assert) => {
+  test('.compareBoolean()', (assert) => {
     assert.generate(compareBoolean, BOOLEANS.concat(EMPTY));
   });
 
-  test(".compareString()", (assert) => {
+  test('.compareString()', (assert) => {
     assert.generate(compareString, STRINGS.concat(EMPTY));
   });
 
-  test(".compareNumber()", (assert) => {
+  test('.compareNumber()', (assert) => {
     assert.generate(compareNumber, NUMBERS.concat(EMPTY));
   });
 
-  test(".compareDate()", (assert) => {
+  test('.compareDate()', (assert) => {
     assert.generate(compareDate, DATES.concat(EMPTY));
   });
 
-  test(".compareRegExp()", (assert) => {
+  test('.compareRegExp()', (assert) => {
     assert.generate(compareRegExp, REGEXPS.concat(EMPTY));
   });
 
-  test(".min()", (assert) => {
+  test('.min()', (assert) => {
     assert.strictEqual(min(0, 0, compareNumber), 0);
     assert.strictEqual(min(0, 1, compareNumber), 0);
     assert.strictEqual(min(-1, 1, compareNumber), -1);
-    assert.strictEqual(min("a", "b", compareString), "a");
+    assert.strictEqual(min('a', 'b', compareString), 'a');
   });
 
-  test(".max()", (assert) => {
+  test('.max()', (assert) => {
     assert.strictEqual(max(0, 1, compareNumber), 1);
     assert.strictEqual(max(-1, 1, compareNumber), 1);
-    assert.strictEqual(max("a", "b", compareString), "b");
+    assert.strictEqual(max('a', 'b', compareString), 'b');
   });
 
-  test(".equals()", (assert) => {
+  test('.equals()', (assert) => {
     assert.strictEqual(equals(0, 1, compareNumber), false);
     assert.strictEqual(equals(-1, 1, compareNumber), false);
-    assert.strictEqual(equals("a", "b", compareString), false);
-    assert.strictEqual(equals("a", "a", compareString), true);
+    assert.strictEqual(equals('a', 'b', compareString), false);
+    assert.strictEqual(equals('a', 'a', compareString), true);
   });
 
-  test(".notEquals()", (assert) => {
+  test('.notEquals()', (assert) => {
     assert.strictEqual(notEquals(0, 1, compareNumber), true);
     assert.strictEqual(notEquals(-1, 1, compareNumber), true);
-    assert.strictEqual(notEquals("a", "b", compareString), true);
-    assert.strictEqual(notEquals("a", "a", compareString), false);
+    assert.strictEqual(notEquals('a', 'b', compareString), true);
+    assert.strictEqual(notEquals('a', 'a', compareString), false);
   });
-})
+});

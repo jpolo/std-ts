@@ -1,4 +1,4 @@
-import { IIterableIterator, IIteratorResult } from "./iterator";
+import { IIterableIterator, IIteratorResult } from './iterator';
 
 export interface IGeneratorResult<T> extends IIteratorResult<T> {
 
@@ -17,10 +17,10 @@ function IteratorResultCreate<T>(done: boolean, value: T): IIteratorResult<T> {
 function IsGenerator(o: any): boolean {
   return (
     o !== null &&
-    typeof o === "object" &&
-    typeof o.next === "function" &&
-    typeof o.return === "function" &&
-    typeof o.throw === "function"
+    typeof o === 'object' &&
+    typeof o.next === 'function' &&
+    typeof o.return === 'function' &&
+    typeof o.throw === 'function'
   );
 }
 
@@ -35,7 +35,7 @@ function GeneratorNext<T, Next>(gen: IGenerator<T>, v?: any): IIteratorResult<T>
 function GeneratorMap<T, U>(gen: IGenerator<T>, f: (v: T) => U): Generator<U> {
   return GeneratorCreate(function (v?: any) {
     const iterResult = GeneratorNext(gen, v);
-    const iterMapped: IIteratorResult<U> = iterResult.done ? <any> iterResult : IteratorResultCreate(false, f(iterResult.value));
+    const iterMapped: IIteratorResult<U> = iterResult.done ? iterResult as any : IteratorResultCreate(false, f(iterResult.value));
     return iterMapped;
   });
 }

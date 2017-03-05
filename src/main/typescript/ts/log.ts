@@ -1,7 +1,7 @@
 /* tslint:disable:no-namespace no-bitwise */
 
-import * as console from "./console";
-import * as time from "./time";
+import * as console from './console';
+import * as time from './time';
 
 // ECMA like functions
 // const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
@@ -72,9 +72,9 @@ export class Level implements ILevel {
   static cast(o: any): Level {
     if (o instanceof Level) {
       return o;
-    } else if (typeof o === "number") {
+    } else if (typeof o === 'number') {
       return Level.fromNumber(o);
-    } else if (typeof o === "string") {
+    } else if (typeof o === 'string') {
       return Level.fromString(o);
     }
   }
@@ -95,10 +95,10 @@ export class Level implements ILevel {
     const byName = Level._instances;
     const byValue = Level._byValue;
     if (byName[name]) {
-      throw new Error(byName[name] + " is already defined");
+      throw new Error(byName[name] + ' is already defined');
     }
     if (byValue[level]) {
-      throw new Error(byValue[level] + " is already defined");
+      throw new Error(byValue[level] + ' is already defined');
     }
     const levelObj = byName[name] = byValue[level] = new Level(name, level, Level._constructorKey);
     return levelObj;
@@ -118,7 +118,7 @@ export class Level implements ILevel {
     constructorKey: any
   ) {
     if (constructorKey !== Level._constructorKey) {
-      throw new Error("new Level() cannot be called directly");
+      throw new Error('new Level() cannot be called directly');
     }
   }
 
@@ -147,11 +147,11 @@ export class Level implements ILevel {
   }
 }
 
-export const DEBUG = Level.create("DEBUG", 0);
-export const INFO = Level.create("INFO", 10);
-export const WARN = Level.create("WARN", 20);
-export const ERROR = Level.create("ERROR", 30);
-export const FATAL = Level.create("FATAL", 40);
+export const DEBUG = Level.create('DEBUG', 0);
+export const INFO = Level.create('INFO', 10);
+export const WARN = Level.create('WARN', 20);
+export const ERROR = Level.create('ERROR', 30);
+export const FATAL = Level.create('FATAL', 40);
 
 export class Message implements IMessage {
 
@@ -197,7 +197,7 @@ export class Message implements IMessage {
   }
 
   toString(): string {
-    return `[${this.level.name}|${this.group}] ${this.data.join(" ")}`;
+    return `[${this.level.name}|${this.group}] ${this.data.join(' ')}`;
   }
 }
 
@@ -331,7 +331,7 @@ export class Logger {
   protected _dispatch(level: ILevel, args: any[]): void  {
     const { name, $dispatcher } = this;
     if (!$dispatcher) {
-      throw new Error("dispatcher is required");
+      throw new Error('dispatcher is required');
     }
 
     // if (dispatcher.isEnabledFor(level, name)) {
@@ -417,7 +417,7 @@ export namespace reporter {
   }
 
   const $consoleFormatterDefault: IConsoleFormatter = function (logMessage: IMessage) {
-    return ["[" + logMessage.group + "]"].concat(logMessage.data);
+    return ['[' + logMessage.group + ']'].concat(logMessage.data);
   };
 
   export class Array implements IReporter {

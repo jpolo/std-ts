@@ -9,20 +9,20 @@ export interface IDictLike<T> {
 }
 
 export interface IDict<T> {
-   [key: string]: T;
+  [key: string]: T;
 }
 
 // ECMA like spec
 function IsObject(o: any) {
-  return typeof o === "object";
+  return typeof o === 'object';
 }
 
 function IsNumber(o: any) {
-  return typeof o === "number";
+  return typeof o === 'number';
 }
 
 function IsFunction(o: any) {
-  return typeof o === "function";
+  return typeof o === 'function';
 }
 
 function IsDictLike(o: any) {

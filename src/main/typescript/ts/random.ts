@@ -1,6 +1,6 @@
 /* tslint:disable:no-bitwise */
 
-import { /*IIteratorResult,*/ IIterator } from "./iterator";
+import { /*IIteratorResult,*/ IIterator } from './iterator';
 
 declare function require(s: string): any; // nodejs
 declare const process: any;
@@ -81,7 +81,7 @@ export function Adapter<F extends IRandomGeneratorAdapter>(name: string) {
 }
 
 export class RandomGeneratorAdapter implements IRandomGenerator<number> {
-  constructor(protected _next: { (v?: any): number }, public hint = "abstract") {}
+  constructor(protected _next: { (v?: any): number }, public hint = 'abstract') {}
 
   next(v?: any) {
     return { done: false, value: this._next(v) };
@@ -106,14 +106,14 @@ export class RandomGeneratorAdapter implements IRandomGenerator<number> {
 
 export class RandomGenerator extends RandomGeneratorAdapter {
 
-  static adapterDefault = "rc4";
+  static adapterDefault = 'rc4';
 
   protected _adapter: IRandomGenerator<number>;
 
-  constructor(type: string = RandomGenerator.adapterDefault, seed = "") {
+  constructor(type: string = RandomGenerator.adapterDefault, seed = '') {
     const Constructor = AdapterRegistry[type];
     if (!Constructor) {
-      throw new ReferenceError(type + " is not a valid adapter");
+      throw new ReferenceError(type + ' is not a valid adapter');
     }
     const adapter = new Constructor(seed);
     super((v) => {
@@ -126,11 +126,11 @@ export class RandomGenerator extends RandomGeneratorAdapter {
   }
 }
 
-@Adapter("nodejs")
+@Adapter('nodejs')
 class RandomGeneratorNodeJS extends RandomGeneratorAdapter {
   static isSupported(): boolean {
     try {
-      require("crypto");
+      require('crypto');
       return true;
     } catch (e) {
       return false;
@@ -139,7 +139,7 @@ class RandomGeneratorNodeJS extends RandomGeneratorAdapter {
 
   constructor(seed?: string) {
     const numBytes = 4;
-    const crypto = require("crypto");
+    const crypto = require('crypto');
     super(function () {
       let returnValue = NaN;
       if (crypto) {
@@ -152,21 +152,21 @@ class RandomGeneratorNodeJS extends RandomGeneratorAdapter {
           // XXX should re-throw any error except insufficient entropy
           bytes = crypto.pseudoRandomBytes(numBytes);
         }
-        const result = bytes.toString("hex");
+        const result = bytes.toString('hex');
         // If the number of digits is odd, we'll have generated an extra 4 bits
         // of randomness, so we need to trim the last digit.
         returnValue = parseInt(result.substring(0, 8), 16);
         returnValue *= 2.3283064365386963e-10; // 2^-32
       }
       return returnValue;
-    }, "nodejs");
+    }, 'nodejs');
   }
 }
 
-@Adapter("browser")
+@Adapter('browser')
 class RandomGeneratorBrowser extends RandomGeneratorAdapter {
   static isSupported(): boolean {
-    return !!(typeof window !== "undefined" ? window.crypto : null);
+    return !!(typeof window !== 'undefined' ? window.crypto : null);
   }
 
   constructor(seed?: string) {
@@ -181,11 +181,11 @@ class RandomGeneratorBrowser extends RandomGeneratorAdapter {
         returnValue = Random();
       }
       return returnValue;
-    }, "browser");
+    }, 'browser');
   }
 }
 
-@Adapter("rc4")
+@Adapter('rc4')
 export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
 
   static isSupported(): boolean {
@@ -230,7 +230,7 @@ export class RandomGeneratorRC4 extends RandomGeneratorAdapter  {
         output += _nextByte();
       }
       return output / RC4_DENOM;
-    }, "rc4");
+    }, 'rc4');
 
     function _nextByte() {
       _i = (_i + 1) % RC4_WIDTH;
@@ -274,7 +274,7 @@ export function nextInt(min = INT_MIN_VALUE, max = INT_MAX_VALUE, rng: IRandomGe
 }
 
 export function nextChar(chars?: string, rng: IRandomGenerator<number> = randomGenerator): string {
-  return GenerateChar(rng, chars || "abcdefghijklmnopqrstuvwxyz0123456789");
+  return GenerateChar(rng, chars || 'abcdefghijklmnopqrstuvwxyz0123456789');
 }
 
 /*export function nextExponential(lambda: number, ng: IEngine = engine.current): number {

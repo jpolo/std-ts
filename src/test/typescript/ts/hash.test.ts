@@ -1,7 +1,7 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit";
-import { hash, hashBoolean, hashNumber, hashString } from "../../../main/typescript/ts/hash";
+import { suite, test, Assert } from '../../../main/typescript/ts/unit/qunit';
+import { hashBoolean, hashNumber, hashString } from '../../../main/typescript/ts/hash';
 
-export default suite("ts/hash", (self) => {
+export default suite('ts/hash', (self) => {
 
   const EMPTY: Array<[any, number]> = [
     [undefined, 0],
@@ -20,11 +20,11 @@ export default suite("ts/hash", (self) => {
   ];
 
   const STRINGS: Array<[string, number]> = [
-    ["", 0]
+    ['', 0]
   ];
 
   function assertAll<Input, Output>(assert: Assert, f: (v: Input) => Output, data: Array<[Input, Output]>) {
-    for (let pair of data) {
+    for (const pair of data) {
       assert.strictEqual(f(pair[0]), pair[1]);
     }
   }
@@ -33,19 +33,19 @@ export default suite("ts/hash", (self) => {
 
   };
 
-  test(".hashBoolean()", (assert) => {
+  test('.hashBoolean()', (assert) => {
     assertAll(assert, hashBoolean, EMPTY);
     assertAll(assert, hashBoolean, BOOLEANS);
   });
 
-  test(".hashNumber()", (assert) => {
+  test('.hashNumber()', (assert) => {
     assertAll(assert, hashNumber, EMPTY);
     assertAll(assert, hashNumber, NUMBERS);
   });
 
-  test(".hashString()", (assert) => {
+  test('.hashString()', (assert) => {
     assertAll(assert, hashString, EMPTY);
     assertAll(assert, hashString, STRINGS);
   });
 
-})
+});

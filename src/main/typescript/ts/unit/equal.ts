@@ -5,7 +5,7 @@ import {
   SameValue,
   OwnKeysSorted,
   ToStringTag
-} from "./util";
+} from './util';
 
 /**
  * Return ```true``` if ```a``` is same value as ```b```
@@ -105,7 +105,7 @@ function equalsRegExp(a: RegExp, b: RegExp): boolean {
     // (gmi) ...
     a.ignoreCase === b.ignoreCase &&
     a.multiline === b.multiline &&
-    a["sticky"] === b["sticky"]
+    a['sticky'] === b['sticky']
   );
 }
 
@@ -145,7 +145,7 @@ function equalsObject(a: any, b: any, equalsFn: (av: any, bv: any) => boolean): 
 }
 
 function equalsMap(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
-  console.warn("equalsMap() not implemented");
+  console.warn('equalsMap() not implemented');
   return true;
 }
 
@@ -175,26 +175,26 @@ function equalsAny(a: any, b: any, equalsFn: (a: any, b: any) => boolean) {
     const atag = ToStringTag(a);
     const btag = ToStringTag(b);
     switch (atag) {
-      case "Undefined":
-      case "Null":
-      case "Boolean":
+      case 'Undefined':
+      case 'Null':
+      case 'Boolean':
         return false;
-      case "Number":
+      case 'Number':
         return (btag === atag) && equalsFloat(a, b, 0);
-      case "String":
+      case 'String':
         return (btag === atag) && (a == b);
-      case "Array":
+      case 'Array':
         return (btag === atag) && equalsArray(a, b, equalsFn);
-      case "Date":
+      case 'Date':
         return (btag === atag) && equalsDate(a, b);
-      case "RegExp":
+      case 'RegExp':
         return (btag === atag) && equalsRegExp(a, b);
-      case "Map":
+      case 'Map':
         return (btag === atag) && equalsMap(a, b, equalsFn);
-      case "Set":
+      case 'Set':
         return (btag === atag) && equalsSet(a, b, equalsFn);
-      case "Object":
-      case "Function":
+      case 'Object':
+      case 'Function':
       default:
         return equalsObject(a, b, equalsFn);
     }

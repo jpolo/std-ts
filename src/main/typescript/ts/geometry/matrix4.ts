@@ -1,6 +1,6 @@
 // Util
-export type Matrix4 = [number, number, number, number]
-type Matrix4Constructor =  { new(n: number): Matrix4 }
+export type Matrix4 = [number, number, number, number];
+type Matrix4Constructor =  { new(n: number): Matrix4 };
 
 const Float64Array: any = Array;
 function GetConstructor(o: Matrix4): Matrix4Constructor { return o.constructor || Float64Array; };
@@ -49,19 +49,18 @@ function ArrayFill(a: Matrix4, v: number) {
   a[15] = v;
 }
 
-
 export function copy(m: Matrix4, dest?: Matrix4): Matrix4 {
-  let r = dest === undefined ? ArrayCreateFrom(m) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(m) : dest;
   ArrayCopy(m, r);
   return r;
 }
 
 export function determinant(m: Matrix4): number {
-  let m00 = m[0], m01 = m[1], m02 = m[2], m03 = m[3];
-  let m10 = m[4], m11 = m[5], m12 = m[6], m13 = m[7];
-  let m20 = m[8], m21 = m[9], m22 = m[10], m23 = m[11];
-  let m30 = m[12], m31 = m[13], m32 = m[14], m33 = m[15];
-  let
+  const m00 = m[0], m01 = m[1], m02 = m[2], m03 = m[3];
+  const m10 = m[4], m11 = m[5], m12 = m[6], m13 = m[7];
+  const m20 = m[8], m21 = m[9], m22 = m[10], m23 = m[11];
+  const m30 = m[12], m31 = m[13], m32 = m[14], m33 = m[15];
+  const
   b00 = m00 * m11 - m01 * m10,
   b01 = m00 * m12 - m02 * m10,
   b02 = m00 * m13 - m03 * m10,
@@ -78,7 +77,7 @@ export function determinant(m: Matrix4): number {
 }
 
 export function identity(dest?: Matrix4): Matrix4 {
-  let r = dest === undefined ? ArrayCreate(Float64Array) : dest;
+  const r = dest === undefined ? ArrayCreate(Float64Array) : dest;
   r[0] = 1;
   r[1] = 0;
   r[2] = 0;
@@ -102,9 +101,9 @@ export function identity(dest?: Matrix4): Matrix4 {
 }
 
 export function transpose(m: Matrix4, dest?: Matrix4): Matrix4 {
-  let r = dest === undefined ? ArrayCreateFrom(m) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(m) : dest;
   if (m === dest) {
-    let m01 = m[1], m02 = m[2], m03 = m[3],
+    const m01 = m[1], m02 = m[2], m03 = m[3],
         m12 = m[6], m13 = m[7],
         m23 = m[11];
 

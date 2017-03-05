@@ -14,13 +14,13 @@ export const SQRT2 = Math.SQRT2;
 // export const Infinity = window.Infinity;
 
 // Util
-const global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+const global: any = typeof window !== 'undefined' ? window : (function () { return this; }());
 const ONE_THIRD = 1 / 3;
 const RADIAN_TO_DEGREE = 180 / Math.PI;
 const DEGREE_TO_RADIAN = 1 / RADIAN_TO_DEGREE;
 
 function ToNumber(o: any) { return Number(o); }
-function IsNaN(n: number) { return n !== n; };
+function IsNaN(n: number) { return n !== n; }
 function IsFinite(o: any) { return global.isFinite(o); }
 const MathAcos = Math.acos;
 const MathAsin = Math.asin;
@@ -30,12 +30,12 @@ const MathAtan2 = Math.atan2;
 const MathAbs = Math.abs;
 const MathCeil = Math.ceil;
 const MathCos = Math.cos;
-const MathClz32 = Math["clz32"] || function (n: number) {
+const MathClz32 = Math['clz32'] || function (n: number) {
   n = ToNumber(n) >>> 0;
   return n ? 32 - n.toString(2).length : 32;
 };
 const MathExp = Math.exp;
-const MathExpm1 = Math["expm1"] || function (n: number) {
+const MathExpm1 = Math['expm1'] || function (n: number) {
   n = ToNumber(n);
   return (
     n === -Infinity ? -1 :
@@ -43,29 +43,29 @@ const MathExpm1 = Math["expm1"] || function (n: number) {
     MathExp(n) - 1
   );
 };
-const Math_floor = Math.floor;
-const Math_imul = Math["imul"] || function (a: number, b: number) {
+const MathFloor = Math.floor;
+const Math_imul = Math['imul'] || function (a: number, b: number) {
   // polyfill from mozilla
   a = a >>> 0;
   b = b >>> 0;
-  let ah = (a >>> 16) & 0xffff;
-  let al = a & 0xffff;
-  let bh = (b >>> 16) & 0xffff;
-  let bl = b & 0xffff;
+  const ah = (a >>> 16) & 0xffff;
+  const al = a & 0xffff;
+  const bh = (b >>> 16) & 0xffff;
+  const bl = b & 0xffff;
   // the shift by 0 fixes the sign on the high part
   // the final |0 converts the unsigned value into a signed value
   return ((al * bl) + (((ah * bl + al * bh) << 16) >>> 0) | 0);
 };
 const MathLog = Math.log;
-const MathLog2 = Math["log2"] || function (n: number) { return MathLog(n) * LOG2E; };
-const MathLog10 = Math["log10"] || function (n: number) { return MathLog(n) * LOG10E; };
-const MathLog1p = Math["log1p"] || function (n: number) { return MathLog(1 + n); };
+const MathLog2 = Math['log2'] || function (n: number) { return MathLog(n) * LOG2E; };
+const MathLog10 = Math['log10'] || function (n: number) { return MathLog(n) * LOG10E; };
+const MathLog1p = Math['log1p'] || function (n: number) { return MathLog(1 + n); };
 const Math_pow = Math.pow;
 const Math_round = Math.round;
-const Math_sign = Math["sign"] || function (n: number) { return IsNaN(n) ? n : n > 0 ? 1 : n < 0 ? -1 : 0; };
+const Math_sign = Math['sign'] || function (n: number) { return IsNaN(n) ? n : n > 0 ? 1 : n < 0 ? -1 : 0; };
 const MathSin = Math.sin;
 const MathSqrt = Math.sqrt;
-const MathCbrt = Math["cbrt"] || function (n: number) {
+const MathCbrt = Math['cbrt'] || function (n: number) {
   n = ToNumber(n);
   return (
     n === 0 ? n :
@@ -74,8 +74,8 @@ const MathCbrt = Math["cbrt"] || function (n: number) {
   );
 };
 const MathTan = Math.tan;
-const MathTrunc = Math["trunc"] || function (n: number) { return n > 0 ? Math_floor(n) : MathCeil(n); };
-const MathAcosh = Math["acosh"] || function (n: number) {
+const MathTrunc = Math['trunc'] || function (n: number) { return n > 0 ? MathFloor(n) : MathCeil(n); };
+const MathAcosh = Math['acosh'] || function (n: number) {
   n = ToNumber(n);
   return (
     IsNaN(n) || n < 1 ? NaN :
@@ -84,7 +84,7 @@ const MathAcosh = Math["acosh"] || function (n: number) {
     MathLog(n + MathSqrt(n * n - 1))
   );
 };
-const MathAsinh = Math["asinh"] || function (n: number) {
+const MathAsinh = Math['asinh'] || function (n: number) {
   n = ToNumber(n);
   return (
     n === 0 || !IsFinite(n) ? n :
@@ -92,7 +92,7 @@ const MathAsinh = Math["asinh"] || function (n: number) {
     MathLog(n + MathSqrt(n * n + 1))
   );
 };
-const MathCosh = Math["cosh"] || function (n: number) {
+const MathCosh = Math['cosh'] || function (n: number) {
   n = ToNumber(n);
   return (
     n === 0 ? 1 :
@@ -103,7 +103,7 @@ const MathCosh = Math["cosh"] || function (n: number) {
     MathExp(n) + MathExp(-n) / 2
   );
 };
-const MathAtanh = Math["atanh"] || function (n: number) {
+const MathAtanh = Math['atanh'] || function (n: number) {
   n = ToNumber(n);
   return (
     IsNaN(n) || n < -1 || n > 1 ? NaN :
@@ -113,14 +113,14 @@ const MathAtanh = Math["atanh"] || function (n: number) {
     0.5 * MathLog((1 + n) / (1 - n))
   );
 };
-const MathSinh = Math["sinh"] || function (n: number) {
+const MathSinh = Math['sinh'] || function (n: number) {
   n = ToNumber(n);
   return (
     !IsFinite(n) || n === 0 ? n :
     (MathExp(n) - MathExp(-n)) / 2
   );
 };
-const MathTanh = Math["tanh"] || function (n: number) {
+const MathTanh = Math['tanh'] || function (n: number) {
   n = ToNumber(n);
   let exp, nexp;
   return (
@@ -192,13 +192,13 @@ export function expm1(n: number): number {
 }
 
 export function floor(n: number): number {
-  return Math_floor(n);
+  return MathFloor(n);
 }
 
 export function hypot(...args: number[]): number {
   // See: http://mzl.la/1HDi6xP
   let n = 0;
-  for (let arg of args) {
+  for (const arg of args) {
     if (arg === Infinity || arg === -Infinity) {
       return Infinity;
     }
@@ -263,7 +263,7 @@ export function log1p(n: number): number {
 
 export function mod(n: number, divisor: number): number {
   return (
-    divisor > 0 ? n - divisor * Math_floor(n / divisor) :
+    divisor > 0 ? n - divisor * MathFloor(n / divisor) :
     divisor == 0 ? n :
     NaN
   );

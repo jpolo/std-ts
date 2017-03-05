@@ -16,35 +16,35 @@ declare class WeakMap<K, V> {
 //Constant
 const ES_COMPAT = 3;
 
-export const ADD = "add";
-export const UPDATE = "update";
-export const DELETE = "delete";
-export const RECONFIGURE = "reconfigure";
-export const SET_PROTOTYPE = "setPrototype";
-export const PREVENT_EXTENSIONS = "preventExtensions";
+export const ADD = 'add';
+export const UPDATE = 'update';
+export const DELETE = 'delete';
+export const RECONFIGURE = 'reconfigure';
+export const SET_PROTOTYPE = 'setPrototype';
+export const PREVENT_EXTENSIONS = 'preventExtensions';
 
 const ALL = [ADD, UPDATE, DELETE, RECONFIGURE, SET_PROTOTYPE, PREVENT_EXTENSIONS];
 
 //Util
-let O = (<any>Object);
+const O = (Object as any);
 const __keys = Object.keys || function (o: any): string[] { const ks = []; for (const k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } } return ks; };
 let __observerDeliver = O.deliverChangeRecords;
 let __observe = O.observe;
 let __unobserve = O.unobserve;
 let __notifier: <T>(o: T) => INotifier<T> = O.getNotifier;
-const __setImmediate = typeof setImmediate !== "undefined" ? setImmediate : setTimeout;
-const __clearImmediate = typeof clearImmediate !== "undefined" ? clearImmediate : clearTimeout;
-const __sym: (o: string) => any = typeof Symbol !== "undefined" ? Symbol : function (s: string) { return "@@" + s; };
+const __setImmediate = typeof setImmediate !== 'undefined' ? setImmediate : setTimeout;
+const __clearImmediate = typeof clearImmediate !== 'undefined' ? clearImmediate : clearTimeout;
+const __sym: (o: string) => any = typeof Symbol !== 'undefined' ? Symbol : function (s: string) { return '@@' + s; };
 let __map: <K, V>() => Map<K, V>;
 let __weakMap: <K, V>() => WeakMap<K, V>;
 const __isFrozen = Object.isFrozen || function (o: any): boolean { return false; };
-const __preventExtensions = Object.preventExtensions || function <T>(o: T) { return o; };
+const __preventExtensions = Object.preventExtensions || function <T> (o: T) { return o; };
 
 //Compat
 if (ES_COMPAT <= 5) {
-  __map = typeof Map !== "undefined" ?
+  __map = typeof Map !== 'undefined' ?
     function () { return new Map(); } :
-    function <K, V>() {
+    function <K, V> () {
       const _keys: K[] = [];
       const _values: V[] = [];
 
@@ -75,9 +75,9 @@ if (ES_COMPAT <= 5) {
         }
       };
     };
-  __weakMap = typeof WeakMap !== "undefined" ?
+  __weakMap = typeof WeakMap !== 'undefined' ?
     function () { return new WeakMap(); } :
-    <any> __map;
+    __map as any;
 }
 
 if (!__observe) {
@@ -85,25 +85,25 @@ if (!__observe) {
     return o ? o[name] : undefined;
   };
   const __assertObject = function (o: any) {
-    if (typeof o !== "object" || o === null) {
-      throw new TypeError(o + " must be a object");
+    if (typeof o !== 'object' || o === null) {
+      throw new TypeError(o + ' must be a object');
     }
   };
   const __assertNotFrozen = function (o: any) {
     if (__isFrozen(o)) {
-      throw new TypeError(o + " must not be frozen");
+      throw new TypeError(o + ' must not be frozen');
     }
   };
   const __assertCallable = function (o: any) {
-    if (typeof o !== "function") {
-      throw new TypeError(o + " must be a callable");
+    if (typeof o !== 'function') {
+      throw new TypeError(o + ' must be a callable');
     }
   };
-  const $$notifier = __sym("notifier");
-  const $$target = __sym("target");
-  const $$pendingChangeRecords = __sym("pendingChangeRecords");
-  const $$changeObservers = __sym("changeObservers");
-  const $$activeChanges = __sym("activeChanges");
+  const $$notifier = __sym('notifier');
+  const $$target = __sym('target');
+  const $$pendingChangeRecords = __sym('pendingChangeRecords');
+  const $$changeObservers = __sym('changeObservers');
+  const $$activeChanges = __sym('activeChanges');
 
   const __enqueueChangeRecord = function (o: any, changeRecord: IChangeRecord<any>) {
     const notifier = __notifier(o);
@@ -134,14 +134,12 @@ if (!__observe) {
       __enqueueChangeRecord(target, newRecord);
     };
 
-
     /*Notifier.prototype.performChange = function (changeType, changeFn) {
 
     };*/
 
     return Notifier;
   }());
-
 
   __observerDeliver = function (callback: IObserver<any>) {
     const changeRecords: IChangeRecord<any>[] = callback[$$pendingChangeRecords];
@@ -180,7 +178,7 @@ if (!__observe) {
   };
 
   const __notifiers = __weakMap<any, INotifier<any>>();
-  __notifier = function <T>(o: T): INotifier<T> {
+  __notifier = function <T> (o: T): INotifier<T> {
     __assertObject(o);
     let notifier: INotifier<T> = null;
     if (!__isFrozen(o)) {

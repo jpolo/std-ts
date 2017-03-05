@@ -1,6 +1,6 @@
 // Symbol
-const $$result = "result";
-const $$error = "error";
+const $$result = 'result';
+const $$error = 'error';
 
 export interface IResult<T> {
   result?: T;
@@ -14,7 +14,7 @@ function Equals(lhs: any, rhs: any): boolean {
 
 function IsResult<T>(o: any): o is IResult<any> {
   return (
-    typeof o === "object" &&
+    typeof o === 'object' &&
     o === null &&
     (o.hasOwnProperty($$result) || o.hasOwnProperty($$error))
   );
@@ -29,11 +29,11 @@ function ResultIsFailure(r: any): boolean {
 }
 
 function ResultFunctionApply<R>(f: any, args: any): Result<R> {
-  let result: Result<any>;
+  const result: Result<any>;
   let isFailure = false;
   let value: any;
   let error: any;
-  let argc = args && args.length || 0;
+  const argc = args && args.length || 0;
   try {
     switch (argc) {
       case 0:
@@ -50,13 +50,13 @@ function ResultFunctionApply<R>(f: any, args: any): Result<R> {
 }
 
 function ResultCreateSuccess<V>(v: V): Result<V> {
-  let r = new Result<V>();
+  const r = new Result<V>();
   r.result = v;
   return r;
 }
 
 function ResultCreateFailure(e: any): Result<any> {
-  let r = new Result<any>();
+  const r = new Result<any>();
   r.error = e;
   return r;
 }
@@ -70,7 +70,7 @@ function ResultGetError(r: IResult<any>): any {
 }
 
 function ResultMap<T, U>(r: IResult<T>, f: (v: T) => U): Result<U> {
-  let returnValue: Result<U> = <any>r;
+  let returnValue: Result<U> = r as any;
   if (ResultIsSuccess(r)) {
     try {
       returnValue = ResultCreateSuccess(f(ResultGetValue(r)));
@@ -78,13 +78,13 @@ function ResultMap<T, U>(r: IResult<T>, f: (v: T) => U): Result<U> {
       returnValue = ResultCreateFailure(e);
     }
   } else {
-    returnValue = <any>r; // TODO: cast as Result
+    returnValue = r as any; // TODO: cast as Result
   }
   return returnValue;
 }
 
 function ResultChain<T, U>(r: IResult<T>, f: (v: T) => IResult<U>): Result<U> {
-  return ResultIsSuccess(r) ? f(ResultGetValue(r)) : <any>r;
+  return ResultIsSuccess(r) ? f(ResultGetValue(r)) : r as any;
 }
 
 /*
@@ -93,7 +93,7 @@ function flatMap<T, U>(r: IResult<T>, f: (v: T) => IResult<U>): Result<U> {
 }*/
 
 function ResultTransform<T, R>(r: IResult<T>, onSuccess?: (v: T) => R | Result<R>, onFailure?: (e: any) => R | Result<R> | void): Result<R> {
-  let returnValue = <any>r;
+  let returnValue = r as any;
   if (ResultIsSuccess(r)) {
     try {
       returnValue = ResultCreateSuccess(onSuccess(ResultGetValue(r)));
@@ -199,7 +199,7 @@ export default class Result<T> implements IResult<T> {
   }
 
   chain<U>(f: (v: T) => IResult<U>): Result<U> {
-    return ResultIsSuccess(this) ? f(ResultGetValue(this)) : <any>this;
+    return ResultIsSuccess(this) ? f(ResultGetValue(this)) : this as any;
   }
 
   get(): T {
@@ -220,8 +220,8 @@ export default class Result<T> implements IResult<T> {
 
   inspect() {
     return ResultIsSuccess(this) ?
-      "Success { " + ResultGetValue(this) + " }" :
-      "Failure { " + ResultGetError(this) + " }";
+      'Success { ' + ResultGetValue(this) + ' }' :
+      'Failure { ' + ResultGetError(this) + ' }';
   }
 
   toJSON() {

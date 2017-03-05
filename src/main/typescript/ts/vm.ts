@@ -1,5 +1,5 @@
 // Util
-const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
+const Global: Window = typeof window !== 'undefined' ? window : (function () { return this; }());
 
 export interface ILocals {
   [key: string]: any;
@@ -33,14 +33,14 @@ export function compile(jscode: string, options: IEvalOption = OptionEmpty): (lo
   const { sourceURL, sourceMappingURL } = options;
   const evalCode = (
     jscode +
-    (sourceURL ? "\n//# sourceURL=" + sourceURL : "") +
-    (sourceMappingURL ? "\n//# sourceMappingURL=" + sourceMappingURL : "")
+    (sourceURL ? '\n//# sourceURL=' + sourceURL : '') +
+    (sourceMappingURL ? '\n//# sourceMappingURL=' + sourceMappingURL : '')
   );
 
   return function (locals) {
     let returnValue;
     if (locals) {
-      fnWithContext = fnWithContext || new Function("__locals__", "with(__locals__) {" + evalCode + "}");
+      fnWithContext = fnWithContext || new Function('__locals__', 'with(__locals__) {' + evalCode + '}');
       returnValue = fnWithContext.call(locals, locals);
     } else {
       fnNoContext = fnNoContext || new Function(evalCode);

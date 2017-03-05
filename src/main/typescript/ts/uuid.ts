@@ -7,7 +7,7 @@ export interface IByteArray {
 // Constant
 const LENGTH = 16;
 // Util
-const __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
+const __global: any = typeof window !== 'undefined' ? window : (function () { return this; }());
 const __buffer: IByteArray = ArrayCreate(16);
 const __rng: () => number[] = (function () {
   let __rng;
@@ -15,7 +15,7 @@ const __rng: () => number[] = (function () {
   //Node
   if (typeof __global.require == 'function') {
     try {
-      let _rb = __global.require('crypto').randomBytes;
+      const _rb = __global.require('crypto').randomBytes;
       __rng = _rb ? function () {
         return _rb(LENGTH);
       } : null;
@@ -55,7 +55,7 @@ function Compare(a: number, b: number) {
 
 function ArrayCreate(length: number): IByteArray {
   let returnValue;
-  if (typeof Uint8Array !== "undefined") {
+  if (typeof Uint8Array !== 'undefined') {
     returnValue = new Uint8Array(length);
   } else {
     returnValue = new Array(length);
@@ -117,10 +117,10 @@ const __uint8ToHex: string[] = [];
 function Array16ToString(a: IByteArray) {
   const f = __uint8ToHex;
   return f[a[0]] + f[a[1]] +
-    f[a[2]] + f[a[3]] + "-" +
-    f[a[4]] + f[a[5]] + "-" +
-    f[a[6]] + f[a[7]] + "-" +
-    f[a[8]] + f[a[9]] + "-" +
+    f[a[2]] + f[a[3]] + '-' +
+    f[a[4]] + f[a[5]] + '-' +
+    f[a[6]] + f[a[7]] + '-' +
+    f[a[8]] + f[a[9]] + '-' +
     f[a[10]] + f[a[11]] +
     f[a[12]] + f[a[13]] +
     f[a[14]] + f[a[15]];
@@ -128,7 +128,7 @@ function Array16ToString(a: IByteArray) {
 
 const __hexToUint8: { [k: string]: number } = {};
 for (let i = 0; i < 256; i++) {
-  let s = (i + 0x100).toString(16).substr(1);
+  const s = (i + 0x100).toString(16).substr(1);
   __uint8ToHex[i] = s;
   __hexToUint8[s] = i;
 }
@@ -154,12 +154,12 @@ function setRandomBytes(a: IByteArray): void {
 function parse(s: string): number[] {
   const byteArray = new Array(LENGTH);
   let i = 0;
-  s.toLowerCase().replace(/[0-9a-f]{2}/g, <any> function (oct: string) {
+  s.toLowerCase().replace(/[0-9a-f]{2}/g, function (oct: string) {
     if (i < LENGTH) { // Don't overflow!
       byteArray[i] = __hexToUint8[oct] & 0xff;
       i += 1;
     }
-  });
+  } as any);
 
   // Zero out remaining bytes if string was short
   while (i < LENGTH) {
@@ -181,7 +181,7 @@ export class UUID {
     if (o) {
       if (o instanceof UUID) {
         id = o;
-      } else if (typeof o === "string") {
+      } else if (typeof o === 'string') {
         id = UUID.parse(o);
       }
     }
@@ -236,7 +236,7 @@ export class UUID {
   }
 
   inspect() {
-    return "UUID { " + this.toString() + " }";
+    return 'UUID { ' + this.toString() + ' }';
   }
 
   toJSON() {

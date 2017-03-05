@@ -1,11 +1,11 @@
 import {
   SUCCESS, FAILURE, ERROR, WARNING,
   IAssertion, IReporter, ITestReport
-} from "../../unit";
+} from '../../unit';
 import {
   OwnKeysSorted,
   ToString
-} from "../util";
+} from '../util';
 
 export class HTMLReporter implements IReporter {
 
@@ -15,8 +15,8 @@ export class HTMLReporter implements IReporter {
     let statFailed = 0;
     let statSuccess = 0;
     let statError = 0;
-    let sections: {[key: string]: IAssertion[]} = {};
-    let uncaughtErrors: IAssertion[] = [];
+    const sections: {[key: string]: IAssertion[]} = {};
+    const uncaughtErrors: IAssertion[] = [];
 
     function push(sectionName: string, a: IAssertion) {
       let array = sections[sectionName];
@@ -35,7 +35,7 @@ export class HTMLReporter implements IReporter {
         Math.max(endTime, +report.startDate + report.elapsedMilliseconds);
 
       report.assertions.forEach((assertion) =>  {
-        let category = assertion.test.category + "" + assertion.test.name;
+        const category = assertion.test.category + '' + assertion.test.name;
 
         switch (assertion.name) {
           case SUCCESS:
@@ -64,77 +64,77 @@ export class HTMLReporter implements IReporter {
     });
 
     OwnKeysSorted(sections).forEach((sectionName) => {
-      let matrix = "";
-      let messages = "";
+      let matrix = '';
+      let messages = '';
       const section = sections[sectionName];
 
       section.forEach((assertion) => {
         const { message, name, position } = assertion;
-        const positionMessage = position ? " (" + position.getFileName() + ":" + position.getLineNumber() + ")" : "";
+        const positionMessage = position ? ' (' + position.getFileName() + ':' + position.getLineNumber() + ')' : '';
         const typeName = ToString(name);
 
         switch (assertion.name) {
           case SUCCESS:
-            matrix += ".";
+            matrix += '.';
             break;
           case FAILURE:
-            matrix += "F";
-            messages += "\n  [" + typeName + "]  " + message + positionMessage;
+            matrix += 'F';
+            messages += '\n  [' + typeName + ']  ' + message + positionMessage;
             break;
           case WARNING:
-            matrix += "W";
-            messages += "\n  [" + typeName + "]  " + message + positionMessage;
+            matrix += 'W';
+            messages += '\n  [' + typeName + ']  ' + message + positionMessage;
             break;
           case ERROR:
-            matrix += "E";
-            messages += "\n  [" + typeName + "] " + (assertion.stack || message);
+            matrix += 'E';
+            messages += '\n  [' + typeName + '] ' + (assertion.stack || message);
             break;
           default:
             throw TypeError(JSON.stringify(assertion));
         }
       });
 
-      this._print(sectionName + " : ");
+      this._print(sectionName + ' : ');
       this._print(matrix);
       this._print(messages);
-      this._print("\n");
+      this._print('\n');
     });
 
     if (uncaughtErrors.length > 0) {
-      this._println("Uncaught errors : ");
+      this._println('Uncaught errors : ');
       let uncaughtError: IAssertion;
       for (let i = 0, l = uncaughtErrors.length; i < l; ++i) {
         uncaughtError = uncaughtErrors[i];
-        this._println("  [Error]  " + (uncaughtError.stack || uncaughtError.message));
+        this._println('  [Error]  ' + (uncaughtError.stack || uncaughtError.message));
       }
     }
 
     this._println();
-    this._println("Duration : " + (endTime - startTime) + " ms");
-    this._println("Total : " + (statSuccess + statFailed));
-    this._println("Success : " + statSuccess + " / Failed : " + statFailed + " / Errors : " + statError);
-    this._println("" + (statError !== 0 || statFailed !== 0 ? "FAILED!" : "SUCCESS!"));
+    this._println('Duration : ' + (endTime - startTime) + ' ms');
+    this._println('Total : ' + (statSuccess + statFailed));
+    this._println('Success : ' + statSuccess + ' / Failed : ' + statFailed + ' / Errors : ' + statError);
+    this._println('' + (statError !== 0 || statFailed !== 0 ? 'FAILED!' : 'SUCCESS!'));
   }
 
   private _print(s: string) {
-    const id = "ts:trace";
+    const id = 'ts:trace';
     let element = document.getElementById(id);
     if (!element) {
-      element = document.createElement("div");
+      element = document.createElement('div');
       element.id = id;
       document.body.appendChild(element);
     }
     const html = s
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\n/g, "<br>")
-      .replace(/ /g, "&nbsp;");
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>')
+      .replace(/ /g, '&nbsp;');
     element.innerHTML += html;
   }
 
   private _println(v?: string) {
-    this._print("\n");
-    this._print(v || "");
+    this._print('\n');
+    this._print(v || '');
   }
 
 }

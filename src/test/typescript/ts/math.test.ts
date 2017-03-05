@@ -1,10 +1,10 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit";
+import { suite, test, Assert } from '../../../main/typescript/ts/unit/qunit';
 import {
   E, LN10, LN2, PI,
   abs, ceil, exp, floor, isEven, isOdd, imul, round
-} from "../../../main/typescript/ts/math";
+} from '../../../main/typescript/ts/math';
 
-export default suite("ts/math", (self) => {
+export default suite('ts/math', (self) => {
 
   function generate<Input, Return>(
     assert: Assert,
@@ -13,31 +13,31 @@ export default suite("ts/math", (self) => {
     methodName: string
   ) {
     for (let i = 0, l = d.length; i < l; ++i) {
-      let pair = d[i];
-      let value = pair[0];
-      let actual = f(pair[0]);
-      let expected = pair[1];
-      assert.strictEqual(actual, expected,  methodName + "(" + value + ") -> " + actual + " must be " + expected);
+      const pair = d[i];
+      const value = pair[0];
+      const actual = f(pair[0]);
+      const expected = pair[1];
+      assert.strictEqual(actual, expected,  methodName + '(' + value + ') -> ' + actual + ' must be ' + expected);
     }
   }
 
-  test(".E", (assert) => {
+  test('.E', (assert) => {
     assert.strictEqual(E, E);
   });
 
-  test(".LN10", (assert) => {
+  test('.LN10', (assert) => {
     assert.strictEqual(LN10, LN10);
   });
 
-  test(".LN2", (assert) => {
+  test('.LN2', (assert) => {
     assert.strictEqual(LN2, LN2);
   });
 
-  test(".PI", (assert) => {
+  test('.PI', (assert) => {
     assert.strictEqual(PI, PI);
   });
 
-  test(".abs()", (assert) => {
+  test('.abs()', (assert) => {
 
     // Arity
     assert.strictEqual(abs.length, 1);
@@ -50,10 +50,10 @@ export default suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, Infinity]
-    ], abs, "abs");
+    ], abs, 'abs');
   });
 
-  test(".ceil()", (assert) => {
+  test('.ceil()', (assert) => {
 
     // Arity
     assert.strictEqual(ceil.length, 1);
@@ -67,10 +67,10 @@ export default suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ], ceil, "ceil");
+    ], ceil, 'ceil');
   });
 
-  test(".exp()", (assert) => {
+  test('.exp()', (assert) => {
 
     // Arity
     assert.strictEqual(exp.length, 1);
@@ -83,10 +83,10 @@ export default suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, 0]
-    ], exp, "exp");
+    ], exp, 'exp');
   });
 
-  test(".floor()", (assert) => {
+  test('.floor()', (assert) => {
 
     // Arity
     assert.strictEqual(floor.length, 1);
@@ -100,10 +100,10 @@ export default suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ], floor, "floor");
+    ], floor, 'floor');
   });
 
-  test(".imul()", (assert) => {
+  test('.imul()', (assert) => {
 
     // Arity
     assert.strictEqual(imul.length, 2);
@@ -124,7 +124,7 @@ export default suite("ts/math", (self) => {
     ], imul, "imul")*/
   });
 
-  test(".isEven()", (assert) => {
+  test('.isEven()', (assert) => {
 
     // Arity
     assert.strictEqual(isEven.length, 1);
@@ -142,10 +142,10 @@ export default suite("ts/math", (self) => {
       [NaN, false],
       [Infinity, false],
       [-Infinity, false]
-    ], isEven, "isEven");
+    ], isEven, 'isEven');
   });
 
-  test(".isOdd()", (assert) => {
+  test('.isOdd()', (assert) => {
 
     // Arity
     assert.strictEqual(isOdd.length, 1);
@@ -161,10 +161,10 @@ export default suite("ts/math", (self) => {
       [NaN, false],
       [Infinity, false],
       [-Infinity, false]
-    ], isOdd, "isOdd");
+    ], isOdd, 'isOdd');
   });
 
-  test(".round()", (assert) => {
+  test('.round()', (assert) => {
 
     // Arity
     assert.strictEqual(round.length, 1);
@@ -178,7 +178,7 @@ export default suite("ts/math", (self) => {
       [NaN, NaN],
       [Infinity, Infinity],
       [-Infinity, -Infinity]
-    ], round, "round");
+    ], round, 'round');
   });
 
-})
+});

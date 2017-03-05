@@ -81,22 +81,22 @@ export function parse(s: string, options?: IParserOption): YAMLValue {
 }
 
 export function stringify(o: any): string {
-  return "TODO";
+  return 'TODO';
 }
 
 namespace parser {
-  const FILE_ANONYMOUS = "<anonymous>";
+  const FILE_ANONYMOUS = '<anonymous>';
 
   interface IState extends Array<ITokenMatch> { }
 
   function error(sourceURL: string, lineNumber: number, columnNumber: number, message: string) {
-    let s = (
+    const s = (
       message +
-      " (" +
+      ' (' +
       (!sourceURL ? FILE_ANONYMOUS : sourceURL) +
-      ":" + lineNumber +
-      ":" + columnNumber +
-      ")"
+      ':' + lineNumber +
+      ':' + columnNumber +
+      ')'
     );
     return new SyntaxError(s);
   }
@@ -106,7 +106,7 @@ namespace parser {
   }
 
   function peekType(state: IState, type: Token): boolean {
-    let head = state[0];
+    const head = state[0];
     return head && head.token === type;
   }
 
@@ -124,12 +124,12 @@ namespace parser {
 
   function expect(state: IState, type: Token, message: string) {
     if (!accept(state, type)) {
-      let tokenMatch = peek(state);
+      const tokenMatch = peek(state);
       throw error(
         tokenMatch.sourceURL,
         tokenMatch.lineNumber,
         tokenMatch.columnNumber,
-        message + ", " + _context(tokenMatch.matches.input)
+        message + ', ' + _context(tokenMatch.matches.input)
       );
     }
   }
@@ -199,9 +199,9 @@ namespace parser {
 
   function parseDoc(state: IState): any {
     accept(state, Token.DOC);
-    expect(state, Token.INDENT, "expected indent after document");
+    expect(state, Token.INDENT, 'expected indent after document');
     const val = parse(state);
-    expect(state, Token.DEDENT, "document not properly dedented");
+    expect(state, Token.DEDENT, 'document not properly dedented');
     return val;
   }
 
@@ -212,13 +212,13 @@ namespace parser {
    */
   function parseHash(state: IState) {
     let id: string;
-    let hash = {};
+    const hash = {};
     while (peekType(state, Token.ID) && (id = advanceValue(state))) {
-      expect(state, Token.COLON, "expected semi-colon after id");
+      expect(state, Token.COLON, 'expected semi-colon after id');
       ignoreSpace(state);
       if (accept(state, Token.INDENT)) {
         hash[id] = parse(state);
-        expect(state, Token.DEDENT, "hash not properly dedented");
+        expect(state, Token.DEDENT, 'hash not properly dedented');
       } else {
         hash[id] = parse(state);
       }
@@ -231,18 +231,18 @@ namespace parser {
    * '{' (- ','? ws id ':' - expr ws)* '}'
    */
   function parseInlineHash(state: IState) {
-    let hash = {};
+    const hash = {};
     let id;
     let i = 0;
     accept(state, Token.CURLY_BRACE_OPEN);
     while (!accept(state, Token.CURLY_BRACE_CLOSE)) {
       ignoreSpace(state);
       if (i !== 0)  {
-        expect(state, Token.COMMA, "expected comma");
+        expect(state, Token.COMMA, 'expected comma');
       }
       ignoreWhitespace(state);
       if (peekType(state, Token.ID) && (id = advanceValue(state))) {
-        expect(state, Token.COLON, "expected colon after id");
+        expect(state, Token.COLON, 'expected colon after id');
         ignoreSpace(state);
         hash[id] = parse(state);
         ignoreWhitespace(state);
@@ -258,12 +258,12 @@ namespace parser {
    *  )+
    */
   function parseList(state: IState): any[] {
-    let list = [];
+    const list = [];
     while (accept(state, Token.DASH)) {
       ignoreSpace(state);
       if (accept(state, Token.INDENT)) {
         list.push(parse(state));
-        expect(state, Token.DEDENT, "list item not properly dedented");
+        expect(state, Token.DEDENT, 'list item not properly dedented');
       } else {
         list.push(parse(state));
       }
@@ -276,13 +276,13 @@ namespace parser {
    * '[' (- ','? - expr -)* ']'
    */
   function parseInlineList(state: IState): any[] {
-    let list = [];
+    const list = [];
     let i = 0;
     accept(state, Token.SQUARED_BRACKET_OPEN);
     while (!accept(state, Token.SQUARED_BRACKET_CLOSE)) {
       ignoreSpace(state);
       if (i !== 0) {
-        expect(state, Token.COMMA, "expected comma");
+        expect(state, Token.COMMA, 'expected comma');
       }
       ignoreSpace(state);
       list.push(parse(state));
@@ -298,14 +298,14 @@ namespace parser {
    * For full format: http://yaml.org/type/timestamp.html
    */
   function parseTimestamp(state: IState) {
-    let matches = advance(state).matches;
-    let date = new Date("");
+    const matches = advance(state).matches;
+    const date = new Date('');
     const year = parseInt(matches[2], 10);
     const month = parseInt(matches[3], 10);
     const day = parseInt(matches[4], 10);
     const hour = parseInt(matches[5], 10) || 0;
-    let min = parseInt(matches[6], 10) || 0;
-    let sec = parseInt(matches[7], 10) || 0;
+    const min = parseInt(matches[6], 10) || 0;
+    const sec = parseInt(matches[7], 10) || 0;
 
     date.setUTCFullYear(year, month - 1, day);
     date.setUTCHours(hour);
@@ -316,37 +316,37 @@ namespace parser {
   }
 
   export function tokenize(str: string, options: IParserOption): ITokenMatch[] {
-    let strLength = str.length;
+    const strLength = str.length;
     let strConsumedLength = 0;
-    let TOKEN_COUNT = TOKENS.length;
+    const TOKEN_COUNT = TOKENS.length;
     let tokenMatch: ITokenMatch;
     let captures: RegExpExecArray;
     let ignore = false;
     let input;
     let indents = 0;
     let lastIndents = 0;
-    let stack = [];
+    const stack = [];
     let indentAmount = -1;
-    let sourceURL = options.sourceURL;
+    const sourceURL = options.sourceURL;
     let lineNumber = NaN;
     let columnNumber = NaN;
     let buffer = str;
 
     // Windows new line support (CR+LF, \r\n)
-    buffer = buffer.replace(/\r\n/g, "\n");
+    buffer = buffer.replace(/\r\n/g, '\n');
 
     while (buffer.length) {
       for (let i = 0; i < TOKEN_COUNT; ++i) {
-        let matcher = TOKENS[i];
-        let tokenType = matcher[0];
-        let re = matcher[1];
+        const matcher = TOKENS[i];
+        const tokenType = matcher[0];
+        const re = matcher[1];
         if (captures = re.exec(buffer)) {
           // consume
-          buffer = buffer.replace(re, "");
+          buffer = buffer.replace(re, '');
           strConsumedLength = (strLength - buffer.length);
 
-          lineNumber = StringCount(str, "\n", strConsumedLength) + 1;
-          columnNumber = strConsumedLength - str.lastIndexOf("\n", strConsumedLength);
+          lineNumber = StringCount(str, '\n', strConsumedLength) + 1;
+          columnNumber = strConsumedLength - str.lastIndexOf('\n', strConsumedLength);
           tokenMatch = {
             columnNumber: columnNumber,
             lineNumber: lineNumber,
@@ -370,7 +370,7 @@ namespace parser {
               if (indents === lastIndents) {
                 ignore = true;
               } else if (indents > lastIndents + 1) {
-                throw new SyntaxError("invalid indentation, got " + indents + " instead of " + (lastIndents + 1));
+                throw new SyntaxError('invalid indentation, got ' + indents + ' instead of ' + (lastIndents + 1));
               } else if (indents < lastIndents) {
                 input = captures.input;
                 tokenMatch = {
@@ -405,9 +405,9 @@ namespace parser {
 
   function _context(str: string) {
     return (
-      typeof str !== "string" ? "" :
-      "near \"" +
-      (str.slice(0, 25).replace(/\n/g, '\\n')  .replace(/"/g, '\\\"')) + "\""
+      typeof str !== 'string' ? '' :
+      'near \"' +
+      (str.slice(0, 25).replace(/\n/g, '\\n')  .replace(/"/g, '\\\"')) + '\"'
     );
   }
 }

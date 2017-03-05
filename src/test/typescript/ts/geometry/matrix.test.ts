@@ -1,34 +1,34 @@
-import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit";
-import * as matrix2 from "../../../../main/typescript/ts/geometry/matrix2";
-import * as matrix3 from "../../../../main/typescript/ts/geometry/matrix3";
-import * as matrix4 from "../../../../main/typescript/ts/geometry/matrix4";
+import { suite, test } from '../../../../main/typescript/ts/unit/qunit';
+import * as matrix2 from '../../../../main/typescript/ts/geometry/matrix2';
+import * as matrix3 from '../../../../main/typescript/ts/geometry/matrix3';
+import * as matrix4 from '../../../../main/typescript/ts/geometry/matrix4';
 
 interface MatrixModule<T> {
   identity(dest?: T): T;
 }
 
 function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number) {
-  let dimension = Math.sqrt(arity);
+  const dimension = Math.sqrt(arity);
 
   function create(): number[] {
     return new Array(arity);
   }
 
   function copy(a: number[]) {
-    let r = new Array(arity);
-    for (var i = 0; i < arity; i++) {
+    const r = new Array(arity);
+    for (let i = 0; i < arity; i++) {
       r[i] = a[i];
     }
     return r;
   }
 
   function random(): number[] {
-    let __rand = Math.random;
-    let r = create();
+    const __rand = Math.random;
+    const r = create();
     for (let i = 0; i < arity; i++) {
       r[i] = __rand() * 200 - 100;
     }
-    return <any>r;
+    return r as any;
   }
 
   function getCol(i: number) {
@@ -40,17 +40,17 @@ function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number)
   }
 
   function gen(f: () => void, count = 10) {
-    for (var i = 0; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       f();
     }
   }
 
   return suite(n, (self) => {
 
-    test(".identity()", (assert) => {
+    test('.identity()', (assert) => {
       gen(() => {
-        let dest = create();
-        let expected = create();
+        const dest = create();
+        const expected = create();
         for (let i = 0; i < arity; i++) {
           if (getCol(i) === getRow(i)) {
             expected[i] = 1;
@@ -71,9 +71,9 @@ function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number)
   });
 }
 
-const matrix2Suite = generateSuite("ts/geometry/matrix2", matrix2, 2 * 2);
-const matrix3Suite = generateSuite("ts/geometry/matrix3", matrix3, 3 * 3);
-const matrix4Suite = generateSuite("ts/geometry/matrix4", matrix4, 4 * 4);
+const matrix2Suite = generateSuite('ts/geometry/matrix2', matrix2, 2 * 2);
+const matrix3Suite = generateSuite('ts/geometry/matrix3', matrix3, 3 * 3);
+const matrix4Suite = generateSuite('ts/geometry/matrix4', matrix4, 4 * 4);
 
 /*
 var matrixSuite = unit.suite("ts/geometry/matrix", (self) => {
@@ -113,7 +113,6 @@ var matrixSuite = unit.suite("ts/geometry/matrix", (self) => {
       4, 5, 6, 1
     )
   }
-
 
   test('.identity(a)', (assert) => {
 

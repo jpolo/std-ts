@@ -1,20 +1,19 @@
 //Constant
-let ES_COMPAT = 3;
-
+const ES_COMPAT = 3;
 
 //Util
-let __global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-let Reflect = typeof __global.Reflect !== "undefined" ? __global.Reflect : {};
-let __fidentity = function f<T>() { return function (o: T) { return o; }; };
-let __fapply = Function.prototype.apply;
-let __fconst = function f<T>(k: T) { return function () { return k; }; };
-let __polyfill = function poly<T>(f: T): T { (<any> f).polyfill = true; return f; };
-let __polyfilled = function (f: Function): boolean { return !!(<any>f).polyfill; };
-let __str = function (o: any) { return "" + o; };
-let __ohasown = {}.hasOwnProperty;
-let __ostring = Object.prototype.toString;
+const __global: any = typeof window !== 'undefined' ? window : (function () { return this; }());
+const Reflect = typeof __global.Reflect !== 'undefined' ? __global.Reflect : {};
+const __fidentity = function f<T>() { return function (o: T) { return o; }; };
+const __fapply = Function.prototype.apply;
+const __fconst = function f<T>(k: T) { return function () { return k; }; };
+const __polyfill = function poly<T>(f: T): T { (f as any).polyfill = true; return f; };
+const __polyfilled = function (f: Function): boolean { return !!(f as any).polyfill; };
+const __str = function (o: any) { return '' + o; };
+const __ohasown = {}.hasOwnProperty;
+const __ostring = Object.prototype.toString;
 let __okeys = Object.keys;
-let __obj = Object;
+const __obj = Object;
 let __apply = Reflect.apply; // Reflect API still draft
 let __construct = Reflect.construct; // Reflect API still draft
 let __create = Object.create;
@@ -26,18 +25,18 @@ let __propertyNames = Object.getOwnPropertyNames;
 let __propertySymbols = Object['getOwnPropertySymbols'];
 let __has = Reflect.has; // Reflect API still draft
 let __hasOwn = Reflect.hasOwn; // Reflect API still draft
-let __isDataDescriptor = function (descriptor: IPropertyDescriptor) { return ('value' in descriptor || 'writable' in descriptor); };
-let __isAccessorDescriptor = function (descriptor: IPropertyDescriptor) { return ('get' in descriptor || 'set' in descriptor); };
-let __isUndefined = function (o: any) { return typeof o === 'undefined'; };
-let __isFunction = function (o: any) { return typeof o === 'function'; };
-let __isObject = function (o: any){ return o !== null && (typeof o === 'object' || typeof o === 'function'); };
+const __isDataDescriptor = function (descriptor: IPropertyDescriptor) { return ('value' in descriptor || 'writable' in descriptor); };
+const __isAccessorDescriptor = function (descriptor: IPropertyDescriptor) { return ('get' in descriptor || 'set' in descriptor); };
+const __isUndefined = function (o: any) { return typeof o === 'undefined'; };
+const __isFunction = function (o: any) { return typeof o === 'function'; };
+const __isObject = function (o: any){ return o !== null && (typeof o === 'object' || typeof o === 'function'); };
 let __isFrozen = Object.isFrozen;
 let __isSealed = Object.isSealed;
 let __isExtensible = Object.isExtensible;
 let __freeze = Object.freeze;
 let __preventExtensions = Object.preventExtensions;
 let __seal = Object.seal;
-let __typeOf = function (o: any): string {
+const __typeOf = function (o: any): string {
   let t = typeof o;
   switch (t) {
   case 'undefined':
@@ -51,7 +50,7 @@ let __typeOf = function (o: any): string {
     } else if (o instanceof __global.Symbol) {
       t = 'symbol';
     } else {
-      t = "object";
+      t = 'object';
     }
   }
   return t;
@@ -59,8 +58,8 @@ let __typeOf = function (o: any): string {
 
 //Compat
 if (ES_COMPAT <= 3) {
-  __okeys = __okeys || __polyfill(function (o: any) { let ks = []; for (let k in o) { if (__hasOwn.call(o, k)) { ks.push(k); } } return ks; });
-  __create = __create|| __polyfill(function (proto: any) { function t() {}; t.prototype = proto.prototype; return new t(); });
+  __okeys = __okeys || __polyfill(function (o: any) { const ks = []; for (const k in o) { if (__hasOwn.call(o, k)) { ks.push(k); } } return ks; });
+  __create = __create || __polyfill(function (proto: any) { function t() {}; t.prototype = proto.prototype; return new t(); });
   __proto = __proto || __polyfill(function (o: any) { return o.__proto__; });
   __propertyDefine = Object.defineProperty; // TODO polyfill this
   __propertyDescriptor = Object.getOwnPropertyDescriptor; // TODO polyfill this
@@ -76,21 +75,21 @@ if (ES_COMPAT <= 3) {
 if (ES_COMPAT <= 5) {
   __apply = __apply || __polyfill(function (f: Function, thisArg?: any, args?: any[]) { return __fapply.call(f, thisArg, args); });
   __construct = __construct || __polyfill(function (Constructor: Function, args: any[]) {
-    let proto = Constructor.prototype;
-    let instance = __obj(proto) === proto ? __create(proto) : {};
-    let result = __fapply.call(Constructor, instance, args);
+    const proto = Constructor.prototype;
+    const instance = __obj(proto) === proto ? __create(proto) : {};
+    const result = __fapply.call(Constructor, instance, args);
     return __obj(result) === result ? result : instance;
   });
   __has = __has || function (o: any, propertyName: string) { return (propertyName in o); };
   __hasOwn = __hasOwn || __polyfill(function (o: any, name: string) { return __ohasown.call(o, name); });
   __propertySymbols = __propertySymbols || __polyfill(function (o: any): Symbol[] { return []; });
   __propertyDelete = __propertyDelete || __polyfill(function (o: any, propertyName: string) {
-    let target = __obj(o);
+    const target = __obj(o);
     let returnValue = false;
     if (!__hasOwn(target, propertyName)) {
       returnValue = true;
     } else {
-      let descriptor = __propertyDescriptor(target, propertyName);
+      const descriptor = __propertyDescriptor(target, propertyName);
       if (descriptor && descriptor.configurable === true) {
         delete target[propertyName];
         returnValue = true;
@@ -280,23 +279,23 @@ export function set(o: any, propertyName: string, value: any, receiver?: any): b
 }
 
 export function stringTag(o: any): string {
-  let s = "";
+  let s = '';
   switch (__typeOf(o)) {
-    case "null": s = "Null"; break;
-    case "boolean": s = "Boolean"; break;
-    case "function": s = "Function"; break;
-    case "number": s = "Number"; break;
-    case "string": s = "String"; break;
-    case "undefined": s = "Undefined"; break;
+    case 'null': s = 'Null'; break;
+    case 'boolean': s = 'Boolean'; break;
+    case 'function': s = 'Function'; break;
+    case 'number': s = 'Number'; break;
+    case 'string': s = 'String'; break;
+    case 'undefined': s = 'Undefined'; break;
     default: /*object*/
-      let c = o.constructor;
+      const c = o.constructor;
       s = c && c.name || __ostring.call(o).slice(8, -1);
   }
   return s;
 }
 
 export function typeName(t: Function): string {
-  return ((<any> t).displayName || (<any> t).name || ((<any> t).name = /\W*function\s+([\w\$]+)\(/.exec(__str(t))[1]));
+  return ((t as any).displayName || (t as any).name || ((t as any).name = /\W*function\s+([\w\$]+)\(/.exec(__str(t))[1]));
 }
 
 export function typeOf(o: any): Type {

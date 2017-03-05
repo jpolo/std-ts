@@ -1,24 +1,19 @@
 {
-  "extends": "tslint:recommended",
-  "rulesDirectory": [
-    "node_modules/tslint-microsoft-contrib"
-  ],
+  "extends": "tslint-config-standard",
+  "rulesDirectory": [],
   "rules": {
     "class-name": true,
     "curly": false,
     "eofline": true,
-    "indent": ["spaces"],
-    "max-line-length": [true, 140],
     "member-access": false,
     "member-ordering": [true, "public-before-private", "static-before-instance", "variables-before-functions"],
     "no-arg": true,
     "no-construct": true,
-    "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
+    "no-extra-semi": true,
     "no-trailing-whitespace": true,
-    "no-unreachable": true,
     "no-unused-expression": true,
     "no-unused-variable": true,
     "no-use-before-declare": true,
@@ -26,6 +21,11 @@
     "one-line": [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"],
     "prefer-const": true,
     "semicolon": true,
+    "space-before-function-paren": [true, {
+      "anonymous": "always",
+      "named": "never",
+      "asyncArrow": "ignore"
+    }],
     "trailing-comma": true,
     "triple-equals": true,
     "variable-name": false

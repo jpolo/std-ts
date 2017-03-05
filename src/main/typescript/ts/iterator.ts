@@ -16,7 +16,7 @@ export interface IIteratorResult<T> {
 
 // Ecma like
 function IsIterator(o: any): boolean {
-  return typeof o === "object" && o !== null && typeof o.next === "function";
+  return typeof o === 'object' && o !== null && typeof o.next === 'function';
 }
 
 function IteratorCreate<T>(next: (v?: any) => IIteratorResult<T>, hint?: string) {
@@ -75,19 +75,19 @@ function IteratorRepeat<T>(length: number, v: T, hint?: string): Iterator<T> {
 export class Iterator<T> implements IIterator<T> {
 
   static empty(): Iterator<any> {
-    return IteratorCreateEmpty("empty");
+    return IteratorCreateEmpty('empty');
   }
 
   static single<T>(v: T): Iterator<T> {
-    return IteratorRepeat(1, v, "single");
+    return IteratorRepeat(1, v, 'single');
   }
 
   static fill<T>(length: number, v: T): Iterator<T> {
-    return IteratorRepeat(length, v, "fill");
+    return IteratorRepeat(length, v, 'fill');
   }
 
   static continually<T>(v: T): Iterator<T> {
-    return IteratorRepeat(Infinity, v, "continue");
+    return IteratorRepeat(Infinity, v, 'continue');
   }
 
   static concat<T>(...args: IIterator<T>[]): Iterator<T> {
@@ -120,7 +120,7 @@ export class Iterator<T> implements IIterator<T> {
         r = IteratorResultCreate(done, undefined);
       }
       return r;
-    }, "concatenated");
+    }, 'concatenated');
   }
 
   static isIterator(o: any): boolean {
@@ -139,7 +139,7 @@ export class Iterator<T> implements IIterator<T> {
         acc = f(acc);
       }
       return IteratorResultCreate(false, acc);
-    }, "iterate");
+    }, 'iterate');
   }
 
   static range(start: number, end: number, step = 1): Iterator<number> {
@@ -154,10 +154,10 @@ export class Iterator<T> implements IIterator<T> {
         done = true;
       }
       return IteratorResultCreate(done, value);
-    }, "[" + start + "," + end + ")");
+    }, '[' + start + ',' + end + ')');
   }
 
-  constructor(public next: () => IIteratorResult<T>, public hint = "abstract") { }
+  constructor(public next: () => IIteratorResult<T>, public hint = 'abstract') { }
 
   inspect() { return `Iterator { [${this.hint}] }`; }
 

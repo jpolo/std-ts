@@ -28,12 +28,12 @@ const InspectorSuite = suite("ts/inspect.Inspector", (self) => {
 
   function generate<T>(assert, data: Array<{ 0: T; 1: string; }>, f: (v: T) => string) {
     for (let i = 0; i < data.length; ++i) {
-      let r = data[i];
+      const r = data[i];
       assert.strictEqual(f(r[0]), r[1]);
     }
   }
 
-  let inspector = new Inspector({ maxElements: 3, maxString: 15 });
+  const inspector = new Inspector({ maxElements: 3, maxString: 15 });
   const EMPTY = inspectResults(
     [undefined, "undefined"],
     [null, "null"]
@@ -103,7 +103,6 @@ const InspectorSuite = suite("ts/inspect.Inspector", (self) => {
     ARRAYS
   );
 
-
   test("#stringify()", (assert) => {
     generate(assert, ALL, (o) => inspector.stringify(o));
   });
@@ -150,4 +149,4 @@ const InspectorSuite = suite("ts/inspect.Inspector", (self) => {
 
 });
 
-export default inspectSuite.concat(InspectorSuite)
+export default inspectSuite.concat(InspectorSuite);

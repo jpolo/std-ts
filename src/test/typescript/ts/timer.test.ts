@@ -1,14 +1,14 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit";
+import { suite, test } from '../../../main/typescript/ts/unit/qunit';
 import {
   setTimeout, clearTimeout,
   setInterval, clearInterval,
   setImmediate, clearImmediate
-} from "../../../main/typescript/ts/timer";
+} from '../../../main/typescript/ts/timer';
 
-export default suite("ts/timer", (self) => {
+export default suite('ts/timer', (self) => {
 
   function createSpy() {
-    let o = {
+    const o = {
       called: false,
       counter: 0,
       call: function () {
@@ -19,11 +19,10 @@ export default suite("ts/timer", (self) => {
     return o;
   }
 
-
-  test(".setTimeout()", (assert, done) => {
-    let spy = createSpy();
-    let timeout = 5;
-    let timerId = setTimeout(spy.call, timeout);
+  test('.setTimeout()', (assert, done) => {
+    const spy = createSpy();
+    const timeout = 5;
+    const timerId = setTimeout(spy.call, timeout);
     let pending = 3;
 
     // arity
@@ -37,7 +36,7 @@ export default suite("ts/timer", (self) => {
     }
 
     // timer id
-    assert.strictEqual(typeof timerId, "number");
+    assert.strictEqual(typeof timerId, 'number');
 
     // assert called
     setTimeout(() => {
@@ -52,15 +51,15 @@ export default suite("ts/timer", (self) => {
 
     // assert arguments
     setTimeout((a) => {
-      assert.strictEqual(a, "foo");
+      assert.strictEqual(a, 'foo');
       notify();
-    }, timeout + 2, "foo");
+    }, timeout + 2, 'foo');
   });
 
-  test(".clearTimeout()", (assert, done) => {
-    let spy = createSpy();
-    let timeout = 5;
-    let timerId = setTimeout(spy.call, timeout);
+  test('.clearTimeout()', (assert, done) => {
+    const spy = createSpy();
+    const timeout = 5;
+    const timerId = setTimeout(spy.call, timeout);
     setTimeout(() => {
       clearTimeout(timerId);
     }, timeout - 1);
@@ -71,11 +70,11 @@ export default suite("ts/timer", (self) => {
     }, timeout + 1);
   });
 
-  test(".setInterval()", (assert, done) => {
-    let spy = createSpy();
-    let intervalMs = 50;
-    let iterationMax = 4;
-    let timerId = setInterval(() => {
+  test('.setInterval()', (assert, done) => {
+    const spy = createSpy();
+    const intervalMs = 50;
+    const iterationMax = 4;
+    const timerId = setInterval(() => {
       spy.call(); // increment
       if (spy.counter === iterationMax) {
         // finish
@@ -88,16 +87,15 @@ export default suite("ts/timer", (self) => {
       }
     }, intervalMs);
 
-
     setTimeout(() => { if (!spy.called) { done(); } }, ((iterationMax + 1) * intervalMs));
 
-    assert.strictEqual(typeof timerId, "number");
+    assert.strictEqual(typeof timerId, 'number');
   });
 
-  test(".clearInterval()", (assert, done) => {
-    let spy = createSpy();
-    let timeout = 5;
-    let timerId = setInterval(spy.call, timeout);
+  test('.clearInterval()', (assert, done) => {
+    const spy = createSpy();
+    const timeout = 5;
+    const timerId = setInterval(spy.call, timeout);
     setTimeout(() => {
       assert.strictEqual(spy.counter, 1);
     }, timeout + 1);
@@ -109,12 +107,12 @@ export default suite("ts/timer", (self) => {
       done();
     }, (2 * timeout) + 1);
 
-    assert.strictEqual(typeof timerId, "number");
+    assert.strictEqual(typeof timerId, 'number');
   });
 
-  test(".setImmediate()", (assert, done) => {
-    let spy = createSpy();
-    let timerId = setImmediate(spy.call);
+  test('.setImmediate()', (assert, done) => {
+    const spy = createSpy();
+    const timerId = setImmediate(spy.call);
 
     setTimeout(() => {
       assert.ok(spy.called);
@@ -122,12 +120,12 @@ export default suite("ts/timer", (self) => {
       done();
     }, 1);
 
-    assert.strictEqual(typeof timerId, "number");
+    assert.strictEqual(typeof timerId, 'number');
   });
 
-  test(".clearImmediate()", (assert, done) => {
-    let spy = createSpy();
-    let timerId = setImmediate(spy.call);
+  test('.clearImmediate()', (assert, done) => {
+    const spy = createSpy();
+    const timerId = setImmediate(spy.call);
     clearImmediate(timerId);
     setTimeout(() => {
       assert.ok(!spy.called);
@@ -135,4 +133,4 @@ export default suite("ts/timer", (self) => {
     }, 1);
   });
 
-})
+});

@@ -1,16 +1,16 @@
-import { suite, test, Assert, testc } from "../../../main/typescript/ts/unit/qunit";
-import * as random from "../../../main/typescript/ts/random";
+import { suite, Assert, testc } from '../../../main/typescript/ts/unit/qunit';
+import * as random from '../../../main/typescript/ts/random';
 
 class AssertCustom extends Assert {
 
   generates<T>(f: () => T, expected: T[]) {
     let isSuccess = true;
-    let message = "";
+    let message = '';
     expected.forEach((expected, index) => {
-      let actual = f();
+      const actual = f();
       if (!this.__engine__().equalsStrict(expected, actual)) {
         isSuccess = false;
-        message += this.__dump__(actual) + " must be " + this.__dump__(expected) + "\n";
+        message += this.__dump__(actual) + ' must be ' + this.__dump__(expected) + '\n';
       }
     });
     this.__assert__(isSuccess, message, this.__position__());
@@ -18,8 +18,7 @@ class AssertCustom extends Assert {
 }
 
 export default suite("ts/random.RandomGenerator('rc4')", (self) => {
-  let test = testc(AssertCustom); // overload
-
+  const test = testc(AssertCustom); // overload
 
   self.setUp = () => {
     // engineTest.seed("");
@@ -29,8 +28,8 @@ export default suite("ts/random.RandomGenerator('rc4')", (self) => {
 
   };
 
-  test(".generate()", (assert) => {
-    let rc4 = new random.RandomGenerator("rc4", "Example");
+  test('.generate()', (assert) => {
+    const rc4 = new random.RandomGenerator('rc4', 'Example');
     assert.generates(
       rc4.generate.bind(rc4),
       [
@@ -198,4 +197,4 @@ export default suite("ts/random.RandomGenerator('rc4')", (self) => {
     })
   })*/
 
-})
+});

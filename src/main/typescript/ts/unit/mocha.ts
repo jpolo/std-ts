@@ -33,7 +33,7 @@ class Test {
   }
 }
 
-const rootSuite: Suite = new Suite("");
+const rootSuite: Suite = new Suite('');
 
 let currentDisabled = false;
 let currentSuite: Suite = rootSuite;
@@ -62,7 +62,7 @@ export function xdescribe(description: string, f?: () => void): void {
 
 export function it(description: string, f?: () => void): void {
   if (currentSuite === null) {
-    throw SyntaxError("it() must be called inside describe() block");
+    throw SyntaxError('it() must be called inside describe() block');
   }
   const previousTest = currentTest;
   currentTest = currentSuite.getTest(description);
@@ -73,7 +73,7 @@ export function it(description: string, f?: () => void): void {
 }
 
 export function xit(description: string, f?: () => void): void {
-   return undefined;
+  return undefined;
 }
 
 export function before(f: () => void): void {

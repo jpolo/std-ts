@@ -9,33 +9,33 @@ interface IFullScreenModule {
 function fullScreenProvider(document: Document): IFullScreenModule {
 
   const ELEMENT = _findProperty(document, [
-    "fullscreenElement",
-    "webkitFullscreenElement",
-    "webkitCurrentFullScreenElement",
-    "mozFullScreenElement",
-    "msFullscreenElement"
+    'fullscreenElement',
+    'webkitFullscreenElement',
+    'webkitCurrentFullScreenElement',
+    'mozFullScreenElement',
+    'msFullscreenElement'
   ]);
-  const REQUEST = _findProperty(document.createElement("div"), [
-    "requestFullScreen",
-    "webkitRequestFullScreen",
-    "webkitEnterFullscreen",
-    "mozRequestFullScreen",
-    "msRequestFullScreen"
+  const REQUEST = _findProperty(document.createElement('div'), [
+    'requestFullScreen',
+    'webkitRequestFullScreen',
+    'webkitEnterFullscreen',
+    'mozRequestFullScreen',
+    'msRequestFullScreen'
   ]);
   const EXIT = _findProperty(document, [
-    "exitFullScreen",
-    "webkitCancelFullScreen",
-    "webkitExitFullScreen",
-    "mozCancelFullScreen",
-    "msCancelFullScreen",
-    "msExitFullscreen"
+    'exitFullScreen',
+    'webkitCancelFullScreen',
+    'webkitExitFullScreen',
+    'mozCancelFullScreen',
+    'msCancelFullScreen',
+    'msExitFullscreen'
   ]);
   const ENABLED = _findProperty(document, [
-    "fullscreenEnabled",
-    "webkitFullscreenEnabled",
-    "webkitIsFullScreen",
-    "mozFullScreen",
-    "msFullscreenEnabled"
+    'fullscreenEnabled',
+    'webkitFullscreenEnabled',
+    'webkitIsFullScreen',
+    'mozFullScreen',
+    'msFullscreenEnabled'
   ]);
 
   function _findProperty(o: any, propNames: Array<string>) {

@@ -1,7 +1,5 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit";
-import * as date from "../../../main/typescript/ts/date";
+import { suite } from '../../../main/typescript/ts/unit/qunit';
 
+export default suite('ts/date', (self) => {
 
-export default suite("ts/date", (self) => {
-
-})
+});

@@ -1,9 +1,6 @@
-import { test } from "./_boot.test";
-import { ITest, ITestReport, IAssertion, SUCCESS, FAILURE } from "../../../../main/typescript/ts/unit";
-import { Assert } from "../../../../main/typescript/ts/unit/qunit";
-import { Engine } from "../../../../main/typescript/ts/unit/engine";
+import { test } from './_boot.test';
 
-export default test("ts/unit/qunit.Assert", (assert) => {
+export default test('ts/unit/qunit.Assert', (assert) => {
 
   /*
   const engine = new Engine()
@@ -88,4 +85,4 @@ export default test("ts/unit/qunit.Assert", (assert) => {
   assertMock.throws(() => { throw new Error("foo") }, "Error: blah")
   assertLastFailure()
   */
-})
+});

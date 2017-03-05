@@ -1,4 +1,4 @@
-import { IStorage, Storage } from "./storage";
+import { Storage } from './storage';
 
 export class LocalStorage extends Storage {
   protected _getStorage() {

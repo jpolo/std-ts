@@ -47,61 +47,61 @@ export interface IClone {
   clone(): any;
 }
 
-export function isIClone(o: any): boolean {
-  return !!o && (typeof o.clone === "function");
+export function isIClone(o: any): o is IClone {
+  return !!o && (typeof o.clone === 'function');
 }
 
 export function clone<T>(o: T): T {
-  const anyVal = <any> o;
+  const anyVal = o as any;
   let returnValue: T = o;
   switch (typeof anyVal) {
-  case "object":
-    if (anyVal !== null) {
-      if (isIClone(anyVal)) {
-        returnValue = anyVal.clone();
-      } else {
-        switch (ToStringTag(anyVal)) {
-          case "Array": returnValue = <any> cloneArray(anyVal); break;
-          case "Date": returnValue = <any> cloneDate(anyVal); break;
-          // case "Map": returnValue = <any> cloneMap(anyVal); break;
-          case "RegExp": returnValue = <any> cloneRegExp(anyVal); break;
-          // case "Set": returnValue = <any> cloneSet(anyVal); break;
-          default: returnValue = ObjectCreate(GetPrototypeOf(anyVal), OwnDescriptors(anyVal));
+    case 'object':
+      if (anyVal !== null) {
+        if (isIClone(anyVal)) {
+          returnValue = anyVal.clone();
+        } else {
+          switch (ToStringTag(anyVal)) {
+            case 'Array': returnValue = cloneArray(anyVal) as any; break;
+            case 'Date': returnValue = cloneDate(anyVal) as any; break;
+            // case "Map": returnValue = <any> cloneMap(anyVal); break;
+            case 'RegExp': returnValue = cloneRegExp(anyVal) as any; break;
+            // case "Set": returnValue = <any> cloneSet(anyVal); break;
+            default: returnValue = ObjectCreate(GetPrototypeOf(anyVal), OwnDescriptors(anyVal));
+          }
         }
       }
-    }
-    break;
-  case "function":
-    let f: any = (<any> returnValue).__cloned__ = anyVal.__cloned__ || o;
-    returnValue = <any> function () {
-      let r: any;
-      const t = this;
-      const argc = arguments.length;
+      break;
+    case 'function':
+      const f: any = (returnValue as any).__cloned__ = anyVal.__cloned__ || o;
+      returnValue = function () {
+        let r: any;
+        const t = this;
+        const argc = arguments.length;
 
-      switch (argc) {
-        case 0: r = t ? f() : f.call(t); break;
-        case 1: r = t ? f(arguments[0]) : f.call(t, arguments[0]); break;
-        case 2: r = t ? f(arguments[0], arguments[1]) : f.call(t, arguments[0], arguments[1]); break;
-        case 3: r = t ? f(arguments[0], arguments[1], arguments[2]) : f.call(t, arguments[0], arguments[1], arguments[2]); break;
-        case 4: r = t ? f(
-          arguments[0],
-          arguments[1],
-          arguments[2],
-          arguments[3]) :
-          f.call(t,
-           arguments[0],
-           arguments[1],
-           arguments[2],
-           arguments[3]
-         );
-         break;
-        default: r = f.apply(t, arguments);
-      }
-      return r;
-    };
+        switch (argc) {
+          case 0: r = t ? f() : f.call(t); break;
+          case 1: r = t ? f(arguments[0]) : f.call(t, arguments[0]); break;
+          case 2: r = t ? f(arguments[0], arguments[1]) : f.call(t, arguments[0], arguments[1]); break;
+          case 3: r = t ? f(arguments[0], arguments[1], arguments[2]) : f.call(t, arguments[0], arguments[1], arguments[2]); break;
+          case 4: r = t ? f(
+            arguments[0],
+            arguments[1],
+            arguments[2],
+            arguments[3]) :
+            f.call(t,
+             arguments[0],
+             arguments[1],
+             arguments[2],
+             arguments[3]
+            );
+            break;
+          default: r = f.apply(t, arguments);
+        }
+        return r;
+      } as any;
 
-    break;
-  default: // keep value
+      break;
+    default: // keep value
   }
   return returnValue;
 }
@@ -134,21 +134,21 @@ export function cloneDate(d: Date): Date {
 export function cloneRegExp(re: RegExp): RegExp {
   let returnValue = re;
   if (IsDefined(re)) {
-    let flags = "";
+    let flags = '';
     if (re.global) {
-      flags += "g";
+      flags += 'g';
     }
     if (re.ignoreCase) {
-      flags += "i";
+      flags += 'i';
     }
     if (re.multiline) {
-      flags += "m";
+      flags += 'm';
     }
-    if ((<any> re).sticky) {
-      flags += "y";
+    if ((re as any).sticky) {
+      flags += 'y';
     }
-    if ((<any> re).unicode) {
-      flags += "u";
+    if ((re as any).unicode) {
+      flags += 'u';
     }
     returnValue = new RegExp(re.source, flags);
   }

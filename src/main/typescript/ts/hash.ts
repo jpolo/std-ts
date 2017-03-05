@@ -1,6 +1,6 @@
 /* tslint:disable:no-bitwise */
 
-import { getId, hasId } from "./id";
+import { getId, hasId } from './id';
 
 // see https://github.com/facebook/immutable-js/blob/master/src/Hash.js
 
@@ -47,20 +47,20 @@ export interface IHash {
 export function hash(o: any): number {
   let returnValue = 0;
   if (o !== null && o !== undefined) {
-    if (typeof o.valueOf === "function") {
+    if (typeof o.valueOf === 'function') {
       o = o.valueOf();
     }
     switch (typeof o) {
-      case "boolean":
+      case 'boolean':
         returnValue = hashBoolean(o);
         break;
-      case "number":
+      case 'number':
         returnValue = hashNumber(o);
         break;
-      case "string":
+      case 'string':
         returnValue = hashString(o);
         break;
-      case "function":
+      case 'function':
         returnValue = getId(o);
         break;
       default: // object
@@ -134,5 +134,5 @@ function hashIHash(o: IHash) {
 }
 
 export function isIHash(o: any): o is IHash {
-  return o && typeof o.hashCode === "function";
+  return o && typeof o.hashCode === 'function';
 }

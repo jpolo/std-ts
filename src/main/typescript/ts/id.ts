@@ -7,7 +7,7 @@ const idPropertyDescriptor: PropertyDescriptor = {
   value: null,
   writable: false
 };
-function SymbolCreate(s: string): any { return typeof Symbol !== "undefined" ? Symbol(s) : "@@" + s; }
+function SymbolCreate(s: string): any { return typeof Symbol !== 'undefined' ? Symbol(s) : '@@' + s; }
 function DefinePropertyOrThrow(o: any, k: string, d: PropertyDescriptor) {
   const def = Object.defineProperty;
   if (def) {
@@ -31,7 +31,7 @@ function IdGeneratorCreate() {
 }
 
 const idGenerator = IdGeneratorCreate();
-const $$id = SymbolCreate("id");
+const $$id = SymbolCreate('id');
 function GetOrSetId(o: any): number {
   let id = o[$$id];
   if (id === undefined) {
@@ -57,7 +57,7 @@ export function generate(): number {
  * @return
  */
 export function hasId(o: any): boolean {
-  return typeof o === "function" || (typeof o === "object" && o !== null);
+  return typeof o === 'function' || (typeof o === 'object' && o !== null);
 }
 
 /**

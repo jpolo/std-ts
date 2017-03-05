@@ -1,17 +1,17 @@
-import { suite, test } from "../../../main/typescript/ts/unit/qunit";
-import { getId, hasId, generate } from "../../../main/typescript/ts/id";
+import { suite, test } from '../../../main/typescript/ts/unit/qunit';
+import { getId, hasId, generate } from '../../../main/typescript/ts/id';
 
-export default suite("ts/id", (self) => {
+export default suite('ts/id', (self) => {
 
-  test(".generate()", (assert) => {
-    let current = generate();
+  test('.generate()', (assert) => {
+    const current = generate();
 
     assert.strictEqual(generate(), current + 1);
     assert.strictEqual(generate(), current + 2);
     assert.strictEqual(generate(), current + 3);
   });
 
-  test(".id()", (assert) => {
+  test('.id()', (assert) => {
     // var hasWeakMap = !!WeakMap;
 
     // null, undefined, string, number
@@ -19,7 +19,7 @@ export default suite("ts/id", (self) => {
     assert.strictEqual(getId(null), NaN);
     assert.strictEqual(getId(NaN), NaN);
     assert.strictEqual(getId(123), NaN);
-    assert.strictEqual(getId("abc"), NaN);
+    assert.strictEqual(getId('abc'), NaN);
 
     // Date
     const odate = new Date();
@@ -35,7 +35,7 @@ export default suite("ts/id", (self) => {
 
   });
 
-  test(".hasId()", (assert) => {
+  test('.hasId()', (assert) => {
     // var hasWeakMap = !!WeakMap;
 
     // null, undefined, string, number
@@ -43,7 +43,7 @@ export default suite("ts/id", (self) => {
     assert.strictEqual(hasId(null), false);
     assert.strictEqual(hasId(NaN), false);
     assert.strictEqual(hasId(123), false);
-    assert.strictEqual(hasId("abc"), false);
+    assert.strictEqual(hasId('abc'), false);
 
     // Date
     assert.strictEqual(hasId(new Date()), true);

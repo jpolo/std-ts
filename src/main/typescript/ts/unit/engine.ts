@@ -1,10 +1,10 @@
-import { Inspector } from "../inspect";
-import * as equal from "./equal";
-import * as stacktrace from "../stacktrace";
-import * as time from "../time";
-import * as timer from "../timer";
-import { IAssertion, IAssertionCallSite } from "./assertion";
-import { IsFinite, ObjectAssign } from "./util";
+import { Inspector } from '../inspect';
+import * as equal from './equal';
+import * as stacktrace from '../stacktrace';
+import * as time from '../time';
+import * as timer from '../timer';
+import { IAssertion, IAssertionCallSite } from './assertion';
+import { IsFinite, ObjectAssign } from './util';
 
 // Service
 export interface ITestEngineEqual {
@@ -228,7 +228,7 @@ export class Engine implements ITestEngine {
     if (IsFinite(timeoutMs)) {
       timerId = engine.setTimeout(() => {
         timerId = null;
-        stream.onError(new Error("No test completion after " + timeoutMs + "ms"));
+        stream.onError(new Error('No test completion after ' + timeoutMs + 'ms'));
         stream.onEnd();
       }, timeoutMs);
     }

@@ -1,8 +1,8 @@
-import { suite, test } from "../../../main/typescript/ts/unit/qunit";
-import * as stacktrace from "../../../main/typescript/ts/stacktrace";
+import { suite, test } from '../../../main/typescript/ts/unit/qunit';
+import * as stacktrace from '../../../main/typescript/ts/stacktrace';
 
-export default suite("ts/stacktrace", (self) => {
-  const FILENAME = "stacktrace.test.js";
+export default suite('ts/stacktrace', (self) => {
+  const FILENAME = 'stacktrace.test.js';
 
   let errorEval: Error;
   let callstackEval: stacktrace.ICallSite[];
@@ -13,13 +13,13 @@ export default suite("ts/stacktrace", (self) => {
   let errorNative: Error;
 
   function createStacktrace(): { error: Error, callstack: stacktrace.ICallSite[] } {
-    let data = { error: null, callstack: null };
+    const data = { error: null, callstack: null };
     //put in eval block so we can test line number
     (new Function(
-      "stacktrace", "exports",
+      'stacktrace', 'exports',
       //pseudo script
-      "exports.error = new Error();\n" +
-      "exports.callstack = stacktrace.create();\n"
+      'exports.error = new Error();\n' +
+      'exports.callstack = stacktrace.create();\n'
     ))(stacktrace, data);
     return data;
   }
@@ -35,19 +35,19 @@ export default suite("ts/stacktrace", (self) => {
     }
 
     //put in eval block so we can test line number
-    let d = createStacktrace();
+    const d = createStacktrace();
     errorEval = d.error;
     callstackEval = d.callstack;
   };
 
-  test(".get()", (assert) => {
+  test('.get()', (assert) => {
 
     //Normal
     let callstack = stacktrace.get(errorLocal);
     let callsite = callstack[0];
     assert.strictEqual(callsite.getFileName().slice(-FILENAME.length), FILENAME);
-    assert.strictEqual(typeof callsite.getLineNumber(), "number");
-    assert.strictEqual(typeof callsite.getColumnNumber(), "number");
+    assert.strictEqual(typeof callsite.getLineNumber(), 'number');
+    assert.strictEqual(typeof callsite.getColumnNumber(), 'number');
     assert.strictEqual(callsite.isNative(), false);
     assert.strictEqual(callsite.isEval(), false);
 
@@ -57,7 +57,7 @@ export default suite("ts/stacktrace", (self) => {
 
     assert.ok(Array.isArray(callstack));
     assert.ok(callstack.length > 0);
-    assert.strictEqual(callsite.getFileName(), "native");
+    assert.strictEqual(callsite.getFileName(), 'native');
     assert.strictEqual(callsite.getLineNumber(), null);
     assert.strictEqual(callsite.getColumnNumber(), null);
     assert.strictEqual(callsite.isNative(), true);
@@ -74,15 +74,14 @@ export default suite("ts/stacktrace", (self) => {
     assert.strictEqual(callsite.isEval(), true);
   });
 
-
-  test(".create()", (assert) => {
+  test('.create()', (assert) => {
 
     //Normal
     let callstack = callstackLocal;
     let callsite = callstack[0];
     assert.strictEqual(callsite.getFileName().slice(-FILENAME.length), FILENAME);
-    assert.strictEqual(typeof callsite.getLineNumber(), "number");
-    assert.strictEqual(typeof callsite.getColumnNumber(), "number");
+    assert.strictEqual(typeof callsite.getLineNumber(), 'number');
+    assert.strictEqual(typeof callsite.getColumnNumber(), 'number');
     assert.strictEqual(callsite.isNative(), false);
     assert.strictEqual(callsite.isEval(), false);
 
@@ -97,4 +96,4 @@ export default suite("ts/stacktrace", (self) => {
     assert.strictEqual(callsite.isEval(), true);
   });
 
-})
+});

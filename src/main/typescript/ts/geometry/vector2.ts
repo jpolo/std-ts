@@ -25,34 +25,34 @@ function ArrayFill(a: Vector2, v: number) {
 }
 
 export function abs(v: Vector2, dest?: Vector2): Vector2 {
-  let r = dest === undefined ? ArrayCreateFrom(v) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(v) : dest;
   r[0] = __abs(v[0]);
   r[1] = __abs(v[1]);
   return r;
 }
 
 export function add(a: Vector2, b: Vector2, dest?: Vector2): Vector2 {
-  let r = dest === undefined ? ArrayCreateFrom(a) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(a) : dest;
   r[0] = a[0] + b[0];
   r[1] = a[1] + b[1];
   return r;
 }
 
 export function copy(v: Vector2, dest?: Vector2): Vector2 {
-  let r = dest === undefined ? ArrayCreateFrom(v) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(v) : dest;
   ArrayCopy(v, r);
   return r;
 }
 
 export function create(x: number, y: number): Vector2 {
-  let v = ArrayCreate(Float64Array);
+  const v = ArrayCreate(Float64Array);
   v[0] = x;
   v[1] = y;
   return v;
 }
 
 export function divide(a: Vector2, b: Vector2, dest?: Vector2): Vector2 {
-  let r = dest === undefined ? ArrayCreateFrom(a) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(a) : dest;
   r[0] = a[0] / b[0];
   r[1] = a[1] / b[1];
   return r;
@@ -61,7 +61,7 @@ export function divide(a: Vector2, b: Vector2, dest?: Vector2): Vector2 {
 export function dot(a: Vector2, b: Vector2): number {
   let r = 0;
   if (a === b) {
-    let a0 = a[0], a1 = a[1];
+    const a0 = a[0], a1 = a[1];
     r = a0 * a0 + a1 * a1;
   } else {
     r = a[0] * b[0] + a[1] * b[1];
@@ -78,7 +78,7 @@ export function lengthSquared(v: Vector2): number {
 }
 
 export function multiply(a: Vector2, b: Vector2, dest?: Vector2): Vector2 {
-  let r = dest === undefined ? ArrayCreateFrom(a) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(a) : dest;
   r[0] = a[0] * b[0];
   r[1] = a[1] * b[1];
   return r;
@@ -93,7 +93,7 @@ export function normalize(v: Vector2, dest?: Vector2): Vector2 {
 }
 
 export function scale(v: Vector2, scalar: number, dest?: Vector2): Vector2 {
-  let r = dest === undefined ? ArrayCreateFrom(v) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(v) : dest;
   if (scalar === 0) {
     ArrayFill(r, 0);
   } else if (scalar === 1) {
@@ -106,7 +106,7 @@ export function scale(v: Vector2, scalar: number, dest?: Vector2): Vector2 {
 }
 
 export function subtract(a: Vector2, b: Vector2, dest?: Vector2): Vector2 {
-  let r = dest === undefined ? ArrayCreateFrom(a) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(a) : dest;
   if (a === b) {
     ArrayFill(r, 0);
   } else {

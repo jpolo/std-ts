@@ -1,6 +1,6 @@
 // Util
-const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-const GlobalConsole: Console = Global.console ? Global.console : <any> {};
+const Global: Window = typeof window !== 'undefined' ? window : (function () { return this; }());
+const GlobalConsole: Console = Global.console ? Global.console : {} as any;
 const Timer = (function () {
   const timers = {};
   return {
@@ -10,7 +10,7 @@ const Timer = (function () {
     timeEnd(timerName: string) {
       const start = timers[timerName];
       if (start) {
-        Log("log", timerName + ": " + (Now() - start) + "ms");
+        Log('log', timerName + ': ' + (Now() - start) + 'ms');
         delete timers[timerName];
       }
     }
@@ -63,7 +63,7 @@ export function assert(test?: boolean, message?: string, ...args: any[]): void {
     FunctionApply(GlobalConsole.assert, GlobalConsole, [message].concat(args));
   } else {
     if (!test) {
-      Log("error", [ "Assertion failed:", message ].concat(args));
+      Log('error', [ 'Assertion failed:', message ].concat(args));
     }
   }
 }
@@ -80,7 +80,7 @@ export function dir(object: any): void {
   if (GlobalConsole.dir) {
     GlobalConsole.dir(object);
   } else {
-    Log("log", [object]);
+    Log('log', [object]);
   }
 }
 
@@ -88,33 +88,33 @@ export function dirxml(object: any): void {
   if (GlobalConsole.dirxml) {
     GlobalConsole.dirxml(object);
   } else {
-    Log("log", [object]);
+    Log('log', [object]);
   }
 }
 
-export function log(message?: any, ...args: any[]): void
+export function log(message?: any, ...args: any[]): void;
 export function log(...args: any[]): void {
-  Log("log", args);
+  Log('log', args);
 }
 
-export function debug(message?: any, ...args: any[]): void
+export function debug(message?: any, ...args: any[]): void;
 export function debug(...args: any[]): void {
-  Log("debug", args);
+  Log('debug', args);
 }
 
-export function info(message?: any, ...args: any[]): void
+export function info(message?: any, ...args: any[]): void;
 export function info(...args: any[]): void {
-  Log("info", args);
+  Log('info', args);
 }
 
-export function warn(message?: any, ...args: any[]): void
+export function warn(message?: any, ...args: any[]): void;
 export function warn(...args: any[]): void {
-  Log("warn", args);
+  Log('warn', args);
 }
 
-export function error(message?: any, ...args: any[]): void
+export function error(message?: any, ...args: any[]): void;
 export function error(...args: any[]): void {
-  Log("error", args);
+  Log('error', args);
 }
 
 export function groupCollapsed(groupTitle?: string): void {

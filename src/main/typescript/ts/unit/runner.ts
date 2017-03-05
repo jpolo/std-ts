@@ -1,5 +1,5 @@
-import { ITestEngine, IReporter, ITest, ITestReport, IAssertion } from "../unit";
-import { Engine, ITestEngineRunContext } from "./engine";
+import { ITestEngine, IReporter, ITest, ITestReport, IAssertion } from '../unit';
+import { Engine, ITestEngineRunContext } from './engine';
 
 // Constant
 const $engineDefault = new Engine();
@@ -40,7 +40,7 @@ export class Runner {
     const reports: ITestReport[] = [];
 
     function runTest(test: ITest, onTestComplete: (r: ITestReport) => void) {
-      let report: ITestReport = {
+      const report: ITestReport = {
         assertions: [],
         elapsedMilliseconds: NaN,
         startDate: null

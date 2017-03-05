@@ -1,4 +1,4 @@
-import { IIterator } from "../iterator";
+import { IIterator } from '../iterator';
 
 interface IListData<T> {
   _head: INode<T>;
@@ -13,7 +13,7 @@ interface INode<T> {
 
 // ECMA like
 function IsArray(o: any): boolean {
-  return Array.isArray ? Array.isArray(o) : Object.prototype.toString.call(o) === "[object Array]";
+  return Array.isArray ? Array.isArray(o) : Object.prototype.toString.call(o) === '[object Array]';
 }
 
 function IsList(o: any): boolean {
@@ -29,7 +29,7 @@ function NodeCreate<T>(v: T): INode<T> {
 }
 
 function ListData<T>(list: List<T>): IListData<T> {
-  return (<any> list);
+  return (list as any);
 }
 
 function ListClear<T>(list: IListData<T>) {
@@ -69,8 +69,8 @@ function ListEnqueueIterator<A, B>(list: IListData<B>, iter: IIterator<A>, mapFn
   }
 }
 
-function ListEnqueue<A, B>(list: IListData<B>, values: A[], mapFn: (v: A) => B): void
-function ListEnqueue<A, B>(list: IListData<B>, values: List<A>, mapFn: (v: A) => B): void
+function ListEnqueue<A, B>(list: IListData<B>, values: A[], mapFn: (v: A) => B): void;
+function ListEnqueue<A, B>(list: IListData<B>, values: List<A>, mapFn: (v: A) => B): void;
 function ListEnqueue<A, B>(list: IListData<B>, values: any, mapFn: (v: A) => B): void  {
   if (IsList(values)) {
     ListEnqueueIterator(list, new ListIterator<A>(values), mapFn);
@@ -212,18 +212,18 @@ export default class List<T> {
   }
 
   toString() {
-    let s = "";
+    let s = '';
     const iterator = new ListIterator(this);
     let iteratorResult = iterator.next();
     if (!iteratorResult.done) {
-      s += " ";
+      s += ' ';
       s += iteratorResult.value;
       while (!(iteratorResult = iterator.next()).done) {
-        s += ", " + iteratorResult.value;
+        s += ', ' + iteratorResult.value;
       }
-      s += " ";
+      s += ' ';
     }
-    return "List {" + s + "}";
+    return 'List {' + s + '}';
   }
 }
 

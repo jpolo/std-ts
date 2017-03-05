@@ -1,6 +1,6 @@
 /* tslint:disable: no-namespace */
 
-import * as iterator from "./iterator";
+import * as iterator from './iterator';
 
 // Interfaces
 export interface IErrorHandlerResult extends iterator.IIteratorResult<any> {}
@@ -13,28 +13,28 @@ export interface IThrowable extends Error {}
 
 // Util
 declare var __extends: any; // Typescript __extends
-const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-const GlobalConsole: Console = typeof console !== "undefined" ? Global.console : null;
+const Global: any = typeof window !== 'undefined' ? window : (function () { return this; }());
+const GlobalConsole: Console = typeof console !== 'undefined' ? Global.console : null;
 const GlobalError = Global.Error;
 // const GlobalTypeError: any = Global.TypeError;
 function Has(o: any, name: string) { return o && (name in o); }
 function IsError(o: any): boolean { return o instanceof GlobalError; }
-function ToString(o: any) { return "" + o; }
+function ToString(o: any) { return '' + o; }
 function Dump(o: any) {
-  return IsError(o) && Has(o, "stack") ? ToString(o.stack) : ToString(o);
+  return IsError(o) && Has(o, 'stack') ? ToString(o.stack) : ToString(o);
 }
 function FunctionName(f: Function) {
-  return ((<any> f).displayName || (<any> f).name || ((<any> f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]));
+  return ((f as any).displayName || (f as any).name || ((f as any).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]));
 }
 
 function CaptureStackTrace(error: Error, stripPoint: any) {
   if (GlobalError.captureStackTrace) {
     GlobalError.captureStackTrace(error, stripPoint);
   } else {
-    const stackString = (<any> new GlobalError()).stack;
+    const stackString = (new GlobalError() as any).stack;
     // Remove first calls
-    const stack = stackString.split("\n").slice(1); // first is Error string, second is __captureStackTrace
-    error.stack = ToString(error) + "\n" + stack.join("\n");
+    const stack = stackString.split('\n').slice(1); // first is Error string, second is __captureStackTrace
+    error.stack = ToString(error) + '\n' + stack.join('\n');
   }
 }
 
@@ -89,10 +89,10 @@ class ErrorHandler implements IErrorHandler {
   static uncaught(): ErrorHandler {
     return ErrorHandler._uncaught || (ErrorHandler._uncaught = new ErrorHandler(function (e: any) {
       if (e && e.name === FatalError.prototype.name) {
-        const fatalError = <FatalError> e;
-        HandleUncaughtError(fatalError.error, "Fatal ");
+        const fatalError = e as FatalError;
+        HandleUncaughtError(fatalError.error, 'Fatal ');
       } else {
-        HandleUncaughtError(e, "Uncaught ");
+        HandleUncaughtError(e, 'Uncaught ');
       }
       return { done: true, value: undefined };
     }));
@@ -205,7 +205,7 @@ export class FatalError extends BaseError {
   error: any = null;
 
   constructor(e: any) {
-    super(e !== undefined && e !== null ? ToString(e) : "");
+    super(e !== undefined && e !== null ? ToString(e) : '');
     this.error = e;
   }
 }

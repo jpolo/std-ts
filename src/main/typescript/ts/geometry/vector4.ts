@@ -1,6 +1,6 @@
 // Util
-export type Vector4 = [number, number, number, number]
-type Vector4Constructor = { new(n: number): Vector4 }
+export type Vector4 = [number, number, number, number];
+type Vector4Constructor = { new(n: number): Vector4 };
 
 // let Float32Array: any = (typeof Float32Array !== 'undefined') ? Float32Array : Array
 const Float64Array: any = Array;
@@ -29,7 +29,7 @@ function ArrayFill(a: Vector4, v: number) {
 }
 
 export function abs(v: Vector4, dest?: Vector4): Vector4 {
-  let r = dest === undefined ? ArrayCreateFrom(v) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(v) : dest;
   r[0] = __abs(v[0]);
   r[1] = __abs(v[1]);
   r[2] = __abs(v[2]);
@@ -38,7 +38,7 @@ export function abs(v: Vector4, dest?: Vector4): Vector4 {
 }
 
 export function add(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
-  let r = dest === undefined ? ArrayCreateFrom(a) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(a) : dest;
   r[0] = a[0] + b[0];
   r[1] = a[1] + b[1];
   r[2] = a[2] + b[2];
@@ -47,13 +47,13 @@ export function add(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
 }
 
 export function copy(v: Vector4, dest?: Vector4): Vector4 {
-  let r = dest === undefined ? ArrayCreateFrom(v) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(v) : dest;
   ArrayCopy(v, r);
   return r;
 }
 
 export function create(x: number, y: number, z: number, w: number): Vector4 {
-  let v = ArrayCreate(Float64Array);
+  const v = ArrayCreate(Float64Array);
   v[0] = x;
   v[1] = y;
   v[2] = z;
@@ -62,7 +62,7 @@ export function create(x: number, y: number, z: number, w: number): Vector4 {
 }
 
 export function divide(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
-  let r = dest === undefined ? ArrayCreateFrom(a) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(a) : dest;
   r[0] = a[0] / b[0];
   r[1] = a[1] / b[1];
   r[2] = a[2] / b[2];
@@ -73,7 +73,7 @@ export function divide(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
 export function dot(a: Vector4, b: Vector4): number {
   let r = 0;
   if (a === b) {
-    let a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3];
+    const a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3];
     r = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
   } else {
     r = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
@@ -90,7 +90,7 @@ export function lengthSquared(v: Vector4): number {
 }
 
 export function multiply(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
-  let r = dest === undefined ? ArrayCreateFrom(a) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(a) : dest;
   r[0] = a[0] * b[0];
   r[1] = a[1] * b[1];
   r[2] = a[2] * b[2];
@@ -107,7 +107,7 @@ export function normalize(v: Vector4, dest?: Vector4): Vector4 {
 }
 
 export function scale(v: Vector4, scalar: number, dest?: Vector4): Vector4 {
-  let r = dest === undefined ? ArrayCreateFrom(v) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(v) : dest;
   if (scalar === 0) {
     ArrayFill(r, 0);
   } else if (scalar === 1) {
@@ -122,7 +122,7 @@ export function scale(v: Vector4, scalar: number, dest?: Vector4): Vector4 {
 }
 
 export function subtract(a: Vector4, b: Vector4, dest?: Vector4): Vector4 {
-  let r = dest === undefined ? ArrayCreateFrom(a) : dest;
+  const r = dest === undefined ? ArrayCreateFrom(a) : dest;
   if (a === b) {
     ArrayFill(r, 0);
   } else {

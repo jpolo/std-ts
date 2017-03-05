@@ -3,7 +3,7 @@ declare var Set: any; // TODO remove
 
 // Util
 function FunctionName(f: Function): string {
-  return (<any> f).displayName || (<any> f).name || ((<any> f).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]);
+  return (f as any).displayName || (f as any).name || ((f as any).name = /\W*function\s+([\w\$]+)\(/.exec(ToString(f))[1]);
 }
 
 function FunctionToString(f: Function) {
@@ -25,23 +25,23 @@ function OwnKeys(o: any) {
   return keys;
 }
 
-function Type(o: any) { return o === null ? "null" : typeof o; }
+function Type(o: any) { return o === null ? 'null' : typeof o; }
 
-function ToString(o: any) { return "" + o; }
+function ToString(o: any) { return '' + o; }
 
 function SetCreate<T>(): { has: (o: T) => boolean; add: (o: T) => void } {
-  if (typeof Set !== "undefined") {
+  if (typeof Set !== 'undefined') {
     return new Set();
   } else {
     const d: T[] = [];
     return {
       add(o) { if (d.indexOf(o) !== -1) { d.push(o); } },
-      has(o) { return d.indexOf(o) !== -1; },
+      has(o) { return d.indexOf(o) !== -1; }
     };
   }
 }
 
-function StringTruncate(s: string, maxLength: number, ellipsis = "...") {
+function StringTruncate(s: string, maxLength: number, ellipsis = '...') {
   return (s.length > maxLength ? s.slice(0, maxLength) + ellipsis : s);
 }
 
@@ -56,11 +56,11 @@ function DumpEmpty<T>(i: Inspector, o: T, orElse?: (o: T) => string): string {
 
 function DumpObject(constructorName: string, content: string) {
   content = ToString(content);
-  const sep = content.length ? " " : "";
+  const sep = content.length ? ' ' : '';
   return (
-    "" +
-    (constructorName && constructorName !== "Object" ? constructorName + " " : "") +
-    "{" + sep + content + sep + "}"
+    '' +
+    (constructorName && constructorName !== 'Object' ? constructorName + ' ' : '') +
+    '{' + sep + content + sep + '}'
   );
 }
 
@@ -76,7 +76,7 @@ export class Inspector implements IInspector {
   public maxDepth = 6;
   public maxElements = 7;
   public maxString = 30;
-  public ellipsis = "...";
+  public ellipsis = '...';
 
   private _refs = SetCreate();
 
@@ -98,28 +98,28 @@ export class Inspector implements IInspector {
   }
 
   stringify(o: any, maxDepth: number = this.maxDepth): string {
-    let s = "";
+    let s = '';
 
     if (!s) {
       switch (Type(o)) {
         // Primitive
-        case "undefined": s = this.stringifyUndefined(); break;
-        case "null": s = this.stringifyNull(); break;
-        case "boolean": s = this.stringifyBoolean(o); break;
-        case "number": s = this.stringifyNumber(o); break;
-        case "string": s = this.stringifyString(o); break;
-        case "function": s = this.stringifyFunction(o); break;
+        case 'undefined': s = this.stringifyUndefined(); break;
+        case 'null': s = this.stringifyNull(); break;
+        case 'boolean': s = this.stringifyBoolean(o); break;
+        case 'number': s = this.stringifyNumber(o); break;
+        case 'string': s = this.stringifyString(o); break;
+        case 'function': s = this.stringifyFunction(o); break;
         default:
-          let init = !this._refs;
+          const init = !this._refs;
           // let refs = init ? (this._refs = SetCreate()) : this._refs;
-          let strTag = o.constructor ? FunctionName(o.constructor) : "Object";
+          const strTag = o.constructor ? FunctionName(o.constructor) : 'Object';
           switch (strTag) {
             // Special
-            case "Array": s = this.stringifyArray(o, maxDepth); break;
+            case 'Array': s = this.stringifyArray(o, maxDepth); break;
             // case "Map": s = this.stringifyMap(o, maxDepth); break;
             // case "Set": s = this.stringifySet(o, maxDepth); break;
-            case "Date": s = this.stringifyDate(o); break;
-            case "RegExp": s = this.stringifyRegExp(o); break;
+            case 'Date': s = this.stringifyDate(o); break;
+            case 'RegExp': s = this.stringifyRegExp(o); break;
             default:
               try {
                 if (isIInspect(o)) {
@@ -143,19 +143,19 @@ export class Inspector implements IInspector {
   }
 
   stringifyUndefined(): string {
-    return "undefined";
+    return 'undefined';
   }
 
   stringifyNull(): string {
-    return "null";
+    return 'null';
   }
 
   stringifyBoolean(o: boolean|Boolean): string {
     let s = DumpEmpty(this, o);
     if (s === null) {
       s = ToString(o);
-      if (typeof o === "object") {
-        s = DumpObject("Boolean", s);
+      if (typeof o === 'object') {
+        s = DumpObject('Boolean', s);
       }
     }
     return s;
@@ -163,15 +163,15 @@ export class Inspector implements IInspector {
 
   stringifyDate(o: Date): string {
     const s = DumpEmpty(this, o);
-    return s === null ? DumpObject("Date", o.toISOString()) : s;
+    return s === null ? DumpObject('Date', o.toISOString()) : s;
   }
 
   stringifyNumber(o: number|Number): string {
     let s = DumpEmpty(this, o);
     if (s === null) {
       s = ToString(o);
-      if (typeof o === "object") {
-        s = DumpObject("Number", s);
+      if (typeof o === 'object') {
+        s = DumpObject('Number', s);
       }
     }
     return s;
@@ -185,13 +185,13 @@ export class Inspector implements IInspector {
   stringifyString(o: string|String): string {
     let s = DumpEmpty(this, o);
     if (s === null) {
-      s = "\"" +
+      s = '\"' +
         (StringTruncate(ToString(o), this.maxString, this.ellipsis)
-        .replace(/"/g, "\\\"" )
-        .replace(/[\n\r]/g, "↵")) + "\"";
+        .replace(/"/g, '\\\"' )
+        .replace(/[\n\r]/g, '↵')) + '\"';
 
-      if (typeof o === "object") {
-        s = DumpObject("String", s);
+      if (typeof o === 'object') {
+        s = DumpObject('String', s);
       }
     }
     return s;
@@ -201,10 +201,10 @@ export class Inspector implements IInspector {
     let s = DumpEmpty(this, o);
     if (s === null) {
       s = FunctionToString(o);
-      const i = s.indexOf("{");
+      const i = s.indexOf('{');
       const head = s.slice(0, i + 1);
       const content = s.slice(i + 1, -1);
-      s = head + StringTruncate(content, 0, this.ellipsis) + "}";
+      s = head + StringTruncate(content, 0, this.ellipsis) + '}';
     }
     return s;
   }
@@ -218,10 +218,10 @@ export class Inspector implements IInspector {
 
       s = (
         maxDepth <= 0 && length ? ellipsis :
-        "[" +
-          (truncate ? a.slice(0, maxElements) : a).map((v) => this.stringify(v, maxDepth - 1)).join(", ") +
-          (truncate ? ", " + ellipsis : "") +
-        "]"
+        '[' +
+          (truncate ? a.slice(0, maxElements) : a).map((v) => this.stringify(v, maxDepth - 1)).join(', ') +
+          (truncate ? ', ' + ellipsis : '') +
+        ']'
       );
     }
     return s;
@@ -285,7 +285,7 @@ export class Inspector implements IInspector {
     let s = DumpEmpty(this, o);
     if (s === null) {
       s = o.inspect(maxDepth); // TODO catch errors?
-      if (typeof s !== "string") {
+      if (typeof s !== 'string') {
         s = this.stringify(s, maxDepth);
       }
     }
@@ -295,20 +295,20 @@ export class Inspector implements IInspector {
   stringifyObject(o: any, maxDepth: number = this.maxDepth) {
     let s = DumpEmpty(this, o);
     if (s === null) {
-      s = "";
+      s = '';
       const ctor = o.constructor;
       const ctorName = FunctionName(ctor);
       switch (ctorName) {
         // Boxed primitives
-        case "Boolean": s = this.stringifyBoolean(o); break;
-        case "Number": s = this.stringifyNumber(o); break;
-        case "String": s = this.stringifyString(o); break;
+        case 'Boolean': s = this.stringifyBoolean(o); break;
+        case 'Number': s = this.stringifyNumber(o); break;
+        case 'String': s = this.stringifyString(o); break;
 
         // Normal class
         default:
-          let maxElements = this.maxElements;
-          let ellipsis = this.ellipsis;
-          let keys = OwnKeys(o);
+          const maxElements = this.maxElements;
+          const ellipsis = this.ellipsis;
+          const keys = OwnKeys(o);
           let keyc = keys.length;
           let truncate = false;
           if (keyc > maxElements) {
@@ -320,12 +320,12 @@ export class Inspector implements IInspector {
             const val = o[key];
 
             if (i !== 0) {
-              s += ", ";
+              s += ', ';
             }
-            s += key + ": " + this.stringify(val, maxDepth - 1);
+            s += key + ': ' + this.stringify(val, maxDepth - 1);
           }
           if (truncate) {
-            s += ", " + ellipsis;
+            s += ', ' + ellipsis;
           }
           s = DumpObject(ctorName, s);
       }
@@ -335,7 +335,7 @@ export class Inspector implements IInspector {
 }
 
 export function isIInspect(o: any): boolean {
-  return (o && typeof o.inspect === "function");
+  return (o && typeof o.inspect === 'function');
 }
 
 const $inspectorDefault = new Inspector();

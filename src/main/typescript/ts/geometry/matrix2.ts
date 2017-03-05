@@ -1,6 +1,6 @@
 // Util
-export type Matrix2 = [number, number, number, number]
-type Matrix2Constructor = { new(n: number): Matrix2 }
+export type Matrix2 = [number, number, number, number];
+type Matrix2Constructor = { new(n: number): Matrix2 };
 
 const NumberArray: any = Array;
 function GetConstructor(o: Matrix2): Matrix2Constructor { return o.constructor || NumberArray; };

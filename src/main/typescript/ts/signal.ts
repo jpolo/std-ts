@@ -22,10 +22,10 @@ export interface ISignalHandler<T> {
 }
 
 // Util
-const Global: any = typeof window !== "undefined" ? window : (function() { return this; }());
-function SymbolCreate(o: any) { return Global.Symbol ? Global.Symbol(o) : "@@" + o; }
+const Global: any = typeof window !== 'undefined' ? window : (function () { return this; }());
+function SymbolCreate(o: any) { return Global.Symbol ? Global.Symbol(o) : '@@' + o; }
 function Put(o: any, k: string, v: any) {
-  let defineProperty = Object.defineProperty;
+  const defineProperty = Object.defineProperty;
   if (defineProperty) {
     defineProperty(o, k, {
       configurable: true,
@@ -38,7 +38,7 @@ function Put(o: any, k: string, v: any) {
   }
 }
 
-const $$dispatcher = SymbolCreate("signal");
+const $$dispatcher = SymbolCreate('signal');
 
 function GetSignalDispatcher(o: any, create: boolean): ISignalDispatcher {
   let dispatcher = o[$$dispatcher];
@@ -50,8 +50,8 @@ function GetSignalDispatcher(o: any, create: boolean): ISignalDispatcher {
 }
 
 function GetSignal<T>(o: any, s: ISignalSymbol<T>, create: boolean): Signal<T> {
-  let dispatcher = GetSignalDispatcher(o, create);
-  let key = <string> s;
+  const dispatcher = GetSignalDispatcher(o, create);
+  const key = s as string;
   let sig = dispatcher ? dispatcher[key] : null;
   if (!sig && create) {
     sig = dispatcher[key] = new Signal();
@@ -60,9 +60,9 @@ function GetSignal<T>(o: any, s: ISignalSymbol<T>, create: boolean): Signal<T> {
 }
 
 function SignalBindingQueuePush<T>(q: ISignalBindingQueue<T>, b: ISignalBinding<T>) {
-  let head = q.head;
+  const head = q.head;
   if (head) {
-    let last = head.prev;
+    const last = head.prev;
     // b as last next element
     last.next = b;
     b.prev = last;
@@ -77,9 +77,9 @@ function SignalBindingQueuePush<T>(q: ISignalBindingQueue<T>, b: ISignalBinding<
 }
 
 function SignalBindingQueueRemove<T>(q: ISignalBindingQueue<T>, b: ISignalBinding<T>) {
-  let head = q.head;
-  let prev = b.prev;
-  let next = b.next;
+  const head = q.head;
+  const prev = b.prev;
+  const next = b.next;
 
   prev.next = next;
   next.prev = prev;
@@ -92,7 +92,7 @@ function SignalBindingQueueRemove<T>(q: ISignalBindingQueue<T>, b: ISignalBindin
 
 function SignalBindingQueueFind<T>(q: ISignalBindingQueue<T>, f: ISignalHandler<T>, once: boolean) {
   let returnValue: ISignalBinding<T>;
-  let head = q.head;
+  const head = q.head;
   if (head) {
     let binding = head;
     do {
@@ -107,7 +107,7 @@ function SignalBindingQueueFind<T>(q: ISignalBindingQueue<T>, f: ISignalHandler<
 }
 
 function ToSignalBindingQueue<T>(sig: Signal<T>): ISignalBindingQueue<T> {
-  return <any> sig;
+  return sig as any;
 }
 
 export default class Signal<T> {
@@ -129,7 +129,7 @@ export default class Signal<T> {
   }
 
   add(f: ISignalHandler<T>, once = false): void {
-    let bindings = ToSignalBindingQueue(this);
+    const bindings = ToSignalBindingQueue(this);
     let binding = SignalBindingQueueFind(bindings, f, once);
     if (!binding) {
       binding = { f: f, next: null, once: once, prev: null };
@@ -138,15 +138,15 @@ export default class Signal<T> {
   }
 
   delete(f: ISignalHandler<T>, once = false): void {
-    let bindings = ToSignalBindingQueue(this);
-    let binding = SignalBindingQueueFind(bindings, f, once);
+    const bindings = ToSignalBindingQueue(this);
+    const binding = SignalBindingQueueFind(bindings, f, once);
     if (binding) {
       SignalBindingQueueRemove(bindings, binding);
     }
   }
 
   emit(v: T) {
-    let bindings = ToSignalBindingQueue(this);
+    const bindings = ToSignalBindingQueue(this);
     let head = bindings.head;
     if (head) {
       let binding = head;
@@ -167,7 +167,7 @@ export default class Signal<T> {
 
 export function signal<T>(s: string): ISignalSymbol<T> {
   if (s === undefined || s === null || s.length === 0) {
-    throw TypeError("signal must not be a non-empty string.");
+    throw TypeError('signal must not be a non-empty string.');
   }
   return s;
 }
@@ -177,24 +177,24 @@ export function has<T>(o: any, s: ISignalSymbol<T>): boolean {
 }
 
 export function count<T>(o: any, s: ISignalSymbol<T>): number {
-  let sig = GetSignal(o, s, false);
+  const sig = GetSignal(o, s, false);
   return sig ? sig.size() : 0;
 }
 
 export function connect<T>(o: any, s: ISignalSymbol<T>, f: ISignalHandler<T>, once = false): void {
-  let sig = GetSignal(o, s, true);
+  const sig = GetSignal(o, s, true);
   sig.add(f, once);
 }
 
 export function disconnect<T>(o: any, s: ISignalSymbol<T>, f: ISignalHandler<T>, once = false): void {
-  let sig = GetSignal(o, s, false);
+  const sig = GetSignal(o, s, false);
   if (sig) {
     sig.delete(f, once);
   }
 }
 
 export function emit<T>(o: any, s: ISignalSymbol<T>, v: T): void {
-  let sig = GetSignal(o, s, false);
+  const sig = GetSignal(o, s, false);
   if (sig) {
     sig.emit(v);
   }

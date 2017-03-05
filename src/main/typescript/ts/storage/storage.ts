@@ -1,5 +1,5 @@
 // Util
-function ToString(o: any) { return "" + o; };
+function ToString(o: any) { return '' + o; };
 function OwnKeys(o: any): string[] {
   let keys: string[];
   if (Object.keys) {
@@ -11,10 +11,10 @@ function OwnKeys(o: any): string[] {
   return keys;
 }
 function CheckStorage(storage: IWebStorage) {
-  const testKey = "storageTest" + Math.random();
+  const testKey = 'storageTest' + Math.random();
   try {
     // Safari in private mode can throw error
-    storage.setItem(testKey, "1");
+    storage.setItem(testKey, '1');
     storage.removeItem(testKey);
     return true;
   } catch (e) {
@@ -22,7 +22,7 @@ function CheckStorage(storage: IWebStorage) {
   }
 }
 function CreateMemoryStorage() {
-  const memoryStorage: IWebStorage = <any> {};
+  const memoryStorage: IWebStorage = {} as any;
   const _data = {};
 
   function _onchange() {
@@ -104,7 +104,7 @@ export class Storage implements IStorage {
 
     this._isAvailable = isAvailable;
     this._storage = storage;
-    DefineGetter(this, "length", () => {
+    DefineGetter(this, 'length', () => {
       return this.size();
     });
   }

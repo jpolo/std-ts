@@ -1,17 +1,10 @@
 {
+  "extends": "./tsbase.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "declaration": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "module": "es6",
-    "moduleResolution": "node",
     "outDir": "./target/js",
-    "noImplicitAny": true,
-    "noFallthroughCasesInSwitch": true,
     "paths": {},
     "rootDir": "./src",
-    "inlineSourceMap": true,
     "lib": [
       "es5",
       "dom",
@@ -19,9 +12,6 @@
       "es2015.collection",
       "es2015.iterable"
     ],
-    "skipDefaultLibCheck": true,
-    "skipLibCheck": true,
-    "target": "es6",
     "types": []
   },
   "exclude": [

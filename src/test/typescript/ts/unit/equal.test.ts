@@ -1,17 +1,15 @@
-import { test } from "./_boot.test";
+import { test } from './_boot.test';
 import {
   equalsSame,
   equalsStrict,
-  equalsSimple,
-  equalsDeep,
-  equalsNear
-} from "../../../../main/typescript/ts/unit/equal";
+  equalsDeep
+} from '../../../../main/typescript/ts/unit/equal';
 
-export default test("ts/unit/equal", (assert) => {
+export default test('ts/unit/equal', (assert) => {
 
   // #equalsSame()
   (function () {
-    let message = "#equalsSame() failure";
+    const message = '#equalsSame() failure';
 
     function eq(a, b) {
       return equalsSame(a, b);
@@ -28,12 +26,12 @@ export default test("ts/unit/equal", (assert) => {
     assert_neq(false, 0);
     assert_neq(0, 1);
     assert_neq([0], [0]);
-    assert_neq("1", 1);
+    assert_neq('1', 1);
   }());
 
   // #equalsStrict()
   (function () {
-    let message = "#equalsStrict() failure";
+    const message = '#equalsStrict() failure';
 
     function eq(a, b) {
       return equalsStrict(a, b);
@@ -52,12 +50,12 @@ export default test("ts/unit/equal", (assert) => {
     assert_neq(0, 1);
     assert_neq(NaN, NaN);
     assert_neq([0], [0]);
-    assert_neq("1", 1);
+    assert_neq('1', 1);
   }());
 
   // #equalDeep()
   (function () {
-    let message = "#equalsDeep() failure";
+    const message = '#equalsDeep() failure';
 
     function eq(a, b) {
       return equalsDeep(a, b);
@@ -70,12 +68,12 @@ export default test("ts/unit/equal", (assert) => {
     }
 
     assert_eq([0, 1], [0, 1]);
-    assert_eq([0, ["a", "b"]], [0, ["a", "b"]]);
+    assert_eq([0, ['a', 'b']], [0, ['a', 'b']]);
     assert_eq([NaN, NaN], [NaN, NaN]);
     assert_eq({ foo: 1, bar: 2 }, { foo: 1, bar: 2 });
     assert_neq({ foo: 1, bar: 2 }, { foo: 1 });
     assert_neq([false], [0]);
-    assert_neq(["1"], [1]);
+    assert_neq(['1'], [1]);
   }());
 
-})
+});

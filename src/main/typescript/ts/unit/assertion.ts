@@ -1,10 +1,10 @@
-import { ICallSite } from "../stacktrace";
-import { ITest } from "../unit";
+import { ICallSite } from '../stacktrace';
+import { ITest } from '../unit';
 
-export const SUCCESS = "AssertionSuccess";
-export const FAILURE = "AssertionFailure";
-export const ERROR = "AssertionError";
-export const WARNING = "AssertionWarning";
+export const SUCCESS = 'AssertionSuccess';
+export const FAILURE = 'AssertionFailure';
+export const ERROR = 'AssertionError';
+export const WARNING = 'AssertionWarning';
 
 export interface IAssertion extends Error {
   name: string;

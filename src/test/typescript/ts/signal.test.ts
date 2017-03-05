@@ -1,22 +1,22 @@
-import { suite, test } from "../../../main/typescript/ts/unit/qunit";
-import { signal, has, connect, disconnect, count, emit } from "../../../main/typescript/ts/signal";
+import { suite, test } from '../../../main/typescript/ts/unit/qunit';
+import { signal, has, connect, disconnect, count, emit } from '../../../main/typescript/ts/signal';
 
-export default suite("ts/signal", (self) => {
+export default suite('ts/signal', (self) => {
 
   let receiver = {};
-  let SIG = signal<string>("data");
+  const SIG = signal<string>('data');
   let stream: string[] = [];
 
   function listener1(s: string) {
-    stream.push("l1:" + s);
+    stream.push('l1:' + s);
   }
 
   function listener2(s: string) {
-    stream.push("l2:" + s);
+    stream.push('l2:' + s);
   }
 
   function listener3(s: string) {
-    stream.push("l3:" + s);
+    stream.push('l3:' + s);
   }
 
   self.setUp = () => {
@@ -24,20 +24,20 @@ export default suite("ts/signal", (self) => {
     stream = [];
   };
 
-  test(".signal()", (assert) => {
-    assert.strictEqual(signal("data"), "data");
+  test('.signal()', (assert) => {
+    assert.strictEqual(signal('data'), 'data');
     assert.throws(() => { signal(undefined); });
     assert.throws(() => { signal(null); });
-    assert.throws(() => { signal(""); });
+    assert.throws(() => { signal(''); });
   });
 
-  test(".has()", (assert) => {
+  test('.has()', (assert) => {
     assert.strictEqual(has(receiver, SIG), false);
     connect(receiver, SIG, function () {});
     assert.strictEqual(has(receiver, SIG), true);
   });
 
-  test(".count()", (assert) => {
+  test('.count()', (assert) => {
     assert.strictEqual(count(receiver, SIG), 0);
     connect(receiver, SIG, function () {});
     assert.strictEqual(count(receiver, SIG), 1);
@@ -45,7 +45,7 @@ export default suite("ts/signal", (self) => {
     assert.strictEqual(count(receiver, SIG), 2);
   });
 
-  test(".connect()", (assert) => {
+  test('.connect()', (assert) => {
     assert.strictEqual(count(receiver, SIG), 0);
 
     // Connect
@@ -61,7 +61,7 @@ export default suite("ts/signal", (self) => {
     assert.strictEqual(count(receiver, SIG), 2); // must be unique
   });
 
-  test(".disconnect()", (assert) => {
+  test('.disconnect()', (assert) => {
     assert.strictEqual(count(receiver, SIG), 0);
     connect(receiver, SIG, listener1);
     assert.strictEqual(count(receiver, SIG), 1);
@@ -69,30 +69,30 @@ export default suite("ts/signal", (self) => {
     assert.strictEqual(count(receiver, SIG), 0);
   });
 
-  test(".emit()", (assert) => {
+  test('.emit()', (assert) => {
     connect(receiver, SIG, listener1);
-    assert.deepEqual(stream, ["l1:foo"]);
+    assert.deepEqual(stream, ['l1:foo']);
 
     stream = [];
     connect(receiver, SIG, listener2);
-    emit(receiver, SIG, "bar");
-    assert.deepEqual(stream, ["l1:bar", "l2:bar"]);
+    emit(receiver, SIG, 'bar');
+    assert.deepEqual(stream, ['l1:bar', 'l2:bar']);
 
     stream = [];
     connect(receiver, SIG, listener3);
-    emit(receiver, SIG, "baz");
-    assert.deepEqual(stream, ["l1:baz", "l2:baz", "l3:baz"]);
+    emit(receiver, SIG, 'baz');
+    assert.deepEqual(stream, ['l1:baz', 'l2:baz', 'l3:baz']);
 
     // disconnecting
     stream = [];
     disconnect(receiver, SIG, listener2);
-    emit(receiver, SIG, "foo");
-    assert.deepEqual(stream, ["l1:foo", "l3:foo"]);
+    emit(receiver, SIG, 'foo');
+    assert.deepEqual(stream, ['l1:foo', 'l3:foo']);
 
     stream = [];
     disconnect(receiver, SIG, listener1);
-    emit(receiver, SIG, "foo");
-    assert.deepEqual(stream, ["l3:foo"]);
+    emit(receiver, SIG, 'foo');
+    assert.deepEqual(stream, ['l3:foo']);
     /*
     stream = []
     disconnect(receiver, SIG, listener3);

@@ -1,13 +1,13 @@
 // ECMA like
 function IsEmpty(o: any): o is (null | undefined) { return o === null  || o === undefined; }
 function IsNaN(o: any) { return o !== o; }
-function ToString(o: any) { return "" + o; };
+function ToString(o: any) { return '' + o; };
 function ToStringTag(o: any) {
-  let s = "";
+  let s = '';
   if (o === undefined) {
-    s = "Undefined";
+    s = 'Undefined';
   } else if (o === null) {
-    s = "Null";
+    s = 'Null';
   } else {
     const c = o.constructor;
     s = c && c.name || Object.prototype.toString.call(o).slice(8, -1);
@@ -18,18 +18,18 @@ function ToStringTag(o: any) {
 function Comparator<T>(o: T): (lhs: T, rhs: T) => Ordering {
   const tag = ToStringTag(o);
   switch (tag) {
-    case "Undefined": return null;
-    case "Null": return null;
-    case "Boolean": return <any> compareBoolean;
-    case "Number": return <any> compareNumber;
-    case "String": return <any> compareString;
+    case 'Undefined': return null;
+    case 'Null': return null;
+    case 'Boolean': return compareBoolean as any;
+    case 'Number': return compareNumber as any;
+    case 'String': return compareString as any;
     default:
       if (isICompare(o)) {
-        return <any> compareICompare;
+        return compareICompare as any;
       } else {
         switch (tag) {
-          case "Date": return <any> compareDate;
-          case "RegExp": return <any> compareRegExp;
+          case 'Date': return compareDate as any;
+          case 'RegExp': return compareRegExp as any;
           default: return null;
         }
       }
@@ -48,7 +48,7 @@ export interface ICompare {
 }
 
 export function isICompare(o: any): o is ICompare {
-  return (!!o && typeof o.compare === "function");
+  return (!!o && typeof o.compare === 'function');
 }
 
 export function compare<T>(lhs: T, rhs: T): Ordering {

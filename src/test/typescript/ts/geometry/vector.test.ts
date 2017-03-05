@@ -1,7 +1,7 @@
-import { suite, test, Assert } from "../../../../main/typescript/ts/unit/qunit";
-import * as vector2 from "../../../../main/typescript/ts/geometry/vector2";
-import * as vector3 from "../../../../main/typescript/ts/geometry/vector3";
-import * as vector4 from "../../../../main/typescript/ts/geometry/vector4";
+import { suite, test } from '../../../../main/typescript/ts/unit/qunit';
+import * as vector2 from '../../../../main/typescript/ts/geometry/vector2';
+import * as vector3 from '../../../../main/typescript/ts/geometry/vector3';
+import * as vector4 from '../../../../main/typescript/ts/geometry/vector4';
 
 interface VectorModule<T> {
   add(a: T, b: T, dest?: T): T;
@@ -25,7 +25,7 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
   }
 
   function copy(a: number[]) {
-    let r = new Array(arity);
+    const r = new Array(arity);
     for (let i = 0; i < arity; i++) {
       r[i] = a[i];
     }
@@ -33,12 +33,12 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
   }
 
   function random(): number[] {
-    let __rand = Math.random;
-    let r = create();
+    const __rand = Math.random;
+    const r = create();
     for (let i = 0; i < arity; i++) {
       r[i] = __rand() * 200 - 100;
     }
-    return <any>r;
+    return r as any;
   }
 
   function gen(f: () => void, count = 10) {
@@ -49,13 +49,13 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
 
   return suite(n, (self) => {
 
-    test(".add(a, b)", (assert) => {
+    test('.add(a, b)', (assert) => {
       gen(() => {
 
-        let a = random();
-        let b = random();
-        let dest = create();
-        let expected = create();
+        const a = random();
+        const b = random();
+        const dest = create();
+        const expected = create();
         for (let i = 0; i < arity; i++) {
           expected[i] = a[i] + b[i];
         }
@@ -70,11 +70,11 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".copy(from, to)", (assert) => {
+    test('.copy(from, to)', (assert) => {
       gen(() => {
-        let v = random();
-        let dest = create();
-        let expected = copy(v);
+        const v = random();
+        const dest = create();
+        const expected = copy(v);
 
         // alloc
         assert.deepEqual(vector.copy(v), expected);
@@ -85,13 +85,12 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-
-    test(".divide(a, b)", (assert) => {
+    test('.divide(a, b)', (assert) => {
       gen(() => {
-        let a = random();
-        let b = random();
-        let dest = create();
-        let expected = create();
+        const a = random();
+        const b = random();
+        const dest = create();
+        const expected = create();
         for (let i = 0; i < arity; i++) {
           expected[i] = a[i] / b[i];
         }
@@ -105,10 +104,10 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".dot(a, b)", (assert) => {
+    test('.dot(a, b)', (assert) => {
       gen(() => {
-        let a = random();
-        let b = random();
+        const a = random();
+        const b = random();
         let expected = 0;
         for (let i = 0; i < arity; i++) {
           expected += a[i] * b[i];
@@ -117,9 +116,9 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".lengthSquared(v)", (assert) => {
+    test('.lengthSquared(v)', (assert) => {
       gen(() => {
-        let v = random();
+        const v = random();
         let expected = 0;
         for (let i = 0; i < arity; i++) {
           expected += v[i] * v[i];
@@ -128,9 +127,9 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".length(v)", (assert) => {
+    test('.length(v)', (assert) => {
       gen(() => {
-        let v = random();
+        const v = random();
         let expected = 0;
         for (let i = 0; i < arity; i++) {
           expected += v[i] * v[i];
@@ -140,13 +139,13 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".multiply(a, b)", (assert) => {
+    test('.multiply(a, b)', (assert) => {
       gen(() => {
 
-        let a = random();
-        let b = random();
-        let dest = create();
-        let expected = create();
+        const a = random();
+        const b = random();
+        const dest = create();
+        const expected = create();
         for (let i = 0; i < arity; i++) {
           expected[i] = a[i] * b[i];
         }
@@ -160,12 +159,12 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".negate(a)", (assert) => {
+    test('.negate(a)', (assert) => {
       gen(() => {
 
-        let v = random();
-        let dest = create();
-        let expected = create();
+        const v = random();
+        const dest = create();
+        const expected = create();
         for (let i = 0; i < arity; i++) {
           expected[i] = -v[i];
         }
@@ -180,19 +179,19 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".normalize(a)", (assert) => {
+    test('.normalize(a)', (assert) => {
       gen(() => {
 
-        let v = random();
-        let dest = create();
+        const v = random();
+        const dest = create();
         let length = 0;
         for (let i = 0; i < arity; i++) {
           length += v[i] * v[i];
         }
         length = Math.sqrt(length);
 
-        let factor = 1 / length;
-        let expected = create();
+        const factor = 1 / length;
+        const expected = create();
         for (let i = 0; i < arity; i++) {
           expected[i] = v[i] * factor;
         }
@@ -207,12 +206,12 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".scale(a)", (assert) => {
+    test('.scale(a)', (assert) => {
       gen(() => {
-        let v = random();
-        let factor = Math.random();
-        let dest = create();
-        let expected = create();
+        const v = random();
+        const factor = Math.random();
+        const dest = create();
+        const expected = create();
         for (let i = 0; i < arity; i++) {
           expected[i] = v[i] * factor;
         }
@@ -226,12 +225,12 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
       });
     });
 
-    test(".subtract(a, b)", (assert) => {
+    test('.subtract(a, b)', (assert) => {
       gen(() => {
-        let a = random();
-        let b = random();
-        let dest = create();
-        let expected = create();
+        const a = random();
+        const b = random();
+        const dest = create();
+        const expected = create();
         for (let i = 0; i < arity; i++) {
           expected[i] = a[i] - b[i];
         }
@@ -248,9 +247,8 @@ function generateSuite(n: string, vector: VectorModule<number[]>, arity: number)
   });
 }
 
-let vector2Suite = generateSuite("ts/geometry/vector2", vector2, 2);
-let vector3Suite = generateSuite("ts/geometry/vector3", vector3, 3);
-let vector4Suite = generateSuite("ts/geometry/vector4", vector4, 4);
-
+const vector2Suite = generateSuite('ts/geometry/vector2', vector2, 2);
+const vector3Suite = generateSuite('ts/geometry/vector3', vector3, 3);
+const vector4Suite = generateSuite('ts/geometry/vector4', vector4, 4);
 
 export default vector2Suite.concat(vector3Suite, vector4Suite);

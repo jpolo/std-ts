@@ -1,5 +1,5 @@
 // Util
-const hasClassList = "classList" in document.createElement("div");
+const hasClassList = 'classList' in document.createElement('div');
 
 const TokenError: any = /*DOMException || */TypeError;
 function OwnKeys(o: any) {
@@ -12,28 +12,28 @@ function OwnKeys(o: any) {
   return ks;
 }
 function ArrayToDict(a: string[]|DOMTokenList) {
-  let returnValue: {[k: string]: boolean} = {};
+  const returnValue: {[k: string]: boolean} = {};
   for (let i = 0, l = a.length; i < l; ++i) {
     returnValue[a[i]] = true;
   }
   return returnValue;
 }
 function AssertToken(token: string): string {
-  if (token === "") {
-    throw new TokenError("An invalid or illegal string was specified");
+  if (token === '') {
+    throw new TokenError('An invalid or illegal string was specified');
   } else if (/\s/.test(token)) {
-    throw new TokenError("String contains an invalid character");
+    throw new TokenError('String contains an invalid character');
   }
   return token;
 }
 let __classListGet = function (element: HTMLElement): string[] {
   return element.className.split(/\s+/);
 };
-let __classListSet = function (element: HTMLElement, classNames: string[]) {
-  element.className = classNames.join(" ");
+const __classListSet = function (element: HTMLElement, classNames: string[]) {
+  element.className = classNames.join(' ');
 };
 let __classListContains = function (element: HTMLElement, className: string): boolean {
-  return typeof className === "string" && element.classList.contains(className);
+  return typeof className === 'string' && element.classList.contains(className);
 };
 let __classListAdd = function (element: HTMLElement, className: string) {
   element.classList.add(className);
@@ -48,20 +48,20 @@ if (!hasClassList) {
     return element.className.split(/\s+/);
   };
   __classListContains = function (element: HTMLElement, className: string): boolean {
-    return typeof className === "string" && ((" " + element.className + " ").indexOf(" " + className + " ") !== -1);
+    return typeof className === 'string' && ((' ' + element.className + ' ').indexOf(' ' + className + ' ') !== -1);
   };
   __classListAdd = function (element: HTMLElement, className: string) {
-    let elementClassName = element.className;
+    const elementClassName = element.className;
     if (
-      typeof className === "string" &&
-      ((" " + elementClassName + " ").indexOf(" " + className + " ") === -1)
+      typeof className === 'string' &&
+      ((' ' + elementClassName + ' ').indexOf(' ' + className + ' ') === -1)
     ) {
-      element.className += (elementClassName.length ? " " : "") + className;
+      element.className += (elementClassName.length ? ' ' : '') + className;
     }
   };
    __classListRemove = function (element: HTMLElement, className: string) {
-    let classList = __classListGet(element);
-    let i = classList.indexOf(classList[0]);
+    const classList = __classListGet(element);
+    const i = classList.indexOf(classList[0]);
     if (i !== -1) {
       classList.splice(i, 1);
       __classListSet(element, classList);
@@ -74,17 +74,17 @@ export function contains(element: HTMLElement, className: string): boolean {
 }
 
 export function add(element: HTMLElement, ...classNames: string[]): void {
-  let l = classNames.length;
+  const l = classNames.length;
   if (element && l !== 0) {
-    let classNamesNew: string[] = [];
-    for (let className of classNames) {
+    const classNamesNew: string[] = [];
+    for (const className of classNames) {
       AssertToken(className);
-      if (typeof className === "string" && !__classListContains(element, className)) {
+      if (typeof className === 'string' && !__classListContains(element, className)) {
         classNamesNew.push(className);
       }
     }
     if (classNames.length !== 0) {
-      element.className += (element.className.length ? " " : "") + classNamesNew.join(" ");
+      element.className += (element.className.length ? ' ' : '') + classNamesNew.join(' ');
     }
   }
 
@@ -92,15 +92,15 @@ export function add(element: HTMLElement, ...classNames: string[]): void {
 }
 
 export function remove(element: HTMLElement, ...classNames: string[]): void {
-  let l = classNames.length;
+  const l = classNames.length;
   if (l === 0) {
     // Do nothing
   } else if (l === 1) {
     __classListRemove(element, classNames[0]);
   } else {
-    let classIndex = ArrayToDict(__classListGet(element));
+    const classIndex = ArrayToDict(__classListGet(element));
     let changed = false;
-    for (let className of classNames) {
+    for (const className of classNames) {
       AssertToken(className);
       if (classIndex.hasOwnProperty(className)) {
         delete classIndex[className];

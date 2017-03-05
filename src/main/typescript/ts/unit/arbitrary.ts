@@ -1,5 +1,5 @@
-import { IIterator, IIteratorResult } from "../iterator";
-import { oneOf, random, from } from "./generator";
+import { IIterator, IIteratorResult } from '../iterator';
+import { oneOf, random, from } from './generator';
 import {
   Now,
   INT8_MIN_VALUE, INT8_MAX_VALUE,
@@ -9,7 +9,7 @@ import {
   UINT16_MIN_VALUE, UINT16_MAX_VALUE,
   UINT32_MIN_VALUE, UINT32_MAX_VALUE,
   DATE_MIN_MILLISECONDS, DATE_MAX_MILLISECONDS
-} from "./util";
+} from './util';
 
 const Floor = Math.floor;
 const GeneratorFrom = from;
@@ -28,14 +28,14 @@ function GeneratorCreate<T>(f: {(v?: any): IIteratorResult<T>}) {
 function GeneratorMap<T, U>(g: IGenerator<T>, f: (v: T) => U): IGenerator<U> {
   return GeneratorCreate(function (v?: any) {
     const iterResult = g.next(v);
-    const iterMapped: IIteratorResult<U> = iterResult.done ? <any> iterResult : { done: false, value: f(iterResult.value) };
+    const iterMapped: IIteratorResult<U> = iterResult.done ? iterResult as any : { done: false, value: f(iterResult.value) };
     return iterMapped;
   });
 }
 
 function GeneratorRandomInt(min: number|IGenerator<number>, max: number|IGenerator<number>) {
-  const genMin = GeneratorFrom<number>(<any> min);
-  const genMax = GeneratorFrom<number>(<any> max);
+  const genMin = GeneratorFrom<number>(min as any);
+  const genMax = GeneratorFrom<number>(max as any);
   return GeneratorFrom(function (p) {
     const minResult = genMin.next(p);
     const maxResult = genMax.next(p);
@@ -66,7 +66,7 @@ function ArbitraryCreate<T>(g: IGenerator<T>) {
 // Boolean
 export const boolean = ArbitraryCreate(oneOf([ true, false ]));
 export const truthy = ArbitraryCreate(oneOf<any>([ true, {}, [], new Date() ]));
-export const falsy = ArbitraryCreate(oneOf<any>([ false, null, undefined, "", 0, NaN ]));
+export const falsy = ArbitraryCreate(oneOf<any>([ false, null, undefined, '', 0, NaN ]));
 
 // Number
 export const int8 = ArbitraryCreate(GeneratorRandomInt(INT8_MIN_VALUE, INT8_MAX_VALUE));

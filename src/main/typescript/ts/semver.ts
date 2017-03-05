@@ -1,18 +1,18 @@
 /* tslint:disable:no-bitwise */
 
-import { IHash, hashString } from "./hash";
+import { IHash, hashString } from './hash';
 
 // reference: https://github.com/npm/node-semver/blob/master/semver.js
 
 // Util
 function Has(o: any, prop: string) { return (prop in o); }
 function ToUint32(o: any) { return o >>> 0; }
-function ToString(o: any): string { return "" + o; }
+function ToString(o: any): string { return '' + o; }
 function SemVerStringify(v: ISemVer) {
-  let s = "";
-  s += v.major + "." + v.minor + "." + v.patch;
+  let s = '';
+  s += v.major + '.' + v.minor + '.' + v.patch;
   if (v.prerelease.length) {
-    s += "-" + v.prerelease.join(".");
+    s += '-' + v.prerelease.join('.');
   }
   return s;
 }
@@ -35,7 +35,7 @@ export class SemVer implements ISemVer, IHash {
     if (o) {
       if (o instanceof SemVer) {
         returnValue = o;
-      } else if (typeof o === "string") {
+      } else if (typeof o === 'string') {
         returnValue = SemVer.parse(o);
       } else if (SemVer.isSemVer(o)) {
         returnValue = new SemVer(
@@ -56,9 +56,9 @@ export class SemVer implements ISemVer, IHash {
     return (o && (
       o instanceof SemVer ||
       (
-        Has(o, "major") &&
-        Has(o, "minor") &&
-        Has(o, "patch")
+        Has(o, 'major') &&
+        Has(o, 'minor') &&
+        Has(o, 'patch')
       )
     ));
   }
@@ -88,12 +88,12 @@ export class SemVer implements ISemVer, IHash {
     // numberify any prerelease numeric ids
     let prerelease: Array<number|string> = [];
     if (m[4]) {
-      prerelease = m[4].split(".").map(function(id) {
+      prerelease = m[4].split('.').map(function (id) {
         return (/^[0-9]+$/.test(id)) ? +id : id;
       });
     }
 
-    const build = m[5] ? m[5].split(".") : [];
+    const build = m[5] ? m[5].split('.') : [];
     return new SemVer(
       major,
       minor,
@@ -159,7 +159,6 @@ export class SemVer implements ISemVer, IHash {
 
 }
 
-
 function __cmpIdentifiers(a: number|string, b: number|string): number {
   return NaN;
   /*let anum = numeric.test(a);
@@ -186,8 +185,8 @@ function __cmpMain(a: ISemVer, b: ISemVer): number {
 }
 
 function __cmpPre(a: ISemVer, b: ISemVer): number {
-  let apre = a.prerelease;
-  let bpre = b.prerelease;
+  const apre = a.prerelease;
+  const bpre = b.prerelease;
 
   // NOT having a prerelease is > having one
   if (apre.length && !bpre.length) {
@@ -200,10 +199,10 @@ function __cmpPre(a: ISemVer, b: ISemVer): number {
 
   let i = 0;
   do {
-    let av = apre[i];
-    let avundef = av === undefined;
-    let bv = bpre[i];
-    let bvundef = bv === undefined;
+    const av = apre[i];
+    const avundef = av === undefined;
+    const bv = bpre[i];
+    const bvundef = bv === undefined;
 
     if (avundef && bvundef) {
       return 0;
@@ -220,8 +219,8 @@ function __cmpPre(a: ISemVer, b: ISemVer): number {
 }
 
 // The actual regexps go on exports.re
-let re: RegExp[] = [];
-let src: string[] = [];
+const re: RegExp[] = [];
+const src: string[] = [];
 let R = 0;
 
 // The following Regular Expressions can be used for tokenizing,
@@ -230,29 +229,27 @@ let R = 0;
 // ## Numeric Identifier
 // A single `0`, or a non-zero digit followed by zero or more digits.
 
-let NUMERICIDENTIFIER = R++;
-src[NUMERICIDENTIFIER] = "0|[1-9]\\d*";
-let NUMERICIDENTIFIERLOOSE = R++;
-src[NUMERICIDENTIFIERLOOSE] = "[0-9]+";
-
+const NUMERICIDENTIFIER = R++;
+src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
+const NUMERICIDENTIFIERLOOSE = R++;
+src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
 
 // ## Non-numeric Identifier
 // Zero or more digits, followed by a letter or hyphen, and then zero or
 // more letters, digits, or hyphens.
 
-let NONNUMERICIDENTIFIER = R++;
-src[NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-][a-zA-Z0-9-]*";
-
+const NONNUMERICIDENTIFIER = R++;
+src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
 
 // ## Main Version
 // Three dot-separated numeric identifiers.
 
-let MAINVERSION = R++;
+const MAINVERSION = R++;
 src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
                    '(' + src[NUMERICIDENTIFIER] + ')\\.' +
                    '(' + src[NUMERICIDENTIFIER] + ')';
 
-let MAINVERSIONLOOSE = R++;
+const MAINVERSIONLOOSE = R++;
 src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
@@ -260,41 +257,39 @@ src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
 
-let PRERELEASEIDENTIFIER = R++;
+const PRERELEASEIDENTIFIER = R++;
 src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
                             '|' + src[NONNUMERICIDENTIFIER] + ')';
 
-let PRERELEASEIDENTIFIERLOOSE = R++;
+const PRERELEASEIDENTIFIERLOOSE = R++;
 src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
                                  '|' + src[NONNUMERICIDENTIFIER] + ')';
-
 
 // ## Pre-release Version
 // Hyphen, followed by one or more dot-separated pre-release version
 // identifiers.
 
-let PRERELEASE = R++;
+const PRERELEASE = R++;
 src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
                   '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))';
 
-let PRERELEASELOOSE = R++;
+const PRERELEASELOOSE = R++;
 src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
                        '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
 
 // ## Build Metadata Identifier
 // Any combination of digits, letters, or hyphens.
 
-let BUILDIDENTIFIER = R++;
+const BUILDIDENTIFIER = R++;
 src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
 
 // ## Build Metadata
 // Plus sign, followed by one or more period-separated build metadata
 // identifiers.
 
-let BUILD = R++;
+const BUILD = R++;
 src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
              '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
-
 
 // ## Full Version String
 // A main version, followed optionally by a pre-release version and
@@ -305,8 +300,8 @@ src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
 // capturing group, because it should not ever be used in version
 // comparison.
 
-let FULL = R++;
-let FULLPLAIN = 'v?' + src[MAINVERSION] +
+const FULL = R++;
+const FULLPLAIN = 'v?' + src[MAINVERSION] +
                 src[PRERELEASE] + '?' +
                 src[BUILD] + '?';
 
@@ -315,25 +310,25 @@ src[FULL] = '^' + FULLPLAIN + '$';
 // like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
 // also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
 // common in the npm registry.
-let LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
+const LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
                  src[PRERELEASELOOSE] + '?' +
                  src[BUILD] + '?';
 
-let LOOSE = R++;
+const LOOSE = R++;
 src[LOOSE] = '^' + LOOSEPLAIN + '$';
 
-let GTLT = R++;
+const GTLT = R++;
 src[GTLT] = '((?:<|>)?=?)';
 
 // Something like "2.*" or "1.2.x".
 // Note that "x.x" is a valid xRange identifer, meaning "any version"
 // Only the first item is strictly required.
-let XRANGEIDENTIFIERLOOSE = R++;
+const XRANGEIDENTIFIERLOOSE = R++;
 src[XRANGEIDENTIFIERLOOSE] = `${src[NUMERICIDENTIFIERLOOSE]}|x|X|\\*`;
-let XRANGEIDENTIFIER = R++;
+const XRANGEIDENTIFIER = R++;
 src[XRANGEIDENTIFIER] = `${src[NUMERICIDENTIFIER]}|x|X|\\*`;
 
-let XRANGEPLAIN = R++;
+const XRANGEPLAIN = R++;
 src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
@@ -341,7 +336,7 @@ src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
                    src[BUILD] + '?' +
                    ')?)?';
 
-let XRANGEPLAINLOOSE = R++;
+const XRANGEPLAINLOOSE = R++;
 src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
@@ -349,77 +344,75 @@ src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         src[BUILD] + '?' +
                         ')?)?';
 
-let XRANGE = R++;
+const XRANGE = R++;
 src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
-let XRANGELOOSE = R++;
+const XRANGELOOSE = R++;
 src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"
-let LONETILDE = R++;
+const LONETILDE = R++;
 src[LONETILDE] = '(?:~>?)';
 
-let TILDETRIM = R++;
+const TILDETRIM = R++;
 src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
 re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
-let tildeTrimReplace = '$1~';
+const tildeTrimReplace = '$1~';
 
-let TILDE = R++;
+const TILDE = R++;
 src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
-let TILDELOOSE = R++;
+const TILDELOOSE = R++;
 src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
 
 // Caret ranges.
 // Meaning is "at least and backwards compatible with"
-let LONECARET = R++;
+const LONECARET = R++;
 src[LONECARET] = '(?:\\^)';
 
-let CARETTRIM = R++;
+const CARETTRIM = R++;
 src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
 re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
-let caretTrimReplace = '$1^';
+const caretTrimReplace = '$1^';
 
-let CARET = R++;
+const CARET = R++;
 src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
-let CARETLOOSE = R++;
+const CARETLOOSE = R++;
 src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
 
 // A simple gt/lt/eq thing, or just "" to indicate "any version"
-let COMPARATORLOOSE = R++;
+const COMPARATORLOOSE = R++;
 src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
-let COMPARATOR = R++;
+const COMPARATOR = R++;
 src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
-
 
 // An expression to strip any whitespace between the gtlt and the thing
 // it modifies, so that `> 1.2.3` ==> `>1.2.3`
-let COMPARATORTRIM = R++;
+const COMPARATORTRIM = R++;
 src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
                       '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
 
 // this one has to use the /g flag
 re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
-let comparatorTrimReplace = '$1$2$3';
-
+const comparatorTrimReplace = '$1$2$3';
 
 // Something like `1.2.3 - 1.2.4`
 // Note that these all use the loose form, because they'll be
 // checked against either the strict or loose comparator form
 // later.
-let HYPHENRANGE = R++;
+const HYPHENRANGE = R++;
 src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
                    '\\s+-\\s+' +
                    '(' + src[XRANGEPLAIN] + ')' +
                    '\\s*$';
 
-let HYPHENRANGELOOSE = R++;
+const HYPHENRANGELOOSE = R++;
 src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
                         '\\s+-\\s+' +
                         '(' + src[XRANGEPLAINLOOSE] + ')' +
                         '\\s*$';
 
 // Star ranges basically just allow anything at all.
-let STAR = R++;
+const STAR = R++;
 src[STAR] = '(<|>)?=?\\s*\\*';
 
 // Compile to actual regexp objects.

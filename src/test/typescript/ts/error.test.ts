@@ -1,5 +1,5 @@
-import { suite, test, Assert } from "../../../main/typescript/ts/unit/qunit";
-import * as error from "../../../main/typescript/ts/error";
+import { suite, test } from '../../../main/typescript/ts/unit/qunit';
+import * as error from '../../../main/typescript/ts/error';
 
 class ChildError extends error.Error {}
 class ChildEvalError extends error.EvalError {}
@@ -10,134 +10,134 @@ class ChildURIError extends error.URIError {}
 class ChildBaseError extends error.BaseError {}
 class GrandChildBaseError extends ChildBaseError {}
 
-const ErrorSuite = suite("ts/error.Error", (self) => {
+const ErrorSuite = suite('ts/error.Error', (self) => {
 
-  test("<extends>", (assert) => {
-    let err = new ChildError("my message");
+  test('<extends>', (assert) => {
+    const err = new ChildError('my message');
     assert.instanceOf(err, ChildError);
     assert.instanceOf(err, Error);
-    assert.strictEqual(err.name, "ChildError");
+    assert.strictEqual(err.name, 'ChildError');
   });
 
-  test("#constructor()", (assert) => {
+  test('#constructor()', (assert) => {
     assert.strictEqual(error.Error, Error);
     assert.instanceOf(new error.Error(), Error);
   });
 
 });
 
-const EvalErrorSuite = suite("ts/error.EvalError", (self) => {
+const EvalErrorSuite = suite('ts/error.EvalError', (self) => {
 
-  test("<extends>", (assert) => {
-    let err = new ChildEvalError("my message");
+  test('<extends>', (assert) => {
+    const err = new ChildEvalError('my message');
     assert.instanceOf(err, ChildEvalError);
     assert.instanceOf(err, EvalError);
     assert.instanceOf(err, Error);
-    assert.strictEqual(err.name, "ChildEvalError");
+    assert.strictEqual(err.name, 'ChildEvalError');
   });
 
-  test("#constructor()", (assert) => {
+  test('#constructor()', (assert) => {
     assert.strictEqual(error.EvalError, EvalError);
     assert.instanceOf(new error.EvalError(), EvalError);
   });
 
 });
 
-const RangeErrorSuite = suite("ts/error.RangeError", (self) => {
+const RangeErrorSuite = suite('ts/error.RangeError', (self) => {
 
-  test("<extends>", (assert) => {
-    let err = new ChildRangeError("my message");
+  test('<extends>', (assert) => {
+    const err = new ChildRangeError('my message');
     assert.instanceOf(err, ChildRangeError);
     assert.instanceOf(err, RangeError);
     assert.instanceOf(err, Error);
-    assert.strictEqual(err.name, "ChildRangeError");
+    assert.strictEqual(err.name, 'ChildRangeError');
   });
 
-  test("#constructor()", (assert) => {
+  test('#constructor()', (assert) => {
     assert.strictEqual(error.RangeError, RangeError);
     assert.instanceOf(new error.RangeError(), RangeError);
   });
 
 });
 
-const ReferenceErrorSuite = suite("ts/error.ReferenceError", (self) => {
+const ReferenceErrorSuite = suite('ts/error.ReferenceError', (self) => {
 
-  test("<extends>", (assert) => {
-    let err = new ChildReferenceError("my message");
+  test('<extends>', (assert) => {
+    const err = new ChildReferenceError('my message');
     assert.instanceOf(err, ChildReferenceError);
     assert.instanceOf(err, ReferenceError);
     assert.instanceOf(err, Error);
-    assert.strictEqual(err.name, "ChildReferenceError");
+    assert.strictEqual(err.name, 'ChildReferenceError');
   });
 
-  test("#constructor()", (assert) => {
+  test('#constructor()', (assert) => {
     assert.strictEqual(error.ReferenceError, ReferenceError);
     assert.instanceOf(new error.ReferenceError(), ReferenceError);
   });
 
 });
 
-const TypeErrorSuite = suite("ts/error.TypeError", (self) => {
+const TypeErrorSuite = suite('ts/error.TypeError', (self) => {
 
-  test("<extends>", (assert) => {
-    let err = new ChildTypeError("my message");
+  test('<extends>', (assert) => {
+    const err = new ChildTypeError('my message');
     assert.instanceOf(err, ChildTypeError);
     assert.instanceOf(err, TypeError);
     assert.instanceOf(err, Error);
-    assert.strictEqual(err.name, "ChildTypeError");
+    assert.strictEqual(err.name, 'ChildTypeError');
   });
 
-  test("#constructor()", (assert) => {
+  test('#constructor()', (assert) => {
     assert.strictEqual(error.TypeError, TypeError);
     assert.instanceOf(new error.TypeError(), TypeError);
   });
 
 });
 
-const URIErrorSuite = suite("ts/error.URIError", (self) => {
+const URIErrorSuite = suite('ts/error.URIError', (self) => {
 
-  test("<extends>", (assert) => {
-    let err = new ChildURIError("my message");
+  test('<extends>', (assert) => {
+    const err = new ChildURIError('my message');
     assert.instanceOf(err, ChildURIError);
     assert.instanceOf(err, URIError);
     assert.instanceOf(err, Error);
-    assert.strictEqual(err.name, "ChildURIError");
+    assert.strictEqual(err.name, 'ChildURIError');
   });
 
-  test("#constructor()", (assert) => {
+  test('#constructor()', (assert) => {
     assert.strictEqual(error.URIError, URIError);
     assert.instanceOf(new error.URIError(), URIError);
   });
 
 });
 
-const BaseErrorSuite = suite("ts/error.BaseError", (self) => {
+const BaseErrorSuite = suite('ts/error.BaseError', (self) => {
 
-  test("<extends>", (assert) => {
-    let err = new ChildBaseError("my message");
+  test('<extends>', (assert) => {
+    const err = new ChildBaseError('my message');
     assert.instanceOf(err, Error);
     assert.instanceOf(err, error.BaseError);
     assert.instanceOf(err, ChildBaseError);
-    assert.strictEqual(err.name, "ChildBaseError");
+    assert.strictEqual(err.name, 'ChildBaseError');
   });
 
-  test("#constructor()", (assert) => {
-    let err = new error.BaseError("my message");
+  test('#constructor()', (assert) => {
+    const err = new error.BaseError('my message');
     assert.instanceOf(err, Error);
     assert.instanceOf(err, error.BaseError);
   });
 
-  test("#name", (assert) => {
-    let err = new error.BaseError("foo");
+  test('#name', (assert) => {
+    const err = new error.BaseError('foo');
 
-    assert.strictEqual(err.name, "BaseError");
+    assert.strictEqual(err.name, 'BaseError');
   });
 
-  test("#stack", (assert) => {
-    let err = new error.BaseError("foo");
-    let stack = String(err.stack);
-    let stackLines = stack.split("\n");
-    assert.strictEqual(stackLines[0], "BaseError: foo");
+  test('#stack', (assert) => {
+    const err = new error.BaseError('foo');
+    const stack = String(err.stack);
+    const stackLines = stack.split('\n');
+    assert.strictEqual(stackLines[0], 'BaseError: foo');
 
     // let prefix = "    at file:";
     // assert.strictEqual(stackLines[1].slice(0, prefix.length), prefix);
@@ -150,9 +150,9 @@ const BaseErrorSuite = suite("ts/error.BaseError", (self) => {
   })
   */
 
-  test("#toString()", (assert) => {
-    let err = new error.BaseError("my message");
-    assert.strictEqual(err.toString(), "BaseError: my message");
+  test('#toString()', (assert) => {
+    const err = new error.BaseError('my message');
+    assert.strictEqual(err.toString(), 'BaseError: my message');
   });
 
 });

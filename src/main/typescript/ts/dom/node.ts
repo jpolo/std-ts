@@ -3,9 +3,9 @@ function IsNode(o: any): o is Node {
   return (
     // typeof Node === "object" ? o instanceof Node :
     o &&
-    typeof o === "object" &&
-    typeof o.nodeType === "number" &&
-    typeof o.nodeName === "string"
+    typeof o === 'object' &&
+    typeof o.nodeType === 'number' &&
+    typeof o.nodeName === 'string'
   );
 }
 /*
@@ -27,7 +27,7 @@ function SetText(n: Node, text: string) {
 */
 
 function GetText(n: Node) {
-  let returnValue = "";
+  let returnValue = '';
   const nodeType = n.nodeType;
 
   if (
@@ -38,8 +38,8 @@ function GetText(n: Node) {
     // Use textContent for elements
     // innerText usage removed for consistency of new lines (jQuery #11153)
     returnValue = n.textContent;
-    if (typeof returnValue !== "string") {
-      returnValue = "";
+    if (typeof returnValue !== 'string') {
+      returnValue = '';
       // Traverse its children
       for (n = n.firstChild; n; n = n.nextSibling) {
         returnValue += GetText(n);
@@ -145,7 +145,7 @@ export function contains(parentNode: Node, node: Node): boolean {
  */
 export function empty(node: Node): void {
   if (node.textContent.length) {
-    node.textContent = "";
+    node.textContent = '';
   }
 }
 
@@ -199,7 +199,7 @@ export function place(node: Node, position: Position, refNode: Node): boolean {
       }
       break;
     default:
-      throw new Error(position + " is not a valid position");
+      throw new Error(position + ' is not a valid position');
   }
   return returnValue;
 }

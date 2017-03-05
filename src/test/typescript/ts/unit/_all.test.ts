@@ -1,13 +1,13 @@
-import arbitrarySuite from "./arbitrary.test";
-import generatorSuite from "./generator.test";
+import arbitrarySuite from './arbitrary.test';
+import generatorSuite from './generator.test';
 
 // boot
-import assertionSuite from "./assertion.test";
-import equalSuite from "./equal.test";
-import qunitSuite from "./qunit.test";
-import engineSuite from "./engine.test";
+import assertionSuite from './assertion.test';
+import equalSuite from './equal.test';
+import qunitSuite from './qunit.test';
+import engineSuite from './engine.test';
 
-for (let suite of [assertionSuite, equalSuite, qunitSuite, engineSuite]) {
+for (const suite of [assertionSuite, equalSuite, qunitSuite, engineSuite]) {
   suite();
 }
 

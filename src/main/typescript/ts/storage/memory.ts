@@ -1,7 +1,7 @@
-import { IStorage } from "./storage";
+import { IStorage } from './storage';
 
 // Util
-function ToString(o: any) { return "" + o; }
+function ToString(o: any) { return '' + o; }
 function OwnKeys(o: any) {
   let keys: string[];
   if (Object.keys) {
