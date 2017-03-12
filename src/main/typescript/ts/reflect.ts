@@ -1,10 +1,10 @@
-//Constant
+// Constant
 const ES_COMPAT = 3;
 
-//Util
+// Util
 const __global: any = typeof window !== 'undefined' ? window : (function () { return this; }());
 const Reflect = typeof __global.Reflect !== 'undefined' ? __global.Reflect : {};
-const __fidentity = function f<T>() { return function (o: T) { return o; }; };
+const __fidentity = function f() { return function (o: any) { return o; }; };
 const __fapply = Function.prototype.apply;
 const __fconst = function f<T>(k: T) { return function () { return k; }; };
 const __polyfill = function poly<T>(f: T): T { (f as any).polyfill = true; return f; };
@@ -28,7 +28,6 @@ let __hasOwn = Reflect.hasOwn; // Reflect API still draft
 const __isDataDescriptor = function (descriptor: IPropertyDescriptor) { return ('value' in descriptor || 'writable' in descriptor); };
 const __isAccessorDescriptor = function (descriptor: IPropertyDescriptor) { return ('get' in descriptor || 'set' in descriptor); };
 const __isUndefined = function (o: any) { return typeof o === 'undefined'; };
-const __isFunction = function (o: any) { return typeof o === 'function'; };
 const __isObject = function (o: any){ return o !== null && (typeof o === 'object' || typeof o === 'function'); };
 let __isFrozen = Object.isFrozen;
 let __isSealed = Object.isSealed;
@@ -37,36 +36,35 @@ let __freeze = Object.freeze;
 let __preventExtensions = Object.preventExtensions;
 let __seal = Object.seal;
 const __typeOf = function (o: any): string {
-  let t = typeof o;
+  const t = typeof o;
   switch (t) {
-  case 'undefined':
-  case 'boolean':
-  case 'number':
-  case 'string':
-    break;
-  default: // object
-    if (o === null)  {
-      t = 'null';
-    } else if (o instanceof __global.Symbol) {
-      t = 'symbol';
-    } else {
-      t = 'object';
-    }
+    case 'undefined':
+    case 'boolean':
+    case 'number':
+    case 'string':
+      return t;
+    default: // object
+      if (o === null) {
+        return 'null';
+      } else if (o instanceof __global.Symbol) {
+        return 'symbol';
+      } else {
+        return 'object';
+      }
   }
-  return t;
 };
 
-//Compat
+// Compat
 if (ES_COMPAT <= 3) {
   __okeys = __okeys || __polyfill(function (o: any) { const ks = []; for (const k in o) { if (__hasOwn.call(o, k)) { ks.push(k); } } return ks; });
-  __create = __create || __polyfill(function (proto: any) { function t() {}; t.prototype = proto.prototype; return new t(); });
+  __create = __create || __polyfill(function (proto: any) { const t = function () {}; t.prototype = proto.prototype; return new t(); });
   __proto = __proto || __polyfill(function (o: any) { return o.__proto__; });
   __propertyDefine = Object.defineProperty; // TODO polyfill this
   __propertyDescriptor = Object.getOwnPropertyDescriptor; // TODO polyfill this
   __propertyNames = __propertyNames || __polyfill(function (o: any) { return __okeys(o); });
   __isFrozen = __isFrozen || __polyfill(__fconst(false));
-  __isSealed = __isSealed ||  __polyfill(__fconst(false));
-  __isExtensible = __isExtensible ||  __polyfill(__fconst(true));
+  __isSealed = __isSealed || __polyfill(__fconst(false));
+  __isExtensible = __isExtensible || __polyfill(__fconst(true));
   __freeze = __freeze || __polyfill(__fidentity());
   __preventExtensions = __preventExtensions || __polyfill(__fidentity());
   __seal = __seal || __polyfill(__fidentity());
@@ -139,7 +137,8 @@ export function freeze<T>(o: T, deep?: boolean): T {
   __freeze(o); // First freeze the object.
   if (deep && !__polyfilled(__freeze)) {
     const keys = __okeys(o);
-    for (let i = 0, l = keys.length; i < l; ++i) {
+    const keyc = keys.length;
+    for (let i = 0; i < keyc; ++i) {
       const val = o[keys[i]];
       if (__isObject(val) && !__isFrozen(val)) {
         freeze(val, deep); // Recursively call freeze().
@@ -205,7 +204,7 @@ export function isSealed(o: any): boolean {
 
 export function ownKeys(o: any): string[] {
   return __propertyNames(o);
-  //return __polyfilled(__propertySymbols) ? names : names.concat(__propertySymbols(o))
+  // return __polyfilled(__propertySymbols) ? names : names.concat(__propertySymbols(o))
 }
 
 export function preventExtensions<T>(o: T): boolean {

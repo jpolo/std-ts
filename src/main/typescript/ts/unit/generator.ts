@@ -10,7 +10,7 @@ const Floor = Math.floor;
 const Round = Math.round;
 const Log = Math.log;
 const Log2 = function (n: number): number { return Log(n) / LN2; };
-const genSize = GeneratorCreate(function (params: Params) {
+const genSize = GeneratorCreate(function (params: IGeneratorParams) {
   return IteratorResultCreate(false, ParamsRandomInt(params, 0, ParamsSize(params)));
 });
 

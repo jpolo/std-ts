@@ -29,7 +29,6 @@ function ResultIsFailure(r: any): boolean {
 }
 
 function ResultFunctionApply<R>(f: any, args: any): Result<R> {
-  const result: Result<any>;
   let isFailure = false;
   let value: any;
   let error: any;

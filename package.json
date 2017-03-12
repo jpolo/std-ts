@@ -31,12 +31,13 @@
     "merge2": "^1.0.2",
     "requirejs": "^2.2.0",
     "tslint": "^4.5.1",
+    "tslint-config-standard": "^4.0.0",
     "typescript": "^2.2.1"
   },
   "scripts": {
     "build": "grunt --gruntfile Gruntfile.js",
     "lint": "tslint --project ./tsconfig.json",
-    "lint:fix": "tslint --project ./tsconfig.json --fix",
+    "format": "tslint --project ./tsconfig.json --fix",
     "atom": "apm install editorconfig atom-typescript linter linter-tslint"
   }
 }

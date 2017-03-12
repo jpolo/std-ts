@@ -115,7 +115,7 @@ function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean)
   const bl = b.length;
 
   if (al === bl) {
-    for (let i = 0, l = al; i < l; ++i) {
+    for (let i = 0; i < al; ++i) {
       if (!equalFn(a[i], b[i])) {
         returnValue = false;
         break;
@@ -128,20 +128,19 @@ function equalsArray(a: any[], b: any[], equalFn: (av: any, bv: any) => boolean)
 function equalsObject(a: any, b: any, equalsFn: (av: any, bv: any) => boolean): boolean {
   const akeys = OwnKeysSorted(a);
   const bkeys = OwnKeysSorted(b);
-  let returnValue = false;
   // Compare keys first to deep value
   if (equalsArray(akeys, bkeys, equalsStrict)) {
-    returnValue = true;
-    for (let i = 0, l = akeys.length; i < l; ++i) {
+    const length = akeys.length;
+    for (let i = 0; i < length; ++i) {
       const akey = akeys[i];
       const bkey = bkeys[i];
       if (akey !== bkey || !equalsFn(a[akey], b[bkey])) {
-        returnValue = false;
-        break;
+        return false;
       }
     }
+    return true;
   }
-  return returnValue;
+  return false;
 }
 
 function equalsMap(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
@@ -151,7 +150,7 @@ function equalsMap(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boole
 
 function equalsSet(a: Set<any>, b: Set<any>, equalsFn: (a: any, b: any) => boolean): boolean {
   function SetHasValue<V>(s: Set<V>, value: V): boolean {
-    for (const iterValue of s.values()) {
+    for (const iterValue of Array.from(s.values())) {
       if (equalsFn(iterValue, value)) {
         return true;
       }
@@ -160,7 +159,7 @@ function equalsSet(a: Set<any>, b: Set<any>, equalsFn: (a: any, b: any) => boole
   }
 
   if (a.size === b.size) {
-    for (const avalue of a.values()) {
+    for (const avalue of Array.from(a.values())) {
       if (!SetHasValue(b, avalue)) {
         return false;
       }
