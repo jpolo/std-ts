@@ -3,7 +3,6 @@ import { Engine } from '../../../../main/typescript/ts/unit/engine';
 
 export default test('ts/unit/engine.Engine', (assert) => {
   const engine = new Engine();
-  const message: string;
 
   // #equalsStrict()
   (function () {

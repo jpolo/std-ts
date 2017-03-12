@@ -19,7 +19,7 @@ export const DATE_MIN_MILLISECONDS = -DATE_MAX_MILLISECONDS;
 export const EPSILON = 2.220446049250313e-16;
 
 export function IsExtensible(o: any): boolean { return Object.isExtensible ? Object.isExtensible(o) : true; }
-export function IsFinite(o: any): boolean { return global.isFinite(o); };
+export function IsFinite(o: any): boolean { return global.isFinite(o); }
 export function IsEmpty(o: any): boolean { return o === undefined || o === null; }
 export function IsNaN(o: any): boolean { return o !== o; }
 export function IsNumber(o: any): o is number { return typeof o === 'number'; }
@@ -34,7 +34,7 @@ export function OwnKeys(o: any): string[] {
     keys = Object.keys(o);
   } else {
     keys = [];
-    for (const prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } };
+    for (const prop in o) { if (o.hasOwnProperty(prop)) { keys.push(prop); } }
   }
   return keys;
 }
@@ -43,40 +43,38 @@ export function ObjectAssign<T, U>(o: T, ext: U): T & U { for (const key of OwnK
 export function ObjectFreeze<T>(o: T): T { return Object.freeze ? Object.freeze(o) : o; }
 export function GetPrototypeOf(o: any) { return Object.getPrototypeOf ? Object.getPrototypeOf(o) : o.__proto__; }
 export function Type(o: any): string {
-  let t = typeof o;
+  const t = typeof o;
   switch (t) {
-  case 'undefined':
-  case 'boolean':
-  case 'number':
-  case 'string':
-  case 'symbol':
-    break;
-  default: // object
-    if (o === null)  {
-      t = 'null';
-    } else if (o instanceof global.Symbol) {
-      t = 'symbol';
-    } else {
-      t = 'object';
-    }
+    case 'undefined':
+    case 'function':
+    case 'boolean':
+    case 'number':
+    case 'string':
+    case 'symbol':
+      return t;
+    default: // object
+      if (o === null) {
+        return 'null';
+      } else if (o instanceof global.Symbol) {
+        return 'symbol';
+      } else {
+        return 'object';
+      }
   }
-  return t;
 }
 export function ToString(o: any) { return '' + o; }
 export function ToStringTag(o: any): string {
-  let s = '';
   switch (Type(o)) {
-    case 'null': s = 'Null'; break;
-    case 'boolean': s = 'Boolean'; break;
-    case 'function': s = 'Function'; break;
-    case 'number': s = 'Number'; break;
-    case 'string': s = 'String'; break;
-    case 'undefined': s = 'Undefined'; break;
+    case 'null': return 'Null';
+    case 'boolean': return 'Boolean';
+    case 'function': return 'Function';
+    case 'number': return 'Number';
+    case 'string': return 'String';
+    case 'undefined': return 'Undefined';
     default: /*object*/
       const c = o.constructor;
-      s = c && c.name || Object.prototype.toString.call(o).slice(8, -1);
+      return c && c.name || Object.prototype.toString.call(o).slice(8, -1);
   }
-  return s;
 }
 
 export function Call(f: Function, thisp: any, args: any[]) {
@@ -96,4 +94,4 @@ export function FunctionToSource(f: Function): string {
   const src = FunctionToString(f);
   return src.slice(src.indexOf('{'), -1).trim();
 }
-export function Now() { return Date.now ? Date.now() : new Date().getTime(); };
+export function Now() { return Date.now ? Date.now() : new Date().getTime(); }
