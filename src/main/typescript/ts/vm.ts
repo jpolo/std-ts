@@ -1,19 +1,16 @@
 // Util
 const Global: Window = typeof window !== 'undefined' ? window : (function () { return this; }());
 
-export interface ILocals {
+export interface Locals {
   [key: string]: any;
 }
 
-export interface IEvalOption {
+export interface EvalOption {
   sourceMappingURL?: string;
   sourceURL?: string;
 }
 
-const OptionEmpty: IEvalOption = {
-  sourceMappingURL: null,
-  sourceURL: null
-};
+const EvalOptionEmpty: EvalOption = {};
 
 /**
  * The global object (either ```window``` or ```global```)
@@ -27,7 +24,7 @@ export const global = Global;
  * @param options The options of evaluation
  * @returns The evaluable function
  */
-export function compile(jscode: string, options: IEvalOption = OptionEmpty): (local?: ILocals) => any {
+export function compile(jscode: string, options: EvalOption = EvalOptionEmpty): (local?: Locals) => any {
   let fnWithContext: Function;
   let fnNoContext: Function;
   const { sourceURL, sourceMappingURL } = options;
@@ -58,6 +55,6 @@ export function compile(jscode: string, options: IEvalOption = OptionEmpty): (lo
  * @param options The options of evaluation
  * @returns The evaluation result
  */
-export function run(jscode: string, locals?: ILocals, options?: IEvalOption): any {
+export function run(jscode: string, locals?: Locals, options?: EvalOption): any {
   return compile(jscode, options)(locals);
 }
