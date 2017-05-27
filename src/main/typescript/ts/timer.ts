@@ -67,7 +67,7 @@ const ClearImmediate =
   Global.postMessage ? function (id: number) { TaskRemove(id); } :
   function (id: number): void { return ClearTimeout(id); };
 
-export interface ITimerModule {
+export interface TimerModule {
   setTimeout: typeof setTimeout;
   clearTimeout: typeof clearTimeout;
   setInterval: typeof setInterval;

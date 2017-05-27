@@ -1,5 +1,5 @@
 // Util
-export interface ITimeModule {
+export interface TimeModule {
   now: typeof now;
 }
 

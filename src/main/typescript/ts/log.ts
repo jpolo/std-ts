@@ -6,24 +6,24 @@ import * as time from './time';
 // ECMA like functions
 // const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
 function OwnKeys(o: any) {
-  let ks: string[];
   if (Object.keys) {
-    ks = Object.keys(o);
+    return Object.keys(o);
   } else {
+    const ks: string[] = [];
     for (const k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } }
+    return ks;
   }
-  return ks;
 }
 
 function Compare(a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1; }
-function ThrowAsync(e: any) { setTimeout(() => { throw e; }, 0); }
+function ThrowAsync(e: any): any { setTimeout(() => { throw e; }, 0); }
 function StringCompare(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1; }
 function ArrayCompare<T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): number {
   let returnValue = 0;
   const al = a.length;
   const bl = b.length;
   if (al === bl) {
-    for (let i = 0, l = al; i < l; ++i) {
+    for (let i = 0; i < al; ++i) {
       const r = cmpFn(a[i], b[i]);
       if (r !== 0) {
         returnValue = r;
@@ -44,15 +44,15 @@ export interface IDispatcher {
 }
 
 export interface ILevel {
-  name: string;
-  value: number;
+  readonly name: string;
+  readonly value: number;
 }
 
 export interface IMessage {
-  level: ILevel;
-  group: string;
-  data: any[];
-  timestamp: number;
+  readonly level: ILevel;
+  readonly group: string;
+  readonly data: any[];
+  readonly timestamp: number;
 }
 
 export interface IFilter {
@@ -77,6 +77,7 @@ export class Level implements ILevel {
     } else if (typeof o === 'string') {
       return Level.fromString(o);
     }
+    throw new TypeError('Cast Error');
   }
 
   static compare(lhs: ILevel, rhs: ILevel): number {
@@ -113,8 +114,8 @@ export class Level implements ILevel {
   }
 
   constructor(
-    public name: string,
-    public value: number,
+    public readonly name: string,
+    public readonly value: number,
     constructorKey: any
   ) {
     if (constructorKey !== Level._constructorKey) {
@@ -164,10 +165,10 @@ export class Message implements IMessage {
   }
 
   constructor(
-    public level: ILevel,
-    public group: string,
-    public data: any[],
-    public timestamp: number = NaN
+    public readonly level: ILevel,
+    public readonly group: string,
+    public readonly data: any[],
+    public readonly timestamp: number = NaN
   ) {
   }
 
@@ -238,7 +239,7 @@ export class Dispatcher implements IDispatcher {
   isEnabledFor(level: ILevel, group: string): boolean {
     let returnValue = false;
     const reporters = this.reporters;
-    const logMessage = new Message(level, group, null);
+    const logMessage = new Message(level, group, []);
     const names = OwnKeys(reporters);
     for (const name of names) {
       const target = reporters[name];
@@ -269,7 +270,7 @@ function __filter(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): b
   try {
     return f.filter ? f.filter(m) || false : true;
   } catch (e) {
-    ThrowAsync(e);
+    return ThrowAsync(e);
   }
 }
 
@@ -328,7 +329,7 @@ export class Logger {
     return this.inspect();
   }
 
-  protected _dispatch(level: ILevel, args: any[]): void  {
+  protected _dispatch(level: ILevel, args: any[]): void {
     const { name, $dispatcher } = this;
     if (!$dispatcher) {
       throw new Error('dispatcher is required');
