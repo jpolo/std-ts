@@ -1,9 +1,9 @@
-import { Storage } from './storage';
+import { Storage } from './storage'
 
 export class LocalStorage extends Storage {
-  protected _getStorage() {
-    return localStorage;
+  protected _getStorage () {
+    return localStorage
   }
 }
 
-export default new LocalStorage();
+export default new LocalStorage()

@@ -1,4 +1,4 @@
-import { test } from './_boot.test';
+import { test } from './_boot.test'
 
 export default test('ts/unit/qunit.Assert', (assert) => {
 
@@ -85,4 +85,4 @@ export default test('ts/unit/qunit.Assert', (assert) => {
   assertMock.throws(() => { throw new Error("foo") }, "Error: blah")
   assertLastFailure()
   */
-});
+})

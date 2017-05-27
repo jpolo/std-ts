@@ -1,47 +1,47 @@
-import { suite, test } from '../../../../main/typescript/ts/unit/qunit';
-import * as matrix2 from '../../../../main/typescript/ts/geometry/matrix2';
-import * as matrix3 from '../../../../main/typescript/ts/geometry/matrix3';
-import * as matrix4 from '../../../../main/typescript/ts/geometry/matrix4';
+import { suite, test } from '../../../../main/typescript/ts/unit/qunit'
+import * as matrix2 from '../../../../main/typescript/ts/geometry/matrix2'
+import * as matrix3 from '../../../../main/typescript/ts/geometry/matrix3'
+import * as matrix4 from '../../../../main/typescript/ts/geometry/matrix4'
 
 interface MatrixModule<T> {
-  identity(dest?: T): T;
+  identity (dest?: T): T
 }
 
-function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number) {
-  const dimension = Math.sqrt(arity);
+function generateSuite (n: string, matrix: MatrixModule<number[]>, arity: number) {
+  const dimension = Math.sqrt(arity)
 
-  function create(): number[] {
-    return new Array(arity);
+  function create (): number[] {
+    return new Array(arity)
   }
 
-  function copy(a: number[]) {
-    const r = new Array(arity);
+  function copy (a: number[]) {
+    const r = new Array(arity)
     for (let i = 0; i < arity; i++) {
-      r[i] = a[i];
+      r[i] = a[i]
     }
-    return r;
+    return r
   }
 
-  function random(): number[] {
-    const __rand = Math.random;
-    const r = create();
+  function random (): number[] {
+    const __rand = Math.random
+    const r = create()
     for (let i = 0; i < arity; i++) {
-      r[i] = __rand() * 200 - 100;
+      r[i] = __rand() * 200 - 100
     }
-    return r as any;
+    return r as any
   }
 
-  function getCol(i: number) {
-    return i % dimension;
+  function getCol (i: number) {
+    return i % dimension
   }
 
-  function getRow(i: number) {
-    return Math.floor(i / dimension);
+  function getRow (i: number) {
+    return Math.floor(i / dimension)
   }
 
-  function gen(f: () => void, count = 10) {
+  function gen (f: () => void, count = 10) {
     for (let i = 0; i < count; i++) {
-      f();
+      f()
     }
   }
 
@@ -49,31 +49,31 @@ function generateSuite(n: string, matrix: MatrixModule<number[]>, arity: number)
 
     test('.identity()', (assert) => {
       gen(() => {
-        const dest = create();
-        const expected = create();
+        const dest = create()
+        const expected = create()
         for (let i = 0; i < arity; i++) {
           if (getCol(i) === getRow(i)) {
-            expected[i] = 1;
+            expected[i] = 1
           } else {
-            expected[i] = 0;
+            expected[i] = 0
           }
         }
 
         // alloc
-        assert.deepEqual(matrix.identity(), expected);
+        assert.deepEqual(matrix.identity(), expected)
 
         // dest
-        assert.deepEqual(matrix.identity(dest), expected);
-        assert.deepEqual(dest, expected);
+        assert.deepEqual(matrix.identity(dest), expected)
+        assert.deepEqual(dest, expected)
 
-      });
-    });
-  });
+      })
+    })
+  })
 }
 
-const matrix2Suite = generateSuite('ts/geometry/matrix2', matrix2, 2 * 2);
-const matrix3Suite = generateSuite('ts/geometry/matrix3', matrix3, 3 * 3);
-const matrix4Suite = generateSuite('ts/geometry/matrix4', matrix4, 4 * 4);
+const matrix2Suite = generateSuite('ts/geometry/matrix2', matrix2, 2 * 2)
+const matrix3Suite = generateSuite('ts/geometry/matrix3', matrix3, 3 * 3)
+const matrix4Suite = generateSuite('ts/geometry/matrix4', matrix4, 4 * 4)
 
 /*
 var matrixSuite = unit.suite("ts/geometry/matrix", (self) => {
@@ -189,4 +189,4 @@ var matrixSuite = unit.suite("ts/geometry/matrix", (self) => {
 })
 */
 
-export default matrix2Suite.concat(matrix3Suite, matrix4Suite);
+export default matrix2Suite.concat(matrix3Suite, matrix4Suite)

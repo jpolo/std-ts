@@ -1,8 +1,8 @@
-import { IReporter, ITestReport } from '../../unit';
+import { IReporter, ITestReport } from '../../unit'
 
 export class JUnitReporter implements IReporter {
 
-  print(reports: ITestReport[]) {
+  print (reports: ITestReport[]) {
     //TODO
   }
 

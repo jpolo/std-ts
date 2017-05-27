@@ -1,170 +1,170 @@
 /* tslint:disable:no-namespace no-bitwise */
 
-import * as console from './console';
-import * as time from './time';
+import * as console from './console'
+import * as time from './time'
 
 // ECMA like functions
 // const Global: Window = typeof window !== "undefined" ? window : (function() { return this; }());
-function OwnKeys(o: any) {
+function OwnKeys (o: any) {
   if (Object.keys) {
-    return Object.keys(o);
+    return Object.keys(o)
   } else {
-    const ks: string[] = [];
-    for (const k in o) { if (o.hasOwnProperty(k)) { ks.push(k); } }
-    return ks;
+    const ks: string[] = []
+    for (const k in o) { if (o.hasOwnProperty(k)) { ks.push(k) } }
+    return ks
   }
 }
 
-function Compare(a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1; }
-function ThrowAsync(e: any): any { setTimeout(() => { throw e; }, 0); }
-function StringCompare(a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1; }
-function ArrayCompare<T>(a: T[], b: T[], cmpFn: (a: T, b: T) => number): number {
-  let returnValue = 0;
-  const al = a.length;
-  const bl = b.length;
+function Compare (a: any, b: any) { return a === b ? 0 : a > b ? 1 : -1 }
+function ThrowAsync (e: any): any { setTimeout(() => { throw e }, 0) }
+function StringCompare (a: string, b: string) { return a === b ? 0 : a > b ? 1 : -1 }
+function ArrayCompare<T> (a: T[], b: T[], cmpFn: (a: T, b: T) => number): number {
+  let returnValue = 0
+  const al = a.length
+  const bl = b.length
   if (al === bl) {
     for (let i = 0; i < al; ++i) {
-      const r = cmpFn(a[i], b[i]);
+      const r = cmpFn(a[i], b[i])
       if (r !== 0) {
-        returnValue = r;
-        break;
+        returnValue = r
+        break
       }
     }
   }
-  return returnValue;
+  return returnValue
 }
 
 // Services
-const $consoleDefault: console.IConsoleModule = console;
-const $timeDefault: time.ITimeModule = time;
+const $consoleDefault: console.IConsoleModule = console
+const $timeDefault: time.ITimeModule = time
 
 export interface IDispatcher {
-  isEnabledFor(level: ILevel, group: string): boolean;
-  send(level: ILevel, group: string, data: any[]): void;
+  isEnabledFor (level: ILevel, group: string): boolean
+  send (level: ILevel, group: string, data: any[]): void
 }
 
 export interface ILevel {
-  readonly name: string;
-  readonly value: number;
+  readonly name: string
+  readonly value: number
 }
 
 export interface IMessage {
-  readonly level: ILevel;
-  readonly group: string;
-  readonly data: any[];
-  readonly timestamp: number;
+  readonly level: ILevel
+  readonly group: string
+  readonly data: any[]
+  readonly timestamp: number
 }
 
 export interface IFilter {
-  (message?: IMessage): boolean;
+  (message?: IMessage): boolean
 }
 
 export interface IReporter {
-  receive(message: IMessage): void;
+  receive (message: IMessage): void
 }
 
 export class Level implements ILevel {
 
-  private static _instances: {[key: string]: Level} = {};
-  private static _byValue: {[key: number]: Level} = {};
-  private static _constructorKey = {};
+  private static _instances: {[key: string]: Level} = {}
+  private static _byValue: {[key: number]: Level} = {}
+  private static _constructorKey = {}
 
-  static cast(o: any): Level {
+  static cast (o: any): Level {
     if (o instanceof Level) {
-      return o;
+      return o
     } else if (typeof o === 'number') {
-      return Level.fromNumber(o);
+      return Level.fromNumber(o)
     } else if (typeof o === 'string') {
-      return Level.fromString(o);
+      return Level.fromString(o)
     }
-    throw new TypeError('Cast Error');
+    throw new TypeError('Cast Error')
   }
 
-  static compare(lhs: ILevel, rhs: ILevel): number {
-    let returnValue = NaN;
+  static compare (lhs: ILevel, rhs: ILevel): number {
+    let returnValue = NaN
     if (lhs != null && rhs != null) {
-      const lv = lhs.value;
-      const rv = rhs.value;
-      returnValue = lv === rv ? 0 : lv < rv ? -1 : 1;
+      const lv = lhs.value
+      const rv = rhs.value
+      returnValue = lv === rv ? 0 : lv < rv ? -1 : 1
     }
-    return returnValue;
+    return returnValue
   }
 
-  static create(name: string, level: number): Level {
-    name = name.toUpperCase();
-    level = level >>> 0;
-    const byName = Level._instances;
-    const byValue = Level._byValue;
+  static create (name: string, level: number): Level {
+    name = name.toUpperCase()
+    level = level >>> 0
+    const byName = Level._instances
+    const byValue = Level._byValue
     if (byName[name]) {
-      throw new Error(byName[name] + ' is already defined');
+      throw new Error(byName[name] + ' is already defined')
     }
     if (byValue[level]) {
-      throw new Error(byValue[level] + ' is already defined');
+      throw new Error(byValue[level] + ' is already defined')
     }
-    const levelObj = byName[name] = byValue[level] = new Level(name, level, Level._constructorKey);
-    return levelObj;
+    const levelObj = byName[name] = byValue[level] = new Level(name, level, Level._constructorKey)
+    return levelObj
   }
 
-  static fromNumber(val: number): Level {
-    return Level._byValue[val >>> 0];
+  static fromNumber (val: number): Level {
+    return Level._byValue[val >>> 0]
   }
 
-  static fromString(s: string): Level {
-    return Level._instances[s.toUpperCase()];
+  static fromString (s: string): Level {
+    return Level._instances[s.toUpperCase()]
   }
 
-  constructor(
+  constructor (
     public readonly name: string,
     public readonly value: number,
     constructorKey: any
   ) {
     if (constructorKey !== Level._constructorKey) {
-      throw new Error('new Level() cannot be called directly');
+      throw new Error('new Level() cannot be called directly')
     }
   }
 
-  compare(l: ILevel): number {
-    return Level.compare(this, l);
+  compare (l: ILevel): number {
+    return Level.compare(this, l)
   }
 
-  equals(o: any): boolean {
-    return this === o || (!!o && (o instanceof Level) && Level.compare(this, o) === 0);
+  equals (o: any): boolean {
+    return this === o || (!!o && (o instanceof Level) && Level.compare(this, o) === 0)
   }
 
-  valueOf() {
-    return this.value;
+  valueOf () {
+    return this.value
   }
 
-  inspect(): string {
-    return `Level { name: "${this.name}", value: ${this.value} }`;
+  inspect (): string {
+    return `Level { name: "${this.name}", value: ${this.value} }`
   }
 
-  toJSON() {
-    return this.value;
+  toJSON () {
+    return this.value
   }
 
-  toString(): string {
-    return this.name;
+  toString (): string {
+    return this.name
   }
 }
 
-export const DEBUG = Level.create('DEBUG', 0);
-export const INFO = Level.create('INFO', 10);
-export const WARN = Level.create('WARN', 20);
-export const ERROR = Level.create('ERROR', 30);
-export const FATAL = Level.create('FATAL', 40);
+export const DEBUG = Level.create('DEBUG', 0)
+export const INFO = Level.create('INFO', 10)
+export const WARN = Level.create('WARN', 20)
+export const ERROR = Level.create('ERROR', 30)
+export const FATAL = Level.create('FATAL', 40)
 
 export class Message implements IMessage {
 
-  static compare(a: IMessage, b: IMessage): number {
+  static compare (a: IMessage, b: IMessage): number {
     return (
       Level.compare(a.level, b.level) ||
       StringCompare(a.group, b.group) ||
       ArrayCompare(a.data, b.data, Compare)
-    );
+    )
   }
 
-  constructor(
+  constructor (
     public readonly level: ILevel,
     public readonly group: string,
     public readonly data: any[],
@@ -172,33 +172,33 @@ export class Message implements IMessage {
   ) {
   }
 
-  compare(o: IMessage): number {
-    return Message.compare(this, o);
+  compare (o: IMessage): number {
+    return Message.compare(this, o)
   }
 
-  equals(o: any): boolean {
+  equals (o: any): boolean {
     return this === o || (
       !!o &&
       (o instanceof Message) &&
       Message.compare(this, o) === 0
-    );
+    )
   }
 
-  inspect(): string {
-    return `Message { level: ${this.level.name}, group: "${this.group}", data: "${this.data}" }`;
+  inspect (): string {
+    return `Message { level: ${this.level.name}, group: "${this.group}", data: "${this.data}" }`
   }
 
-  toJSON() {
+  toJSON () {
     return {
       data: this.data,
       group: this.group,
       level: this.level.value,
       timestamp: this.timestamp
-    };
+    }
   }
 
-  toString(): string {
-    return `[${this.level.name}|${this.group}] ${this.data.join(' ')}`;
+  toString (): string {
+    return `[${this.level.name}|${this.group}] ${this.data.join(' ')}`
   }
 }
 
@@ -212,53 +212,53 @@ function loggerFor(o: any): Logger {
 */
 
 export class Dispatcher implements IDispatcher {
-  reporters: { [key: string]: { filter?: IFilter; reporter: IReporter; } } = {};
+  reporters: { [key: string]: { filter?: IFilter; reporter: IReporter; } } = {}
 
-  protected _loggers: { [name: string]: Logger } = {};
+  protected _loggers: { [name: string]: Logger } = {}
 
   // Services
-  protected $time: time.ITimeModule = $timeDefault;
+  protected $time: time.ITimeModule = $timeDefault
 
-  constructor(
+  constructor (
     deps?: {
       $time?: time.ITimeModule
     }
   ) {
     if (deps) {
       if (deps.$time !== undefined) {
-        this.$time = deps.$time;
+        this.$time = deps.$time
       }
     }
   }
 
-  getLogger(name: string): Logger {
-    const loggers = this._loggers;
-    return loggers[name] || (loggers[name] = new Logger(name, this));
+  getLogger (name: string): Logger {
+    const loggers = this._loggers
+    return loggers[name] || (loggers[name] = new Logger(name, this))
   }
 
-  isEnabledFor(level: ILevel, group: string): boolean {
-    let returnValue = false;
-    const reporters = this.reporters;
-    const logMessage = new Message(level, group, []);
-    const names = OwnKeys(reporters);
+  isEnabledFor (level: ILevel, group: string): boolean {
+    let returnValue = false
+    const reporters = this.reporters
+    const logMessage = new Message(level, group, [])
+    const names = OwnKeys(reporters)
     for (const name of names) {
-      const target = reporters[name];
+      const target = reporters[name]
       if (__filter(target, logMessage)) {
-        returnValue = true;
-        break;
+        returnValue = true
+        break
       }
     }
-    return returnValue;
+    return returnValue
   }
 
-  send(level: ILevel, group: string, data: any[]): void {
-    const reporters = this.reporters;
-    const logMessage = new Message(level, group, data, this.$time.now());
-    const names = OwnKeys(reporters);
+  send (level: ILevel, group: string, data: any[]): void {
+    const reporters = this.reporters
+    const logMessage = new Message(level, group, data, this.$time.now())
+    const names = OwnKeys(reporters)
     for (const name of names) {
-      const target = reporters[name];
+      const target = reporters[name]
       if (__filter(target, logMessage)) {
-        __send(target, logMessage);
+        __send(target, logMessage)
       }
     }
   }
@@ -266,77 +266,77 @@ export class Dispatcher implements IDispatcher {
 }
 
 // util
-function __filter(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): boolean {
+function __filter (f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): boolean {
   try {
-    return f.filter ? f.filter(m) || false : true;
+    return f.filter ? f.filter(m) || false : true
   } catch (e) {
-    return ThrowAsync(e);
+    return ThrowAsync(e)
   }
 }
 
-function __send(f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): void {
+function __send (f: { filter?: IFilter; reporter: IReporter; }, m: IMessage): void {
   try {
-    f.reporter.receive(m);
+    f.reporter.receive(m)
   } catch (e) {
-    ThrowAsync(e);
+    ThrowAsync(e)
   }
 }
 
 // default dispatcher
-const $dispatcherDefault: Dispatcher = new Dispatcher();
+const $dispatcherDefault: Dispatcher = new Dispatcher()
 
 export class Logger {
   // static SEPARATOR = '.'
 
-  protected $dispatcher: IDispatcher;
+  protected $dispatcher: IDispatcher
 
-  constructor(
+  constructor (
     public name: string,
     $dispatcher: IDispatcher
   ) {
-    this.$dispatcher = $dispatcher;
+    this.$dispatcher = $dispatcher
   }
 
-  inspect() {
-    return `Logger { name: "${this.name}" }`;
+  inspect () {
+    return `Logger { name: "${this.name}" }`
   }
 
-  log(level: ILevel, ...args: any[]): void {
-    this._dispatch(level, args);
+  log (level: ILevel, ...args: any[]): void {
+    this._dispatch(level, args)
   }
 
-  debug(...args: any[]): void {
-    this._dispatch(DEBUG, args);
+  debug (...args: any[]): void {
+    this._dispatch(DEBUG, args)
   }
 
-  info(...args: any[]): void {
-    this._dispatch(INFO, args);
+  info (...args: any[]): void {
+    this._dispatch(INFO, args)
   }
 
-  warn(...args: any[]): void {
-    this._dispatch(WARN, args);
+  warn (...args: any[]): void {
+    this._dispatch(WARN, args)
   }
 
-  error(...args: any[]): void {
-    this._dispatch(ERROR, args);
+  error (...args: any[]): void {
+    this._dispatch(ERROR, args)
   }
 
-  fatal(...args: any[]): void {
-    this._dispatch(FATAL, args);
+  fatal (...args: any[]): void {
+    this._dispatch(FATAL, args)
   }
 
-  toString(): string {
-    return this.inspect();
+  toString (): string {
+    return this.inspect()
   }
 
-  protected _dispatch(level: ILevel, args: any[]): void {
-    const { name, $dispatcher } = this;
+  protected _dispatch (level: ILevel, args: any[]): void {
+    const { name, $dispatcher } = this
     if (!$dispatcher) {
-      throw new Error('dispatcher is required');
+      throw new Error('dispatcher is required')
     }
 
     // if (dispatcher.isEnabledFor(level, name)) {
-    $dispatcher.send(level, name, args);
+    $dispatcher.send(level, name, args)
     // }
   }
 }
@@ -408,61 +408,61 @@ export module filter {
   }
 }*/
 
-export function logger(group: string): Logger {
-  return $dispatcherDefault.getLogger(group);
+export function logger (group: string): Logger {
+  return $dispatcherDefault.getLogger(group)
 }
 
 export namespace reporter {
   export interface IConsoleFormatter {
-    (logMessage: IMessage): any[];
+    (logMessage: IMessage): any[]
   }
 
   const $consoleFormatterDefault: IConsoleFormatter = function (logMessage: IMessage) {
-    return ['[' + logMessage.group + ']'].concat(logMessage.data);
-  };
+    return ['[' + logMessage.group + ']'].concat(logMessage.data)
+  }
 
   export class Array implements IReporter {
 
-    constructor(public logs: IMessage[] = []) { }
+    constructor (public logs: IMessage[] = []) { }
 
-    receive(logMessage: IMessage) {
-      this.logs.push(logMessage);
+    receive (logMessage: IMessage) {
+      this.logs.push(logMessage)
     }
   }
 
   export class Console implements IReporter {
     // Services
-    protected $formatter: IConsoleFormatter = $consoleFormatterDefault;
-    protected $console: console.IConsoleModule = $consoleDefault;
+    protected $formatter: IConsoleFormatter = $consoleFormatterDefault
+    protected $console: console.IConsoleModule = $consoleDefault
 
-    constructor(deps: {
+    constructor (deps: {
       $formatter?: IConsoleFormatter;
       $console?: console.IConsoleModule
     }) {
       if (deps) {
         if (deps.$formatter !== undefined) {
-          this.$formatter = deps.$formatter;
+          this.$formatter = deps.$formatter
         }
         if (deps.$console !== undefined) {
-          this.$console = deps.$console;
+          this.$console = deps.$console
         }
       }
     }
 
-    receive(logMessage: IMessage) {
-      const { $console, $formatter } = this;
+    receive (logMessage: IMessage) {
+      const { $console, $formatter } = this
       if ($console) {
-        const args = $formatter(logMessage);
-        const levelValue = logMessage.level.value;
+        const args = $formatter(logMessage)
+        const levelValue = logMessage.level.value
 
         if (levelValue >= ERROR.value) {
-          console.error.apply(console, args);
+          console.error.apply(console, args)
         } else if (levelValue >= WARN.value) {
-          console.warn.apply(console, args);
+          console.warn.apply(console, args)
         } else if (levelValue >= INFO.value) {
-          console.info.apply(console, args);
+          console.info.apply(console, args)
         } else { // Debug
-          console.debug.apply(console, args);
+          console.debug.apply(console, args)
         }
       }
     }

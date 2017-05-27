@@ -1,39 +1,39 @@
-import { Inspector } from '../inspect';
-import * as equal from './equal';
-import * as stacktrace from '../stacktrace';
-import * as time from '../time';
-import * as timer from '../timer';
-import { IAssertion, IAssertionCallSite } from './assertion';
-import { IsFinite, ObjectAssign } from './util';
+import { Inspector } from '../inspect'
+import * as equal from './equal'
+import * as stacktrace from '../stacktrace'
+import * as time from '../time'
+import * as timer from '../timer'
+import { IAssertion, IAssertionCallSite } from './assertion'
+import { IsFinite, ObjectAssign } from './util'
 
 // Service
 export interface ITestEngineEqual {
-  equalsSame(lhs: any, rhs: any): boolean;
-  equalsSimple(lhs: any, rhs: any): boolean;
-  equalsStrict(lhs: any, rhs: any): boolean;
-  equalsNear(lhs: any, rhs: any, epsilon: any): boolean;
-  equalsProperties(lhs: any, rhs: any, equalsFn: (a: any, b: any) => boolean): boolean;
-  equalsDeep(lhs: any, rhs: any): boolean;
+  equalsSame (lhs: any, rhs: any): boolean
+  equalsSimple (lhs: any, rhs: any): boolean
+  equalsStrict (lhs: any, rhs: any): boolean
+  equalsNear (lhs: any, rhs: any, epsilon: any): boolean
+  equalsProperties (lhs: any, rhs: any, equalsFn: (a: any, b: any) => boolean): boolean
+  equalsDeep (lhs: any, rhs: any): boolean
 }
 export interface ITestEngineDump {
-  dump(o: any): string;
+  dump (o: any): string
 }
 export interface ITestEngineStacktrace {
-  callstack(): IAssertionCallSite[];
+  callstack (): IAssertionCallSite[]
 }
 export interface ITestEngineTime extends time.ITimeModule {}
 export interface ITestEngineTimer extends timer.ITimerModule {}
 export interface ITestEngineRun {
-  run(context: ITestEngineRunContext): void;
+  run (context: ITestEngineRunContext): void
 }
 
 export interface ITestEngineRunContext {
-  getTimeout(): number;
-  getTest(): ITest;
-  onStart(): void;
-  onAssertion(a: IAssertion): void;
-  onError(e: any): void;
-  onEnd(): void;
+  getTimeout (): number
+  getTest (): ITest
+  onStart (): void
+  onAssertion (a: IAssertion): void
+  onError (e: any): void
+  onEnd (): void
 }
 export interface ITestEngine extends
   ITestEngineEqual,
@@ -45,61 +45,61 @@ export interface ITestEngine extends
 }
 
 export interface ITest {
-  category: string;
-  name: string;
-  run(context: ITestRunContext): void;
+  category: string
+  name: string
+  run (context: ITestRunContext): void
 }
 
 export interface ITestRunContext extends ITestEngineRunContext {
-  getEngine(): ITestEngine;
+  getEngine (): ITestEngine
 }
 
-const $equalDefault: ITestEngineEqual = equal;
+const $equalDefault: ITestEngineEqual = equal
 const $dumpDefault: ITestEngineDump = (function () {
-  const inspector = new Inspector({ maxString: 70 });
+  const inspector = new Inspector({ maxString: 70 })
   return {
-    dump(o: any) {
-      return inspector.stringify(o);
+    dump (o: any) {
+      return inspector.stringify(o)
     }
-  };
-}());
-const $timeDefault: ITestEngineTime = time;
+  }
+}())
+const $timeDefault: ITestEngineTime = time
 const $stacktraceDefault: ITestEngineStacktrace = {
-  callstack() { return stacktrace.create(); }
-};
-const $timerDefault: ITestEngineTimer = timer;
+  callstack () { return stacktrace.create() }
+}
+const $timerDefault: ITestEngineTimer = timer
 
 class Context<T> {
 
-  static unit = new Context();
+  static unit = new Context()
 
-  static empty() {
-    return new Context();
+  static empty () {
+    return new Context()
   }
 
-  static create<T>(o: T): Context<T> & T {
-    const returnValue: any = new Context();
-    ObjectAssign(returnValue, o);
-    return returnValue;
+  static create<T> (o: T): Context<T> & T {
+    const returnValue: any = new Context()
+    ObjectAssign(returnValue, o)
+    return returnValue
   }
 
-  createChild<U>(ext: U): Context<T & U> & T & U {
-    const returnValue: any = new Context();
-    ObjectAssign(ObjectAssign(returnValue, this), ext);
-    return returnValue;
+  createChild<U> (ext: U): Context<T & U> & T & U {
+    const returnValue: any = new Context()
+    ObjectAssign(ObjectAssign(returnValue, this), ext)
+    return returnValue
   }
 }
 
 export class Engine implements ITestEngine {
 
   // Services
-  protected $dump: ITestEngineDump = $dumpDefault;
-  protected $equal: ITestEngineEqual = $equalDefault;
-  protected $stacktrace: ITestEngineStacktrace = $stacktraceDefault;
-  protected $time: ITestEngineTime = $timeDefault;
-  protected $timer: ITestEngineTimer = $timerDefault;
+  protected $dump: ITestEngineDump = $dumpDefault
+  protected $equal: ITestEngineEqual = $equalDefault
+  protected $stacktrace: ITestEngineStacktrace = $stacktraceDefault
+  protected $time: ITestEngineTime = $timeDefault
+  protected $timer: ITestEngineTimer = $timerDefault
 
-  constructor(
+  constructor (
     deps?: {
       $dump?: ITestEngineDump
       $equal?: ITestEngineEqual
@@ -109,135 +109,135 @@ export class Engine implements ITestEngine {
     }
   ) {
     if (deps) {
-      const { $equal, $dump, $stacktrace, $time, $timer } = deps;
+      const { $equal, $dump, $stacktrace, $time, $timer } = deps
 
       if ($equal !== undefined) {
-        this.$equal = $equal;
+        this.$equal = $equal
       }
       if ($dump !== undefined) {
-        this.$dump = $dump;
+        this.$dump = $dump
       }
       if ($stacktrace !== undefined) {
-        this.$stacktrace = $stacktrace;
+        this.$stacktrace = $stacktrace
       }
       if ($time !== undefined) {
-        this.$time = $time;
+        this.$time = $time
       }
       if ($timer !== undefined) {
-        this.$timer = $timer;
+        this.$timer = $timer
       }
     }
   }
 
-  callstack(): IAssertionCallSite[] {
-    return this.$stacktrace.callstack();
+  callstack (): IAssertionCallSite[] {
+    return this.$stacktrace.callstack()
   }
 
-  dump(o: any): string {
-    return this.$dump.dump(o);
+  dump (o: any): string {
+    return this.$dump.dump(o)
   }
 
-  now(): number {
-    return this.$time.now();
+  now (): number {
+    return this.$time.now()
   }
 
-  equalsDeep(o1: any, o2: any): boolean {
-    return this.$equal.equalsDeep(o1, o2);
+  equalsDeep (o1: any, o2: any): boolean {
+    return this.$equal.equalsDeep(o1, o2)
   }
 
-  equalsNear(o1: any, o2: any, epsilon: number): boolean {
-    return this.$equal.equalsNear(o1, o2, epsilon);
+  equalsNear (o1: any, o2: any, epsilon: number): boolean {
+    return this.$equal.equalsNear(o1, o2, epsilon)
   }
 
-  equalsProperties(a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
-    return this.$equal.equalsProperties(a, b, equalsFn);
+  equalsProperties (a: any, b: any, equalsFn: (a: any, b: any) => boolean): boolean {
+    return this.$equal.equalsProperties(a, b, equalsFn)
   }
 
-  equalsSame(a: any, b: any): boolean {
-    return this.$equal.equalsSame(a, b);
+  equalsSame (a: any, b: any): boolean {
+    return this.$equal.equalsSame(a, b)
   }
 
-  equalsSimple(a: any, b: any): boolean {
-    return this.$equal.equalsSimple(a, b);
+  equalsSimple (a: any, b: any): boolean {
+    return this.$equal.equalsSimple(a, b)
   }
 
-  equalsStrict(a: any, b: any): boolean {
-    return this.$equal.equalsStrict(a, b);
+  equalsStrict (a: any, b: any): boolean {
+    return this.$equal.equalsStrict(a, b)
   }
 
-  setTimeout(f: any, ms?: number) {
-    return this.$timer.setTimeout(f, ms);
+  setTimeout (f: any, ms?: number) {
+    return this.$timer.setTimeout(f, ms)
   }
 
-  clearTimeout(id: number) {
-    return this.$timer.clearTimeout(id);
+  clearTimeout (id: number) {
+    return this.$timer.clearTimeout(id)
   }
 
-  setInterval(f: any, ms?: number) {
-    return this.$timer.setInterval(f, ms);
+  setInterval (f: any, ms?: number) {
+    return this.$timer.setInterval(f, ms)
   }
 
-  clearInterval(id: number) {
-    return this.$timer.clearInterval(id);
+  clearInterval (id: number) {
+    return this.$timer.clearInterval(id)
   }
 
-  setImmediate(f: any) {
-    return this.$timer.setImmediate(f);
+  setImmediate (f: any) {
+    return this.$timer.setImmediate(f)
   }
 
-  clearImmediate(id: number) {
-    return this.$timer.clearImmediate(id);
+  clearImmediate (id: number) {
+    return this.$timer.clearImmediate(id)
   }
 
-  run(context: ITestEngineRunContext) {
-    const engine = this;
-    const test = context.getTest();
-    const timeoutMs = context.getTimeout();
-    let opened = true;
-    let timerId: number = null;
+  run (context: ITestEngineRunContext) {
+    const engine = this
+    const test = context.getTest()
+    const timeoutMs = context.getTimeout()
+    let opened = true
+    let timerId: number = null
     const stream: ITestRunContext = {
-      getTest() { return test; },
-      getTimeout() { return timeoutMs; },
-      getEngine() { return engine; },
-      onStart() {
-        context.onStart();
+      getTest () { return test },
+      getTimeout () { return timeoutMs },
+      getEngine () { return engine },
+      onStart () {
+        context.onStart()
       },
-      onAssertion(a: IAssertion) {
+      onAssertion (a: IAssertion) {
         if (opened) {
-          context.onAssertion(a);
+          context.onAssertion(a)
         }
       },
-      onError(e: any) {
+      onError (e: any) {
         if (opened) {
-          context.onError(e);
+          context.onError(e)
         }
       },
-      onEnd() {
+      onEnd () {
         if (opened) {
-          opened = false;
+          opened = false
           if (timerId) {
-            engine.clearTimeout(timerId);
-            timerId = null;
+            engine.clearTimeout(timerId)
+            timerId = null
           }
-          context.onEnd();
+          context.onEnd()
         }
       }
-    };
+    }
 
     // timeout
     if (IsFinite(timeoutMs)) {
       timerId = engine.setTimeout(() => {
-        timerId = null;
-        stream.onError(new Error('No test completion after ' + timeoutMs + 'ms'));
-        stream.onEnd();
-      }, timeoutMs);
+        timerId = null
+        stream.onError(new Error('No test completion after ' + timeoutMs + 'ms'))
+        stream.onEnd()
+      }, timeoutMs)
     }
 
     try {
-      test.run(stream);
+      test.run(stream)
     } catch (e) {
-      context.onError(e);
-      context.onEnd();
+      context.onError(e)
+      context.onEnd()
     }
   }
 }

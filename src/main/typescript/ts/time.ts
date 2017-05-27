@@ -1,6 +1,6 @@
 // Util
 export interface TimeModule {
-  now: typeof now;
+  now: typeof now
 }
 
 /**
@@ -8,6 +8,6 @@ export interface TimeModule {
  *
  * @return the current timestamp
  */
-export function now(): number {
-  return Date.now ? Date.now() : new Date().getTime();
+export function now (): number {
+  return Date.now ? Date.now() : new Date().getTime()
 }

@@ -1,4 +1,4 @@
-declare var Symbol: any;
+declare var Symbol: any
 
 // ECMA like
 const idPropertyDescriptor: PropertyDescriptor = {
@@ -6,39 +6,39 @@ const idPropertyDescriptor: PropertyDescriptor = {
   enumerable: false,
   value: null,
   writable: false
-};
-function SymbolCreate(s: string): any { return typeof Symbol !== 'undefined' ? Symbol(s) : '@@' + s; }
-function DefinePropertyOrThrow(o: any, k: string, d: PropertyDescriptor) {
-  const def = Object.defineProperty;
+}
+function SymbolCreate (s: string): any { return typeof Symbol !== 'undefined' ? Symbol(s) : '@@' + s }
+function DefinePropertyOrThrow (o: any, k: string, d: PropertyDescriptor) {
+  const def = Object.defineProperty
   if (def) {
-    def(o, k, d);
+    def(o, k, d)
   } else {
-    o[k] = d.value;
+    o[k] = d.value
   }
 }
-function DefineValue(o: any, k: string, v: any): void {
-  idPropertyDescriptor.value = v;
-  DefinePropertyOrThrow(o, k, idPropertyDescriptor);
+function DefineValue (o: any, k: string, v: any): void {
+  idPropertyDescriptor.value = v
+  DefinePropertyOrThrow(o, k, idPropertyDescriptor)
 }
-function IdGeneratorCreate() {
+function IdGeneratorCreate () {
   // Start from 1, helps not to have falsy values
-  let currentId = 1;
+  let currentId = 1
   return function () {
-    const returnValue = currentId;
-    currentId += 1;
-    return returnValue;
-  };
+    const returnValue = currentId
+    currentId += 1
+    return returnValue
+  }
 }
 
-const idGenerator = IdGeneratorCreate();
-const $$id = SymbolCreate('id');
-function GetOrSetId(o: any): number {
-  let id = o[$$id];
+const idGenerator = IdGeneratorCreate()
+const $$id = SymbolCreate('id')
+function GetOrSetId (o: any): number {
+  let id = o[$$id]
   if (id === undefined) {
-    id = idGenerator();
-    DefineValue(o, $$id, id);
+    id = idGenerator()
+    DefineValue(o, $$id, id)
   }
-  return id;
+  return id
 }
 
 /**
@@ -46,8 +46,8 @@ function GetOrSetId(o: any): number {
  *
  * @return a new identifier
  */
-export function generate(): number {
-  return idGenerator();
+export function generate (): number {
+  return idGenerator()
 }
 
 /**
@@ -56,8 +56,8 @@ export function generate(): number {
  * @param o the object
  * @return
  */
-export function hasId(o: any): boolean {
-  return typeof o === 'function' || (typeof o === 'object' && o !== null);
+export function hasId (o: any): boolean {
+  return typeof o === 'function' || (typeof o === 'object' && o !== null)
 }
 
 /**
@@ -66,6 +66,6 @@ export function hasId(o: any): boolean {
  * @param o the object
  * @return the o identifier
  */
-export function getId(o: any): number {
-  return hasId(o) ? GetOrSetId(o) : NaN;
+export function getId (o: any): number {
+  return hasId(o) ? GetOrSetId(o) : NaN
 }

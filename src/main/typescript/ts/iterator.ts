@@ -1,8 +1,8 @@
 // Interface
 export interface IIterator<T> {
-  next(value?: any): IIteratorResult<T>;
-  return?<U>(value?: U): IIteratorResult<U>;
-  throw?(error?: any): IIteratorResult<T>;
+  next (value?: any): IIteratorResult<T>
+  return?<U> (value?: U): IIteratorResult<U>
+  throw? (error?: any): IIteratorResult<T>
 }
 
 export interface IIterableIterator<T> extends IIterator<T> {
@@ -10,21 +10,21 @@ export interface IIterableIterator<T> extends IIterator<T> {
 }
 
 export interface IIteratorResult<T> {
-  value: T;
-  done: boolean;
+  value: T
+  done: boolean
 }
 
 // Ecma like
-function IsIterator(o: any): boolean {
-  return typeof o === 'object' && o !== null && typeof o.next === 'function';
+function IsIterator (o: any): boolean {
+  return typeof o === 'object' && o !== null && typeof o.next === 'function'
 }
 
-function IteratorCreate<T>(next: (v?: any) => IIteratorResult<T>, hint?: string) {
-  return new Iterator(next, hint);
+function IteratorCreate<T> (next: (v?: any) => IIteratorResult<T>, hint?: string) {
+  return new Iterator(next, hint)
 }
 
-function IteratorNext<T>(iter: IIterator<T>, v?: any) {
-  return iter.next(v);
+function IteratorNext<T> (iter: IIterator<T>, v?: any) {
+  return iter.next(v)
 }
 
 /*
@@ -36,168 +36,168 @@ function IteratorMap<T, U>(iter: IIterator<T>, f: (v: T) => IIteratorResult<U>) 
 }
 */
 
-function IteratorResultCreate<T>(done: boolean, value: T) {
-  return { done: done, value: value };
+function IteratorResultCreate<T> (done: boolean, value: T) {
+  return { done: done, value: value }
 }
 
-function IteratorCreateEmpty(hint?: string): Iterator<any> {
+function IteratorCreateEmpty (hint?: string): Iterator<any> {
   return IteratorCreate(function () {
-    return IteratorResultCreate(true, undefined);
-  }, hint);
+    return IteratorResultCreate(true, undefined)
+  }, hint)
 }
 
-function IteratorRepeat<T>(length: number, v: T, hint?: string): Iterator<T> {
-  let i = 0;
-  let done = false;
-  let value = v;
+function IteratorRepeat<T> (length: number, v: T, hint?: string): Iterator<T> {
+  let i = 0
+  let done = false
+  let value = v
   return (
     // Empty?
     length <= 0 ? IteratorCreateEmpty(hint) :
 
     // Continually?
     length === Infinity ? IteratorCreate(function () {
-      return IteratorResultCreate(false, value);
+      return IteratorResultCreate(false, value)
     }, hint) :
 
     // Repeat
     IteratorCreate(function () {
       if (i < length) {
-        i += 1;
+        i += 1
       } else {
-        done = true;
-        value = undefined;
+        done = true
+        value = undefined
       }
-      return IteratorResultCreate(done, value);
+      return IteratorResultCreate(done, value)
     }, hint)
-  );
+  )
 }
 
 export class Iterator<T> implements IIterator<T> {
 
-  static empty(): Iterator<any> {
-    return IteratorCreateEmpty('empty');
+  static empty (): Iterator<any> {
+    return IteratorCreateEmpty('empty')
   }
 
-  static single<T>(v: T): Iterator<T> {
-    return IteratorRepeat(1, v, 'single');
+  static single<T> (v: T): Iterator<T> {
+    return IteratorRepeat(1, v, 'single')
   }
 
-  static fill<T>(length: number, v: T): Iterator<T> {
-    return IteratorRepeat(length, v, 'fill');
+  static fill<T> (length: number, v: T): Iterator<T> {
+    return IteratorRepeat(length, v, 'fill')
   }
 
-  static continually<T>(v: T): Iterator<T> {
-    return IteratorRepeat(Infinity, v, 'continue');
+  static continually<T> (v: T): Iterator<T> {
+    return IteratorRepeat(Infinity, v, 'continue')
   }
 
-  static concat<T>(...args: IIterator<T>[]): Iterator<T> {
-    let argi = 0;
-    const argc = args.length;
-    let current = args[argi];
-    let done = false;
+  static concat<T> (...args: IIterator<T>[]): Iterator<T> {
+    let argi = 0
+    const argc = args.length
+    let current = args[argi]
+    let done = false
 
     return IteratorCreate(function () {
-      let r: IIteratorResult<T>;
+      let r: IIteratorResult<T>
       if (!done) {
         while (true) {
           if (current) {
-            r = IteratorNext(current);
+            r = IteratorNext(current)
             if (r.done) {
-              args[argi] = null; // free reference;
-              current = args[++argi];
+              args[argi] = null // free reference;
+              current = args[++argi]
             } else {
-              break;
+              break
             }
           } else if (argi < argc) {
-            args[argi] = null; // free reference;
-            current = args[++argi];
+            args[argi] = null // free reference;
+            current = args[++argi]
           } else {
-            done = true;
-            break;
+            done = true
+            break
           }
         }
       } else {
-        r = IteratorResultCreate(done, undefined);
+        r = IteratorResultCreate(done, undefined)
       }
-      return r;
-    }, 'concatenated');
+      return r
+    }, 'concatenated')
   }
 
-  static isIterator(o: any): boolean {
-    return IsIterator(o);
+  static isIterator (o: any): boolean {
+    return IsIterator(o)
   }
 
-  static iterate<T>(start: T, f: (v: T) => T): Iterator<T> {
-    let first = true;
-    let acc: T;
+  static iterate<T> (start: T, f: (v: T) => T): Iterator<T> {
+    let first = true
+    let acc: T
 
     return IteratorCreate(function () {
       if (first) {
-        acc = start;
-        first = false;
+        acc = start
+        first = false
       } else {
-        acc = f(acc);
+        acc = f(acc)
       }
-      return IteratorResultCreate(false, acc);
-    }, 'iterate');
+      return IteratorResultCreate(false, acc)
+    }, 'iterate')
   }
 
-  static range(start: number, end: number, step = 1): Iterator<number> {
-    let index = start;
-    let done = false;
+  static range (start: number, end: number, step = 1): Iterator<number> {
+    let index = start
+    let done = false
     return IteratorCreate(function () {
-      let value: number;
+      let value: number
       if (index < end) {
-        value = index;
-        index += step;
+        value = index
+        index += step
       } else {
-        done = true;
+        done = true
       }
-      return IteratorResultCreate(done, value);
-    }, '[' + start + ',' + end + ')');
+      return IteratorResultCreate(done, value)
+    }, '[' + start + ',' + end + ')')
   }
 
-  constructor(public next: () => IIteratorResult<T>, public hint = 'abstract') { }
+  constructor (public next: () => IIteratorResult<T>, public hint = 'abstract') { }
 
-  inspect() { return `Iterator { [${this.hint}] }`; }
+  inspect () { return `Iterator { [${this.hint}] }` }
 
-  toString() {
-    return this.inspect();
+  toString () {
+    return this.inspect()
   }
 }
 
-export function isIIterator(o: any): boolean {
-  return IsIterator(o);
+export function isIIterator (o: any): boolean {
+  return IsIterator(o)
 }
 
-export function result<T>(value?: T) {
-  return IteratorResultCreate(arguments.length > 0, value);
+export function result<T> (value?: T) {
+  return IteratorResultCreate(arguments.length > 0, value)
 }
 
-export function empty(): Iterator<any> {
-  return Iterator.empty();
+export function empty (): Iterator<any> {
+  return Iterator.empty()
 }
 
-export function single<T>(v: T): Iterator<T> {
-  return Iterator.single(v);
+export function single<T> (v: T): Iterator<T> {
+  return Iterator.single(v)
 }
 
-export function fill<T>(length: number, v: T): Iterator<T> {
-  return Iterator.fill(length, v);
+export function fill<T> (length: number, v: T): Iterator<T> {
+  return Iterator.fill(length, v)
 }
 
-export function iterate<T>(start: T, f: (v: T) => T): Iterator<T> {
-  return Iterator.iterate(start, f);
+export function iterate<T> (start: T, f: (v: T) => T): Iterator<T> {
+  return Iterator.iterate(start, f)
 }
 
-export function range(start: number, end: number, step = 1): Iterator<number> {
-  return Iterator.range(start, end, step);
+export function range (start: number, end: number, step = 1): Iterator<number> {
+  return Iterator.range(start, end, step)
 }
 
-export function continually<T>(v: T): Iterator<T> {
-  return Iterator.continually(v);
+export function continually<T> (v: T): Iterator<T> {
+  return Iterator.continually(v)
 }
 
-export function concat<T>(...args: IIterator<T>[]): Iterator<T> {
-  return Iterator.concat.apply(null, args);
+export function concat<T> (...args: IIterator<T>[]): Iterator<T> {
+  return Iterator.concat.apply(null, args)
 }

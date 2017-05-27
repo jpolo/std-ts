@@ -1,12 +1,12 @@
 // Util
-function IsNode(o: any): o is Node {
+function IsNode (o: any): o is Node {
   return (
     // typeof Node === "object" ? o instanceof Node :
     o &&
     typeof o === 'object' &&
     typeof o.nodeType === 'number' &&
     typeof o.nodeName === 'string'
-  );
+  )
 }
 /*
 function IsElementOrDocument(n: Node) {
@@ -26,9 +26,9 @@ function SetText(n: Node, text: string) {
 }
 */
 
-function GetText(n: Node) {
-  let returnValue = '';
-  const nodeType = n.nodeType;
+function GetText (n: Node) {
+  let returnValue = ''
+  const nodeType = n.nodeType
 
   if (
     nodeType === NodeType.ELEMENT_NODE ||
@@ -37,21 +37,21 @@ function GetText(n: Node) {
   ) {
     // Use textContent for elements
     // innerText usage removed for consistency of new lines (jQuery #11153)
-    returnValue = n.textContent;
+    returnValue = n.textContent
     if (typeof returnValue !== 'string') {
-      returnValue = '';
+      returnValue = ''
       // Traverse its children
       for (n = n.firstChild; n; n = n.nextSibling) {
-        returnValue += GetText(n);
+        returnValue += GetText(n)
       }
     }
   } else if (
     nodeType === NodeType.TEXT_NODE ||
     nodeType === NodeType.CDATA_SECTION_NODE
   ) {
-    returnValue = n.nodeValue;
+    returnValue = n.nodeValue
   }
-  return returnValue;
+  return returnValue
 }
 
 export enum NodeType {
@@ -125,16 +125,16 @@ export class DOMError implements Error {
  * @param parentNode the parent node
  * @param node the supposed child element
  */
-export function contains(parentNode: Node, node: Node): boolean {
-  let returnValue = false;
+export function contains (parentNode: Node, node: Node): boolean {
+  let returnValue = false
   if (returnValue !== null && returnValue !== undefined) {
     if (parentNode === node) {
-      returnValue = true;
+      returnValue = true
     } else {
-      returnValue = !!(node.compareDocumentPosition(parentNode) & Node.DOCUMENT_POSITION_CONTAINS);
+      returnValue = !!(node.compareDocumentPosition(parentNode) & Node.DOCUMENT_POSITION_CONTAINS)
     }
   }
-  return returnValue;
+  return returnValue
 }
 
 /**
@@ -143,9 +143,9 @@ export function contains(parentNode: Node, node: Node): boolean {
  * @param node any Node
  * @return true if o is a Node
  */
-export function empty(node: Node): void {
+export function empty (node: Node): void {
   if (node.textContent.length) {
-    node.textContent = '';
+    node.textContent = ''
   }
 }
 
@@ -155,53 +155,53 @@ export function empty(node: Node): void {
  * @param o any object
  * @return true if o is a Node
  */
-export function isNode(o: any): o is Node {
-  return IsNode(o);
+export function isNode (o: any): o is Node {
+  return IsNode(o)
 }
 
-export function nodeType(node: Node): NodeType {
-  return node.nodeType;
+export function nodeType (node: Node): NodeType {
+  return node.nodeType
 }
 
 /**
  *
  * @param node the element to be placed
  */
-export function place(node: Node, position: Position, refNode: Node): boolean {
-  let parentNode: Node;
-  let returnValue = false;
+export function place (node: Node, position: Position, refNode: Node): boolean {
+  let parentNode: Node
+  let returnValue = false
   switch (position) {
     case Position.BEFORE:
-      parentNode = refNode.parentNode;
+      parentNode = refNode.parentNode
       if (parentNode) {
-        parentNode.insertBefore(node, refNode);
-        returnValue = true;
+        parentNode.insertBefore(node, refNode)
+        returnValue = true
       }
-      break;
+      break
     case Position.AFTER:
-      parentNode = refNode.parentNode;
+      parentNode = refNode.parentNode
       if (parentNode) {
-        parentNode.insertBefore(node, refNode.nextSibling);
-        returnValue = true;
+        parentNode.insertBefore(node, refNode.nextSibling)
+        returnValue = true
       }
-      break;
+      break
     case Position.FIRST:
-      refNode.insertBefore(node, refNode.firstChild);
-      break;
+      refNode.insertBefore(node, refNode.firstChild)
+      break
     case Position.LAST:
-      refNode.appendChild(node);
-      break;
+      refNode.appendChild(node)
+      break
     case Position.REPLACE:
-      parentNode = refNode.parentNode;
+      parentNode = refNode.parentNode
       if (parentNode) {
-        parentNode.replaceChild(node, refNode);
-        returnValue = true;
+        parentNode.replaceChild(node, refNode)
+        returnValue = true
       }
-      break;
+      break
     default:
-      throw new Error(position + ' is not a valid position');
+      throw new Error(position + ' is not a valid position')
   }
-  return returnValue;
+  return returnValue
 }
 
 /**
@@ -210,12 +210,12 @@ export function place(node: Node, position: Position, refNode: Node): boolean {
  * @param node the element to be detached
  * @return true if removed successfully
  */
-export function remove(node: Node): boolean {
-  const parentNode = node.parentNode;
-  let returnValue = false;
+export function remove (node: Node): boolean {
+  const parentNode = node.parentNode
+  let returnValue = false
   if (parentNode) {
-    parentNode.removeChild(node);
-    returnValue = true;
+    parentNode.removeChild(node)
+    returnValue = true
   }
-  return returnValue;
+  return returnValue
 }
