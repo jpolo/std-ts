@@ -1,13 +1,13 @@
 /* tslint:disable:max-line-length no-namespace */
-function TokenCreate (t: Token, re: RegExp): [Token, RegExp] { return [t, re] }
-function StringCount (str: string, needle: string, toIndex: number): number {
-  let n = 0
-  let i = str.indexOf(needle)
+function TokenCreate(t: Token, re: RegExp): [Token, RegExp] { return [t, re]; }
+function StringCount(str: string, needle: string, toIndex: number): number {
+  let n = 0;
+  let i = str.indexOf(needle);
   while (i !== -1 && i < toIndex) {
-    n++
-    i = str.indexOf(needle, i + 1)
+    n++;
+    i = str.indexOf(needle, i + 1);
   }
-  return n
+  return n;
 }
 
 /**
@@ -37,15 +37,15 @@ enum Token {
 }
 
 interface ITokenMatch {
-  token: Token
-  matches: RegExpExecArray
-  sourceURL: string
-  lineNumber: number
-  columnNumber: number
+  token: Token;
+  matches: RegExpExecArray;
+  sourceURL: string;
+  lineNumber: number;
+  columnNumber: number;
 }
 
 export interface IParserOption {
-  sourceURL?: string
+  sourceURL?: string;
 }
 
 const TOKENS: {0: Token; 1: RegExp}[] = [
@@ -70,26 +70,26 @@ const TOKENS: {0: Token; 1: RegExp}[] = [
   TokenCreate(Token.COLON, /^[:]/),
   TokenCreate(Token.STRING, /^(?![^:\n\s]*:[^\/]{2})(([^:,\]\}\n\s]|(?!\n)\s(?!\s*?\n)|:\/\/|,(?=[^\n]*\s*[^\]\}\s\n]\s*\n)|[\]\}](?=[^\n]*\s*[^\]\}\s\n]\s*\n))*)(?=[,:\]\}\s\n]|$)/),
   TokenCreate(Token.ID, /^([\w][\w -]*)/)
-]
+];
 
-export interface IYAMLObject { [key: string]: YAMLValue }
+export interface IYAMLObject { [key: string]: YAMLValue; }
 export interface IYAMLArray extends Array<YAMLValue> {}
-export type YAMLValue = number | string | boolean | IYAMLArray | IYAMLObject | Date
+export type YAMLValue = number | string | boolean | IYAMLArray | IYAMLObject | Date;
 
-export function parse (s: string, options?: IParserOption): YAMLValue {
-  return parser.parse(parser.tokenize(s, options || {}))
+export function parse(s: string, options?: IParserOption): YAMLValue {
+  return parser.parse(parser.tokenize(s, options || {}));
 }
 
-export function stringify (o: any): string {
-  return 'TODO'
+export function stringify(o: any): string {
+  return 'TODO';
 }
 
 namespace parser {
-  const FILE_ANONYMOUS = '<anonymous>'
+  const FILE_ANONYMOUS = '<anonymous>';
 
   interface IState extends Array<ITokenMatch> { }
 
-  function error (sourceURL: string, lineNumber: number, columnNumber: number, message: string) {
+  function error(sourceURL: string, lineNumber: number, columnNumber: number, message: string) {
     const s = (
       message +
       ' (' +
@@ -97,54 +97,54 @@ namespace parser {
       ':' + lineNumber +
       ':' + columnNumber +
       ')'
-    )
-    return new SyntaxError(s)
+    );
+    return new SyntaxError(s);
   }
 
-  function peek (state: IState): ITokenMatch {
-    return state[0]
+  function peek(state: IState): ITokenMatch {
+    return state[0];
   }
 
-  function peekType (state: IState, type: Token): boolean {
-    const head = state[0]
-    return head && head.token === type
+  function peekType(state: IState, type: Token): boolean {
+    const head = state[0];
+    return head && head.token === type;
   }
 
-  function advance (state: IState): ITokenMatch {
-    return state.shift()
+  function advance(state: IState): ITokenMatch {
+    return state.shift();
   }
 
-  function advanceValue (state: IState) {
-    return advance(state).matches[1]
+  function advanceValue(state: IState) {
+    return advance(state).matches[1];
   }
 
-  function accept (state: IState, type: Token): ITokenMatch {
-    return peekType(state, type) ? advance(state) : null
+  function accept(state: IState, type: Token): ITokenMatch {
+    return peekType(state, type) ? advance(state) : null;
   }
 
-  function expect (state: IState, type: Token, message: string) {
+  function expect(state: IState, type: Token, message: string) {
     if (!accept(state, type)) {
-      const tokenMatch = peek(state)
+      const tokenMatch = peek(state);
       throw error(
         tokenMatch.sourceURL,
         tokenMatch.lineNumber,
         tokenMatch.columnNumber,
         message + ', ' + _context(tokenMatch.matches.input)
-      )
+      );
     }
   }
 
-  function ignoreSpace (state: IState) {
+  function ignoreSpace(state: IState) {
     while (peekType(state, Token.SPACE)) {
-      advance(state)
+      advance(state);
     }
   }
 
-  function ignoreWhitespace (state: IState) {
+  function ignoreWhitespace(state: IState) {
     while (peekType(state, Token.SPACE) ||
            peekType(state, Token.INDENT) ||
            peekType(state, Token.DEDENT)) {
-      advance(state)
+      advance(state);
     }
   }
 
@@ -162,47 +162,47 @@ namespace parser {
    * | false
    * | null
    */
-  export function parse (state: IState): YAMLValue {
-    const token = peek(state).token
+  export function parse(state: IState): YAMLValue {
+    const token = peek(state).token;
     switch (token) {
       case Token.DOC:
-        return parseDoc(state)
+        return parseDoc(state);
       case Token.DASH:
-        return parseList(state)
+        return parseList(state);
       case Token.CURLY_BRACE_OPEN:
-        return parseInlineHash(state)
+        return parseInlineHash(state);
       case Token.SQUARED_BRACKET_OPEN:
-        return parseInlineList(state)
+        return parseInlineList(state);
       case Token.ID:
-        return parseHash(state)
+        return parseHash(state);
       case Token.STRING:
-        return advanceValue(state)
+        return advanceValue(state);
       case Token.TIMESTAMP:
-        return parseTimestamp(state)
+        return parseTimestamp(state);
       case Token.FLOAT:
-        return parseFloat(advanceValue(state))
+        return parseFloat(advanceValue(state));
       case Token.INT:
-        return parseInt(advanceValue(state), 10)
+        return parseInt(advanceValue(state), 10);
       case Token.TRUE:
-        advanceValue(state)
-        return true
+        advanceValue(state);
+        return true;
       case Token.FALSE:
-        advanceValue(state)
-        return false
+        advanceValue(state);
+        return false;
       case Token.NULL:
-        advanceValue(state)
-        return null
+        advanceValue(state);
+        return null;
       default:
-        throw new Error(`Unknown token ${token}`)
+        throw new Error(`Unknown token ${token}`);
     }
   }
 
-  function parseDoc (state: IState): any {
-    accept(state, Token.DOC)
-    expect(state, Token.INDENT, 'expected indent after document')
-    const val = parse(state)
-    expect(state, Token.DEDENT, 'document not properly dedented')
-    return val
+  function parseDoc(state: IState): any {
+    accept(state, Token.DOC);
+    expect(state, Token.INDENT, 'expected indent after document');
+    const val = parse(state);
+    expect(state, Token.DEDENT, 'document not properly dedented');
+    return val;
   }
 
   /**
@@ -210,46 +210,46 @@ namespace parser {
    *  | id ':' - indent expr dedent
    *  )+
    */
-  function parseHash (state: IState) {
-    let id: string
-    const hash = {}
+  function parseHash(state: IState) {
+    let id: string;
+    const hash = {};
     while (peekType(state, Token.ID) && (id = advanceValue(state))) {
-      expect(state, Token.COLON, 'expected semi-colon after id')
-      ignoreSpace(state)
+      expect(state, Token.COLON, 'expected semi-colon after id');
+      ignoreSpace(state);
       if (accept(state, Token.INDENT)) {
-        hash[id] = parse(state)
-        expect(state, Token.DEDENT, 'hash not properly dedented')
+        hash[id] = parse(state);
+        expect(state, Token.DEDENT, 'hash not properly dedented');
       } else {
-        hash[id] = parse(state)
+        hash[id] = parse(state);
       }
-      ignoreSpace(state)
+      ignoreSpace(state);
     }
-    return hash
+    return hash;
   }
 
   /**
    * '{' (- ','? ws id ':' - expr ws)* '}'
    */
-  function parseInlineHash (state: IState) {
-    const hash = {}
-    let id
-    let i = 0
-    accept(state, Token.CURLY_BRACE_OPEN)
+  function parseInlineHash(state: IState) {
+    const hash = {};
+    let id;
+    let i = 0;
+    accept(state, Token.CURLY_BRACE_OPEN);
     while (!accept(state, Token.CURLY_BRACE_CLOSE)) {
-      ignoreSpace(state)
+      ignoreSpace(state);
       if (i !== 0)  {
-        expect(state, Token.COMMA, 'expected comma')
+        expect(state, Token.COMMA, 'expected comma');
       }
-      ignoreWhitespace(state)
+      ignoreWhitespace(state);
       if (peekType(state, Token.ID) && (id = advanceValue(state))) {
-        expect(state, Token.COLON, 'expected colon after id')
-        ignoreSpace(state)
-        hash[id] = parse(state)
-        ignoreWhitespace(state)
+        expect(state, Token.COLON, 'expected colon after id');
+        ignoreSpace(state);
+        hash[id] = parse(state);
+        ignoreWhitespace(state);
       }
-      ++i
+      ++i;
     }
-    return hash
+    return hash;
   }
 
   /**
@@ -257,39 +257,39 @@ namespace parser {
    *  | '-' - indent expr dedent
    *  )+
    */
-  function parseList (state: IState): any[] {
-    const list = []
+  function parseList(state: IState): any[] {
+    const list = [];
     while (accept(state, Token.DASH)) {
-      ignoreSpace(state)
+      ignoreSpace(state);
       if (accept(state, Token.INDENT)) {
-        list.push(parse(state))
-        expect(state, Token.DEDENT, 'list item not properly dedented')
+        list.push(parse(state));
+        expect(state, Token.DEDENT, 'list item not properly dedented');
       } else {
-        list.push(parse(state))
+        list.push(parse(state));
       }
-      ignoreSpace(state)
+      ignoreSpace(state);
     }
-    return list
+    return list;
   }
 
   /**
    * '[' (- ','? - expr -)* ']'
    */
-  function parseInlineList (state: IState): any[] {
-    const list = []
-    let i = 0
-    accept(state, Token.SQUARED_BRACKET_OPEN)
+  function parseInlineList(state: IState): any[] {
+    const list = [];
+    let i = 0;
+    accept(state, Token.SQUARED_BRACKET_OPEN);
     while (!accept(state, Token.SQUARED_BRACKET_CLOSE)) {
-      ignoreSpace(state)
+      ignoreSpace(state);
       if (i !== 0) {
-        expect(state, Token.COMMA, 'expected comma')
+        expect(state, Token.COMMA, 'expected comma');
       }
-      ignoreSpace(state)
-      list.push(parse(state))
-      ignoreSpace(state)
-      ++i
+      ignoreSpace(state);
+      list.push(parse(state));
+      ignoreSpace(state);
+      ++i;
     }
-    return list
+    return list;
   }
 
   /**
@@ -297,117 +297,117 @@ namespace parser {
    *
    * For full format: http://yaml.org/type/timestamp.html
    */
-  function parseTimestamp (state: IState) {
-    const matches = advance(state).matches
-    const date = new Date('')
-    const year = parseInt(matches[2], 10)
-    const month = parseInt(matches[3], 10)
-    const day = parseInt(matches[4], 10)
-    const hour = parseInt(matches[5], 10) || 0
-    const min = parseInt(matches[6], 10) || 0
-    const sec = parseInt(matches[7], 10) || 0
+  function parseTimestamp(state: IState) {
+    const matches = advance(state).matches;
+    const date = new Date('');
+    const year = parseInt(matches[2], 10);
+    const month = parseInt(matches[3], 10);
+    const day = parseInt(matches[4], 10);
+    const hour = parseInt(matches[5], 10) || 0;
+    const min = parseInt(matches[6], 10) || 0;
+    const sec = parseInt(matches[7], 10) || 0;
 
-    date.setUTCFullYear(year, month - 1, day)
-    date.setUTCHours(hour)
-    date.setUTCMinutes(min)
-    date.setUTCSeconds(sec)
-    date.setUTCMilliseconds(0)
-    return date
+    date.setUTCFullYear(year, month - 1, day);
+    date.setUTCHours(hour);
+    date.setUTCMinutes(min);
+    date.setUTCSeconds(sec);
+    date.setUTCMilliseconds(0);
+    return date;
   }
 
-  export function tokenize (str: string, options: IParserOption): ITokenMatch[] {
-    const strLength = str.length
-    let strConsumedLength = 0
-    const TOKEN_COUNT = TOKENS.length
-    let tokenMatch: ITokenMatch
-    let captures: RegExpExecArray
-    let ignore = false
-    let input
-    let indents = 0
-    let lastIndents = 0
-    const stack = []
-    let indentAmount = -1
-    const sourceURL = options.sourceURL
-    let lineNumber = NaN
-    let columnNumber = NaN
-    let buffer = str
+  export function tokenize(str: string, options: IParserOption): ITokenMatch[] {
+    const strLength = str.length;
+    let strConsumedLength = 0;
+    const TOKEN_COUNT = TOKENS.length;
+    let tokenMatch: ITokenMatch;
+    let captures: RegExpExecArray;
+    let ignore = false;
+    let input;
+    let indents = 0;
+    let lastIndents = 0;
+    const stack = [];
+    let indentAmount = -1;
+    const sourceURL = options.sourceURL;
+    let lineNumber = NaN;
+    let columnNumber = NaN;
+    let buffer = str;
 
     // Windows new line support (CR+LF, \r\n)
-    buffer = buffer.replace(/\r\n/g, '\n')
+    buffer = buffer.replace(/\r\n/g, '\n');
 
     while (buffer.length) {
       for (let i = 0; i < TOKEN_COUNT; ++i) {
-        const matcher = TOKENS[i]
-        const tokenType = matcher[0]
-        const re = matcher[1]
+        const matcher = TOKENS[i];
+        const tokenType = matcher[0];
+        const re = matcher[1];
         if (captures = re.exec(buffer)) {
           // consume
-          buffer = buffer.replace(re, '')
-          strConsumedLength = (strLength - buffer.length)
+          buffer = buffer.replace(re, '');
+          strConsumedLength = (strLength - buffer.length);
 
-          lineNumber = StringCount(str, '\n', strConsumedLength) + 1
-          columnNumber = strConsumedLength - str.lastIndexOf('\n', strConsumedLength)
+          lineNumber = StringCount(str, '\n', strConsumedLength) + 1;
+          columnNumber = strConsumedLength - str.lastIndexOf('\n', strConsumedLength);
           tokenMatch = {
             columnNumber: columnNumber,
             lineNumber: lineNumber,
             matches: captures,
             sourceURL: sourceURL,
             token: tokenType
-          }
+          };
 
           switch (tokenMatch.token) {
             case Token.COMMENT:
-              ignore = true
-              break
+              ignore = true;
+              break;
             case Token.INDENT:
-              lastIndents = indents
+              lastIndents = indents;
               // determine the indentation amount from the first indent
               if (indentAmount === -1) {
-                indentAmount = captures[1].length
+                indentAmount = captures[1].length;
               }
 
-              indents = captures[1].length / indentAmount
+              indents = captures[1].length / indentAmount;
               if (indents === lastIndents) {
-                ignore = true
+                ignore = true;
               } else if (indents > lastIndents + 1) {
-                throw new SyntaxError('invalid indentation, got ' + indents + ' instead of ' + (lastIndents + 1))
+                throw new SyntaxError('invalid indentation, got ' + indents + ' instead of ' + (lastIndents + 1));
               } else if (indents < lastIndents) {
-                input = captures.input
+                input = captures.input;
                 tokenMatch = {
                   columnNumber: columnNumber,
                   lineNumber: lineNumber,
                   matches: null,
                   sourceURL: sourceURL,
                   token: Token.DEDENT
-                }
+                };
                 // tokenMatch['input'] = input
                 while (--lastIndents > indents) {
-                  stack.push(tokenMatch)
+                  stack.push(tokenMatch);
                 }
               }
           }
-          break
+          break;
         }
       }
       if (!ignore) {
         if (tokenMatch) {
-          stack.push(tokenMatch)
-          tokenMatch = null
+          stack.push(tokenMatch);
+          tokenMatch = null;
         } else {
-          throw new SyntaxError(_context(buffer))
+          throw new SyntaxError(_context(buffer));
         }
       }
 
-      ignore = false
+      ignore = false;
     }
-    return stack
+    return stack;
   }
 
-  function _context (str: string) {
+  function _context(str: string) {
     return (
       typeof str !== 'string' ? '' :
       'near \"' +
       (str.slice(0, 25).replace(/\n/g, '\\n')  .replace(/"/g, '\\\"')) + '\"'
-    )
+    );
   }
 }

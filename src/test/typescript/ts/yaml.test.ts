@@ -1,5 +1,5 @@
-import { suite, test } from '../../../main/typescript/ts/unit/qunit'
-import { parse } from '../../../main/typescript/ts/yaml'
+import { suite, test } from '../../../main/typescript/ts/testing/qunit';
+import { parse } from '../../../main/typescript/ts/yaml';
 
 export default suite('ts/yaml', (self) => {
 
@@ -21,7 +21,7 @@ export default suite('ts/yaml', (self) => {
         valid_true: [true, true, true],
         valid_false: [false, false, false]
       }
-    )
+    );
 
     // Null
     assert.deepEqual(
@@ -44,7 +44,7 @@ export default suite('ts/yaml', (self) => {
         capitalized: null,
         end: 'test passed?'
       }
-    )
+    );
 
     // Hash
     assert.deepEqual(
@@ -59,7 +59,7 @@ export default suite('ts/yaml', (self) => {
         hash_inline: { name: 'Mail', email: 'mail@corporate.com' },
         hash_default: { name: 'Default', email: 'default@corporate.com' }
       }
-    )
+    );
 
     // List
     assert.deepEqual(
@@ -75,7 +75,7 @@ export default suite('ts/yaml', (self) => {
         list_inline: ['foo', 'bar', 'baz'],
         list_default: [ 'lots of milk', 'cookies', 'something' ]
       }
-    )
+    );
 
     // Comment
     assert.deepEqual(
@@ -91,7 +91,7 @@ export default suite('ts/yaml', (self) => {
         name: 'MyName',
         mail: 'default@corporate.com'
       }
-    )
+    );
 
     // Error
     const wrong =
@@ -99,12 +99,12 @@ export default suite('ts/yaml', (self) => {
       '  name:\n' +
       '    - lots of milk\n' +
       "    - 'cookies':\n" +
-      "    - 'something'\n"
+      "    - 'something'\n";
     assert.throws(() => {
-      parse(wrong, { sourceURL: 'ts/yaml.test.yaml' })
-    }, `SyntaxError: hash not properly dedented, near ":\\n    - \'something\'\\n" (ts/yaml.test.yaml:4:0)`)
+      parse(wrong, { sourceURL: 'ts/yaml.test.yaml' });
+    }, `SyntaxError: hash not properly dedented, near ":\\n    - \'something\'\\n" (ts/yaml.test.yaml:4:0)`);
 
     // console.warn(yaml.parse(wrong, { sourceURL: "ts/yaml.test.yaml" }))
-  })
+  });
 
-})
+});
