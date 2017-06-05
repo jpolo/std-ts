@@ -31,12 +31,12 @@ function IdGeneratorCreate() {
 }
 
 const idGenerator = IdGeneratorCreate();
-const $$id = SymbolCreate('id');
+const idSymbol = SymbolCreate('id');
 function GetOrSetId(o: any): number {
-  let id = o[$$id];
+  let id = o[idSymbol];
   if (id === undefined) {
     id = idGenerator();
-    DefineValue(o, $$id, id);
+    DefineValue(o, idSymbol, id);
   }
   return id;
 }
@@ -66,6 +66,7 @@ export function hasId(o: any): boolean {
  * @param o the object
  * @return the o identifier
  */
-export function getId(o: any): number {
-  return hasId(o) ? GetOrSetId(o) : NaN;
+export function getId(o: string|number|boolean): undefined;
+export function getId(o: any): undefined|number {
+  return hasId(o) ? GetOrSetId(o) : undefined;
 }

@@ -1,5 +1,5 @@
 /* tslint:disable:no-bitwise */
-export interface IByteArray {
+/*export interface IByteArray {
   [k: number]: number;
   length: number;
 }
@@ -59,7 +59,7 @@ function ArrayCreate(length: number): IByteArray {
     returnValue = new Uint8Array(length);
   } else {
     returnValue = new Array(length);
-    returnValue[0] = 0; /*v8 optim*/
+    returnValue[0] = 0; //v8 optim
   }
   return returnValue;
 }
@@ -170,13 +170,13 @@ function parse(s: string): number[] {
 }
 
 export class UUID {
-  BYTES_PER_ELEMENT = 1;
+  //BYTES_PER_ELEMENT = 1;
 
   byteLength = LENGTH;
-  length = LENGTH
-  [i;: number;]: number;
+  length = LENGTH;
+  //[i: number]: number;
 
-  static cast(o: any);: UUID; {
+  static cast(o: any): UUID; {
   let id: UUID = null;
   if (o) {
     if (o instanceof UUID) {
@@ -188,7 +188,7 @@ export class UUID {
   return id;
 }
 
-  static compare (a: UUID, b: UUID);: number; {
+  static compare(a: UUID, b: UUID);: number; {
   return Array16Compare(a, b);
 }
 
@@ -250,4 +250,4 @@ toString ();: string; {
 valueOf (); {
   return this.toString();
 }
-}
+}*/

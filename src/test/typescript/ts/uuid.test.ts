@@ -1,3 +1,4 @@
+/*
 import { suite, test } from '../../../main/typescript/ts/testing/qunit';
 import { UUID } from '../../../main/typescript/ts/uuid';
 
@@ -62,4 +63,4 @@ const UUIDSuite = suite('ts/uuid.UUID', (self) => {
   });
 });
 
-export default uuidSuite.concat(UUIDSuite);
+export default uuidSuite.concat(UUIDSuite);*/
