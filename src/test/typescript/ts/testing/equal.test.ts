@@ -1,0 +1,79 @@
+import { test } from './_boot.test';
+import {
+  equalsSame,
+  equalsStrict,
+  equalsDeep
+} from '../../../../main/typescript/ts/testing/equal';
+
+export default test('ts/testing/equal', (assert) => {
+
+  // #equalsSame()
+  (function() {
+    const message = '#equalsSame() failure';
+
+    function eq(a, b) {
+      return equalsSame(a, b);
+    }
+    function assert_eq(a, b) {
+      return assert(eq(a, b), message);
+    }
+    function assert_neq(a, b) {
+      return assert(!eq(a, b), message);
+    }
+
+    assert_eq(1, 1);
+    assert_eq(NaN, NaN);
+    assert_neq(false, 0);
+    assert_neq(0, 1);
+    assert_neq([0], [0]);
+    assert_neq('1', 1);
+  }());
+
+  // #equalsStrict()
+  (function() {
+    const message = '#equalsStrict() failure';
+
+    function eq(a, b) {
+      return equalsStrict(a, b);
+    }
+    function assert_eq(a, b) {
+      return assert(eq(a, b), message);
+    }
+    function assert_neq(a, b) {
+      return assert(!eq(a, b), message);
+    }
+
+    assert_eq(1, 1);
+    assert_neq(false, 0);
+    assert_neq(undefined, false);
+    assert_neq(undefined, null);
+    assert_neq(0, 1);
+    assert_neq(NaN, NaN);
+    assert_neq([0], [0]);
+    assert_neq('1', 1);
+  }());
+
+  // #equalDeep()
+  (function() {
+    const message = '#equalsDeep() failure';
+
+    function eq(a, b) {
+      return equalsDeep(a, b);
+    }
+    function assert_eq(a, b) {
+      return assert(eq(a, b), message);
+    }
+    function assert_neq(a, b) {
+      return assert(!eq(a, b), message);
+    }
+
+    assert_eq([0, 1], [0, 1]);
+    assert_eq([0, ['a', 'b']], [0, ['a', 'b']]);
+    assert_eq([NaN, NaN], [NaN, NaN]);
+    assert_eq({ foo: 1, bar: 2 }, { foo: 1, bar: 2 });
+    assert_neq({ foo: 1, bar: 2 }, { foo: 1 });
+    assert_neq([false], [0]);
+    assert_neq(['1'], [1]);
+  }());
+
+});
