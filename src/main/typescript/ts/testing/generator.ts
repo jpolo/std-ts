@@ -67,9 +67,7 @@ function GeneratorCreate<T>(f: {(params: IGeneratorParams): IIteratorResult<T>})
   };
 }
 
-function GeneratorFrom<T>(o: IGenerator<T>): IGenerator<T>;
-function GeneratorFrom<T>(o: T): IGenerator<T>;
-function GeneratorFrom(o: any): IGenerator<any> {
+function GeneratorFrom<T>(o: IGenerator<T>| T): IGenerator<T> {
   return IsIGenerator(o) ? o : GeneratorCreate(function(params: IGeneratorParams) {
     return IteratorResultCreate(false, o);
   });
@@ -95,9 +93,7 @@ export function constant<T>(k: T): IGenerator<T> {
  * @param choices the array of possible values or generators
  * @return the value generator
  */
-export function oneOf<T>(choices: IGenerator<T>[]): IGenerator<T>;
-export function oneOf<T>(choices: T[]): IGenerator<T>;
-export function oneOf<T>(choices: any[]): IGenerator<T> {
+export function oneOf<T>(choices: IGenerator<T>[] | T[]): IGenerator<T> {
   const length = choices.length;
   const generators: IGenerator<T>[] = new Array(length);
   for (let i = 0; i < length; i++) {
@@ -116,8 +112,10 @@ export function oneOf<T>(choices: any[]): IGenerator<T> {
  * @param size the size value or generator of the array
  * @return the array generator
  */
-export function array<T>(value: IGenerator<T>, size: number|IGenerator<number>): IGenerator<T[]>;
-export function array<T>(value: IGenerator<T>, size = genSize): IGenerator<T[]> {
+export function array<T>(
+  value: IGenerator<T>,
+  size: number|IGenerator<number> = genSize
+): IGenerator<T[]> {
   const _genSize = GeneratorFrom<number>(size);
   return GeneratorCreate(function(params: IGeneratorParams) {
     const lengthResult = GeneratorNext(_genSize, params);
@@ -182,7 +180,10 @@ function recursive<T>(gen: IGenerator<T>, loop: (g: IGenerator<T>) => IGenerator
  * @param max the maximum value or generator
  * @return the random generator
  */
-export function random(min: number|IGenerator<number> = 0, max: number|IGenerator<number> = 1): IGenerator<number> {
+export function random(
+  min: number|IGenerator<number> = 0,
+  max: number|IGenerator<number> = 1
+): IGenerator<number> {
   const genMin = GeneratorFrom<number>(min as any);
   const genMax = GeneratorFrom<number>(max as any);
   return GeneratorCreate(function(params: IGeneratorParams) {
@@ -227,9 +228,11 @@ export function tuple(gens: any[]): IGenerator<any> {
  * @param value the value generator
  * @return the object generator
  */
-export function object<V>(key: IGenerator<number>, value: IGenerator<V>, size?: number|IGenerator<number>): IGenerator<{[key: number]: V}>;
-export function object<V>(key: IGenerator<string>, value: IGenerator<V>, size?: number|IGenerator<number>): IGenerator<{[key: string]: V}>;
-export function object<V>(key: IGenerator<any>, value: IGenerator<V>, size = genSize): IGenerator<any> {
+export function object<V>(
+  key: IGenerator<number|string>,
+  value: IGenerator<V>,
+  size?: number|IGenerator<number> = genSize
+): IGenerator<{[key: number]: V}> {
   const _genSize = GeneratorFrom(size);
   return GeneratorCreate(function(params: IGeneratorParams) {
     const keyCountResult = GeneratorNext(_genSize, params);
